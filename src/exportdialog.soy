@@ -1,0 +1,182 @@
+// Copyright 2011 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/*
+ * @fileoverview Template for the Export Dialog in RPF.
+ *
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+
+{namespace rpf.soy.ExportDialog}
+
+
+/**
+ * Creates the content for the export project dialog.
+ */
+{template .getContent}
+<div id="export-root" class="export-content-canvas">
+  <!-- Project Specification -->
+  <table style="width:100%">
+    <tr>
+      <td class="export-label">
+        Location
+      </td>
+      <td class="export-label">
+        <input id="location-local-export" type="radio" value="local"
+               name="export-location">
+        <label>Local</label>
+      </td>
+      <td class="export-label">
+        <input id="location-web-export" type="radio" value="web" checked
+               name="export-location">
+        <label>Web</label>
+      </td>
+      <td></td>
+    </tr>
+  </table>
+  <table style="width:100%">
+    <tr>
+      <td class="export-label">
+        Project Name
+      </td>
+      <td>
+        <input id="export-name" type="text" value="" style="width:100%">
+      </td>
+      <td style="width:40px">
+        <input id="export-button-go" type="button" value="Go"
+               style="float:right">
+      </td>
+    </tr>
+  </table>
+
+  <!-- Project data and configuration -->
+  <table style="width:100%">
+    <!-- List of tests associated with the project. -->
+    <tr>
+      <td>
+        <div id="export-test-heading" class="export-heading">
+          Tests
+        </div>
+        <div id="export-test-data" class="export-data">
+        </div>
+      </td>
+    </tr>
+
+    <!-- The interface for managing the url/page map. -->
+    <tr>
+      <td>
+        <div class="export-heading">
+          Url/Class Mapping
+        </div>
+        <div class="export-data">
+          <table style="width:100%">
+            <thead>
+              <tr>
+                <th style="width:150px" class="export-table-data">
+                  Url (substring match)
+                </th>
+                <th style="width:150px" class="export-table-data">
+                  Class Name
+                </th>
+                <th style="width:26px">
+                  <img id="export-add-class" width="22" height="22"
+                       src="imgs/rpf/plus.png">
+                </th>
+              </tr>
+            </thead>
+            <tbody id="export-page-table-body">
+            </tbody>
+          </table>
+        </div>
+      </td>
+    </tr>
+
+    <!-- Java specific information. -->
+    <tr>
+      <td>
+        <div class="export-heading">
+          Java Configuration
+        </div>
+        <div>
+          <table style="width:100%">
+            <tr>
+              <td class="export-label">
+                Package Path
+              </td>
+              <td>
+                <input id="export-java-package-path" type="text"
+                       style="width:100%">
+              </td>
+            </tr>
+          </table>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Dialog's footer -->
+  <div class="console-footer">
+    <input id="export-button-save" type="button" value="Save"
+           style="float:left" title="Save project details.">
+    <input id="export-button-import" type="button" value="Import"
+           title="Load data.rpf from disk using package path.">
+    <input id="export-button-export" type="button" value="Export"
+           title="Load data.rpf from disk using package path.">
+  </div>
+</div>
+{/template}
+
+
+/**
+ * Generate the table of tests; one test per line.
+ * @param tests
+ */
+{template .getTests}
+<table style="width:100%">
+  <tbody>
+    {foreach $test in $tests}
+      <tr>
+        <td class="export-table-data">
+          {$test}
+        </td>
+      </tr>
+    {/foreach}
+  </tbody>
+</table>
+{/template}
+
+
+/**
+ * Generate the table of url to page maps; one mapping per line.
+ * @param url
+ * @param name
+ */
+{template .getPageMap}
+<table>
+  <tr id="export-page-map-row">
+    <td>
+      <input style="width:150px" type="text" value="{$url}">
+    </td>
+    <td>
+      <input style="width:150px" type="text" value="{$name}">
+    </td>
+    <td>
+      <img id="export-page-map-close" width="22" height="22"
+           src="imgs/rpf/closewindow.png">
+    </td>
+  </tr>
+</table>
+{/template}
+

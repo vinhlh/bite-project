@@ -1,0 +1,219 @@
+// Copyright 2011 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/**
+ * New Bug console templates.
+ *
+ * @author ekamenskaya@google.com (Ekaterina Kamenskaya)
+ * @author alexto@google.com (Alexis O. Torres)
+ */
+
+{namespace bite.client.console.NewBugTemplate}
+
+/**
+ * Template for a small popup telling the user to select the UI for a
+ * new bug.
+ * @param rootFolder
+ */
+{template .newBugPrompt}
+  <div id="bite-newbug-prompt" class="bite-container"
+       style="position:fixed; top:20px; left:20px;">
+    <link rel="stylesheet" href="{$rootFolder}/styles/consoles.css"
+        type="text/css">
+    <div class="bite-header bite-list-title">
+      <div class="bite-filling-row bite-padded">
+        Where do you see the problem?
+      </div>
+      <div class="bite-close-button">
+        ✕
+      </div>
+    </div>
+    <div>
+      <ul>
+        <li>
+          <span class="bite-newbug-prompt-no-ui">
+            The problem I'm reporting isn't related to the UI
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="bite-footer">
+    </div>
+  </div>
+{/template}
+
+
+/**
+ * New Bug Console template.
+ * @param projects
+ */
+{template .newBugConsole}
+    <table class="bite-nbg-main-table">
+      <tr class="bite-content-row">
+      <td class="bite-padded">
+        <input id="bite-nbg-title"
+               type="text" placeholder="&lt;Enter a bug title here&gt;"/>
+      </td>
+      </tr>
+      <tr class="bite-navbar">
+      <td>
+        <div class="bite-nbg-console-navbar">
+          <table>
+            <tr>
+            <td class="bite-navbar-item{sp}
+                       bite-navbar-item-active bite-nbg-overview-tab">
+              Overview
+            </td>
+            <td class="bite-navbar-item{sp}
+                       bite-navbar-item-inactive bite-nbg-ui-tab">
+              UI
+            </td>
+            <td class="bite-navbar-item{sp}
+                       bite-navbar-item-inactive bite-nbg-recording-tab">
+              Recording
+            </td>
+            </tr>
+          </table>
+        </div>
+      </td>
+      </tr>
+      <tr>
+      <td>
+        <div class="bite-console-toolbar">
+          {call .getConsoleToolbar data="all" /}
+        </div>
+      </td>
+      </tr>
+    </table>
+    <div class="bite-nbg-overview-data bite-flex-filling"
+         style="display: none">
+      <form class="bite-tall bite-flex-filling">
+        <table class="bite-wide-table bite-tall">
+          <tr>
+            <td>
+              <label for="bite-nbg-templates">Template</label>
+            </td>
+            <td class="bite-wide-table">
+              <select id="bite-nbg-templates">
+                {foreach $project in $projects}
+                  <optgroup label="{$project.name}">
+                    {foreach $template in $project.templates}
+                      <option value="{$template.id}">
+                        {$template.name}
+                      </option>
+                    {/foreach}
+                  </optgroup>
+                {/foreach}
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label>Attachments</label>
+            </td>
+            <td class="bite-wide-table">
+              <div class="bite-nbg-attachment"
+                   id="bite-nbg-screenshot">
+                <input type="checkbox">Screenshot</input>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan=2>
+              <label for="bite-nbg-notes">Notes</label>
+            </td>
+          </tr>
+        </table>
+        <div class="bite-flex-filling bite-padded">
+          <textarea id="bite-nbg-notes" class="bite-flex-filling" autofocus>
+          </textarea>
+        </div>
+      </form>
+    </div>
+    <div class="bite-nbg-ui-data bite-flex-filling"
+         style="display: none;">
+      <div class="bite-flex-filling bite-padded">
+        <textarea id="bite-nbg-ui-text" class="bite-flex-filling"></textarea>
+      </div>
+    </div>
+    <div class="bite-nbg-recording-data bite-flex-filling"
+         style="display: none;">
+      <div class="bite-flex-filling bite-padded">
+        <textarea id="bite-nbg-recording-text"
+                  class="bite-flex-filling"></textarea>
+      </div>
+    </div>
+{/template}
+
+
+/**
+ * Template for Console Toolbar depending on selected tab.
+ * TODO(ralphj): Change these to use unique identifiers with the bite-nbg
+ * prefix.
+ * @param? selectedTab
+ */
+{template .getConsoleToolbar}
+  <div>
+    {switch $selectedTab}
+      {case 'Recording'}
+        <div id="readable"
+            class="bite-toolbar-button left">
+          <span class="bite-toolbar-button-label"
+                title="View the recording as a set of readable commands">
+            readable
+          </span>
+        </div>
+        <div id="code" class="bite-toolbar-button right">
+          <span class="bite-toolbar-button-label"
+                title="View the recording as a set of code commands">
+            code
+          </span>
+        </div>
+        <div id="play" class="bite-toolbar-button">
+          <span class="bite-toolbar-button-label"
+                title="Play back the recorded steps in a new window">
+          play
+          </span>
+        </div>
+      {case 'UI'}
+        <div id="json" class="bite-toolbar-button left">
+          <span class="bite-toolbar-button-label"
+                title="View the descriptor of the selected element in JSON">
+            JSON
+          </span>
+        </div>
+        <div id="html" class="bite-toolbar-button right">
+          <span class="bite-toolbar-button-label"
+                title="View the descriptor of the selected element in HTML">
+            HTML
+          </span>
+        </div>
+        <div id="replace" class="bite-toolbar-button">
+          <span class="bite-toolbar-button-label"
+                title="Choose a new element to associate with this issue">
+            replace
+          </span>
+        </div>
+        <div id="ping" class="bite-toolbar-button">
+          <span class="bite-toolbar-button-label"
+                title="View the element associated with this issue">
+            ping
+          </span>
+        </div>
+      {default}
+    {/switch}
+    <div id="bite-nbg-submit">Bug it!</div>
+  </div>
+{/template}
+

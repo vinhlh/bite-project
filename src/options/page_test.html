@@ -1,0 +1,80 @@
+<body>
+  <div class="save-info">
+    <div id="user">unknown</div>
+    <button id="save-button" type="button" disabled="disabled">Saved</button>
+    <div id="save-time">&nbsp;</div>
+  </div>
+
+  <form>
+    <ul>
+      <li>
+        <input id="auto-record" type="checkbox"/>
+        <label for="auto-record">Turn on automatic recording</label>
+      </li>
+      <li>
+        <input id="features-bugs" type="checkbox"/>
+        <label for="features-bugs">Bugs Console</label>
+      </li>
+      <li>
+        <input id="features-rpf" type="checkbox"/>
+        <label for="features-rpf">Record/Playback</label>
+      </li>
+      <li>
+        <input id="features-tests" type="checkbox"/>
+        <label for="features-tests">Tests console</label>
+      </li>
+      <li>
+        <label for="server-channel">Server Channel</label>
+        <select id="server-channel">
+          <option value="dev">Development</option>
+          <option value="beta">Beta</option>
+          <option value="rel">Release</option>
+        </select>
+      </li>
+      <li>
+        <label for="bug-state">State</label>
+        <select id="bug-state">
+          <option value="all">&lt;all states&gt;</option>
+          <option value="active">Active</option>
+          <option value="resolved">Resolved</option>
+          <option value="closed">Closed</option>
+        </select>
+      </li>
+      <li>
+        <label for="bug-project">Projects</label>
+        <select id="bug-project">
+          <option value="all">&lt;all projects&gt;</option>
+          <option value="geo">Geo</option>
+          <option value="ChromeWebStore">Chrome Web Store</option>
+          <option value="trash">Trash</option>
+          <option value="nottrash">All projects except Trash</option>
+        </select>
+      </li>
+      <li>
+        <label for="bug-ui-binding">UI Binding</label>
+        <select id="bug-ui-binding">
+          <option value="all">&lt;all bugs&gt;</option>
+          <option value="yes">Bound</option>
+          <option value="no">Unbound</option>
+        </select>
+      </li>
+      <li>
+        <label for="bug-recording">Recordings</label>
+        <select id="bug-recording">
+          <option value="all">&lt;all bugs&gt;</option>
+          <option value="yes">Has Recording</option>
+          <option value="no">No Recording</option>
+        </select>
+      </li>
+      <li>
+        <label for="bug-screenshot">Screenshot</label>
+        <select id="bug-screenshot">
+          <option value="all">&lt;all bugs&gt;</option>
+          <option value="yes">Has Screenshot</option>
+          <option value="no">No Screenshot</option>
+        </select>
+      </li>
+    </ul>
+  </form>
+
+</body>

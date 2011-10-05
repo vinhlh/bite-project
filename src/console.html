@@ -1,0 +1,118 @@
+<html>
+<!--
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Use of this source code is governed by the Apache License, Version 2.0.
+See the COPYING file for details.
+-->
+  <head>
+    <link rel="stylesheet" type="text/css" href="rpf_style_file.css" />
+    <script type="text/javascript" src="console_script.js"></script>
+    <script type="text/javascript" src="analytics.js"></script>
+    <script type="text/javascript" src="ace/ace.js" charset="utf-8"></script>
+    <script type="text/javascript" src="ace/mode-javascript.js"
+            charset="utf-8"></script>
+  </head>
+  <body bgcolor="#CCE2EA" onLoad="rpf.ConsoleManager.getInstance();"
+        style="padding: 8px; overflow-y: hidden;">
+    <div id="t1" class="console-container">
+      <table class="console-container" border="0"
+             cellspacing="0" cellpadding="0">
+        <tr>
+          <td class="console-header">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td style="text-align: center;
+                           width: 50px; vertical-align: middle;">
+                  <a onclick="">
+                    <img src="/imgs/rpf/bite-logo-tiny.png" alt="BITE" />
+                  </a>
+                </td>
+                <td style="padding: 0px;">
+                  <div class="header-content">
+                    <div class="header-title" id="fluxMode"></div>
+                    <div class="header-notes" id="fluxModeDesc"></div>
+                  </div>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td id="console_toolbar" class="console-toolbar">
+            <input id="startPlayback" type="image" src="imgs/rpf/play.png"
+                   width="22" height="22" class="console-menu-button" />
+            <input id="saveTest" type="image" src="imgs/rpf/writefile.png"
+                   width="20" height="20" class="console-menu-button" />
+            <input id="loadTest" type="image"  src="imgs/rpf/loadfile.png"
+                   width="20" height="20" class="console-menu-button" />
+            <input type="image" id="screenShots"
+                   src="imgs/rpf/screenshots.png" width="22" height="22"
+                   class="console-menu-button"/>
+            <input type="image" id="workerMode" src="imgs/rpf/workermode.png"
+                   width="22" height="22" class="console-menu-button" />
+            <input id="record" type="image" id="recordImg" src="imgs/rpf/record.png"
+                   width="22" height="22" class="console-menu-button" />
+            <input id="stop" type="image" id="stopImg" src="imgs/rpf/stopgrey.png"
+                   width="22" height="22" class="console-menu-button" />
+            <input type="image" id="export"
+                   src="imgs/rpf/export.png" width="22" height="22" />
+            <input type="image" id="validate"
+                   src="imgs/rpf/validationgrey.png" width="22" height="22"
+                   class="console-menu-button" />
+            <input type="image" id="notes" src="imgs/rpf/notes.png"
+                   width="22" height="22" class="console-menu-button" />
+            <input type="image" id="info" src="imgs/rpf/info.png"
+                   width="24" height="24" class="console-menu-button" />
+            <input type="image" id="setting" src="imgs/rpf/setting.png"
+                   width="22" height="22" class="console-menu-button" />
+            <input type="image" id="addCmd" src="imgs/rpf/plus.png"
+                   width="20" height="20" class="console-menu-button" />
+            <input type="image" id="refresh"src="/imgs/rpf/refresh.png"
+                   width="23" height="23" class="console-menu-button" />
+            <div id="viewMode"></div>
+          </td>
+        </tr>
+        <tr height="10px">
+          <td height="10px">
+            <div style="background-color: white; vertical-align: top; text-align: center;"
+                 id="slideMoreInfoDiv">
+              <div id="moreInfoHeader"
+                   style="height:10px; background: #DEDEFF;">
+                <img src="imgs/rpf/downbtn.png" width="10px"
+                     height="10px" id="slideDownBtn">
+              </div>
+              <div id="moreInfoDiv"
+                   style="position: absolute; z-index: 1001;
+                   background: #DEDEFF;
+                   border: solid #C0C0FF; border-width: 0 3px 3px 0;
+                   text-align: justify; overflow: hidden;">
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="console-body" style="vertical-align:top">
+            <div id="scriptsContainer"></div>
+            <div id="bookData">
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td class="console-footer">
+            <table width="100%">
+              <tr>
+                <td width="45px">
+                  <img src="imgs/bite-logo_100x100.png"
+                       width="40px" height="40px">
+                </td>
+                <td id="statusLog" class="status-logger">
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </body>
+</html>

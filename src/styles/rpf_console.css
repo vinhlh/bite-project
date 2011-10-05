@@ -1,0 +1,248 @@
+/**
+ * Copyright 2011 Google, Inc. All Rights Reserved
+ *
+ * @author phu@google.com (Po Hu)
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+
+/* ACE requires that the editor container have a specified height and width. 
+ * TODO(ralphj): Deal with resizing the window. */
+#scriptsContainer {
+  background: white;
+  font-size: 14px;
+  height: 590px;
+  width: 466px;
+  position: relative;
+  overflow: hidden;
+}
+
+/** Styles for the ACE gutter. */
+.ace_rpf-gutter-running {
+  background-image: url("imgs/rpf/running-arrow.png");
+  background-repeat: no-repeat;
+  background-position: 4px center;
+}
+
+.ace_rpf-gutter-passing {
+  background-image: url("imgs/rpf/step-passed-16.png");
+  background-repeat: no-repeat;
+  background-position: 4px center;
+}
+
+.ace_rpf-gutter-failing {
+  background-image: url("imgs/rpf/step-issue-16.png");
+  background-repeat: no-repeat;
+  background-position: 4px center;
+}
+
+.ace_editor ::-webkit-scrollbar {
+  background: transparent;
+  height: 10px;
+  overflow: visible;
+  width: 10px;
+}
+
+.ace_editor ::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  -webkit-border-radius: 5px;
+}
+
+.ace_editor ::-webkit-scrollbar-button {
+  display: none;
+}
+
+.ace_editor ::-webkit-scrollbar-track {
+  border: 0;
+}
+
+.console-save-dialog-local-div {
+  width: 47%;
+  float: left;
+  text-align: right;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline;
+}
+
+.console-save-dialog-div-text {
+  font-size: 12px;
+  font-weight: bold;
+  display: inline;
+}
+
+.console-div-text {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.console-save-dialog-web-div {
+  width: 47%;
+  float: right;
+  text-align: left;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline;
+}
+
+.console-save-dialog-button-div {
+  text-align: center;
+  display: block;
+}
+
+.console-save-dialog-button-img {
+  width: 20;
+  height: 20;
+}
+
+.console-play-dialog-current-step {
+  margin-left: 10px;
+  border: 1px solid #c9d7f1;
+  width: 30px;
+  color: #a00;
+}
+
+.console-play-dialog-status {
+  height: 30px;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  color: red
+}
+
+.console-validate-dialog-block-radio-div {
+  width: 30%;
+  float: left;
+  text-align: right;
+  display: inline
+}
+
+.console-details-div-screen {
+  text-align: center;
+  padding: 5px
+}
+
+.console-details-div-screen-img {
+  padding: 1px;
+  border:1px solid #021a40;
+  background-color:#ff0;
+}
+
+.console-details-div-toolbar {
+  text-align: center;
+  padding-bottom: 5px
+}
+
+.console-details-div-translation {
+  text-align: center;
+  padding-bottom: 10px
+}
+
+.console-details-div-editor {
+  text-align: center;
+  width: 70%;
+}
+
+.export-content-canvas {
+  padding: 4px;
+}
+
+.export-label {
+  font-size: 9pt;
+  margin-left: 8px;
+  width: 85px;
+}
+
+.export-heading {
+  border-bottom: 2px solid #66c;
+  color: #444;
+  font-size: 11pt;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.export-data {
+  border: 1px solid #ccc;
+  font-size: 10pt;
+  height: 100px;
+  overflow-y: scroll;
+  margin-left: 8px;
+  margin-bottom: 8px;
+  vertical-align: middle;
+}
+
+.export-table-data {
+  font-size: 9pt;
+}
+
+.console-loaddialog-content-table {
+  width: 100%;
+  height: 100%;
+}
+
+.console-loaddialog-content-table-div {
+  height: 100%;
+  width: 100%;
+  display: block;
+  overflow-y: auto;
+}
+
+.console-loaddialog-content-table-select {
+  width: 100%;
+  height: 100%;
+}
+
+.console-attributes-description-div {
+  color: orange;
+  font-size: 14px
+}
+
+.console-attributes-row-div {
+  font-size: 12px;
+  font-weight:bold;
+  text-align:center
+}
+
+.console-playdialog-playcurstep {
+  display: inline;
+  margin-left:5px
+}
+
+.console-playdialog-comments-div {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.console-playdialog-status-div {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color: red;
+}
+
+.console-playdialog-match-html {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.console-playdialog-comment-box {
+  display:inline;
+  height: 50px;
+  width: 300px;
+}
+
+.console-playdialog-comment-area {
+  font-size: 12px;
+  padding: 2px;
+  background-image: -webkit-gradient(
+                  linear,
+                  left bottom,
+                  left top,
+                  color-stop(0.3, rgb(105,158,255)),
+                  color-stop(0.3, rgb(110,158,255)),
+                  color-stop(0.9, rgb(255,255,255)));
+}
+

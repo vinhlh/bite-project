@@ -1,0 +1,1078 @@
+/**
+ * Copyright 2011 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/* Colors used:
+ * #36454f Charcoal used for borders
+ * #ccf Light gray used for secondary borders
+ * #fff White used for backgrounds
+ * #e5e4e2 Platinum used for hover
+ * #f5f5f5 Very pale gray used for toolbars
+ * #ebebeb Pale gray used for toolbar borders and tabs
+ * #f9edbe Yellow used for infobars
+ */
+
+/********************************************************
+ * Styles for the container common to all BITE consoles.
+ ********************************************************/
+
+.bite-container {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  text-decoration: none;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 13px;
+  font-variant: normal;
+  font-family: arial, sans-serif;
+  vertical-align: baseline;
+  text-align: left;
+  background: none;
+  line-height: 1;
+  color: black;
+  width: auto;
+  list-style: none;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.bite-container a {
+  color: blue;
+  text-decoration: none;
+}
+
+div.bite-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 65535;
+  padding: 0;
+  margin: 0;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #36454f;
+  border-radius: 6px;
+  background-color: #fff;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  box-shadow: 0 4px 16px rgba(0, 0, 0 ,0.2);
+  -webkit-box-shadow rgba(0, 0, 0, 0.2);
+}
+
+div.bite-container-bottom-dock {
+  border-bottom-width: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+div.bite-container-left-dock {
+  border-left-width: 0;
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+}
+
+div.bite-container-right-dock {
+  border-right-width: 0;
+  border-bottom-right-radius: 0;
+  border-top-right-radius: 0;
+}
+
+div.bite-container-top-dock {
+  border-top-width: 0;
+  border-top-right-radius: 0;
+  border-top-left-radius: 0;
+}
+
+.bite-container table {
+  cellpadding: 0;
+  cellspacing: 0;
+  border-spacing: 0;
+  border: 0;
+  padding: 0;
+}
+
+.bite-container td {
+  padding: 0;
+}
+
+div.bite-header {
+  cursor: move;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+}
+
+.bite-logo img {
+  height: 24px;
+  width: 24px;
+}
+
+div.bite-logo {
+  padding: 5px;
+}
+
+div.bite-header-text {
+  padding-left: 16px;
+  padding-top: 8px;
+  -webkit-box-flex: 1;
+}
+
+.bite-header-text-main {
+  font-size: 120%;
+  padding: 1px;
+}
+
+.bite-header-text-sub {
+  clear: left;
+  padding: 1px;
+  font-size: 75%;
+  font-style: italic;
+}
+
+div.bite-close-button {
+  font-size: 16px;
+  color: #aaa;
+  cursor: pointer;
+  margin: 2px;
+  width: 15px;
+  height: 20px;
+}
+
+div.bite-close-button:hover {
+  color: #444;
+}
+
+div.bite-console-content {
+  -webkit-box-flex: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/*********************************
+ * Styles common to many consoles.
+ *********************************/
+
+.bite-container .bite-wide-table {
+  width: 100%;
+}
+
+.bite-container .bite-tall {
+  height: 100%;
+}
+
+.bite-container .bite-padded {
+  padding: 6px;
+}
+
+.bite-filling-row {
+  -webkit-box-flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.bite-flex-filling {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  width: auto;
+  -webkit-box-flex: 1;
+}
+
+/* Toolbars */
+
+.bite-console-toolbar {
+  padding: 4px 2px;
+  background-color: #f5f5f5;
+  overflow: auto;
+  border-bottom: 1px solid #ebebeb;
+  border-top: 1px solid #ebebeb;
+}
+
+div.bite-toolbar-button {
+  float: left;
+  margin: 2px 4px;
+  padding: 3px;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  background: #ebebeb;
+  -webkit-border-radius: 2px;
+}
+
+div.bite-toolbar-button-disabled {
+  float: left;
+  margin: 2px 4px 2px 4px;
+  color: gray;
+  cursor: default;
+}
+
+div.bite-toolbar-button.bite-pressed {
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  -webkit-box-shadow: inset 0 0 3px 0 rgba(0, 0, 0, 0.6);
+}
+
+div.bite-toolbar-button.left {
+  margin: 2px 0px 2px 4px;
+  -webkit-border-radius: 2px 0 0 2px;
+}
+
+div.bite-toolbar-button.right {
+  border-left-color: rgba(0, 0, 0, 0.4);
+  margin: 2px 4px 2px -1px;
+  -webkit-border-radius: 0 2px 2px 0;
+}
+
+div.bite-toolbar-button:hover {
+  cursor : pointer;
+  -webkit-box-shadow: inset 0 0 3px 0 rgba(0, 0, 0, 0.3);
+}
+
+div.bite-toolbar-button.bite-pressed:hover {
+  -webkit-box-shadow: inset 0 0 3px 0 rbga(0, 0, 0, 0.6);
+}
+
+img.bite-toolbar-button-image {
+  height: 16px;
+  width: 16px;
+  cursor: pointer;
+}
+
+span.bite-toolbar-button-label {
+  padding-left: 4px;
+  margin-right: 2px;
+  font-size: 9pt;
+  cursor: pointer;
+}
+
+/* Nav bar with tabs */
+.bite-navbar {
+  vertical-align: bottom;
+  padding: 4px 4px 0 4px;
+  margin-bottom: 0;
+}
+
+.bite-container .bite-navbar-item {
+  padding: 6px 6px 3px 6px;
+  text-align: center;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  vertical-align: bottom;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.bite-navbar-item-inactive {
+  color: black;
+}
+
+.bite-navbar-item-active {
+  background-color: #ddd;
+  color: black;
+}
+
+/* Infobar */
+.bite-console-infobar {
+  background-color: #f9edbe;
+  padding: 0;
+  font-size: .8em;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-box-shadow: inset 0px 2px 6px rgba(0, 0, 0, 0.2);
+  border-top: 1px solid transparent;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.bite-console-infobar.bite-hidden {
+  visibility: hidden;
+  height: 4px;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.bite-console-infobar span {
+  display: block;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.bite-console-infobar span:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.bite-console-infobar span + span {
+  border-top: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+/* Zippy */
+
+.bite-zippy {
+  cursor: pointer;
+}
+
+.goog-zippy-collapsed .bite-collapsed {
+  display: inline;
+  font-size: 18px;
+  color: black;
+}
+
+.goog-zippy-collapsed .bite-expanded {
+  display: none;
+}
+
+.goog-zippy-expanded .bite-collapsed {
+  display: none;
+}
+
+.goog-zippy-expanded .bite-expanded {
+  display: inline;
+  font-size: 18px;
+  color: black;
+}
+
+/* Lists */
+
+.bite-list-canvas {
+  -webkit-box-flex: 1;
+}
+
+.bite-content-list {
+  overflow: auto;
+}
+
+.bite-list-title {
+  font-style: italic;
+  color: #36545f;
+  border-bottom: 1px solid #ccf;
+}
+
+table.bite-content-list {
+  margin-top: 8px;
+  border-top: 1px solid #ccf;
+  width: 100%;
+}
+
+table.bite-content-list tr:nth-child(odd) {
+  background-color: #e5e4e2;
+}
+
+table.bite-content-list th {
+  padding-left: 4px;
+  padding-bottom: 2px;
+  padding-top: 4px;
+  text-align: left;
+}
+
+table.bite-content-list td {
+  padding-left: 4px;
+  padding-top: 2px;
+  word-wrap: normal;
+  white-space: nowrap;
+}
+
+.bite-container ul,
+.bite-container ol {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bite-container li {
+  padding: 4px;
+  color: blue;
+}
+
+.bite-container li:hover {
+  background-color: #e5e4e2;
+}
+
+/* Forms */
+
+.bite-container label {
+  font-weight: normal;
+  padding: 4px;
+}
+
+.bite-container form td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+.bite-container form div {
+  padding: 2px;
+}
+
+.bite-container select {
+  background-color: #ddd;
+  height: 23px;
+  margin: 0;
+}
+
+.bite-container select.bite-select-disabled {
+  color: graytext;
+}
+
+.bite-container textarea {
+  border: 1px solid transparent;
+  padding: 4px;
+  resize: none;
+  width: auto;
+  height: 100%;
+  background: #fff;
+}
+
+.bite-container textarea:focus {
+  border: 1px solid #4d90fe;
+  outline: 0;
+}
+
+.bite-container input {
+  border: 1px solid #ccc;
+  border-top: 1px solid #bbb;
+  -webkit-border-radius: 1px;
+}
+
+.bite-container input:focus {
+  border: 1px solid #4d90fe;
+  outline: 0;
+}
+
+/* Scrollbars */
+
+.bite-container ::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+  overflow: visible;
+}
+
+.bite-container ::-webkit-scrollbar-button {
+  display: none;
+}
+
+.bite-container ::-webkit-scrollbar-thumb {
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.bite-container ::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.bite-container ::-webkit-scrollbar-track {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+/**********************************
+ * Styles for individual consoles.
+ **********************************/
+
+/* Highlight box */
+#recordingHighlightBox {
+  background-color: #ff6;  /* Use a light yellow color.*/
+  border: 1px solid red;
+  margin: -1px;
+  opacity: 0.5;
+  z-index: 50000;          /* Make the highlight rectangle to be at the top */
+}
+
+/* Bugs */
+
+#bite-bugs-content-canvas {
+  padding-left: 4px;
+  padding-right: 0;
+  font-size: 9pt;
+  overflow: auto;
+  -webkit-box-flex: 1;
+}
+
+table.bite-bugs-table {
+  width: 100%;
+  border: 0;
+  cellspacing: 0;
+  cellpadding: 0;
+}
+
+table.bite-tests-table {
+  width: 100%;
+  border: 0;
+  cellspacing: 0;
+  cellpadding: 0;
+}
+
+.bite-bug-title {
+  cursor: move;
+}
+
+.bite-bug-icon {
+  cursor: move;
+}
+
+.bite-bug-icon img {
+  height: 16px;
+  width: 16px;
+}
+
+div.bite-data-label {
+  font-size: .75em;
+  background-color: rgb(51, 102, 209);
+  color: white;
+  -webkit-border-radius: 4px;
+  padding-right: 4px;
+  padding-left: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  margin-right: 4px;
+  display: inline;
+  cursor: pointer;
+}
+
+/* New bug */
+
+table.bite-nbg-main-table {
+  padding-top: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+#bite-nbg-title {
+  padding-bottom: 4px;
+  width: 100%;
+}
+
+#bite-nbg-submit {
+  float: right;
+  background-color: #d14836;
+  border-radius: 2px;
+  box-shadow: 1px 1px 4px;
+  font-size: .8em;
+  font-weight: bold;
+  color: white;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.bite-nbg-attachment {
+  background-color: #dee4fb;
+  border: 1px solid #abbbdf;
+  border-radius: 4px;
+  color: blue;
+  cursor: pointer;
+  height: 18px;
+  margin-right: 4px;
+  padding: 2px 4px 2px 2px;
+  text-align: center;
+  display: inline-block;
+}
+
+#bite-nbg-highlight-box {
+  background-color: #ff6;
+  border: 2px dashed red;
+  border-radius: 0;
+  margin: -2px;
+  opacity: 0.25;
+  padding: 0;
+  z-index: 50000;
+}
+
+#bite-nbg-highlight-box.bite-nbg-emphasis {
+  border: 2px solid red;
+  margin: -2px;
+  opacity: 0.6;
+}
+
+/* New bug type selector */
+
+#bite-newbug-type-selector .newbug-type {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
+/* New bug prompt */
+
+#bite-newbug-prompt li span {
+  cursor: pointer;
+  display: block;
+  width: 100%;
+}
+
+/********************************
+ * Styles used by overlay popups.
+ ********************************/
+
+div.bug-console-container {
+  font-family: verdana;
+  font-size: 9pt;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 80000;
+  padding: 0;
+  margin: 0;
+  -webkit-border-bottom-right-radius: 6px;
+  -webkit-border-bottom-left-radius: 6px;
+  -webkit-border-top-right-radius: 6px;
+  -webkit-border-top-left-radius: 6px;
+  border-top: 2px ridge rgb(0, 102, 51);
+  border-left: 2px ridge rgb(0, 102, 51);
+  border-right: 2px ridge rgb(0, 102, 51);
+  border-bottom: 2px ridge rgb(0, 102, 51);
+  background-image: -webkit-gradient(linear, left top, left bottom,
+                                     color-stop(0.20, rgb(255, 255, 255)),
+                                     color-stop(0.60, rgb(236, 236, 236)),
+                                     color-stop(0.80, rgb(227, 227, 227)));
+}
+
+div.bug-popup-id {
+  position: absolute;
+  left: 33px;
+  top: 5px;
+  font-size: 10pt;
+  font-weight: bold;
+  vertical-align: top;
+  width: 280px;
+  z-index: 80001;
+}
+
+div.bug-popup-label {
+  position: absolute;
+  font-size: 10pt;
+  vertical-align: top;
+  text-align: right;
+  width: 162px;
+  z-index: 80001;
+}
+
+div.bug-popup-rhs-label {
+  position: absolute;
+  font-size: 10pt;
+  vertical-align: top;
+  text-align: right;
+  width: 102px;
+  z-index: 80001;
+}
+
+div.bug-popup-status {
+  left: 200px;
+  top: 5px;
+}
+
+div.bug-popup-priority {
+  left: 200px;
+  top: 20px;
+}
+
+div.bug-popup-status-dropdown {
+  left: 140px;
+  top: 2px;
+  position: absolute;
+  font-size: 10pt;
+  vertical-align: center;
+  text-align: right;
+  width: 166px;
+  z-index: 80001;
+}
+
+div.bug-popup-date {
+  position: absolute;
+  font-size: 10pt;
+  text-align: left;
+  width: 280px;
+  z-index: 80001;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+div.bug-popup-report-date {
+  left: 8px;
+  top: 40px;
+}
+
+div.bug-popup-update-date {
+  left: 8px;
+  top: 55px;
+}
+
+div.bug-popup-text {
+  position: absolute;
+  left: 8px;
+  top: 80px;
+  font-size: 10pt;
+  text-align: left;
+  width: 302px;
+  z-index: 80001;
+}
+
+div.bug-comment-field {
+  position: absolute;
+  left: 2px;
+  top: 35px;
+  font-size: 10pt;
+  vertical-align: top;
+  width: 300px;
+  height: 100px;
+  background-color: White;
+  border: 1px;
+  border-style: solid;
+  text-indent: 4px;
+}
+
+div.bug-popup-separator {
+  position: absolute;
+  left: 3px;
+  top: 138px;
+  background-color: Gray;
+  height: 1px;
+  width: 305px;
+}
+
+div.bug-comment-field {
+  position: absolute;
+  font-size: 10pt;
+  vertical-align: top;
+  width: 300px;
+  height: 100px;
+  background-color: White;
+  border: 1px;
+  border-style: solid;
+  text-indent: 4px;
+}
+
+div.bug-confirm-options {
+  position: absolute;
+  left: 2px;
+  top: 145px;
+  height: 25px;
+  width: 302px;
+  text-align:right;
+}
+
+div.bug-confirm-message {
+  position: absolute;
+  left: 0;
+  top: 71px;
+  width: 296px;
+  text-align: center;
+ }
+
+div.bug-popup-commands {
+  position: absolute;
+  left: 110px;
+  top: 145px;
+  height: 25px;
+  width: 195px;
+  text-align: right;
+}
+
+div.bug-popup-iterator {
+  position: absolute;
+  left: 2px;
+  top: 145px;
+  height: 25px;
+  width: 105px;
+}
+
+#bug-popup-iteration {
+  text-align: center;
+  vertical-align: top;
+  padding: 3px 0px 0px 0px;
+}
+
+div.bug-popup-iterator img {
+  width: 15;
+  height: 22;
+}
+
+span.pseudo-link {
+  color: #2222BB;
+  cursor: pointer;
+  margin: 0px 0px 0px 8px;
+  text-decoration: underline;
+}
+
+div.back-to-bugs {
+  left: 2px;
+  top: 145px;
+}
+
+span.pseudo-link-disabled {
+  color: #666688;
+  margin: 0px 0px 0px 8px;
+}
+
+div.pseudo-link {
+  position: absolute;
+  text-align: right;
+  width: 295px;
+  color: #2222BB;
+  cursor: pointer;
+  margin: 0px 0px 0px 8px;
+}
+
+div.pseudo-popup-link {
+  position: absolute;
+  text-align: right;
+  color: #2222BB;
+  cursor: pointer;
+}
+
+div.remove-bug-binding {
+  position: absolute;
+  font-size: 10pt;
+  cursor: pointer;
+  z-index: 50001;
+  color: white;
+  font-weight: bold
+}
+
+div.bug-details-popup {
+  width: 310px;
+  height: 170px;
+}
+
+a.bug-details-link {
+  color: #00a;
+}
+
+div.bug-popup-bound-dropdown-menu {
+  position: absolute;
+  background: -webkit-gradient(linear, left top, left bottom,
+                               color-stop(0.20, rgb(255, 255, 255)),
+                               color-stop(0.60, rgb(236, 236, 236)),
+                               color-stop(0.80, rgb(227, 227, 227)));
+  color: #000;
+  border: solid black 1px;
+  font-size: 12px;
+  font-weight: bold;
+  width: 140px;
+  padding: 4px 4px 4px 4px;
+  -webkit-border-radius: 4px;
+  z-index: 80003;
+}
+
+hr.bug-popup-menu-separator {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+
+div.bug-popup-bound-link {
+  color: #2222BB;
+  cursor: pointer;
+}
+
+span.bug-popup-bound-label {
+  font-weight: normal;
+  background-color: #339;
+  color: #fff;
+  padding-left: 4px;
+  padding-right: 4px;
+  vertical-align: center;
+  font-weight: bold;
+  font-size: 10px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  cursor: pointer;
+  -webkit-border-radius: 4px;
+}
+
+div.bug-mini-popup {
+  width: 202px;
+  height: 24px;
+}
+
+div.bug-binding-submit-cancel {
+  width: 185px;
+  height: 80px;
+}
+
+div.popup-empty-frame {
+  position: absolute;
+}
+
+span.pseudo-popup-link {
+  text-align: right;
+  color: #2222BB;
+  cursor: pointer;
+  margin: 0px 0px 0px 6px;
+}
+
+img.bug-popup-icon {
+  position: absolute;
+  height: 25px;
+  width: 25px;
+  top:3px;
+  left:3px;
+}
+
+img.mini-bug-popup-icon {
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  top:4px;
+  left:4px;
+}
+
+div.mini-bug-popup-title {
+  position: absolute;
+  font-size: 10pt;
+  left: 26px;
+  top: 5px;
+}
+
+div.mini-bug-popup-content {
+  position: absolute;
+  font-size: 10pt;
+  left: 22px;
+  top: 33px;
+}
+
+div.mini-bug-popup-command-container {
+  position: absolute;
+  text-align: right;
+  top: 60px;
+  left: 4px;
+  width: 100%;
+  margin-left: -10px;
+}
+
+#console-body {
+  background-color: rgb(234, 234, 234);
+}
+
+.new-bug-step {
+
+  background-image: -webkit-gradient(linear, left top, left bottom,
+                                     color-stop(0.00, rgb(255, 255, 255)),
+                                     color-stop(0.40, rgb(255, 185, 178)),
+                                     color-stop(0.80, rgb(255, 125, 102)));
+  border-bottom: 1px solid black;
+  border-collapse: separate;
+  border-top: 1px solid black;
+  color: black;
+  font-family: arial, sans-serif;
+  font-size: 13px;
+  line-height: 1;
+  margin: 0;
+  outline: 0;
+  padding: 0;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.new-bug-step td {
+  border-bottom: 1px solid black;
+  border-top: 1px solid black;
+  padding: 6px;
+  vertical-align: middle;
+}
+
+.displayStyle {
+  color: black;
+  display: inherit;
+  font-family: arial, sans-serif;
+  font-size: 13px;
+  padding: 2px;
+}
+
+label.required-label {
+  display: inline;
+  position: relative;
+}
+
+div.new-bug-console {
+  border-bottom: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-top: 1px solid black;
+  /*height: 200px;
+  width: 300px;*/
+}
+
+#content_canvas {
+  height: 100%;
+  overflow-x: auto;
+  overflow-y: auto;
+  padding: 5px;
+}
+
+textarea.displayStyle {
+  width: 97%;
+}
+
+img.asterisk-icon {
+  display: inline;
+  height: 10px;
+  position: relative;
+  width: 10px;
+}
+
+#console-footer {
+  border-bottom: 1px solid black;
+  border-bottom-left-radius: 6px;
+  border-bottom-right-radius: 6px;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  border-top: 1px solid black;
+  color: black;
+  vertical-align: inherit;
+  padding-right: 2px;
+  padding-left: 0;
+}
+
+#console-footer a {
+  color: #00f;
+  cursor: pointer;
+  padding-left: 10px;
+  text-decoration: underline;
+  vertical-align: middle;
+}
+
+#console-footer a:hover {
+  color: #f90;
+}
+
+#browserVersion,
+#platformAndVersion {
+  color: black;
+  display: inline;
+}
+
+input.displayStyle {
+  display: inline;
+}
+
+#bugNewStep1 a {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+#bugNewStep5 label {
+  font-weight: bold;
+}
+
+span.extensionName {
+  display: inline;
+}
+
+#projectText {
+  display: block;
+}
+
+span.icon {
+  color: red;
+  padding-left: 4px;
+}
+

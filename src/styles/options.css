@@ -1,0 +1,149 @@
+/**
+ * Copyright 2011 Google, Inc. All Rights Reserved
+ *
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: #fff;
+  font-family: "Arial", "Helvetica", sans-serif;
+  font-size: 13px;
+  height: 100%;
+  font-style: normal;
+  font-weight: normal;
+  line-height: normal;
+  overflow: hidden;
+  width: auto;
+  min-width: 900px; /* Prevents divs from wrapping if screen is too small. */
+  height: auto;
+}
+
+a {
+  color: blue;
+  text-decoration: none;
+}
+
+.footer {
+  clear: both;
+
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 10px;
+}
+
+.footer div {
+  text-align: center;
+}
+
+
+.header {
+  border: 0;
+  display: block;
+  height: 64px;
+}
+
+.header img {
+  float: left;
+  padding: 7px;
+  width: 50px;
+  height: 50px;
+}
+
+.header h1 {
+  font-size: 24px;
+  font-weight: bold;
+  padding-top: 3px;
+  margin-right: 10px;
+}
+
+.header h2 {
+  font-size: 18px;
+  font-style: italic;
+}
+
+.header .titles {
+  float: left;
+}
+
+.header .save-info {
+  float: right;
+}
+
+.header #user {
+  color: #36C !important;
+  margin: 5px;
+  text-align: right;
+}
+
+.header #save-time {
+  color: #999;
+  float: right;
+  /* Extra top margin helps to vertically align text with save button. */
+  margin: 12px 10px 5px 0;
+  text-align: left;
+}
+
+.header #save-button {
+  float: right;
+  margin: 5px;
+  padding: 3px 0;
+  width: 85px;
+}
+
+.content {
+  clear: both;
+}
+
+fieldset {
+  border: 1px solid #ddd;
+  padding: 16px;
+  margin: 10px 0;
+}
+
+fieldset p {
+  font-size: 90%;
+  color: #444;
+}
+
+legend span {
+  font-weight: bold;
+}
+
+ul {
+  list-style-type: none;
+}
+
+form label {
+  display: inline-block;
+  min-width: 120px;
+}
+
+form input[type=text] {
+  border: 1px solid #d9d9d9;
+  border-top: 1px solid silver;
+  display: inline-block;
+  -webkit-border-radius: 1px;
+  -moz-border-radius: 1px;
+  border-radius: 1px;
+  min-width: 150px;
+}
+
+form select {
+  min-width: 170px;
+}
+
+form input:focus {
+  border: 1px solid #4d90fe;
+  outline: none;
+}
+
+form textarea {
+  width: 100%;
+}
