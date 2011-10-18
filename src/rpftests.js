@@ -176,3 +176,12 @@ rpf.Tests.prototype.setDetails = function(details) {
   this.details_ = details;
 };
 
+
+/**
+ * Gets the page map.
+ * @return {Object} The page map.
+ */
+rpf.Tests.prototype.getPageMap = function() {
+  return this.details_ ? this.details_['page_map'] : null;
+};
+

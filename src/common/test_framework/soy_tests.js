@@ -19,17 +19,16 @@
  */
 
 
-goog.provide('common.test_framework.SoyTests');
+goog.provide('bite.common.test_framework.SoyTests');
 
 
 
 /**
  * Used to execute tests.
  * @constructor
- * @export
  */
-common.test_framework.SoyTests = function() {};
-goog.addSingletonGetter(common.test_framework.SoyTests);
+bite.common.test_framework.SoyTests = function() {};
+goog.addSingletonGetter(bite.common.test_framework.SoyTests);
 
 
 /**
@@ -42,9 +41,8 @@ goog.addSingletonGetter(common.test_framework.SoyTests);
  * @param {string} tag The attribute tag to search for.
  * @param {function(Object=):string} template The soy template function.
  * @param {Object=} data The data to pass to the template.
- * @export
  */
-common.test_framework.SoyTests.prototype.testAttributeValue =
+bite.common.test_framework.SoyTests.prototype.testAttributeValue =
     function(assert, expectedValue, tag, template, data) {
   var regexp = RegExp(tag + '=["]([^"]*)["]', 'gi');
   var string = template(data || {});

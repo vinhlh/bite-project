@@ -9,10 +9,12 @@
 
 goog.provide('rpf.SaveDialog');
 
+goog.require('bite.common.mvc.helper');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.ui.Dialog');
 goog.require('rpf.Console.Messenger');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -59,96 +61,21 @@ rpf.SaveDialog = function(messenger, onUiEvents) {
  */
 rpf.SaveDialog.prototype.initSaveDialog_ = function() {
   var dialogElem = this.saveDialog_.getContentElement();
-
-  var saveButton = {};
-  var cancelButton = {};
+  var buttonSet = new goog.ui.Dialog.ButtonSet();
+  buttonSet.set('saveDialogSave', 'Save', true, false);
+  buttonSet.set('saveDialogCancel', 'Cancel', false, true);
   var lastProject = goog.global.localStorage.getItem('last-project');
   lastProject = lastProject ? lastProject : '';
 
-  var contentDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'class': 'content-canvas'},
-      goog.dom.createDom(goog.dom.TagName.DIV,
-          {'class': 'section-title'},
-          'Test Information'),
-      goog.dom.createDom(goog.dom.TagName.TABLE,
-          {'width': '100%'},
-          goog.dom.createDom(goog.dom.TagName.TR, {},
-              goog.dom.createDom(goog.dom.TagName.TD,
-                  {'class': 'dialog-label'},
-                  goog.dom.createDom(goog.dom.TagName.LABEL,
-                      {'for': Bite.Constants.RpfConsoleId.CONSOLE_PROJECT_NAME,
-                       'class': 'dialog-label'},
-                       'Project')),
-              goog.dom.createDom(goog.dom.TagName.TD, {},
-              goog.dom.createDom(goog.dom.TagName.INPUT,
-                  {'type': 'text',
-                   'name': Bite.Constants.RpfConsoleId.CONSOLE_PROJECT_NAME,
-                   'value': lastProject,
-                   'id': Bite.Constants.RpfConsoleId.CONSOLE_PROJECT_NAME,
-                   'class': 'dialog-text'}))),
-          goog.dom.createDom(goog.dom.TagName.TR, {},
-              goog.dom.createDom(goog.dom.TagName.TD,
-                  {'class': 'dialog-label'},
-                  goog.dom.createDom(goog.dom.TagName.LABEL,
-                      {'for': Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME,
-                       'class': 'dialog-label'},
-                       'Test Name')),
-              goog.dom.createDom(goog.dom.TagName.TD, {},
-              goog.dom.createDom(goog.dom.TagName.INPUT,
-                  {'type': 'text',
-                   'name': Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME,
-                   'id': Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME,
-                   'class': 'dialog-text'})))),
-      goog.dom.createDom(goog.dom.TagName.DIV,
-          {'class': 'section-title'},
-          'Location'),
-      goog.dom.createDom(goog.dom.TagName.DIV,
-          {'class': 'option-row'},
-          goog.dom.createDom(goog.dom.TagName.INPUT,
-              {'type': 'radio',
-               'name': 'SaveLocation',
-               'id': 'localBox',
-               'class': 'dialog-option'}),
-          goog.dom.createDom(goog.dom.TagName.LABEL,
-              {'for': 'localBox'},
-              goog.dom.createDom(goog.dom.TagName.SPAN, {},
-                  'Local'),
-              goog.dom.createDom(goog.dom.TagName.SPAN,
-                  {'class': 'option-note'},
-                  ' (save to your browser\'s local storage)'))),
-          goog.dom.createDom(goog.dom.TagName.DIV,
-              {'class': 'option-row'},
-              goog.dom.createDom(goog.dom.TagName.INPUT,
-                  {'type': 'radio',
-                   'name': 'SaveLocation',
-                   'id': 'webBox',
-                   'checked': 'True',
-                   'class': 'dialog-option'}),
-              goog.dom.createDom(goog.dom.TagName.LABEL,
-                  {'for': 'webBox'},
-                  goog.dom.createDom(goog.dom.TagName.SPAN, {},
-                      'Web'),
-                      goog.dom.createDom(goog.dom.TagName.SPAN,
-                          {'class': 'option-note'},
-                           ' (save to the cloud for sharing)'))));
-
-  var buttonDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'class': 'console-save-dialog-button-div console-footer'},
-      saveButton = goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'id': 'saveTestDialog',
-           'type': 'button',
-           'value': 'Save'}),
-      cancelButton = goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'id': 'cancelTestDialog',
-           'type': 'button',
-           'value': 'Cancel'}));
-
-  dialogElem.appendChild(contentDiv);
-  dialogElem.appendChild(buttonDiv);
+  bite.common.mvc.helper.renderModelFor(dialogElem,
+                                        rpf.soy.Dialog.saveContent,
+                                        {'lastProject' : lastProject});
   this.saveDialog_.setTitle('Save Script');
-  this.saveDialog_.setButtonSet(null);
+  this.saveDialog_.setButtonSet(buttonSet);
   this.saveDialog_.setVisible(true);
   this.saveDialog_.setVisible(false);
+  var saveButton = buttonSet.getButton('saveDialogSave');
+  var cancelButton = buttonSet.getButton('saveDialogCancel');
 
   goog.events.listen(
       saveButton,

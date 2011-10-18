@@ -90,6 +90,7 @@ Bite.Constants.COMPLETED_EVENT_TYPES = {
   AUTOMATE_SAVE_DIALOG: 'automateSaveDialog',
   DEFAULT: '',
   FAILED: 'failed',
+  FINISHED_CURRENT_RUN: 'finishedCurrentRun',
   FINISHED_LOAD_TEST_IN_CONSOLE: 'finishedLoadTestInConsole',
   FINISHED_RUNNING_TEST: 'finishedRunningTest',
   FINISHED_UPDATE_TEST_RESULT: 'finishedUpdateTestResult',
@@ -98,7 +99,11 @@ Bite.Constants.COMPLETED_EVENT_TYPES = {
   LOCAL_PROJECT_LOADED: 'localProjectLoaded',
   PLAYBACK_DIALOG_OPENED: 'playbackDialogOpened',
   PLAYBACK_STARTED: 'playbackStarted',
+  PROJECT_LOADED: 'projectLoaded',
   PROJECT_SAVED_LOCALLY: 'projectSavedLocally',
+  RUN_PLAYBACK_COMPLETE: 'runPlaybackComplete',
+  RUN_PLAYBACK_STARTED: 'runPlaybackStarted',
+  STOPPED_GROUP_TESTS: 'stoppedGroupTests',
   TEST_LOADED: 'testLoaded',
   PROJECT_LOADED_IN_EXPORT: 'projectLoadedInExport',
   TEST_SAVED: 'testSaved',
@@ -419,6 +424,7 @@ Bite.Constants.UiCmds = {
   UPDATE_HIGHLIGHT_LINE: 'updateHighlightLine',
 
   // For playback dialog.
+  AUTOMATE_PLAY_MULTIPLE_TESTS: 'automatePlayMultipleTests',
   DELETE_CMD: 'deleteCmd',
   FAIL_CMD: 'failCmd',
   INSERT_CMD: 'insertCmd',
@@ -448,6 +454,7 @@ Bite.Constants.UiCmds = {
   SAVE_TEST: 'saveTestToServer',
 
   // For loaddialog.
+  AUTOMATE_DIALOG_LOAD_PROJECT: 'automateDialogLoadProject',
   AUTOMATE_DIALOG_LOAD_TEST: 'automateDialogLoadTest',
   CANCEL_DIALOG: 'cancelDialog',
   DELETE_SELECTED_TEST: 'deleteSelectedTest',
@@ -475,6 +482,26 @@ Bite.Constants.RpfConsoleId = {
   ELEMENT_TEST_ID: 'testId',
   ELEMENT_TEST_NAME: 'testName',
   SCRIPTS_CONTAINER: 'scriptsContainer'
+};
+
+
+/**
+ * The commands in record helper.
+ * @enum {string}
+ */
+Bite.Constants.RECORD_ACTION = {
+  START_RECORDING: 'startRecording',
+  STOP_RECORDING: 'stopRecording'
+};
+
+
+/**
+ * The commands to automate RPF.
+ * @enum {string}
+ */
+Bite.Constants.RPF_AUTOMATION = {
+  LOAD_AND_RUN_FROM_LOCAL: 'loadAndRunFromLocal',
+  PLAYBACK_MULTIPLE: 'playbackMultiple'
 };
 
 

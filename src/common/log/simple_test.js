@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * @fileoverview Unit tests for common.log.Basic.
+ * @fileoverview Unit tests for bite.common.log.Simple.
  *
  * Note that tests make use of the entryTest function for validating entry
  * objects.  This function requires an object containing expected values.  If a
@@ -44,12 +44,12 @@
  */
 
 
-goog.require('common.log.Basic');
+goog.require('bite.common.log.Simple');
 
 
 /**
  * The log created and destroyed for each test.
- * @type {common.log.Basic}
+ * @type {bite.common.log.Simple}
  */
 var logToTest = null;
 
@@ -60,14 +60,14 @@ var logToTest = null;
  * a more general testing solution.
  * @type {!Object}
  */
-var LOG_KEY_NAME = common.log.Basic.KeyName;
+var LOG_KEY_NAME = bite.common.log.Simple.KeyName;
 
 
 /**
  * Sets up the environment for each unit test.
  */
 function setUp() {
-  logToTest = new common.log.Basic();
+  logToTest = new bite.common.log.Simple();
 }
 
 
@@ -85,10 +85,10 @@ function tearDown() {
  * given value.  If the values are not equal an assert will occur.  An assert
  * will also occur if a known key is missing.
  * @param {string} msg A message to be displayed by the assert.
- * @param {common.log.Basic.Entry} expectedValues An entry object containing
- *     the expected values in the entry.  All undefined but present keys are
- *     considered "don't cares".
- * @param {?common.log.Basic.Entry=} entry The log entry to validate.
+ * @param {bite.common.log.Simple.Entry} expectedValues An entry object
+ *     containing the expected values in the entry.  All undefined but present
+ *     keys are considered "don't cares".
+ * @param {?bite.common.log.Simple.Entry=} entry The log entry to validate.
  */
 function entryTest(msg, expectedValues, entry) {
   if (entry == null || entry == undefined) {
@@ -306,7 +306,7 @@ function testChangeMaxEntriesWithMore() {
 function testMaxEntries() {
   var testName = 'testMaxEntries';
 
-  logToTest = new common.log.Basic(1);
+  logToTest = new bite.common.log.Simple(1);
   logToTest.add('entry1');
   logToTest.add('entry2');
 
@@ -602,18 +602,18 @@ function testNoEntries() {
  * internally.
  */
 function testConstructorInputs() {
-  assertEquals(common.log.Basic.DEFAULT_MAX_ENTRIES,
+  assertEquals(bite.common.log.Simple.DEFAULT_MAX_ENTRIES,
                logToTest.getMaxEntries());
 
-  logToTest = new common.log.Basic(0);
-  assertEquals(common.log.Basic.DEFAULT_MAX_ENTRIES,
+  logToTest = new bite.common.log.Simple(0);
+  assertEquals(bite.common.log.Simple.DEFAULT_MAX_ENTRIES,
                logToTest.getMaxEntries());
 
-  logToTest = new common.log.Basic(-1);
-  assertEquals(common.log.Basic.DEFAULT_MAX_ENTRIES,
+  logToTest = new bite.common.log.Simple(-1);
+  assertEquals(bite.common.log.Simple.DEFAULT_MAX_ENTRIES,
                logToTest.getMaxEntries());
 
-  logToTest = new common.log.Basic(1);
+  logToTest = new bite.common.log.Simple(1);
   assertEquals(1, logToTest.getMaxEntries());
 }
 

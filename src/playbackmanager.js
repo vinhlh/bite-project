@@ -128,6 +128,20 @@ rpf.PlayBackManager = function(
   this.currentTestName_ = '';
 
   /**
+   * The current running project name.
+   * @type {string}
+   * @private
+   */
+  this.currentProjectName_ = '';
+
+  /**
+   * The current running test's location.
+   * @type {string}
+   * @private
+   */
+  this.currentTestLocation_ = '';
+
+  /**
    * The current running test id.
    * @type {string}
    * @private
@@ -957,7 +971,10 @@ rpf.PlayBackManager.prototype.updateTestResultOnServer = function() {
         goog.bind(this.callBackAfterScreenShot_, this,
                   Bite.Constants.WorkerResults.FAILED));
   } else {
-    this.runNext_(Bite.Constants.WorkerResults.PASS, this.playbackWinId_, '');
+    var log = this.createLogJsonStr_(
+        '', this.currentCmd_, '', '', this.currentStep_);
+    this.runNext_(Bite.Constants.WorkerResults.PASS,
+                  this.playbackWinId_, '', log);
   }
 };
 
@@ -971,7 +988,7 @@ rpf.PlayBackManager.prototype.updateTestResultOnServer = function() {
 rpf.PlayBackManager.prototype.callBackAfterScreenShot_ = function(
     status, dataUrl) {
   // TODO(phu): Add failed html in the result.
-  var failureStr = this.createFailureJsonStr_(
+  var failureStr = this.createLogJsonStr_(
       'Failed to finish.', this.currentCmd_, 'Failed to finish.',
       '', this.currentStep_);
   this.runNext_(status, this.playbackWinId_, dataUrl, failureStr);
@@ -991,7 +1008,7 @@ rpf.PlayBackManager.prototype.getFailedHtmlCallback_ = function(
   if (this.replayTabReady_) {
     failureReason = this.getAndClearFailureLog();
   }
-  var failureStr = this.createFailureJsonStr_(
+  var failureStr = this.createLogJsonStr_(
       response['failedHtml'], this.currentCmd_, failureReason,
       response['pageUrl'], this.currentStep_);
   this.runNext_(status, this.playbackWinId_, dataUrl, failureStr);
@@ -1013,7 +1030,7 @@ rpf.PlayBackManager.prototype.callRunNextOnce_ = function(
     if (this.replayTabReady_) {
       failureReason = this.getAndClearFailureLog();
     }
-    var failureStr = this.createFailureJsonStr_(
+    var failureStr = this.createLogJsonStr_(
         'no html collected.', this.currentCmd_, failureReason,
         '', this.currentStep_);
     this.runNext_(status, this.playbackWinId_, dataUrl, failureStr);
@@ -1022,7 +1039,7 @@ rpf.PlayBackManager.prototype.callRunNextOnce_ = function(
 
 
 /**
- * Creates the failure json string for debugging purpose.
+ * Creates the result log string for debugging purpose.
  * @param {string} failedHtml The failed page's html.
  * @param {string} cmd The current command.
  * @param {string} failureReason The last known failure reason.
@@ -1031,7 +1048,7 @@ rpf.PlayBackManager.prototype.callRunNextOnce_ = function(
  * @return {string} The failure json string.
  * @private
  */
-rpf.PlayBackManager.prototype.createFailureJsonStr_ = function(
+rpf.PlayBackManager.prototype.createLogJsonStr_ = function(
     failedHtml, cmd, failureReason, pageUrl, stepIndex) {
   var timeStamp = rpf.MiscHelper.getTimeStamp();
   var result = {};
@@ -1041,6 +1058,9 @@ rpf.PlayBackManager.prototype.createFailureJsonStr_ = function(
   result['failureReason'] = failureReason;
   result['pageUrl'] = pageUrl;
   result['stepIndex'] = stepIndex;
+  result['testName'] = this.currentTestName_;
+  result['projectName'] = this.currentProjectName_;
+  result['testLocation'] = this.currentTestLocation_;
   return JSON.stringify(result);
 };
 
@@ -1466,13 +1486,17 @@ rpf.PlayBackManager.prototype.callBackAfterTabUpdated = function(
  *     show update UI on failure.
  * @param {string=} opt_testName The test name.
  * @param {string=} opt_testId The test id.
- * @export
+ * @param {string=} opt_projectName The project name.
+ * @param {string=} opt_testLocation The test location.
  */
 rpf.PlayBackManager.prototype.checkPlaybackOptionAndRun = function(
     method, startUrl, scripts, datafile, userLib, opt_noConsole, opt_infoMap,
-    opt_continueOnFailure, opt_testName, opt_testId) {
+    opt_continueOnFailure, opt_testName, opt_testId, opt_projectName,
+    opt_testLocation) {
   this.continueOnFailure_ = opt_continueOnFailure || false;
   this.currentTestName_ = opt_testName || '';
+  this.currentProjectName_ = opt_projectName || '';
+  this.currentTestLocation_ = opt_testLocation || '';
   this.currentTestId_ = opt_testId || '';
   this.infoMap_ = opt_infoMap || {};
   if (this.isPreparationDone()) {

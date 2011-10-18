@@ -27,7 +27,7 @@
 
 goog.provide('rpf.Rpf');
 
-goog.require('common.net.Xhr.async');
+goog.require('bite.common.net.xhr.async');
 goog.require('goog.json');
 goog.require('goog.structs.Set');
 goog.require('rpf.ConsoleLogger');
@@ -439,10 +439,8 @@ rpf.Rpf.prototype.fetchCommonLibs = function(opt_callback) {
       '/get_common_libs', {});
 
   var callback = (opt_callback) ? opt_callback : goog.nullFunction;
-  common.net.Xhr.async.get(requestUrl,
-                           goog.bind(this.fetchCommonLibsCallback_,
-                                     this,
-                                     callback));
+  bite.common.net.xhr.async.get(requestUrl,
+      goog.bind(this.fetchCommonLibsCallback_, this, callback));
 };
 
 

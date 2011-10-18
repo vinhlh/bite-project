@@ -21,13 +21,14 @@
 
 goog.provide('rpf.PlayDialog');
 
+goog.require('bite.common.mvc.helper');
 goog.require('element.helper.Templates.locatorsUpdater');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
 goog.require('goog.ui.Dialog');
-goog.require('goog.ui.LabelInput');
 goog.require('rpf.Console.Messenger');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -54,15 +55,22 @@ rpf.PlayDialog = function(messenger, onUiEvents) {
 
   /**
    * The temporary command.
-   * @type string
+   * @type {string}
    */
   this.tempCmd = '';
 
   /**
    * The temporary data.
-   * @type string
+   * @type {string}
    */
   this.tempData = '';
+
+  /**
+   * The test ids.
+   * @type {!Array.<string>}
+   * @private
+   */
+  this.testIds_ = [];
 
   /**
    * The messenger.
@@ -92,11 +100,11 @@ rpf.PlayDialog = function(messenger, onUiEvents) {
  */
 rpf.PlayDialog.Images = {
   PLAY_ALL: 'imgs/rpf/playall.png',
-  PAUSE_GREY: 'imgs/rpf/pausegrey.png',
+  PAUSE_GREY: 'imgs/rpf/pause-disabled.png',
   PLAY_STEP: 'imgs/rpf/playstep.png',
-  PLAY_STOP_GREY: 'imgs/rpf/playstopgrey.png',
-  PLAY_ALL_GREY: 'imgs/rpf/playallgrey.png',
-  PLAY_STEP_GREY: 'imgs/rpf/playstepgrey.png',
+  PLAY_STOP_GREY: 'imgs/rpf/playstop-disabled.png',
+  PLAY_ALL_GREY: 'imgs/rpf/playall-disabled.png',
+  PLAY_STEP_GREY: 'imgs/rpf/playstep-disabled.png',
   PLAY_STOP: 'imgs/rpf/playstop.png',
   PAUSE: 'imgs/rpf/pause.png'
 };
@@ -113,88 +121,44 @@ rpf.PlayDialog.prototype.setVisible = function(display) {
 
 
 /**
+ * Automates this dialog.
+ * @param {Array} testInfo The tests to be selected in selector.
+ */
+rpf.PlayDialog.prototype.automateDialog = function(testInfo) {
+  if (testInfo) {
+    var selector = goog.dom.getElement('playdialog-tests');
+    for (var i = 0; i < selector.options.length; ++i) {
+      if (testInfo[selector.options[i].value]) {
+        selector.options[i].selected = true;
+      }
+    }
+  }
+
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.SET_PLAYBACK_ALL,
+      {},
+      /** @type {Event} */ ({}));
+};
+
+
+/**
  * Inits the playback runtime dialog.
  * @private
  */
 rpf.PlayDialog.prototype.initPlaybackRuntimeDialog_ =
     function() {
   var dialogElem = this.playDialog_.getContentElement();
-  var playAll = {};
-  var playPause = {};
-  var playStep = {};
-  var playStop = {};
-  var playCurStep = {};
-  var multipleTests = goog.dom.createDom(goog.dom.TagName.TABLE,
-      {'id': 'multipleTestsTable', 'width': '100%'},
-      goog.dom.createDom(goog.dom.TagName.TR,
-          {}, goog.dom.createDom(goog.dom.TagName.TD,
-              {'align': 'right', 'valign': 'middle', 'width': '65%'},
-              goog.dom.createDom(goog.dom.TagName.DIV,
-                  {'id': 'finishedTestsNumber',
-                   'style': 'display:inline;font-weight:bold;font-size:12px'}),
-              goog.dom.createDom(goog.dom.TagName.DIV,
-                  {'id': 'totalRunningTestsNumber',
-                   'style': 'display:inline;font-weight:bold;font-size:12px'})),
-          goog.dom.createDom(goog.dom.TagName.TD,
-              {'align': 'left', 'valign': 'middle'},
-              goog.dom.createDom(goog.dom.TagName.INPUT,
-                  {'type': 'button',
-                   'id': 'stopAllTests',
-                   'value': 'Stop All'}))));
-  /*
-   * <div id="playbackruntime" style="height:30px;text-align:center;">
-   *   <input type="image" ...>
-   *   <input type="image" ...>
-   *   ...
-   *   <input type="text" ...>
-   * </div>
-   */
-  var contentDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'playbackruntime', 'style': 'text-align:center;'},
-      playAll = goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'image',
-           'src': rpf.PlayDialog.Images.PLAY_ALL,
-           'id': 'playall', 'width': '25', 'height': '25'}),
-      playPause = goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'image',
-           'src': rpf.PlayDialog.Images.PAUSE_GREY,
-           'id': 'playpause', 'width': '25', 'height': '25',
-           'style': 'margin-left:5px;'}),
-      playStep = goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'image',
-           'src': rpf.PlayDialog.Images.PLAY_STEP,
-           'id': 'playstep', 'width': '25', 'height': '25',
-           'style': 'margin-left:5px;'}),
-      playStop = goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'image',
-           'src': rpf.PlayDialog.Images.PLAY_STOP,
-           'id': 'playstop', 'width': '25', 'height': '25',
-           'style': 'margin-left:5px'}),
-      playCurStep = goog.dom.createDom(goog.dom.TagName.DIV,
-          {'id': 'playbackcurrentstepdiv',
-           'size': '18', 'style': 'margin-top: 5px'}));
-  var statusDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'playbackstatus',
-       'class': 'console-playdialog-status-div'});
-  var matchHtmlDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'matchHtmlDiv',
-       'class': 'console-playdialog-match-html'});
-  var choiceDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'choiceset', 'style': 'text-align:center;'});
-  dialogElem.appendChild(multipleTests);
-  dialogElem.appendChild(contentDiv);
-  dialogElem.appendChild(statusDiv);
-  dialogElem.appendChild(matchHtmlDiv);
-  dialogElem.appendChild(choiceDiv);
+
+  bite.common.mvc.helper.renderModelFor(
+      dialogElem,
+      rpf.soy.Dialog.playContent);
+
   this.playDialog_.setTitle('Playback Runtime');
   this.playDialog_.setButtonSet(null);
   this.playDialog_.setVisible(true);
   this.playDialog_.setVisible(false);
-  var label = new goog.ui.LabelInput('pause at line #');
-  label.render(playCurStep);
-  label.getElement().id = 'playbackcurrentstep';
-  label.getElement().size = '10';
   this.setMultipleTestsVisibility(false);
+  this.setTestSelectorVisibility(false);
   goog.events.listen(
       goog.dom.getElement('playall'),
       'click',
@@ -238,7 +202,8 @@ rpf.PlayDialog.prototype.initPlaybackRuntimeDialog_ =
  * @param {boolean} visible Whether set the multiple tests info visible.
  */
 rpf.PlayDialog.prototype.setMultipleTestsVisibility = function(visible) {
-  goog.style.showElement(goog.dom.getElement('multipleTestsTable'), visible);
+  goog.style.showElement(goog.dom.getElement('rpf-multiple-tests-info'),
+                         visible);
 };
 
 
@@ -259,6 +224,39 @@ rpf.PlayDialog.prototype.setTotalNumber = function(totalNumber) {
 rpf.PlayDialog.prototype.setFinishedNumber = function(finishedNumber) {
   goog.dom.getElement('finishedTestsNumber').innerHTML =
       'Finished: ' + finishedNumber;
+};
+
+
+/**
+ * Gets all of the selected test names.
+ * @return {!Array.<string>} The selected names.
+ */
+rpf.PlayDialog.prototype.getSelectedTests = function() {
+  var selector = goog.dom.getElement('playdialog-tests');
+  var results = [];
+  for (var i = 0; i < selector.options.length; ++i) {
+    if (selector.options[i].selected) {
+      results.push(selector.options[i].value);
+    }
+  }
+  return results;
+};
+
+
+/**
+ * Updates the tests selector.
+ * @param {!Array.<string>} names The test names.
+ * @param {!Array.<string>} testIds The test ids.
+ */
+rpf.PlayDialog.prototype.updateTestSelection = function(names, testIds) {
+  var selector = goog.dom.getElement('playdialog-tests');
+  this.testIds_ = testIds || [];
+  selector.innerHTML = '';
+  for (var i = 0; i < names.length; i++) {
+    var opt = new Option(names[i], names[i]);
+    selector.add(opt, null);
+  }
+  this.setTestSelectorVisibility(true);
 };
 
 
@@ -592,6 +590,16 @@ rpf.PlayDialog.prototype.failCmd = function() {
        'params': {'status': Bite.Constants.WorkerResults.STOPPED,
                   'log': 'Set stop from playback.'}});
   this.setPlaybackStop();
+};
+
+
+/**
+ * Set the visibility of the tests selector.
+ * @param {boolean} visible Whether to show the selector.
+ */
+rpf.PlayDialog.prototype.setTestSelectorVisibility = function(visible) {
+  goog.style.showElement(
+      goog.dom.getElement('rpf-multiple-test-selector'), visible);
 };
 
 

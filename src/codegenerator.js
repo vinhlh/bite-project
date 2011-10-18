@@ -688,12 +688,14 @@ rpf.CodeGenerator.getElemByIdCmd = function(id) {
  * the rpf Console UI; can be started automatically from the background.
  * @param {Object=} opt_iframeInfo The iframe info that the element was from.
  * @param {Array=} opt_xpaths The xpath array.
+ * @param {string=} opt_className The class name string.
  * @return {Object} The result object.
  * @export
  */
 rpf.CodeGenerator.prototype.generateScriptAndDataFileForCmd = function(
     selectors, content, nodeType, action, descriptor,
-    elemVarName, opt_noConsole, opt_iframeInfo, opt_xpaths) {
+    elemVarName, opt_noConsole, opt_iframeInfo, opt_xpaths,
+    opt_className) {
   var playbackCmd = '';
   var cmdMap = {};
   var playAction = action;
@@ -709,6 +711,7 @@ rpf.CodeGenerator.prototype.generateScriptAndDataFileForCmd = function(
   cmdMap['varName'] = elemVarName;
   cmdMap['tagName'] = nodeType;
   cmdMap['xpaths'] = opt_xpaths;
+  cmdMap['className'] = opt_className;
 
   if (playAction == rpf.CodeGenerator.RecordActions.CLICK ||
       playAction == rpf.CodeGenerator.RecordActions.DBLCLICK ||

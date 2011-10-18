@@ -768,6 +768,11 @@ bite.webdriver.getDataArg_ = function(action) {
  * @private
  */
 bite.webdriver.getMethodName_ = function(stepName) {
+  // In the auto generated step id, there will be "-" in it.
+  // So in this case, it means users have renamed it.
+  if (stepName.indexOf('-') == -1) {
+    return stepName;
+  }
   var temp = stepName.toLowerCase();
   temp = goog.string.toCamelCase(temp);
   return temp.replace(/-/g, '');
@@ -1110,27 +1115,56 @@ bite.webdriver.isModule_ = function(code) {
 
 
 /**
+ * Checks if the given class name belongs to the urlPageMap.
+ * @param {string} className The class name.
+ * @param {Object} urlPageMap The url and page mapper.
+ * @return {boolean} Whether the given class name is valid.
+ * @private
+ */
+bite.webdriver.containClass_ = function(className, urlPageMap) {
+  for (var item in urlPageMap) {
+    if (urlPageMap[item] == className) {
+      return true;
+    }
+  }
+  return false;
+};
+
+
+/**
  * Gets the line content of the last redirection before the next command.
  * @param {Array} lines The lines of the test.
  * @param {number} curIndex The current line index.
- * @return {string} The content.
+ * @param {Object} infoMap The info map.
+ * @param {Object} urlPageMap The url and page name mapper.
+ * @return {Object} The redirection content and the next cmd's class name.
  * @private
  */
-bite.webdriver.getLastRedirection_ = function(lines, curIndex) {
+bite.webdriver.getLastRedirection_ = function(
+    lines, curIndex, infoMap, urlPageMap) {
   var len = lines.length;
   var lastRedirectionIndex = 0;
   while (curIndex < len) {
     var line = lines[curIndex];
+    var curId = bite.base.Helper.getStepId(line);
     // Returns the redirection index if the current line is a command.
-    if (bite.base.Helper.getStepId(line)) {
-      return lastRedirectionIndex ? lines[lastRedirectionIndex] : '';
+    if (curId) {
+      var pageName = infoMap['steps'][curId]['pageName'];
+      var className = '';
+      if (bite.webdriver.containClass_(pageName, urlPageMap)) {
+        className = pageName;
+      }
+      return {'redirection': lastRedirectionIndex ?
+                             lines[lastRedirectionIndex] : '',
+              'className': className};
     }
     if (line.indexOf(rpf.CodeGenerator.PlaybackActions.REDIRECT_TO) == 0) {
       lastRedirectionIndex = curIndex;
     }
     ++curIndex;
   }
-  return lastRedirectionIndex ? lines[lastRedirectionIndex] : '';
+  return {'redirection': lastRedirectionIndex ?
+                         lines[lastRedirectionIndex] : ''};
 };
 
 
@@ -1155,9 +1189,13 @@ bite.webdriver.parseTestLines_ = function(
   var playbackActions = rpf.CodeGenerator.PlaybackActions;
   var page = null;
   var pageName = '';
+  var defaultPageName = curPageName;
   for (var i = 0, len = lines.length; i < len; ++i) {
     var line = lines[i];
-    var nextRedirect = bite.webdriver.getLastRedirection_(lines, i + 1);
+    var results = bite.webdriver.getLastRedirection_(
+        lines, i + 1, infoMap, urlPageMap);
+    var nextRedirect = results['redirection'];
+    var nextCmdClassName = results['className'];
 
     // Gets the id from a given line.
     var curId = bite.base.Helper.getStepId(line);
@@ -1168,7 +1206,19 @@ bite.webdriver.parseTestLines_ = function(
       if (realAction == 'verifyNot') {
         stepInfo['action'] = realAction;
       }
-      stepInfo['pageName'] = curPageName;
+
+      // Sets the curPageName.
+      // If the step is associated with a Class name, then use it.
+      // Otherwise, uses the given class name which is probably based on URL.
+      if (stepInfo['pageName'] &&
+          bite.webdriver.containClass_(stepInfo['pageName'], urlPageMap)) {
+        curPageName = stepInfo['pageName'];
+      } else {
+        stepInfo['pageName'] = defaultPageName;
+        curPageName = defaultPageName;
+      }
+      selectorMap = bite.webdriver.getSelectorMap_(curPageName, pages);
+
       stepInfo['url'] = curUrl;
       stepInfo['returnPageName'] = curPageName;
       var elemInfo = infoMap['elems'][stepInfo['elemId']];
@@ -1176,17 +1226,20 @@ bite.webdriver.parseTestLines_ = function(
 
       // This peeps ahead to observe if the current action will result in
       // a url redirection, and then set the return page correctly.
-      if (nextRedirect) {
+      if (!nextCmdClassName && nextRedirect) {
         page = bite.webdriver.getPageInfoFromLine_(
             nextRedirect, urlPageMap, pages);
-
-        if (page) {
-          infoMap['steps'][curStep]['returnPageName'] = page['pageName'];
-          if (!pages[curPageName]['imports']['custom'][page['pageName']]) {
-            pages[curPageName]['imports']['custom'][page['pageName']] = true;
-          }
+        nextCmdClassName = page['pageName'];
+      }
+      // The next cmd class name could be either assigned by a specified class
+      // or based on the info in a redirection.
+      if (nextCmdClassName) {
+        infoMap['steps'][curStep]['returnPageName'] = nextCmdClassName;
+        if (!pages[curPageName]['imports']['custom'][nextCmdClassName]) {
+          pages[curPageName]['imports']['custom'][nextCmdClassName] = true;
         }
       }
+
       var selector = elemInfo['xpaths'][0];
       var selectorKey = selector.replace(/\W+/g, '');
 
@@ -1220,7 +1273,7 @@ bite.webdriver.parseTestLines_ = function(
 
       // When enters a new page, the relavent info should be reset.
       if (page && page['pageName'] != curPageName) {
-        curPageName = page['pageName'];
+        defaultPageName = page['pageName'];
         curUrl = page['url'];
         selectorMap = bite.webdriver.getSelectorMap_(curPageName, pages);
       }
@@ -1297,6 +1350,14 @@ bite.webdriver.generatePages_ = function(
 
     // Gets the current page name based on the url pattern.
     var curPageName = bite.webdriver.getPageName_(urlPageMap, startUrl, pages);
+
+    // Get the first cmd's class name if any.
+    var resultPair = bite.webdriver.getLastRedirection_(
+        lines, 0, infoMap, urlPageMap);
+    if (resultPair['className']) {
+      curPageName = resultPair['className'];
+    }
+
     pages[curPageName]['modules'][moduleName] = {
       'methodNames': [],
       'isModule': isModule,

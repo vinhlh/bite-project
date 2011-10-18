@@ -12,9 +12,9 @@ goog.provide('rpf.WorkerManager');
 
 goog.require('Bite.Constants');
 goog.require('bite.base.Helper');
+goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
-goog.require('common.net.Xhr.async');
 goog.require('goog.Timer');
 goog.require('goog.array');
 goog.require('goog.events');
@@ -209,9 +209,11 @@ rpf.WorkerManager.prototype.stopGroupTests = function() {
  * @param {Array} testNames The test names array.
  * @param {Array} tests The array of tests info.
  * @param {string} runName The run name.
+ * @param {string=} opt_location Where the tests were loaded from.
  */
 rpf.WorkerManager.prototype.runGroupTests = function(
-    testNames, tests, runName) {
+    testNames, tests, runName, opt_location) {
+  var location = opt_location || '';
   this.finishedTestsNum_ = 0;
   var testsToRun = [];
   for (var i = 0, len = tests.length; i < len; ++i) {
@@ -227,7 +229,7 @@ rpf.WorkerManager.prototype.runGroupTests = function(
   var stepArr = [];
   var testInfoArr = [];
   for (var i = 0, len = testsToRun.length; i < len; ++i) {
-    this.pushTest_(testsToRun[i], stepArr, testInfoArr);
+    this.pushTest_(testsToRun[i], stepArr, testInfoArr, location);
   }
 
   // Sends a ping to server and starts the current run.
@@ -255,12 +257,18 @@ rpf.WorkerManager.prototype.runFinishCallback_ = function(response) {
   var link = goog.dom.createDom(goog.dom.TagName.A,
       {'href': resultUrl,
        'target': '_blank'}, 'Result Link');
+  // Reset the player if it was disrupted during playing back.
+  if (this.playbackMgr_.isPreparationDone()) {
+    this.playbackMgr_.setPreparationDone(false);
+  }
+  this.automator_.getEventTarget().dispatchEvent(
+      Bite.Constants.COMPLETED_EVENT_TYPES.FINISHED_CURRENT_RUN);
   // This is to notify the UI with the result link.
   // TODO(phu): Should display the link in another area.
   goog.Timer.callOnce(goog.bind(this.sendMessageToConsole_,
       this, {'command': Bite.Constants.UiCmds.UPDATE_PLAYBACK_STATUS,
              'params': {'text': link.outerHTML,
-             'color': 'green'}}), 1000);
+                        'color': 'green'}}), 1000);
 };
 
 
@@ -295,9 +303,11 @@ rpf.WorkerManager.prototype.startRunOnServer_ = function(
  * @param {Object.<string, string, string>} test The test object.
  * @param {Array} stepArr The step array.
  * @param {Array} testInfoArr The array contains the basic test info.
+ * @param {string} location The location where the tests were from.
  * @private
  */
-rpf.WorkerManager.prototype.pushTest_ = function(test, stepArr, testInfoArr) {
+rpf.WorkerManager.prototype.pushTest_ = function(
+    test, stepArr, testInfoArr, location) {
   var id = test['id'];
   var testObj = bite.base.Helper.getTestObject(test['test']);
   var result = bite.console.Helper.trimInfoMap(testObj['datafile']);
@@ -332,7 +342,9 @@ rpf.WorkerManager.prototype.pushTest_ = function(test, stepArr, testInfoArr) {
        'noConsole': false,
        'continueOnFailure': true,
        'testName': testObj['name'],
-       'testId': id},
+       'testId': id,
+       'projectName': testObj['projectname'],
+       'testLocation': location},
       Bite.Constants.COMPLETED_EVENT_TYPES.FINISHED_RUNNING_TEST);
   stepArr.push(temp);
 
@@ -453,7 +465,7 @@ rpf.WorkerManager.prototype.updateRunningTestStatus = function(
       handler,
       {});
   var parameters = goog.Uri.QueryData.createFromMap(paramsMap).toString();
-  common.net.Xhr.async.post(
+  bite.common.net.xhr.async.post(
       requestUrl,
       parameters,
       function(success) {
@@ -559,15 +571,13 @@ rpf.WorkerManager.prototype.kickOffPlayback = function(
  *     doneResult The result of the previous script.
  * @param {number} winId The playback window id.
  * @param {string} dataUrl The img data url string.
- * @param {string=} opt_failureStr The optional failure json string.
- * @export
+ * @param {string} log The result log.
  */
 rpf.WorkerManager.prototype.runNext = function(
-    doneResult, winId, dataUrl, opt_failureStr) {
-  var failureStr = opt_failureStr || '';
+    doneResult, winId, dataUrl, log) {
   rpf.MiscHelper.removeWindowById(winId);
   this.updateRunningTestStatus(
-      this.autoRunningTestId_, doneResult, dataUrl, failureStr);
+      this.autoRunningTestId_, doneResult, dataUrl, log);
   this.autoRunningTestId_ = 0;
   this.isWorking_ = false;  // TODO(phu): Use hanging GET to solve.
   this.eventMgrListener_(

@@ -21,7 +21,7 @@
 
 goog.provide('rpf.LoaderDialog');
 
-goog.require('common.mvc.Helper');
+goog.require('bite.common.mvc.helper');
 goog.require('goog.Uri');
 goog.require('goog.dom');
 goog.require('goog.events');
@@ -31,7 +31,7 @@ goog.require('goog.ui.ComboBox');
 goog.require('goog.ui.Dialog');
 goog.require('rpf.Console.Messenger');
 goog.require('rpf.StatusLogger');
-goog.require('rpf.soy.LoadDialog');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -156,7 +156,8 @@ rpf.LoaderDialog.prototype.setVisible = function(display) {
  * @private
  */
 rpf.LoaderDialog.prototype.initLoaderDialog_ = function() {
-  var content = common.mvc.Helper.renderModel(rpf.soy.LoadDialog.getContent);
+  var helper = bite.common.mvc.helper;
+  var content = helper.renderModel(rpf.soy.Dialog.getLoadContent);
   if (!content) {
     throw 'No content was rendered.';
   }
@@ -175,7 +176,7 @@ rpf.LoaderDialog.prototype.initLoaderDialog_ = function() {
   };
 
   // Load all relevant elements.
-  if (!common.mvc.Helper.bulkGetElementById(elements, content)) {
+  if (!bite.common.mvc.helper.bulkGetElementById(elements, content)) {
     var keys = [];
     for (var key in elements) {
       if (!elements[key]) {
@@ -287,17 +288,20 @@ rpf.LoaderDialog.prototype.automateDialog = function(
     isWeb, project, test, callback) {
   this.setLocation_(isWeb);
   this.setProjectName_(project);
-  this.showTests_(
-      goog.bind(this.loadSelectedTest, this, callback, project, test));
+  if (test) {
+    this.showTests_(
+        goog.bind(this.loadSelectedTest, this, callback, project, test));
+  } else {
+    this.clickGo_();
+  }
 };
 
 
 /**
  * Gets the storage location.
  * @return {string} The storage location.
- * @private
  */
-rpf.LoaderDialog.prototype.getStorageLocation_ = function() {
+rpf.LoaderDialog.prototype.getStorageLocation = function() {
   var locations = goog.dom.getDocument().getElementsByName('storageLocation');
   for (var i = 0, len = locations.length; i < len; ++i) {
     if (locations[i].checked) {
@@ -326,6 +330,8 @@ rpf.LoaderDialog.prototype.saveProjectNameInput_ = function() {
   if (this.tests_.options.length <= 0) {
     return;
   }
+  this.messenger_.sendStatusMessage(
+      Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED);
   this.onUiEvents_(
       Bite.Constants.UiCmds.SAVE_PROJECT_NAME_INPUT,
       {'name': this.searchBox_.value},
@@ -340,7 +346,7 @@ rpf.LoaderDialog.prototype.saveProjectNameInput_ = function() {
  */
 rpf.LoaderDialog.prototype.showTests_ = function(opt_callback) {
   var names = [];
-  var storageLocation = this.getStorageLocation_();
+  var storageLocation = this.getStorageLocation();
   this.setStatus(rpf.LoaderDialog.STATUS_LOADING_);
   var project = this.searchBox_.value;
   if (!project) {
@@ -351,15 +357,15 @@ rpf.LoaderDialog.prototype.showTests_ = function(opt_callback) {
     var callback = goog.bind(
         this.updateNamesAndIds_, this, opt_callback || goog.nullFunction);
     this.messenger_.sendMessage(
-        {'command': Bite.Constants.CONSOLE_CMDS.GET_ALL_FROM_WEB,
-         'params': {'project': project}},
+        {'command': Bite.Constants.CONSOLE_CMDS.GET_PROJECT,
+         'params': {'name': project}},
         callback);
   } else {
     var callback = goog.bind(
         this.updateNames_, this, opt_callback || goog.nullFunction);
     this.messenger_.sendMessage(
-        {'command': Bite.Constants.CONSOLE_CMDS.GET_TEST_NAMES_LOCALLY,
-         'params': {'project': project}},
+        {'command': Bite.Constants.CONSOLE_CMDS.GET_LOCAL_PROJECT,
+         'params': {'name': project}},
         callback);
   }
 };
@@ -373,12 +379,14 @@ rpf.LoaderDialog.prototype.showTests_ = function(opt_callback) {
  */
 rpf.LoaderDialog.prototype.updateNamesAndIds_ = function(callback, response) {
   var jsonObj = response['jsonObj'];
+  var tests = jsonObj['tests'];
+  var project_details = jsonObj['project_details'];
   var names = [];
   var ids = [];
   var helperObj = {};
-  for (var i = 0; i < jsonObj.length; ++i) {
-    helperObj[jsonObj[i]['test_name']] = jsonObj[i]['id'];
-    names.push(jsonObj[i]['test_name']);
+  for (var i = 0; i < tests.length; ++i) {
+    helperObj[tests[i]['test_name']] = tests[i]['id'];
+    names.push(tests[i]['test_name']);
   }
   names = names.sort();
   for (var i = 0; i < names.length; ++i) {
@@ -391,7 +399,8 @@ rpf.LoaderDialog.prototype.updateNamesAndIds_ = function(callback, response) {
   this.setStatus('');
   this.onUiEvents_(
       Bite.Constants.UiCmds.SET_PROJECT_INFO,
-      {'tests': jsonObj,
+      {'tests': tests,
+       'details': project_details,
        'from': 'web'},
       /** @type {Event} */ ({}));
   callback({});
@@ -405,10 +414,13 @@ rpf.LoaderDialog.prototype.updateNamesAndIds_ = function(callback, response) {
  * @private
  */
 rpf.LoaderDialog.prototype.updateNames_ = function(callback, response) {
-  var tests = response['tests'];
+  var jsonObj = response['jsonObj'];
+  var tests = jsonObj['tests'];
+  var details = jsonObj['project_details'];
   this.onUiEvents_(
       Bite.Constants.UiCmds.SET_PROJECT_INFO,
       {'tests': tests,
+       'details': details,
        'from': 'local'},
       /** @type {Event} */ ({}));
   var names = [];
@@ -445,8 +457,9 @@ rpf.LoaderDialog.prototype.updateSelectBox = function(names, opt_ids) {
   }
   try {
     for (var i = 0; i < names.length; i++) {
-      var opt = common.mvc.Helper.renderModel(rpf.soy.LoadDialog.getOption,
-                                              {'name': names[i]});
+      var helper = bite.common.mvc.helper;
+      var opt = helper.renderModel(rpf.soy.Dialog.getOption,
+                                   {'name': names[i]});
       if (!opt) {
         throw 'No content was rendered.';
       }
@@ -477,7 +490,7 @@ rpf.LoaderDialog.prototype.updateSelectBox = function(names, opt_ids) {
 rpf.LoaderDialog.prototype.deleteSelectedTest = function() {
   var selectedTestNames = [];
   var selectedTestIds = [];
-  var location = this.getStorageLocation_();
+  var location = this.getStorageLocation();
   for (var i = 0; i < this.tests_.options.length; ++i) {
     if (this.tests_.options[i].selected) {
       selectedTestNames.push(this.tests_.options[i].value);
@@ -532,7 +545,7 @@ rpf.LoaderDialog.prototype.loadSelectedTest = function(
     testName = this.tests_.options[index].value;
   }
 
-  var locationStorage = opt_location || this.getStorageLocation_();
+  var locationStorage = opt_location || this.getStorageLocation();
   if (locationStorage == rpf.LoaderDialog.Locations.WEB) {
     this.onUiEvents_(Bite.Constants.UiCmds.LOAD_TEST_FROM_WTF,
         {'jsonId': testId,
@@ -557,28 +570,13 @@ rpf.LoaderDialog.prototype.getProjectName = function() {
 
 
 /**
- * Gets all of the selected test names.
- * @return {Array} The selected names.
- */
-rpf.LoaderDialog.prototype.getSelectedTests = function() {
-  var results = [];
-  for (var i = 0; i < this.tests_.options.length; ++i) {
-    if (this.tests_.options[i].selected) {
-      results.push(this.tests_.options[i].value);
-    }
-  }
-  return results;
-};
-
-
-/**
  * Loads the selected test info on console.
  * @return {number} The selected index.
  * @private
  */
 rpf.LoaderDialog.prototype.getSelectedTestIndex_ = function() {
   var selectedIndex = -1;
-  var locationStorage = this.getStorageLocation_();
+  var locationStorage = this.getStorageLocation();
   for (var i = 0; i < this.tests_.options.length; ++i) {
     if (this.tests_.options[i].selected == true) {
       return i;

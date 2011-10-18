@@ -22,9 +22,9 @@
 
 goog.provide('bite.LoginManager');
 
+goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
-goog.require('common.net.Xhr.async');
 goog.require('goog.Uri');
 goog.require('goog.json');
 goog.require('goog.string');
@@ -62,7 +62,7 @@ bite.LoginManager.prototype.getCurrentUser = function(callback) {
   var url = goog.Uri.parse(server);
   url.setPath(bite.LoginManager.CHECK_LOGIN_STATUS_PATH_);
 
-  common.net.Xhr.async.get(url.toString(),
+  bite.common.net.xhr.async.get(url.toString(),
       goog.bind(this.getCurrentUserCallback_, this, callback));
 };
 

@@ -24,9 +24,9 @@ goog.provide('bite.client.BugTemplateList');
 goog.provide('bite.client.TemplateManager');
 
 goog.require('Bite.Constants');
+goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
-goog.require('common.net.Xhr.async');
 goog.require('goog.Uri');
 goog.require('goog.json');
 goog.require('goog.string');
@@ -228,10 +228,8 @@ bite.client.TemplateManager.prototype.loadTemplates_ = function(callback) {
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
   url.setPath(bite.client.TemplateManager.FETCH_TEMPLATE_PATH_);
-  common.net.Xhr.async.get(url.toString(),
-                           goog.bind(this.loadTemplatesCallback_,
-                                     this,
-                                     callback));
+  bite.common.net.xhr.async.get(url.toString(),
+      goog.bind(this.loadTemplatesCallback_, this, callback));
 };
 
 

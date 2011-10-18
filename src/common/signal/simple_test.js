@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * @fileoverview Unit tests for common.events.Signal.
+ * @fileoverview Unit tests for bite.common.signal.Simple.
  *
  * Test cases:
  *   testMultipleListeners
@@ -26,12 +26,12 @@
  */
 
 
-goog.require('common.events.Signal');
+goog.require('bite.common.signal.Simple');
 
 
 /**
  * The signal created and destroyed for each test.
- * @type {common.events.Signal}
+ * @type {bite.common.signal.Simple}
  */
 var signal = null;
 
@@ -40,7 +40,7 @@ var signal = null;
  * Sets up the environment for each unit test.
  */
 function setUp() {
-  signal = new common.events.Signal();
+  signal = new bite.common.signal.Simple();
 }
 
 
@@ -97,7 +97,7 @@ function testMultipleListeners() {
   signal.clear();
   signal.fire({X: 3});
   assertEquals(7, counter);
-};
+}
 
 
 /**
@@ -128,7 +128,7 @@ function testBoundListeners() {
   signal.removeListener(f3);
   signal.fire({X: 3});
   assertEquals(5, counter);
-};
+}
 
 
 /**
@@ -173,7 +173,7 @@ function noListeners() {
   } catch (error) {
     fail(error);
   }
-};
+}
 
 
 /**
@@ -204,5 +204,5 @@ function testBadInputs() {
   } catch (error) {
     fail(error);
   }
-};
+}
 

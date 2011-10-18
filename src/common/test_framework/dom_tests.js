@@ -19,7 +19,7 @@
  */
 
 
-goog.provide('common.test_framework.DomTests');
+goog.provide('bite.common.test_framework.DomTests');
 
 goog.require('goog.dom');
 goog.require('goog.dom.query');
@@ -29,10 +29,9 @@ goog.require('goog.dom.query');
 /**
  * Used to execute tests.
  * @constructor
- * @export
  */
-common.test_framework.DomTests = function() {};
-goog.addSingletonGetter(common.test_framework.DomTests);
+bite.common.test_framework.DomTests = function() {};
+goog.addSingletonGetter(bite.common.test_framework.DomTests);
 
 
 /**
@@ -42,9 +41,8 @@ goog.addSingletonGetter(common.test_framework.DomTests);
  *     mapped to their expected boolean value.
  * @param {string} attribute The name of the element attribute to examine.
  * @param {Element=} rootElement The element from which to do the queries.
- * @export
  */
-common.test_framework.DomTests.prototype.testElementBooleanValue =
+bite.common.test_framework.DomTests.prototype.testElementBooleanValue =
     function(inputs, attribute, rootElement) {
   rootElement = rootElement || goog.dom.getDocument();
 
@@ -67,9 +65,8 @@ common.test_framework.DomTests.prototype.testElementBooleanValue =
  *     expected boolean value.
  * @param {string} attribute The name of the element attribute to examine.
  * @param {Element=} rootElement The element from which to do the queries.
- * @export
  */
-common.test_framework.DomTests.prototype.testElementEqualsValue =
+bite.common.test_framework.DomTests.prototype.testElementEqualsValue =
     function(inputs, attribute,   rootElement) {
   rootElement = rootElement || goog.dom.getDocument();
 

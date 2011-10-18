@@ -1,0 +1,406 @@
+// Copyright 2011 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/*
+ * @fileoverview Templates for dialogs in the RPF console.
+ *
+ * @author ralphj@google.com (Julie Ralph)
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+
+{namespace rpf.soy.Dialog}
+
+
+/**
+ * Creates the content for the export project dialog.
+ */
+{template .exportContent}
+<div id="export-root" class="export-content-canvas">
+  <!-- Project Specification -->
+  <table style="width:100%">
+    <tr>
+      <td class="export-label">
+        Location
+      </td>
+      <td class="export-label">
+        <input id="location-local-export" type="radio" value="local"
+               name="export-location">
+        <label>Local</label>
+      </td>
+      <td class="export-label">
+        <input id="location-web-export" type="radio" value="web" checked
+               name="export-location">
+        <label>Web</label>
+      </td>
+      <td></td>
+    </tr>
+  </table>
+  <table style="width:100%">
+    <tr>
+      <td class="export-label">
+        Project Name
+      </td>
+      <td>
+        <input id="export-name" type="text" value="" style="width:100%">
+      </td>
+      <td style="width:40px">
+        <input id="export-button-go" type="button" value="Go"
+               style="float:right">
+      </td>
+    </tr>
+  </table>
+
+  <!-- Project data and configuration -->
+  <table style="width:100%">
+    <!-- List of tests associated with the project. -->
+    <tr>
+      <td>
+        <div id="export-test-heading" class="export-heading">
+          Tests
+        </div>
+        <div id="export-test-data" class="export-data">
+        </div>
+      </td>
+    </tr>
+
+    <!-- The interface for managing the url/page map. -->
+    <tr>
+      <td>
+        <div class="export-heading">
+          Url/Class Mapping
+        </div>
+        <div class="export-data">
+          <table style="width:100%">
+            <thead>
+              <tr>
+                <th style="width:150px" class="export-table-data">
+                  Url (substring match)
+                </th>
+                <th style="width:150px" class="export-table-data">
+                  Class Name
+                </th>
+                <th style="width:26px">
+                  <img id="export-add-class" width="22" height="22"
+                       src="imgs/rpf/plus.png">
+                </th>
+              </tr>
+            </thead>
+            <tbody id="export-page-table-body">
+            </tbody>
+          </table>
+        </div>
+      </td>
+    </tr>
+
+    <!-- Java specific information. -->
+    <tr>
+      <td>
+        <div class="export-heading">
+          Java Configuration
+        </div>
+        <div>
+          <table style="width:100%">
+            <tr>
+              <td class="export-label">
+                Package Path
+              </td>
+              <td>
+                <input id="export-java-package-path" type="text"
+                       style="width:100%">
+              </td>
+            </tr>
+          </table>
+        </div>
+      </td>
+    </tr>
+  </table>
+
+  <!-- Dialog's footer -->
+  <div class="console-footer">
+    <input id="export-button-save" type="button" value="Save"
+           style="float:left" title="Save project details.">
+    <input id="export-button-import" type="button" value="Import"
+           title="Load data.rpf from disk using package path.">
+    <input id="export-button-export" type="button" value="Export"
+           title="Load data.rpf from disk using package path.">
+  </div>
+</div>
+{/template}
+
+
+/**
+ * Generate the table of tests; one test per line.
+ * @param tests
+ */
+{template .getTests}
+<table style="width:100%">
+  <tbody>
+    {foreach $test in $tests}
+      <tr>
+        <td class="export-table-data">
+          {$test}
+        </td>
+      </tr>
+    {/foreach}
+  </tbody>
+</table>
+{/template}
+
+
+/**
+ * Generate the table of url to page maps; one mapping per line.
+ * @param url
+ * @param name
+ */
+{template .getPageMap}
+<table>
+  <tr id="export-page-map-row">
+    <td>
+      <input style="width:150px" type="text" value="{$url}">
+    </td>
+    <td>
+      <input style="width:150px" type="text" value="{$name}">
+    </td>
+    <td>
+      <img id="export-page-map-close" width="22" height="22"
+           src="imgs/rpf/dialog_close_box.gif">
+    </td>
+  </tr>
+</table>
+{/template}
+
+
+/**
+ * Creates the content for the load project dialog.
+ */
+{template .getLoadContent}
+<div class="content-canvas">
+  <table class="console-loaddialog-content-table">
+    <tr>
+      <td>
+        <label class="dialog-label">Location</label>
+      </td>
+      <td colspan="2">
+        <input type="radio" name="storageLocation" id="location-local"
+               value="local">
+        <label class="dialog-label">Local</label>
+        <input type="radio" name="storageLocation" id="location-web"
+               value="web"
+               checked style="margin-left: 20px">
+        <label class="dialog-label">Web</label>
+      </td>
+    </tr>
+    <tr style="height:24px">
+      <td style="width:70px">
+        <label class="dialog-label">
+          Project
+        </label>
+      </td>
+      <td>
+        <input id="project-name" type="text" value="" style="width:100%" />
+      </td>
+      <td style="width:40px">
+        <input id="load-go-button" type="button" value="Go"
+               style="float:right" />
+      </td>
+    </tr>
+  </table>
+
+  <div style="padding-top:8px" class="console-loaddialog-content-table-div">
+    <select id="load-tests" multiple="multiple" style="height:250px"
+            class="console-loaddialog-content-table-select">
+    </select>
+  </div>
+
+  <div id="load-footer" class="console-save-dialog-button-div console-footer">
+    <div id="status" class="console-save-dialog-div-text" style="float:left">
+    </div>
+    <input id="deleteTestDialog" type="button" value="Delete" />
+    <input id="loadTestDialog" type="button" value="Load Test" />
+    <input id="cancelTestDialog" type="button" value="Cancel" />
+  </div>
+</div>
+{/template}
+
+
+/**
+ * Create a new test option.
+ * @param name
+ */
+{template .getOption}
+<option value="{$name}">{$name}</option>
+{/template}
+
+
+/**
+ * Creates the play dialog main content.
+ */
+{template .playContent}
+<div class="rpf-left-panel" id="rpf-multiple-test-selector">
+  <select id="playdialog-tests" multiple="multiple"
+          style="height:150px; width:150px;"
+          class="console-loaddialog-content-table-select">
+  </select>
+  <div id="rpf-multiple-tests-info">
+    <span id="finishedTestsNumber"></span>
+    <span id="totalRunningTestsNumber"></span>
+    <input type="image" src="imgs/rpf/dialog_close_box.gif" id="stopAllTests"
+           title="Stop the current run" value="Stop All" />
+  </div>
+</div>
+<div class="rpf-right-panel">
+  <div id="playbackruntime">
+    <input type="image" src="imgs/rpf/playall.png" id="playall">
+    <input type="image" src="imgs/rpf/pause-disabled.png" id="playpause">
+    <input type="image" src="imgs/rpf/playstep.png" id="playstep">
+    <input type="image" src="imgs/rpf/playstop.png" id="playstop">
+    <div id="playbackcurrentstepdiv">
+      <input type="text" placeholder="pause at line #"
+             id="playbackcurrentstep" size="10" />
+    </div>
+  </div>
+  <div id="playbackstatus"></div>
+  <div id="matchHtmlDiv"></div>
+  <div id="choiceset"></div>
+</div>
+{/template}
+
+
+/**
+ * Create the settings dialog main content.
+ */
+{template .settingsContent}
+    <ul>
+      <li>
+        <label for="playbackinterval">
+          Playback Interval (sec)
+        </label>
+        <input type="text" id="playbackinterval" />
+        <input type="button" value="ok" id="playbackintervalbutton" />
+      </li>
+      <li>
+        <label for="defaulttimeout">
+          Default timeout (seconds)
+        </label>
+        <input type="text" id="defaulttimeout" />
+        <input type="button" value="ok" id="defaulttimeoutbutton" />
+      </li>
+      <li>
+        <label for="whetherUseXpath">Take Screenshot</label>
+        <input type="checkbox" id="whethertakescreenshot" />
+      </li>
+      <li>
+        <label for="whetherUseXpath">Use Xpath?</label>
+        <input type="checkbox" id="whetherUseXpath" />
+      </li>
+    </ul>
+{/template}
+
+
+/**
+ * Create the save dialog main content.
+ * @param lastProject
+ */
+{template .saveContent}
+  <form>
+    <fieldset>
+    <legend>Test Information</legend>
+    <ul>
+      <li>
+        <label for="projectName">Project</label>
+        <input type="text" name="projectName" id="projectName"
+               value="{$lastProject}" aria-haspopup="true" />
+      </li>
+      <li>
+        <label for="projectName">Test Name</label>
+        <input type="text" name="testName" id="testName" />
+      </li>
+    </ul>
+    <legend>Location</legend>
+    <ul>
+      <li>
+        <input type="radio" name="saveLocation" id="localBox">
+        <label for="localBox">
+          <span>Local</span>
+          <span class="option-note"> (your browser's local storage)</span>
+        </label>
+      </li>
+      <li>
+        <input type="radio" name="saveLocation" id="webBox" checked>
+        <label for="webBox">
+          <span>Web</span>
+          <span class="option-note"> (the cloud for sharing)</span>
+        </label>
+      </li>
+    </ul>
+    </fieldset>
+  </form>
+{/template}
+
+
+/**
+ * Create the screenshot dialog main content.
+ * @param screenshots
+ */
+{template .screenshotContent}
+  <div id="rpf-screenshots" class="centered-div">
+    {foreach $screenshotUrl in $screenshots}
+    <a href="{$screenshotUrl}" target="_blank">
+      <img src="{$screenshotUrl}" width="80%">
+    </a>
+    <hr />
+    {/foreach}
+  </div>
+{/template}
+
+
+/**
+ * Create the details dialog main content.
+ * @param line
+ * @param? screenSrc
+ */
+{template .detailsContent}
+<div id="rpf-details-toolbar" class="centered-div">
+</div>
+<hr>
+<div class="centered-div">
+  <img src="imgs/rpf/prevpage.png" title="Previous line" id="rpf-prev-line">
+  <input type="text" size="1" id="curlineInput" value="{$line}">
+  <img src="imgs/rpf/nextpage.png" title="Next line" id="rpf-next-line">
+</div>
+<ul>
+  <li>
+    <label for="stepNameInput">Step name</label>
+    <input type="text" id="stepNameInput" name="stepNameInput">
+    <input type="button" id="saveStepName" value="Save">
+  </li>
+  <li>
+    <label for="classNameInput">Class name</label>
+    <input type="text" id="classNameInput" name="classNameInput">
+    <input type="button" id="saveClassName" value="Save">
+  </li>
+</ul>
+<hr>
+<div id="rpf-details-screenshot" class="centered-div">
+  {if $screenSrc}
+    <a href="{$screenSrc}" target="_blank">
+      <img src="{$screenSrc}" width="80%">
+    </a>
+  {/if}
+</div>
+<div id="rpf-details-editor">
+</div>
+{/template}
+

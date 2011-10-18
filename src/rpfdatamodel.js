@@ -132,7 +132,8 @@ rpf.DataModel.prototype.consolidateInfoMap_ = function(infoMap) {
       'action': curStep['action'],
       'stepName': curStep['stepName'],
       'varName': curStep['varName'],
-      'tagName': curStep['tagName']
+      'tagName': curStep['tagName'],
+      'pageName': curStep['pageName']
     };
   }
   for (var elem in infoMap['elems']) {
@@ -165,7 +166,8 @@ rpf.DataModel.prototype.revertInfoMap_ = function(infoMap) {
       'action': curStep['action'],
       'stepName': curStep['stepName'],
       'varName': curStep['varName'],
-      'tagName': curStep['tagName']
+      'tagName': curStep['tagName'],
+      'pageName': curStep['pageName']
     };
   }
   for (var elem in infoMap['elems']) {

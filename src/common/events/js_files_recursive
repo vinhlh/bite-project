@@ -12,7 +12,7 @@
  */
 
 
-goog.provide('common.events.Event');
+goog.provide('bite.common.events.DataBearingEvent');
 
 goog.require('goog.events.Event');
 
@@ -26,7 +26,7 @@ goog.require('goog.events.Event');
  * @constructor
  * @export
  */
-common.events.Event = function(type, opt_data) {
+bite.common.events.DataBearingEvent = function(type, opt_data) {
   goog.base(this, type);
 
   /**
@@ -36,7 +36,7 @@ common.events.Event = function(type, opt_data) {
    */
   this.data_ = opt_data || null;
 };
-goog.inherits(common.events.Event, goog.events.Event);
+goog.inherits(bite.common.events.DataBearingEvent, goog.events.Event);
 
 
 /**
@@ -44,7 +44,7 @@ goog.inherits(common.events.Event, goog.events.Event);
  * @return {Object} The data encompassed by the event.
  * @export
  */
-common.events.Event.prototype.getData = function() {
+bite.common.events.DataBearingEvent.prototype.getData = function() {
   return this.data_;
 };
 

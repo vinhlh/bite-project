@@ -13,33 +13,26 @@
 // limitations under the License.
 
 /**
- * @fileoverview Unit tests for common.mvc.Helper.
+ * @fileoverview Unit tests for bite.common.mvc.helper.
  *
  * @author jasonstredwick@google.com (Jason Stredwick)
  */
 
 
-goog.require('common.mvc.Helper');
+goog.require('bite.common.mvc.helper');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.query');
-goog.require('goog.testing.PropertyReplacer');
 
 
-var stubs_ = new goog.testing.PropertyReplacer();
+function setUp() {}
 
 
-function setUp() {
-}
-
-
-function tearDown() {
-  stubs_.reset();
-}
+function tearDown() {}
 
 
 /**
- * Test common.mvc.Helper.bulkGetElementById
+ * Test bite.common.mvc.helper.bulkGetElementById
  */
 function testBulkGetElementById() {
   var body = goog.dom.getDocument().body;
@@ -61,7 +54,7 @@ function testBulkGetElementById() {
   };
 
   // Test find with src element.
-  assertTrue(common.mvc.Helper.bulkGetElementById(obj, body));
+  assertTrue(bite.common.mvc.helper.bulkGetElementById(obj, body));
   assertFalse(goog.isNull(obj.x) || goog.isNull(obj.y) || goog.isNull(obj.z));
 
   obj.x = undefined;
@@ -69,7 +62,7 @@ function testBulkGetElementById() {
   obj.z = undefined;
 
   // Test find without src element.
-  assertTrue(common.mvc.Helper.bulkGetElementById(obj));
+  assertTrue(bite.common.mvc.helper.bulkGetElementById(obj));
   assertFalse(goog.isNull(obj.x) || goog.isNull(obj.y) || goog.isNull(obj.z));
 
   obj.x = undefined;
@@ -78,7 +71,7 @@ function testBulkGetElementById() {
 
   // Test find with missing id.
   obj['a'] = undefined;
-  assertFalse(common.mvc.Helper.bulkGetElementById(obj));
+  assertFalse(bite.common.mvc.helper.bulkGetElementById(obj));
   assertTrue(goog.isNull(obj.a));
 
   // Clean up
@@ -89,7 +82,7 @@ function testBulkGetElementById() {
 
 
 /**
- * Test common.mvc.Helper.getElement.
+ * Test bite.common.mvc.helper.getElement.
  */
 function testGetElement() {
   var body = goog.dom.getDocument().body;
@@ -99,11 +92,11 @@ function testGetElement() {
   x.innerHTML = '<div id="y"><div id="z"></div></div>';
   goog.dom.appendChild(body, x);
 
-  var element = common.mvc.Helper.getElement('y', goog.dom.getDocument());
+  var element = bite.common.mvc.helper.getElement('y', goog.dom.getDocument());
   assertNotNull(element);
   assertEquals('y', element.id);
 
-  element = common.mvc.Helper.getElement('z', x);
+  element = bite.common.mvc.helper.getElement('z', x);
   assertNotNull(element);
   assertEquals('z', element.id);
 
@@ -113,7 +106,7 @@ function testGetElement() {
 
 
 /**
- * Test common.mvc.Helper.initModel
+ * Test bite.common.mvc.helper.initModel
  */
 function testInitModel() {
   var body = goog.dom.getDocument().body;
@@ -124,7 +117,7 @@ function testInitModel() {
 
   var data = [{'name': 'e1'}, {'name': 'e2'}, {'name': 'e3'}];
   for (i = 0, len = data.length; i < len; ++i) {
-    common.mvc.Helper.initModel(modelFunc, data[i]);
+    bite.common.mvc.helper.initModel(modelFunc, data[i]);
   }
 
   var elements = [];
@@ -142,7 +135,7 @@ function testInitModel() {
 
 
 /**
- * Test common.mvc.Helper.initView.
+ * Test bite.common.mvc.helper.initView.
  */
 function testInitView() {
   var func = function(data) {
@@ -154,7 +147,7 @@ function testInitView() {
   var query = goog.dom.query('[id="init-view-test"]');
   assertEquals(0, query.length);
 
-  assertTrue(common.mvc.Helper.initView(func, 'testurl'));
+  assertTrue(bite.common.mvc.helper.initView(func, 'testurl'));
   query = goog.dom.query('[id="init-view-test"]');
   assertEquals(1, query.length);
   assertEquals('testurl', query[0].innerHTML);
@@ -164,7 +157,7 @@ function testInitView() {
   assertEquals(0, query.length);
 
   // Test with no url
-  assertTrue(common.mvc.Helper.initView(func));
+  assertTrue(bite.common.mvc.helper.initView(func));
   query = goog.dom.query('[id="init-view-test"]');
   assertEquals(1, query.length);
   assertEquals('empty', query[0].innerHTML);
@@ -176,14 +169,14 @@ function testInitView() {
 
 
 /**
- * Test common.mvc.Helper.removeElementById
+ * Test bite.common.mvc.helper.removeElementById
  */
 function testRemoveElementById() {
   var body = goog.dom.getDocument().body;
 
   // Remove with no matching id.
   try {
-    common.mvc.Helper.removeElementById('fail');
+    bite.common.mvc.helper.removeElementById('fail');
   } catch (error) {
     fail(error);
   }
@@ -199,7 +192,7 @@ function testRemoveElementById() {
   goog.dom.appendChild(body, x);
   var query = goog.dom.query('[id="x"]');
   assertEquals(1, query.length);
-  common.mvc.Helper.removeElementById('x');
+  bite.common.mvc.helper.removeElementById('x');
   query = goog.dom.query('[id="x"]');
   assertEquals(0, query.length);
 
@@ -209,42 +202,42 @@ function testRemoveElementById() {
   goog.dom.appendChild(body, z);
   var query = goog.dom.query('[id="x"]');
   assertEquals(3, query.length);
-  common.mvc.Helper.removeElementById('x');
+  bite.common.mvc.helper.removeElementById('x');
   query = goog.dom.query('[id="x"]');
   assertEquals(0, query.length);
 }
 
 
 /**
- * Test common.mvc.Helper.validateName
+ * Test bite.common.mvc.helper.validateName
  */
 function testValidateName() {
   var name = '';
   // Test empty string
-  assertFalse(common.mvc.Helper.validateName(name));
+  assertFalse(bite.common.mvc.helper.validateName(name));
 
   // Test bad values
   name = '_';
-  assertFalse(common.mvc.Helper.validateName(name));
+  assertFalse(bite.common.mvc.helper.validateName(name));
   name = '_a';
-  assertFalse(common.mvc.Helper.validateName(name));
+  assertFalse(bite.common.mvc.helper.validateName(name));
   name = '1';
-  assertFalse(common.mvc.Helper.validateName(name));
+  assertFalse(bite.common.mvc.helper.validateName(name));
   name = '1a';
-  assertFalse(common.mvc.Helper.validateName(name));
+  assertFalse(bite.common.mvc.helper.validateName(name));
   name = 'a b';
-  assertFalse(common.mvc.Helper.validateName(name));
+  assertFalse(bite.common.mvc.helper.validateName(name));
   name = 'a.txt';
-  assertFalse(common.mvc.Helper.validateName(name));
+  assertFalse(bite.common.mvc.helper.validateName(name));
 
   // Test valid values
   name = 'a';
-  assertTrue(common.mvc.Helper.validateName(name));
+  assertTrue(bite.common.mvc.helper.validateName(name));
   name = 'a1_';
-  assertTrue(common.mvc.Helper.validateName(name));
+  assertTrue(bite.common.mvc.helper.validateName(name));
   name = 'a_1';
-  assertTrue(common.mvc.Helper.validateName(name));
+  assertTrue(bite.common.mvc.helper.validateName(name));
   name = 'very_long_name';
-  assertTrue(common.mvc.Helper.validateName(name));
+  assertTrue(bite.common.mvc.helper.validateName(name));
 }
 

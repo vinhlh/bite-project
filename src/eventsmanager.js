@@ -137,18 +137,18 @@ rpf.EventsManager = function() {
   this.automator_ = null;
 
   /**
+   * The rpf automator for worker manager which automates rpf actions.
+   * @type {rpf.Automator}
+   * @private
+   */
+  this.workerAutomator_ = null;
+
+  /**
    * The manager for running multiple tests.
    * @type {rpf.WorkerManager}
    * @private
    */
   this.workerMgr_ = null;
-
-  /**
-   * The event target that listens and dispatches action completion events.
-   * @type {goog.events.EventTarget}
-   * @private
-   */
-  this.eventCompleteTarget_ = new goog.events.EventTarget();
 
   //These are necessary because goog.bind() returns a different
   // function each time.  As a result, when you try to do
@@ -375,12 +375,16 @@ rpf.EventsManager.prototype.setupCommonFuncs = function(
   this.automator_ = new rpf.Automator(
       goog.bind(this.sendMessageToConsole_, this),
       this.boundOnMessageFunc,
-      rpfListener,
-      this.eventCompleteTarget_);
+      rpfListener);
+
+  this.workerAutomator_ = new rpf.Automator(
+      goog.bind(this.sendMessageToConsole_, this),
+      this.boundOnMessageFunc,
+      rpfListener);
 
   this.workerMgr_ = new rpf.WorkerManager(
       this.playbackMgr_,
-      this.automator_,
+      this.workerAutomator_,
       this.logger_,
       this.boundOnMessageFunc,
       goog.bind(this.sendMessageToConsole_, this));
@@ -628,7 +632,7 @@ rpf.EventsManager.prototype.sendMessageToContent_ = function(
  * Writes a command to console.
  * @param {function(Array, string, rpf.CodeGenerator.DomTags,
  *     rpf.CodeGenerator.RecordActions, string, string, boolean=, Object=,
- *     Array=)}
+ *     Array=, string=)}
  *     generateCmd The function to generate the command.
  * @param {Array} selectors The element css selectors.
  * @param {string} content The input content.
@@ -641,16 +645,17 @@ rpf.EventsManager.prototype.sendMessageToContent_ = function(
  *     Console UI.
  * @param {Object=} opt_iframeInfo The iframe info where the element was from.
  * @param {Array=} opt_xpaths The optional xpath array.
- * @param {string} opt_mode The optional mode string.
+ * @param {string=} opt_mode The optional mode string.
+ * @param {string=} opt_className The class name for the action.
  * @export
  */
 rpf.EventsManager.prototype.writeUserActionToConsole = function(
     generateCmd, selectors, content, nodeType, action,
     descriptor, elemVarName, opt_index, opt_noConsole, opt_iframeInfo,
-    opt_xpaths, opt_mode) {
+    opt_xpaths, opt_mode, opt_className) {
   var cmdInfo = generateCmd(
       selectors, content, nodeType, action, descriptor,
-      elemVarName, opt_noConsole, opt_iframeInfo, opt_xpaths);
+      elemVarName, opt_noConsole, opt_iframeInfo, opt_xpaths, opt_className);
 
   if (action == rpf.CodeGenerator.RecordActions.VERIFY &&
       opt_mode == 'updater') {
@@ -852,7 +857,8 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
       noConsole,
       iframeInfo,
       xpaths,
-      request['mode']), delayTime);
+      request['mode'],
+      request['className']), delayTime);
 };
 
 
@@ -929,74 +935,138 @@ rpf.EventsManager.prototype.callBackOnRequest = function(
  * @param {Object} params The parameters map.
  */
 rpf.EventsManager.prototype.automateRpf = function(params) {
-  if (params['testName'] && params['stepId'] &&
-      params['project'] && params['path']) {
-    var stepArr = [];
-    var temp = this.automator_.getStepObject(
-        Bite.Constants.ListenerDestination.RPF,
-        Bite.Constants.CONTROL_CMDS.CREATE_WINDOW,
-        {'refresh': true},
-        Bite.Constants.COMPLETED_EVENT_TYPES.RPF_CONSOLE_OPENED);
-    stepArr.push(temp);
+  switch (params['command']) {
+    case Bite.Constants.RPF_AUTOMATION.LOAD_AND_RUN_FROM_LOCAL:
+      var stepArr = [];
+      var temp = this.automator_.getStepObject(
+          Bite.Constants.ListenerDestination.RPF,
+          Bite.Constants.CONTROL_CMDS.CREATE_WINDOW,
+          {'refresh': true},
+          Bite.Constants.COMPLETED_EVENT_TYPES.RPF_CONSOLE_OPENED);
+      stepArr.push(temp);
 
-    temp = this.automator_.getStepObject(
-        Bite.Constants.ListenerDestination.EVENT_MANAGER,
-        Bite.Constants.CONSOLE_CMDS.LOAD_PROJECT_FROM_LOCAL_SERVER,
-        {'path': params['path']},
-        Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_SAVED_LOCALLY);
-    stepArr.push(temp);
-
-    temp = this.automator_.getStepObject(
-        Bite.Constants.ListenerDestination.CONSOLE,
-        Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_TEST,
-        {'project': params['project'],
-         'test': params['testName'],
-         'isWeb': false},
-        Bite.Constants.COMPLETED_EVENT_TYPES.TEST_LOADED);
-    stepArr.push(temp);
-
-    temp = this.automator_.getStepObject(
-        Bite.Constants.ListenerDestination.CONSOLE,
-        Bite.Constants.UiCmds.AUTOMATE_DIALOG_SAVE_TEST,
-        {'project': params['project'],
-         'isWeb': false},
-        Bite.Constants.COMPLETED_EVENT_TYPES.AUTOMATE_SAVE_DIALOG);
-    stepArr.push(temp);
-
-    temp = this.automator_.getStepObject(
-        Bite.Constants.ListenerDestination.CONSOLE,
-        Bite.Constants.UiCmds.AUTOMATE_EXPORT_DIALOG_LOAD_PROJECT,
-        {'project': params['project'],
-         'isWeb': false},
-        Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED_IN_EXPORT);
-    stepArr.push(temp);
-
-    if (params['autoPlay']) {
-      // Automatically playback the loaded script.
       temp = this.automator_.getStepObject(
-          Bite.Constants.ListenerDestination.CONSOLE,
-          Bite.Constants.UiCmds.SHOW_PLAYBACK_RUNTIME,
-          {},
-          Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_DIALOG_OPENED);
+          Bite.Constants.ListenerDestination.EVENT_MANAGER,
+          Bite.Constants.CONSOLE_CMDS.LOAD_PROJECT_FROM_LOCAL_SERVER,
+          {'path': params['path']},
+          Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_SAVED_LOCALLY);
       stepArr.push(temp);
 
       temp = this.automator_.getStepObject(
           Bite.Constants.ListenerDestination.CONSOLE,
-          Bite.Constants.UiCmds.SET_PLAYBACK_ALL,
-          {},
-          Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_STARTED);
+          Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_TEST,
+          {'project': params['project'],
+           'test': params['testName'],
+           'isWeb': false},
+          Bite.Constants.COMPLETED_EVENT_TYPES.TEST_LOADED);
       stepArr.push(temp);
-    } else {
-      // Highlights on a step and wait for updates.
+
       temp = this.automator_.getStepObject(
           Bite.Constants.ListenerDestination.CONSOLE,
-          Bite.Constants.UiCmds.HIGHLIGHT_LINE,
-          {'testName': params['testName'], 'stepId': params['stepId']},
-          Bite.Constants.COMPLETED_EVENT_TYPES.HIGHLIGHTED_LINE);
+          Bite.Constants.UiCmds.AUTOMATE_DIALOG_SAVE_TEST,
+          {'project': params['project'],
+           'isWeb': false},
+          Bite.Constants.COMPLETED_EVENT_TYPES.AUTOMATE_SAVE_DIALOG);
       stepArr.push(temp);
-    }
-    this.automator_.start(stepArr);
+
+      temp = this.automator_.getStepObject(
+          Bite.Constants.ListenerDestination.CONSOLE,
+          Bite.Constants.UiCmds.AUTOMATE_EXPORT_DIALOG_LOAD_PROJECT,
+          {'project': params['project'],
+           'isWeb': false},
+          Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED_IN_EXPORT);
+      stepArr.push(temp);
+
+      if (params['autoPlay']) {
+        // Automatically playback the loaded script.
+        temp = this.automator_.getStepObject(
+            Bite.Constants.ListenerDestination.CONSOLE,
+            Bite.Constants.UiCmds.SHOW_PLAYBACK_RUNTIME,
+            {},
+            Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_DIALOG_OPENED);
+        stepArr.push(temp);
+
+        temp = this.automator_.getStepObject(
+            Bite.Constants.ListenerDestination.CONSOLE,
+            Bite.Constants.UiCmds.SET_PLAYBACK_ALL,
+            {},
+            Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_STARTED);
+        stepArr.push(temp);
+      } else {
+        // Highlights on a step and wait for updates.
+        temp = this.automator_.getStepObject(
+            Bite.Constants.ListenerDestination.CONSOLE,
+            Bite.Constants.UiCmds.HIGHLIGHT_LINE,
+            {'testName': params['testName'], 'stepId': params['stepId']},
+            Bite.Constants.COMPLETED_EVENT_TYPES.HIGHLIGHTED_LINE);
+        stepArr.push(temp);
+      }
+      this.automator_.start(stepArr);
+      break;
+    case Bite.Constants.RPF_AUTOMATION.PLAYBACK_MULTIPLE:
+      // Assume all of the tests are from the same project for now.
+      // This will no longer be true once we open suite creation to users.
+      var testInfo = {};
+      for (var name in params['data']) {
+        testInfo = params['data'][name];
+      }
+      testInfo = goog.json.parse(testInfo);
+      this.startAutoPlayMultipleTests_(
+          testInfo['projectName'], testInfo['testLocation'], params['data']);
+      //this.automator_.start(stepArray, opt_callback);
+      break;
   }
+};
+
+
+/**
+ * Start the automation to playback multiple tests.
+ * @param {string} project The project name.
+ * @param {string} location Where the project comes from.
+ * @param {Object} testInfo The tests info.
+ */
+rpf.EventsManager.prototype.startAutoPlayMultipleTests_ = function(
+    project, location, testInfo) {
+  var stepArr = [];
+  var temp = this.automator_.getStepObject(
+      Bite.Constants.ListenerDestination.RPF,
+      Bite.Constants.CONTROL_CMDS.CREATE_WINDOW,
+      {'refresh': true},
+      Bite.Constants.COMPLETED_EVENT_TYPES.RPF_CONSOLE_OPENED);
+  stepArr.push(temp);
+
+  temp = this.automator_.getStepObject(
+      Bite.Constants.ListenerDestination.EVENT_MANAGER,
+      Bite.Constants.CONSOLE_CMDS.STOP_GROUP_TESTS,
+      {},
+      Bite.Constants.COMPLETED_EVENT_TYPES.STOPPED_GROUP_TESTS);
+  stepArr.push(temp);
+
+  temp = this.automator_.getStepObject(
+      Bite.Constants.ListenerDestination.CONSOLE,
+      Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_PROJECT,
+      {'project': project,
+       'isWeb': location == 'web'},
+      Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED);
+  stepArr.push(temp);
+
+  temp = this.automator_.getStepObject(
+      Bite.Constants.ListenerDestination.CONSOLE,
+      Bite.Constants.UiCmds.AUTOMATE_PLAY_MULTIPLE_TESTS,
+      {'testInfo': testInfo},
+      Bite.Constants.COMPLETED_EVENT_TYPES.RUN_PLAYBACK_STARTED);
+  stepArr.push(temp);
+  this.automator_.start(stepArr);
+};
+
+
+/**
+ * Dispatches the given event.
+ * @param {Bite.Constants.COMPLETED_EVENT_TYPES} eventType The event type.
+ */
+rpf.EventsManager.prototype.dispatchEventOnAutomator_ = function(eventType) {
+  this.automator_.getEventTarget().dispatchEvent(eventType);
+  this.workerAutomator_.getEventTarget().dispatchEvent(eventType);
 };
 
 
@@ -1014,7 +1084,7 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
   var params = request['params'];
   switch (request['command']) {
     case Bite.Constants.CONSOLE_CMDS.EVENT_COMPLETED:
-      this.eventCompleteTarget_.dispatchEvent(params['eventType']);
+      this.dispatchEventOnAutomator_(params['eventType']);
       break;
     case Bite.Constants.CONSOLE_CMDS.AUTOMATE_RPF:
       this.automateRpf(params);
@@ -1168,7 +1238,9 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['infoMap'],
           params['continueOnFailure'],
           params['testName'],
-          params['testId']);
+          params['testId'],
+          params['projectName'],
+          params['testLocation']);
       sendResponse({'isPrepDone': this.playbackMgr_.isPreparationDone()});
       break;
     case Bite.Constants.CONSOLE_CMDS.INSERT_CMDS_WHILE_PLAYBACK:
@@ -1177,7 +1249,8 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['data']);
       break;
     case Bite.Constants.CONSOLE_CMDS.START_RECORDING:
-      this.recordMgr_.startRecording(params['url'], params['noConsole']);
+      this.recordMgr_.startRecording(
+          params['url'], params['noConsole'], params['info']);
       break;
     case Bite.Constants.CONSOLE_CMDS.SET_TAB_AND_START_RECORDING:
       this.recordMgr_.setRecordingTab(sender.tab.id, sender.tab.windowId);
@@ -1225,10 +1298,12 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
       break;
     case Bite.Constants.CONSOLE_CMDS.RUN_GROUP_TESTS:
       this.workerMgr_.runGroupTests(params['testNames'], params['tests'],
-                                    params['runName']);
+                                    params['runName'], params['location']);
       break;
     case Bite.Constants.CONSOLE_CMDS.STOP_GROUP_TESTS:
       this.workerMgr_.stopGroupTests();
+      this.dispatchEventOnAutomator_(
+          Bite.Constants.COMPLETED_EVENT_TYPES.STOPPED_GROUP_TESTS);
       break;
     case Bite.Constants.CONSOLE_CMDS.GENERATE_NEW_COMMAND:
       var scriptInfo = this.codeGen_.generateScriptAndDataFileForCmd(

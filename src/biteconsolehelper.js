@@ -97,7 +97,7 @@ bite.console.Helper.assignInfoMap = function(infoMap, cmdMap) {
     'stepName': cmdMap['id'],
     'tagName': cmdMap['tagName'],
     'comments': '',
-    'pageName': '',
+    'pageName': cmdMap['className'],
     'returnPageName': '',
     'url': ''
   };

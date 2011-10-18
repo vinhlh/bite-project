@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- * @fileoverview The Basic class defines a type of log class to store and
+ * @fileoverview The Simple class defines a type of log class to store and
  * retrieve units of information in string form.  Each new entry is assigned a
  * timestamp and stored in order.  Internally a queue exists where new entries
  * enter one side and old entries drop off the other, but only when the maximum
@@ -21,7 +21,7 @@
  * information from a iterator-like function to allowing listeners to register
  * and be signalled whenever a new entry is logged.
  *
- * The purpose of the Basic log class is to provide a method of recording
+ * The purpose of the Simple log class is to provide a method of recording
  * information without specifying an output source.  Other JavaScript code can
  * then tap into the log to retrieve information and output it to the
  * appropriate location.
@@ -31,7 +31,7 @@
  * correct namespace.
  *
  * Public Interface:
- *   bite.common.log.Basic(opt_maxEntries) (constructor) - Constructs a Basic
+ *   bite.common.log.Simple(opt_maxEntries) (constructor) - Constructs a Simple
  *       log object.  See the file overview for more details.
  *
  *   add(string) - Add a new entry (string) to the log.
@@ -55,10 +55,10 @@
  *       oldest to newest.
  *
  * Usage:
- *   var keyName = common.log.Basic.KeyName;
+ *   var keyName = bite.common.log.Simple.KeyName;
  *   var callback = function(entry) { console.log(entry[keyName.VALUE]); }
  *
- *   var log = new common.log.Basic();
+ *   var log = new bite.common.log.Simple();
  *
  *   log.addListener(callback);
  *   log.add('entry1'); // Console will display 'entry1' due to callback.
@@ -77,20 +77,20 @@
  */
 
 
-goog.provide('common.log.Basic');
+goog.provide('bite.common.log.Simple');
 
-goog.require('common.events.Signal');
+goog.require('bite.common.signal.Simple');
 goog.require('goog.date.Date');
 
 
 
 /**
- * Constructs a new Basic log object that can store strings with a timestamp.
+ * Constructs a new Simple log object that can store strings with a timestamp.
  * @param {number=} opt_maxEntries The number of entries the log can store
  *     before entries are dropped.
  * @constructor
  */
-common.log.Basic = function(opt_maxEntries) {
+bite.common.log.Simple = function(opt_maxEntries) {
   /**
    * The maximum number of entries the log can hold before it will start
    * dropping old entries.
@@ -98,11 +98,11 @@ common.log.Basic = function(opt_maxEntries) {
    * @private
    */
   this.maxEntries_ = opt_maxEntries && opt_maxEntries > 0 ? opt_maxEntries :
-      common.log.Basic.DEFAULT_MAX_ENTRIES;
+      bite.common.log.Simple.DEFAULT_MAX_ENTRIES;
 
   /**
    * An array of entries.
-   * @type {!Array.<!common.log.Basic.Entry>}
+   * @type {!Array.<!bite.common.log.Simple.Entry>}
    * @private
    */
   this.entries_ = [];
@@ -110,10 +110,10 @@ common.log.Basic = function(opt_maxEntries) {
   /**
    * A signal object used to track those who want to listen to the log as it
    * is created and signal when it has changed.
-   * @type {common.events.Signal}
+   * @type {bite.common.signal.Simple}
    * @private
    */
-  this.signal_ = new common.events.Signal();
+  this.signal_ = new bite.common.signal.Simple();
 };
 
 
@@ -122,21 +122,21 @@ common.log.Basic = function(opt_maxEntries) {
  * entry will be explicit strings for uses external to this code.
  * @typedef {{timestamp: number, value: string}}
  */
-common.log.Basic.Entry;
+bite.common.log.Simple.Entry;
 
 
 /**
  * The default maximum number of entries the log can contain.
  * @type {number}
  */
-common.log.Basic.DEFAULT_MAX_ENTRIES = 10000;
+bite.common.log.Simple.DEFAULT_MAX_ENTRIES = 10000;
 
 
 /**
  * Key names for the entry object.
  * @enum {string}
  */
-common.log.Basic.KeyName = {
+bite.common.log.Simple.KeyName = {
   TIMESTAMP: 'timestamp',
   VALUE: 'value'
 };
@@ -147,7 +147,7 @@ common.log.Basic.KeyName = {
  * Date.getTime.
  * @param {string} value The string to log.
  */
-common.log.Basic.prototype.add = function(value) {
+bite.common.log.Simple.prototype.add = function(value) {
   var time;
   try {
     time = new goog.date.Date().getTime();
@@ -162,8 +162,8 @@ common.log.Basic.prototype.add = function(value) {
 
   // Preserve the key names for external use.
   var entry = {};
-  entry[common.log.Basic.KeyName.TIMESTAMP] = time;
-  entry[common.log.Basic.KeyName.VALUE] = value;
+  entry[bite.common.log.Simple.KeyName.TIMESTAMP] = time;
+  entry[bite.common.log.Simple.KeyName.VALUE] = value;
 
   this.entries_.push(entry);
 
@@ -173,12 +173,12 @@ common.log.Basic.prototype.add = function(value) {
 
 
 /**
- * Adds a callback to the log's common.events.Signal object, which will be
+ * Adds a callback to the log's bite.common.signal.Simple object, which will be
  * fired when a new entry is added.
- * @param {function(!common.log.Basic.Entry)} callback The callback to be
+ * @param {function(!bite.common.log.Simple.Entry)} callback The callback to be
  *     fired.
  */
-common.log.Basic.prototype.addListener = function(callback) {
+bite.common.log.Simple.prototype.addListener = function(callback) {
   this.signal_.addListener(callback);
 };
 
@@ -186,7 +186,7 @@ common.log.Basic.prototype.addListener = function(callback) {
 /**
  * Clear the log.
  */
-common.log.Basic.prototype.clear = function() {
+bite.common.log.Simple.prototype.clear = function() {
   this.entries_ = [];
 };
 
@@ -198,11 +198,11 @@ common.log.Basic.prototype.clear = function() {
  * @param {number} index The index to start with.
  * @param {number} delta How many entries to move forward when the iterator is
  *     called.
- * @return {function(): common.log.Basic.Entry} A function that acts like an
- *     iterator over the log.
+ * @return {function(): bite.common.log.Simple.Entry} A function that acts like
+ *     an iterator over the log.
  * @private
  */
-common.log.Basic.prototype.getIterFunc_ = function(index, delta) {
+bite.common.log.Simple.prototype.getIterFunc_ = function(index, delta) {
   var iter = goog.partial(function(entries) {
     if (index < 0 || index >= entries.length) {
       index = -1;
@@ -224,10 +224,10 @@ common.log.Basic.prototype.getIterFunc_ = function(index, delta) {
  * reached the function will start returning null.  If changes to the state of
  * the log occur while this function exists then it can alter its behavior
  * though it will never recover once the end of the list is reached.
- * @return {function(): common.log.Basic.Entry} A function that acts like an
- *     iterator over the log from newest to oldest.
+ * @return {function(): bite.common.log.Simple.Entry} A function that acts like
+ *     an iterator over the log from newest to oldest.
  */
-common.log.Basic.prototype.getIterNewToOld = function() {
+bite.common.log.Simple.prototype.getIterNewToOld = function() {
   return this.getIterFunc_(this.entries_.length - 1, -1);
 };
 
@@ -238,10 +238,10 @@ common.log.Basic.prototype.getIterNewToOld = function() {
  * reached the function will start returning null.  If changes to the state of
  * the log occur while this function exists then it can alter its behavior
  * though it will never recover once the end of the list is reached.
- * @return {function(): common.log.Basic.Entry} A function that acts like an
- *     iterator over the log from oldest to newest.
+ * @return {function(): bite.common.log.Simple.Entry} A function that acts like
+ *     an iterator over the log from oldest to newest.
  */
-common.log.Basic.prototype.getIterOldToNew = function() {
+bite.common.log.Simple.prototype.getIterOldToNew = function() {
   return this.getIterFunc_(0, 1);
 };
 
@@ -250,17 +250,17 @@ common.log.Basic.prototype.getIterOldToNew = function() {
  * Returns the maximum number of entries that can be recorded.
  * @return {number} The max number of entries.
  */
-common.log.Basic.prototype.getMaxEntries = function() {
+bite.common.log.Simple.prototype.getMaxEntries = function() {
   return this.maxEntries_;
 };
 
 
 /**
  * Returns the newest entry in the list or null if there are no entries.
- * @return {?common.log.Basic.Entry} The newest entry or null if there
+ * @return {?bite.common.log.Simple.Entry} The newest entry or null if there
  *     are no entries.
  */
-common.log.Basic.prototype.getNewestEntry = function() {
+bite.common.log.Simple.prototype.getNewestEntry = function() {
   if (this.entries_.length == 0) {
     return null;
   }
@@ -271,21 +271,21 @@ common.log.Basic.prototype.getNewestEntry = function() {
 
 /**
  * Determine if the given callback is listeneing.
- * @param {function(!common.log.Basic.Entry)} callback The callback to be
+ * @param {function(!bite.common.log.Simple.Entry)} callback The callback to be
  *     fired.
  * @return {boolean} Whether or not the callback is listening.
  */
-common.log.Basic.prototype.hasListener = function(callback) {
+bite.common.log.Simple.prototype.hasListener = function(callback) {
   return this.signal_.hasListener(callback);
 };
 
 
 /**
- * Removes a callback from the log's common.events.Signal object.
- * @param {function(!common.log.Basic.Entry)} callback The callback to be
+ * Removes a callback from the log's bite.common.signal.Simple object.
+ * @param {function(!bite.common.log.Simple.Entry)} callback The callback to be
  *     fired.
  */
-common.log.Basic.prototype.removeListener = function(callback) {
+bite.common.log.Simple.prototype.removeListener = function(callback) {
   this.signal_.removeListener(callback);
 };
 
@@ -298,7 +298,7 @@ common.log.Basic.prototype.removeListener = function(callback) {
  * maximum.
  * @param {number} newMax The new maximum number of entries to allow.
  */
-common.log.Basic.prototype.setMaxEntries = function(newMax) {
+bite.common.log.Simple.prototype.setMaxEntries = function(newMax) {
   if (newMax <= 0 || newMax == this.maxEntries_) {
     return;
   }

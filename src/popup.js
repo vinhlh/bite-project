@@ -10,9 +10,9 @@ goog.provide('bite.Popup');
 goog.require('Bite.Constants');
 goog.require('bite.client.Templates.popup');
 goog.require('bite.client.messages');
+goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
-goog.require('common.net.Xhr.async');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.json');
@@ -190,7 +190,7 @@ bite.Popup.prototype.init = function(opt_initCallback) {
  */
 bite.Popup.prototype.initData_ = function(callback) {
   var url = chrome.extension.getURL('manifest.json');
-  common.net.Xhr.async.get(url,
+  bite.common.net.xhr.async.get(url,
       goog.bind(this.initDataComplete_, this, callback));
 };
 

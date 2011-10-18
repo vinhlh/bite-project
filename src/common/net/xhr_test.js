@@ -13,13 +13,13 @@
 // limitations under the License.
 
 /**
- * @fileoverview Unit tests for common.net.Xhr.
+ * @fileoverview Unit tests for bite.common.net.xhr.
  *
  * @author jasonstredwick@google.com (Jason Stredwick)
  */
 
 
-goog.require('common.net.Xhr');
+goog.require('bite.common.net.xhr');
 goog.require('goog.testing.PropertyReplacer');
 
 
@@ -42,7 +42,7 @@ var failEvent = {
  * A string represent the error message sent back by the fail event.
  * @type {string}
  */
-var FAIL_MESSAGE = failEvent.target.getLastErrorCode() + ': ' +
+var FAIL_MESSAGE = '[' + failEvent.target.getLastErrorCode() + '] ' +
                    failEvent.target.getLastError();
 
 
@@ -129,10 +129,10 @@ function testResponse() {
   var response = SUCCESS_MESSAGE;
 
   var callback = goog.partial(validate, 'AsyncGet' + msg, true, response);
-  common.net.Xhr.async.get(url, callback);
+  bite.common.net.xhr.async.get(url, callback);
 
   callback = goog.partial(validate, 'AsyncPost' + msg, true, response);
-  common.net.Xhr.async.post(url, data, callback);
+  bite.common.net.xhr.async.post(url, data, callback);
 }
 
 
@@ -146,13 +146,13 @@ function testNoCallback() {
   var errorMsg = ' failed when optional callback was not supplied: ';
 
   try {
-    common.net.Xhr.async.get(url);
+    bite.common.net.xhr.async.get(url);
   } catch (error) {
     fail(msg + 'AsyncGet' + errorMsg + error);
   }
 
   try {
-    common.net.Xhr.async.post(url, data);
+    bite.common.net.xhr.async.post(url, data);
   } catch (error) {
     fail(msg + 'AsyncPost' + errorMsg + error);
   }
@@ -169,10 +169,10 @@ function testRequestFailedException() {
   var data = '';
 
   var callback = goog.partial(validate, 'AsyncGet' + msg, false, FAIL_MESSAGE);
-  common.net.Xhr.async.get(url, callback);
+  bite.common.net.xhr.async.get(url, callback);
 
   callback = goog.partial(validate, 'AsyncPost' + msg, false, FAIL_MESSAGE);
-  common.net.Xhr.async.post(url, data, callback);
+  bite.common.net.xhr.async.post(url, data, callback);
 }
 
 
@@ -186,11 +186,11 @@ function testMissingUrl() {
   var data = '';
 
   var callback = goog.partial(validate, 'AsyncGet' + msg, false,
-                              common.net.Xhr.ErrorMessage_.MISSING_URL);
-  common.net.Xhr.async.get(url, callback);
+                              bite.common.net.xhr.ErrorMessage_.MISSING_URL);
+  bite.common.net.xhr.async.get(url, callback);
 
   callback = goog.partial(validate, 'AsyncPost' + msg, false,
-                          common.net.Xhr.ErrorMessage_.MISSING_URL);
-  common.net.Xhr.async.post(url, data, callback);
+                          bite.common.net.xhr.ErrorMessage_.MISSING_URL);
+  bite.common.net.xhr.async.post(url, data, callback);
 }
 

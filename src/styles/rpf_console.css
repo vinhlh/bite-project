@@ -5,48 +5,84 @@
  * @author jasonstredwick@google.com (Jason Stredwick)
  */
 
+/** Reset css. */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
 
-/* ACE requires that the editor container have a specified height and width. 
- * TODO(ralphj): Deal with resizing the window. */
+body,body input,body button,body td {
+  font-family: /*"Open Sans",*/"Arial", "Helvetica", sans-serif;
+  color: #222;
+  font-size:13px;
+}
+
+/** End reset css. */
+
+/** Prevent odd scroll bars. */
+body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* ACE requires that the editor container have a specified height and width. */
 #scriptsContainer {
   background: white;
   font-size: 14px;
-  height: 590px;
-  width: 466px;
-  position: relative;
+  height: 648px;
   overflow: hidden;
+  position: relative;
+  width: 498px;
 }
 
 /** Styles for the ACE gutter. */
 .ace_rpf-gutter-running {
-  background-image: url("imgs/rpf/running-arrow.png");
+  background-image: url("../imgs/rpf/running-arrow.png");
   background-repeat: no-repeat;
   background-position: 4px center;
 }
 
 .ace_rpf-gutter-passing {
-  background-image: url("imgs/rpf/step-passed-16.png");
+  background-image: url("../imgs/rpf/step-passed-16.png");
   background-repeat: no-repeat;
   background-position: 4px center;
 }
 
 .ace_rpf-gutter-failing {
-  background-image: url("imgs/rpf/step-issue-16.png");
+  background-image: url("../imgs/rpf/step-issue-16.png");
   background-repeat: no-repeat;
   background-position: 4px center;
 }
 
+/** ACE scrollbar. */
 .ace_editor ::-webkit-scrollbar {
   background: transparent;
-  height: 10px;
+  /* The ACE editor expects a scrollbar of width 15px. */
+  height: 15px;
   overflow: visible;
-  width: 10px;
+  width: 15px;
 }
 
 .ace_editor ::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(0, 0, 0, 0.3);
-  -webkit-border-radius: 5px;
+  background-color: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 7px;
+}
+
+.ace-editor ::-webkit-scrollbar-thumb:hover {
+  background-color: rbga(0, 0, 0, 0.3);
 }
 
 .ace_editor ::-webkit-scrollbar-button {
@@ -54,9 +90,319 @@
 }
 
 .ace_editor ::-webkit-scrollbar-track {
+  background: #eee;
   border: 0;
 }
 
+/** Styles for the More Info box. */
+#moreInfoHeader {
+  background: #eef;
+  cursor: pointer;
+  height: 15px;
+  text-align: center;
+}
+
+#moreInfoDiv {
+  background: #eef;
+  display: none;
+  -webkit-box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid #C0C0FF;
+  box-shadow: 0px 3px 3px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  z-index: 999;
+}
+
+#moreInfoDiv span {
+  display: block;
+  float: left;
+}
+
+/** General styles for the container. */
+.rpf-container {
+}
+
+.rpf-footer {
+  background: whiteSmoke;
+  border-top: 1px solid #ccc;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 3px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.rpf-footer img {
+  float: left;
+  padding: 7px;
+}
+
+#statusLog {
+  padding: 3px;
+}
+
+/** Styles for forms */
+form td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+form legend {
+  font-weight: bold;
+}
+
+form div {
+  padding: 2px;
+}
+
+form ul {
+  list-style-type: none;
+}
+
+ul label {
+  display: inline-block;
+  font-weight: normal;
+  min-width: 150px;
+  padding: 4px;
+}
+
+select {
+  background-color: #ddd;
+  height: 23px;
+  margin: 0;
+}
+
+.rpf-textarea-container {
+  padding: 4px;
+}
+
+textarea {
+  background: #fff;
+  border: 1px solid transparent;
+  width: 100%;
+}
+
+textarea:focus {
+  border: 1px solid #4d90fe;
+  outline: 0;
+}
+
+input[type=text] {
+  border: 1px solid #d9d9d9;
+  border-top: 1px solid silver;
+  display: inline-block;
+  -webkit-border-radius: 1px;
+  -moz-border-radius: 1px;
+  border-radius: 1px;
+  color: #333;
+  padding-left: 8px;
+}
+
+form input[type=text] {
+  width: 100%;
+}
+
+input:focus {
+  border: 1px solid #4d90fe;
+  outline: 0;
+}
+
+/** Dialog box styles. */
+/* modal-dialog-* are overrides for goog.ui display defaults. */
+.modal-dialog {
+  border: 1px solid #666;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  color: #000;
+  position: absolute;
+  left: 0;
+  right: 0;
+  max-height: 80%;
+  overflow: hidden;
+  z-index: 2002;
+}
+
+.modal-dialog a,
+.modal-dialog a:link,
+.modal-dialog a:visited  {
+  color: #06c;
+  cursor: pointer;
+}
+
+.modal-dialog-bg {
+  background: #666;
+  left: 0;
+  position: absolute;
+  top: 0;
+  z-index: 1000;
+}
+
+.modal-dialog-title {
+  background: whiteSmoke;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+  cursor: pointer;
+  font-size: 120%;
+  font-weight: bold;
+  /* Add padding on the right to ensure the close button has room. */
+  padding: 8px 31px 8px 8px;
+  position: relative;
+}
+
+.modal-dialog-title-close:before {
+  content: '\2715';
+}
+
+.modal-dialog-title-close {
+  color: #666;
+  cursor: default;
+  height: 15px;
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  width: 15px;
+  vertical-align: middle;
+}
+
+.modal-dialog-title-close:hover {
+  color: black;
+}
+
+.modal-dialog-buttons,
+.modal-dialog-content {
+  background-color: #fff;
+  padding: 8px;
+}
+
+.modal-dialog-content {
+  overflow: auto;
+}
+
+/** Closure style overrides. We do not import any of the closure css. */
+.goog-inline-block {
+  display: inline-block;
+  position: relative;
+}
+
+.goog-menu {
+  background: #fff;
+  border-color: #ccc #666 #666 #ccc;
+  border-style: solid;
+  border-width: 1px;
+  cursor: default;
+  font: normal 13px Arial, sans-serif;
+  margin: 0;
+  outline: none;
+  padding: 4px 0;
+  position: absolute;
+  z-index: 20000; /* Arbitrary, but some apps depend on it... */
+}
+
+.goog-menuitem {
+  color: #000;
+  list-style: none;
+  margin: 0;
+  /* 28px on the left for icon or checkbox; 7em on the right for shortcut. */
+  padding: 4px 7em 4px 28px;
+  white-space: nowrap;
+}
+
+.goog-menuitem-highlight,
+.goog-menuitem-hover {
+  background-color: #d6e9f8;
+  border-color: #d6e9f8;
+  border-style: dotted;
+  border-width: 1px 0;
+  padding-bottom: 3px;
+  padding-top: 3px;
+}
+
+.goog-toolbar {
+  background: #fafafa;
+  border-bottom: 1px solid #d5d5d5;
+  padding: 2px;
+}
+
+.goog-toolbar-button,
+.goog-custom-button,
+.goog-toolbar-menu-button {
+  border: 1px solid transparent;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: px;
+  color: #333;
+  font-size: 11px;
+  font-weight: bold;
+  list-style: none;
+  padding: 2px;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.goog-toolbar-button-hover {
+  border: 1px solid #c6c6c6;
+}
+
+.goog-toolbar-separator {
+  margin: 0 2px;
+  border-left: 1px solid #d6d6d6;
+  border-right: 1px solid #f7f7f7;
+  padding: 0;
+  width: 0;
+  text-decoration: none;
+  list-style: none;
+  outline: none;
+  vertical-align: middle;
+  line-height: normal;
+  font-size: 120%;
+  overflow: hidden;
+}
+
+.goog-toolbar-menu-button,
+.goog-custom-button {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: whiteSmoke;
+  height: 20px;
+  line-height: 20px;
+  padding: 2px 6px;
+  margin: 0 5px;
+}
+
+.goog-toolbar-menu-button:hover,
+.goog-custom-button:hover {
+  border: 1px solid #c6c6c6;
+  color: #222;
+  backgorund-color: #f8f8f8;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.goog-toolbar-menu-button-dropdown {
+  background: url('../imgs/rpf/downbtn.png');
+  background-position: center;
+  padding: 0 3px;
+  width: 7px;
+}
+
+/** Specific styles. */
+
+.centered-div {
+  text-align: center;
+}
+
+.rpf-left-panel {
+  float: left;
+}
+
+#stopAllTests {
+  float: right;
+}
+
+.rpf-right-panel {
+  text-align: center;
+}
+
+/* TODO(ralphj): Determine what below is used. */
 .console-save-dialog-local-div {
   width: 47%;
   float: left;
@@ -244,5 +590,62 @@
                   color-stop(0.3, rgb(105,158,255)),
                   color-stop(0.3, rgb(110,158,255)),
                   color-stop(0.9, rgb(255,255,255)));
+}
+
+/* Dialogs */
+div.section-title {
+  font-size: 9pt;
+  font-weight: bold;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+div.content-canvas {
+  padding: 4px;
+}
+
+td.dialog-label {
+  width: 80px;
+}
+
+label.dialog-label {
+  font-size: 9pt;
+  margin-left: 8px;
+}
+
+input.dialog-text {
+  width: 100%;
+}
+
+input.dialog-option {
+  margin-left: 12px;
+}
+
+div.option-row {
+  margin-bottom: 4px;
+}
+
+span.option-label {
+}
+
+span.option-note {
+  font-style: italic;
+  font-size: 8pt;
+}
+
+td.status-logger {
+  margin-top: 5px;
+  margin-bottom: 8px;
+  margin-left: 10px;
+  height: 60px;
+  word-wrap: break-word;
+  vertical-align: middle;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+input.console-menu-button {
+  margin-left: 5px;
+  margin-right: 5px;
 }
 

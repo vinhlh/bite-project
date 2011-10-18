@@ -29,10 +29,10 @@ goog.require('bite.client.Container');
 goog.require('bite.client.TemplateManager');
 goog.require('bite.client.Templates');
 goog.require('bite.client.console.NewBugTemplate');
+goog.require('bite.common.net.xhr.async');
 goog.require('bite.console.Helper');
 goog.require('common.client.ElementDescriptor');
 goog.require('common.client.RecordModeManager');
-goog.require('common.net.Xhr.async');
 goog.require('goog.Timer');
 goog.require('goog.Uri');
 goog.require('goog.Uri.QueryData');
@@ -570,7 +570,8 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(url) {
     }
   };
   var parameters = goog.Uri.QueryData.createFromMap(data).toString();
-  common.net.Xhr.async.post(postUrl.toString(), parameters, responseHandler);
+  bite.common.net.xhr.async.post(postUrl.toString(), parameters,
+                                 responseHandler);
 
   // Inform the other bug related consoles that they need to update.
   chrome.extension.sendRequest({action: Bite.Constants.HUD_ACTION.UPDATE_DATA});

@@ -30,24 +30,19 @@ goog.require('bite.console.Helper');
 goog.require('bite.locators.Updater');
 goog.require('goog.array');
 goog.require('goog.dom');
+goog.require('goog.dom.ViewportSizeMonitor');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
 goog.require('goog.positioning.AnchoredViewportPosition');
 goog.require('goog.positioning.ClientPosition');
 goog.require('goog.positioning.Corner');
 goog.require('goog.string');
-goog.require('goog.ui.AnimatedZippy');
-goog.require('goog.ui.CustomButton');
-goog.require('goog.ui.Dialog');
+goog.require('goog.style');
 goog.require('goog.ui.Option');
-goog.require('goog.ui.Popup');
-goog.require('goog.ui.Tab');
-goog.require('goog.ui.TabBar');
 goog.require('goog.ui.Toolbar');
 goog.require('goog.ui.ToolbarButton');
 goog.require('goog.ui.ToolbarSelect');
 goog.require('goog.ui.ToolbarSeparator');
-goog.require('goog.ui.Zippy');
 goog.require('rpf.CodeGenerator');
 goog.require('rpf.ConsoleLogger');
 goog.require('rpf.DetailsDialog');
@@ -149,6 +144,13 @@ rpf.ConsoleManager = function(opt_noConsole) {
    */
   this.updateAllHandler_ = new goog.events.EventHandler();
 
+  /**
+   * Manages resizes of the window.
+   * @type {goog.dom.ViewportSizeMonitor}
+   * @private
+   */
+  this.viewportSizeMonitor_ = new goog.dom.ViewportSizeMonitor();
+
   if (!this.noConsole_) {
     this.init_();
   }
@@ -162,7 +164,6 @@ goog.addSingletonGetter(rpf.ConsoleManager);
  */
 rpf.ConsoleManager.prototype.init_ = function() {
   this.initUI_();
-  this.initMoreInfoDiv_();
 
   var toolbar = new goog.ui.Toolbar();
 
@@ -250,18 +251,19 @@ rpf.ConsoleManager.prototype.init_ = function() {
                 Bite.Constants.UiCmds.ON_KEY_UP,
                 {}));
   goog.events.listen(
-      goog.dom.getElement('slideDownBtn'),
+      goog.dom.getElement('moreInfoHeader'),
       goog.events.EventType.CLICK,
       goog.bind(this.onUiEvents,
                 this,
                 Bite.Constants.UiCmds.ON_SHOW_MORE_INFO,
                 {}));
 
-  this.zippy_ = new goog.ui.Zippy(
-      'moreInfoHeader', 'moreInfoDiv', false);
   goog.global.window.focus();
   chrome.extension.onRequest.addListener(
       goog.bind(this.makeConsoleCall, this));
+
+  this.viewportSizeMonitor_.addEventListener(goog.events.EventType.RESIZE,
+                                             goog.bind(this.onResize_, this));
 };
 
 
@@ -311,13 +313,6 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
    * @private
    */
   this.lineHighlighted_ = -1;
-
-  /**
-   * The cmd detailed info popup.
-   * @type {goog.ui.Popup}
-   * @private
-   */
-  this.popup_ = null;
 
   /**
    * The mode selector.
@@ -438,22 +433,31 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
    * @private
    */
   this.infoDialog_ = new rpf.InfoDialog();
-
-  /**
-   * The zippy which contains test information.
-   * @type {goog.ui.Zippy}
-   * @private
-   */
-  this.zippy_ = null;
 };
 
 
 /**
- * Expands the zippy.
+ * Expands the more info zippy.
  * @private
  */
 rpf.ConsoleManager.prototype.expandZippy_ = function() {
-  this.zippy_.expand();
+  var moreInfoDiv = goog.dom.getElement('moreInfoDiv');
+  goog.style.setStyle(moreInfoDiv, 'display', 'block');
+};
+
+
+/**
+ * Toggles the more info zippy.
+ * @private
+ */
+rpf.ConsoleManager.prototype.toggleZippy_ = function() {
+  var moreInfoDiv = goog.dom.getElement('moreInfoDiv');
+  var displayStyle = goog.style.getStyle(moreInfoDiv, 'display');
+  if (displayStyle == 'block') {
+    goog.style.setStyle(moreInfoDiv, 'display', 'none');
+  } else {
+    goog.style.setStyle(moreInfoDiv, 'display', 'block');
+  }
 };
 
 
@@ -487,6 +491,18 @@ rpf.ConsoleManager.PROJECTS_ = 'projectNames';
  * @private
  */
 rpf.ConsoleManager.PROJECTS_LENGTH_ = 15;
+
+
+/**
+ * Handles window resizes.
+ * @private
+ */
+rpf.ConsoleManager.prototype.onResize_ = function() {
+  var curSize = this.viewportSizeMonitor_.getSize();
+  var container = goog.dom.getElement('scriptsContainer');
+  goog.style.setSize(container, curSize.width, curSize.height - 118);
+  this.screenshotDialog_.resize();
+};
 
 
 /**
@@ -703,6 +719,12 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       break;
 
     // For the playback dialog.
+    case Bite.Constants.UiCmds.AUTOMATE_PLAY_MULTIPLE_TESTS:
+      this.playbackRuntimeDialog_.setVisible(true);
+      this.playbackRuntimeDialog_.automateDialog(params['testInfo']);
+      this.messenger_.sendStatusMessage(
+          Bite.Constants.COMPLETED_EVENT_TYPES.RUN_PLAYBACK_STARTED);
+      break;
     case Bite.Constants.UiCmds.UPDATE_COMMENT:
       this.playbackRuntimeDialog_.updateComment(
           params['id'], params['comment']);
@@ -781,6 +803,8 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
     // For the quick command dialog.
     case Bite.Constants.UiCmds.UPDATE_INVOKE_SELECT:
       this.quickDialog_.updateInvokeSelect(params['names'], params['ids']);
+      this.playbackRuntimeDialog_.updateTestSelection(
+          params['names'], params['ids']);
       break;
 
     // For the load dialog.
@@ -795,6 +819,13 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
           params['project'],
           params['test'],
           goog.bind(this.loadTestCallback_, this));
+      break;
+    case Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_PROJECT:
+      this.loaderDialog_.automateDialog(
+          params['isWeb'],
+          params['project'],
+          '',
+          goog.bind(this.loadProjectCallback_, this));
       break;
     case Bite.Constants.UiCmds.DELETE_SELECTED_TEST:
       this.loaderDialog_.deleteSelectedTest();
@@ -967,12 +998,13 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
  * @export
  */
 rpf.ConsoleManager.Images = {
+  /* TODO(ralphj): Remove the validation image. */
   VALIDATION: 'imgs/rpf/validation.png',
-  RECORD_GREY: 'imgs/rpf/recordgrey.png',
+  RECORD_GREY: 'imgs/rpf/record-disabled.png',
   STOP: 'imgs/rpf/stop.png',
-  VALIDATION_GREY: 'imgs/rpf/validationgrey.png',
+  VALIDATION_GREY: 'imgs/rpf/validation-disabled.png',
   RECORD: 'imgs/rpf/record.png',
-  STOP_GREY: 'imgs/rpf/stopgrey.png',
+  STOP_GREY: 'imgs/rpf/stop-disabled.png',
   VALIDATION_ON: 'imgs/rpf/validationon.png',
   WORKER: 'imgs/rpf/workermode.png',
   WORKER_OFF: 'imgs/rpf/workermodeoff.png'
@@ -1318,15 +1350,6 @@ rpf.ConsoleManager.prototype.getLineHighlighted = function() {
 
 
 /**
- * @return {goog.ui.Popup} The cmd detailed info popup.
- * @export
- */
-rpf.ConsoleManager.prototype.getPopup = function() {
-  return this.popup_;
-};
-
-
-/**
  * @return {Object} The mode selector.
  * @export
  */
@@ -1503,7 +1526,7 @@ rpf.ConsoleManager.prototype.popDescInfoMap_ = function(lineNum) {
   } else {
     var elemMap = rpf.MiscHelper.getElemMap(
         this.editorMngr_.getTextAtLine(lineNum), this.infoMap_);
-    if (elemMap) {
+    if (elemMap['xpaths']) {
       // New code format.
       desc = elemMap['descriptor'];
       id = bite.base.Helper.getStepId(cmd);
@@ -1513,71 +1536,12 @@ rpf.ConsoleManager.prototype.popDescInfoMap_ = function(lineNum) {
 
   if (desc) {
     this.updateHighlightLine(lineNum);
-    this.detailsDialog_.updateInfo(desc, lineNum, translation, id, xpath);
+    this.detailsDialog_.updateInfo(
+        desc, lineNum, translation, id, xpath, this.infoMap_);
     return true;
   } else {
     return false;
   }
-};
-
-
-/**
- * Inits the more info div.
- * @private
- */
-rpf.ConsoleManager.prototype.initMoreInfoDiv_ = function() {
-  var infoDiv = goog.dom.getElement('moreInfoDiv');
-  var infoTable = goog.dom.createDom(goog.dom.TagName.TABLE,
-      {'id': 'moreInfoTable',
-       'width': '100%'});
-  var firstRow = goog.dom.createDom(goog.dom.TagName.TR, {},
-      goog.dom.createDom(goog.dom.TagName.TD,
-          {'width': '50%'},
-          goog.dom.createDom(goog.dom.TagName.LABEL,
-              {'for': Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID,
-               'style': 'display:inline;float:left;font-size: 9pt;' +
-               'padding-top:6px;padding-right:10px'},
-               'ID'),
-          goog.dom.createDom(goog.dom.TagName.INPUT,
-              {'type': 'text',
-               'name': Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID,
-               'id': Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID,
-               'style': 'display:inline;float:left;width:33%',
-               'disabled': true}),
-          goog.dom.createDom(goog.dom.TagName.LABEL,
-              {'for': Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME,
-               'style': 'display:inline;float:left;font-size:' +
-                        '9pt;padding-top:6px;padding-left:10px;' +
-                        'padding-right:10px'},
-               'Name'),
-          goog.dom.createDom(goog.dom.TagName.INPUT,
-              {'type': 'text',
-               'name': Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME,
-               'id': Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME +
-                     '_readonly',
-               'style': 'display:inline;float:left;width:33%;',
-               'disabled': true})),
-      goog.dom.createDom(goog.dom.TagName.TD,
-          {'width': '50%'},
-          goog.dom.createDom(goog.dom.TagName.INPUT,
-              {'type': 'text',
-               'name': Bite.Constants.RpfConsoleId.ELEMENT_START_URL,
-               'id': Bite.Constants.RpfConsoleId.ELEMENT_START_URL,
-               'style': 'float:right; width:80%'}),
-          goog.dom.createDom(goog.dom.TagName.LABEL,
-              {'for': Bite.Constants.RpfConsoleId.ELEMENT_START_URL,
-               'style': 'font-size: 9pt;padding-top:5px;float:right;' +
-                        'padding-right:10px;display:inline;'},
-               'URL')));
-  var secondRow = goog.dom.createDom(goog.dom.TagName.TR, {},
-      goog.dom.createDom(goog.dom.TagName.TD, {'colspan': '4'},
-          goog.dom.createDom(goog.dom.TagName.TEXTAREA,
-              {'rows': '4', 'id': Bite.Constants.RpfConsoleId.DATA_CONTAINER,
-               'wrap': 'off', 'style': 'width:100%; margin-top: 5px'})));
-  goog.dom.removeChildren(infoDiv);
-  goog.dom.appendChild(infoTable, firstRow);
-  goog.dom.appendChild(infoTable, secondRow);
-  goog.dom.appendChild(infoDiv, infoTable);
 };
 
 
@@ -2066,8 +2030,12 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
     this.setStatus('Can not playback while recording.', 'red');
     throw new Error('Can not play back during recording.');
   }
-  var testNames = this.loaderDialog_.getSelectedTests();
-  if (testNames.length > 1) {
+  var testNames = this.playbackRuntimeDialog_.getSelectedTests();
+  // The current logic is to use the "multiple replay" mode when there
+  // are multiple tests selected, or single test which is the same one
+  // currently loaded in the console.
+  if (testNames.length > 1 ||
+      (testNames.length == 1 && testNames[0] != this.getTestName_())) {
     this.playbackRuntimeDialog_.setFinishedNumber(0);
     this.playbackRuntimeDialog_.setTotalNumber(testNames.length);
     this.playbackRuntimeDialog_.setMultipleTestsVisibility(true);
@@ -2075,7 +2043,8 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
         {'command': Bite.Constants.CONSOLE_CMDS.RUN_GROUP_TESTS,
          'params': {'testNames': testNames,
                     'tests': this.projectInfo_.getTests(),
-                    'runName': this.loaderDialog_.getProjectName()}});
+                    'runName': this.loaderDialog_.getProjectName(),
+                    'location': this.loaderDialog_.getStorageLocation()}});
     return;
   }
   if (this.checkRunnable_()) {
@@ -2158,7 +2127,8 @@ rpf.ConsoleManager.prototype.startRecording = function(opt_pass) {
         var url = goog.string.trim(this.getStartUrl());
         this.messenger_.sendMessage(
             {'command': Bite.Constants.CONSOLE_CMDS.START_RECORDING,
-             'params': {'url': url}});
+             'params': {'url': url,
+                        'info': {'pageMap': this.projectInfo_.getPageMap()}}});
       }
     }
   } else {
@@ -2193,6 +2163,19 @@ rpf.ConsoleManager.prototype.loadTestCallback_ = function(response) {
   this.loaderDialog_.setVisible(false);
   this.messenger_.sendStatusMessage(
       Bite.Constants.COMPLETED_EVENT_TYPES.TEST_LOADED);
+};
+
+
+/**
+ * Callback for loading the project.
+ * @param {Object} response The response object.
+ * @private
+ */
+rpf.ConsoleManager.prototype.loadProjectCallback_ = function(response) {
+  this.statusLogger_.setStatus(response['message'], response['color']);
+  this.loaderDialog_.setVisible(false);
+  this.messenger_.sendStatusMessage(
+      Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED);
 };
 
 
@@ -2467,6 +2450,7 @@ rpf.ConsoleManager.ModeInfo = function() {
   this.modeAndBtns[Bite.Constants.ConsoleModes.IDLE] =
       {'desc': 'Load a script or begin recording to create a new one',
        'btns': [rpf.ConsoleManager.Buttons.LOAD,
+                rpf.ConsoleManager.Buttons.PLAY,
                 rpf.ConsoleManager.Buttons.RECORD,
                 rpf.ConsoleManager.Buttons.EXPORT,
                 rpf.ConsoleManager.Buttons.SETTING,
@@ -2684,12 +2668,8 @@ rpf.ConsoleManager.prototype.changeMode = function(mode) {
   if (this.noConsole_) {
     return;
   }
-  var modeDiv = goog.dom.getElement('fluxMode');
-  var modeDescDiv = goog.dom.getElement('fluxModeDesc');
   this.mode_ = mode;
-  goog.dom.setTextContent(modeDiv, 'BITE Record/Replay - ' + mode);
-  goog.dom.setTextContent(
-      modeDescDiv, this.modeInfo_.modeAndBtns[this.mode_]['desc']);
+  goog.global.document.title = 'RPF - ' + mode;
   for (var i in rpf.ConsoleManager.Buttons) {
     this.btns_[rpf.ConsoleManager.Buttons[i]].setVisible(false);
   }
@@ -2730,5 +2710,6 @@ rpf.ConsoleManager.prototype.onConsoleRefresh_ = function() {
  * @private
  */
 rpf.ConsoleManager.prototype.onShowMoreInfo_ = function() {
+  this.toggleZippy_();
 };
 

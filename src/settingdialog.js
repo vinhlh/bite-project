@@ -21,12 +21,14 @@
 
 goog.provide('rpf.SettingDialog');
 
+goog.require('bite.common.mvc.helper');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
 goog.require('goog.ui.Dialog');
 goog.require('rpf.Console.Messenger');
 goog.require('rpf.MiscHelper');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -90,54 +92,8 @@ rpf.SettingDialog.USE_XPATH_ = 'useXpath';
  */
 rpf.SettingDialog.prototype.initSettingDialog_ = function() {
   var dialogElem = this.settingDialog_.getContentElement();
-  var textOne = null;
-  var textFive = null;
-  var nickName = null;
-  var textEight = null;
-  var iconUrl = null;
-  var textSeven = null;
-  var textNine = null;
-  /*
-   * <div id="settings">
-   *   <div class="console-div-text">
-   *   <input ...>
-   *   <input ...>
-   *   <div>
-   *   <textarea>
-   *   <input>
-   * </div>
-   */
-  var contentDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'settings'},
-      textOne = goog.dom.createDom(goog.dom.TagName.DIV,
-          {'class': 'console-div-text'}),
-      goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'text', 'id': 'playbackinterval'}),
-      goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'button', 'value': 'ok', 'id': 'playbackintervalbutton'}),
-      textNine = goog.dom.createDom(goog.dom.TagName.DIV,
-          {'class': 'console-div-text'}),
-      goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'text', 'id': 'defaulttimeout'}),
-      goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'button', 'value': 'ok', 'id': 'defaulttimeoutbutton'})
-      );
-  var takeShots = goog.dom.createDom(goog.dom.TagName.DIV, {},
-      textSeven = goog.dom.createDom(goog.dom.TagName.DIV,
-          {'class': 'console-div-text'}),
-      goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'checkbox', 'id': 'whethertakescreenshot'}));
-  var useXpath = goog.dom.createDom(goog.dom.TagName.DIV, {},
-      goog.dom.createDom(goog.dom.TagName.DIV,
-          {'class': 'console-div-text'}, 'Use Xpath?'),
-      goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'checkbox', 'id': 'whetherUseXpath'}));
-  dialogElem.appendChild(contentDiv);
-  dialogElem.appendChild(takeShots);
-  dialogElem.appendChild(useXpath);
-  goog.dom.setTextContent(textOne, 'Playback Interval (sec)');
-  goog.dom.setTextContent(textSeven, 'Take Screenshot');
-  goog.dom.setTextContent(textNine, 'Default timeout (in secs)');
+  bite.common.mvc.helper.renderModelFor(dialogElem,
+                                        rpf.soy.Dialog.settingsContent);
   this.settingDialog_.setTitle('Settings');
   this.settingDialog_.setButtonSet(null);
   this.settingDialog_.setVisible(true);

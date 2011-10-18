@@ -21,7 +21,7 @@
 
 goog.require('Bite.Constants');
 goog.require('bite.client.TemplateManager');
-goog.require('common.net.Xhr.async');
+goog.require('bite.common.net.xhr.async');
 goog.require('goog.json');
 goog.require('goog.testing.PropertyReplacer');
 
@@ -96,7 +96,7 @@ var assertTemplateIdsEqual = function(expectedIds, templates) {
 
 
 /**
- * Used to mock common.net.Xhr.async.get
+ * Used to mock bite.common.net.xhr.async.get
  * @param {string} url The url.
  * @param {Function} callback The callback.
  */
@@ -136,7 +136,7 @@ function testGetTemplatesByProject() {
  */
 function testGetTemplates() {
   templateManager = bite.client.TemplateManager.getInstance();
-  stubs.set(common.net.Xhr.async, 'get', mockXhr);
+  stubs.set(bite.common.net.xhr.async, 'get', mockXhr);
   templateManager.getAllTemplates(
       goog.partial(assertTemplateIdsEqual,
                    ['geo_tiles', 'geo_address, chrome_render, all_other']));
@@ -150,7 +150,7 @@ function testGetTemplates() {
  */
 function testDefaultTemplate() {
   templateManager = bite.client.TemplateManager.getInstance();
-  stubs.set(common.net.Xhr.async, 'get', function() {return null;});
+  stubs.set(bite.common.net.xhr.async, 'get', function() {return null;});
   templateManager.getAllTemplates(goog.partial(assertTemplateIdsEqual,
                                                ['bite_default_bug']));
 }

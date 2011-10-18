@@ -229,11 +229,10 @@ def main():
 
   # Compile the closure scripts.
   soy_files = ['consoles.soy',
-               'exportdialog.soy',
                'rpfconsole.soy',
+               'rpf_dialogs.soy',
                'locatorsupdater.soy',
                'newbug_console.soy',
-               'loaddialog.soy',
                'newbug_type_selector.soy',
                'popup.soy']
 
@@ -263,7 +262,6 @@ def main():
                   'src/console.html',
                   'src/options/options.html',
                   'src/popup.html',
-                  'src/rpf_style_file.css',
                   'manifest.json']
   for static_file in static_files:
     shutil.copy(static_file, 'build')

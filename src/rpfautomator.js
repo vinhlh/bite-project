@@ -41,12 +41,9 @@ goog.require('goog.events.EventTarget');
  *     The listener registered in eventsManager.
  * @param {function(Object, Object, function(Object))} rpfListener
  *     The listener registered in rpf.js.
- * @param {goog.events.EventTarget} eventCompleteTarget The event target that
- *     is for registering and dispatching step completion events.
  * @constructor
  */
-rpf.Automator = function(consoleListener, eventMgrListener, rpfListener,
-    eventCompleteTarget) {
+rpf.Automator = function(consoleListener, eventMgrListener, rpfListener) {
 
   /**
    * The steps in queue. Each step contains information of the message name,
@@ -103,7 +100,7 @@ rpf.Automator = function(consoleListener, eventMgrListener, rpfListener,
    * @type {goog.events.EventTarget}
    * @private
    */
-  this.eventTarget_ = eventCompleteTarget;
+  this.eventTarget_ = new goog.events.EventTarget();;
 
   /**
    * The bound function when the expected event is received.
@@ -142,6 +139,15 @@ rpf.Automator.prototype.getStepObject = function(
           'message': message,
           'params': params,
           'eventType': eventType};
+};
+
+
+/**
+ * Gets the event target.
+ * @return {goog.events.EventTarget} The event target.
+ */
+rpf.Automator.prototype.getEventTarget = function() {
+  return this.eventTarget_;
 };
 
 

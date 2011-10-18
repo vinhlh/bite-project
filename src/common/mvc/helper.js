@@ -19,21 +19,13 @@
  */
 
 
-goog.provide('common.mvc.Helper');
+goog.provide('bite.common.mvc.helper');
 
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.query');
 goog.require('soy');
 
-
-
-/**
- * Makes it easy to export function properties when present.
- * @constructor
- * @export
- */
-common.mvc.Helper = function() {};
 
 
 /**
@@ -54,10 +46,9 @@ common.mvc.Helper = function() {};
  * @param {!Element=} opt_srcElement The opt_srcElement to use when looking up
  *     the id.  If an element is not given then the document will be used.
  * @return {boolean} Whether or not all the ids were found.
- * @export
  */
-common.mvc.Helper.bulkGetElementById =
-    function(inout_idToElementMap, opt_srcElement) {
+bite.common.mvc.helper.bulkGetElementById = function(inout_idToElementMap,
+                                                     opt_srcElement) {
   var src = opt_srcElement || goog.dom.getDocument();
   // srcId will only be assigned if src is an Element thus guaranteeing that
   // only elements are returned by this function.
@@ -95,9 +86,8 @@ common.mvc.Helper.bulkGetElementById =
  * @param {!Element} srcElement The element from which to start the search.
  * @return {Element} Return either the element or null.  Null will also be
  *     returned in multiple elements with the same id are found.
- * @export
  */
-common.mvc.Helper.getElement = function(id, srcElement) {
+bite.common.mvc.helper.getElement = function(id, srcElement) {
   var query = goog.dom.query('[id="' + id + '"]', srcElement);
   if (query.length != 1) {
     return null;
@@ -116,10 +106,9 @@ common.mvc.Helper.getElement = function(id, srcElement) {
  * @param {Object.<string>=} opt_data Optional data that can be passed to the
  *     template function.
  * @return {Element} Return the element or null on failure.
- * @export
  */
-common.mvc.Helper.initModel = function(getModelFunc, opt_data) {
-  var element = common.mvc.Helper.renderModel(getModelFunc, opt_data);
+bite.common.mvc.helper.initModel = function(getModelFunc, opt_data) {
+  var element = bite.common.mvc.helper.renderModel(getModelFunc, opt_data);
   if (!element) {
     return null;
   }
@@ -148,9 +137,8 @@ common.mvc.Helper.initModel = function(getModelFunc, opt_data) {
  *     that creates a link tag to the appropriate css.
  * @param {string=} opt_baseUrl The base url to use for relative references.
  * @return {boolean} Whether or not the procedure was a success.
- * @export
  */
-common.mvc.Helper.initView = function(getViewFunc, opt_baseUrl) {
+bite.common.mvc.helper.initView = function(getViewFunc, opt_baseUrl) {
   opt_baseUrl = opt_baseUrl || '';
 
   // Prepare style tag and get first head element.
@@ -171,9 +159,8 @@ common.mvc.Helper.initView = function(getViewFunc, opt_baseUrl) {
 /**
  * Removes all element instances with the given id.
  * @param {string} id The element id to search for.
- * @export
  */
-common.mvc.Helper.removeElementById = function(id) {
+bite.common.mvc.helper.removeElementById = function(id) {
   id = '[id="' + id + '"]';
   var query = goog.dom.query(id);
 
@@ -200,7 +187,7 @@ common.mvc.Helper.removeElementById = function(id) {
  *     template function.
  * @return {Element} Return the element or null on failure.
  */
-common.mvc.Helper.renderModel = function(getModelFunc, opt_data) {
+bite.common.mvc.helper.renderModel = function(getModelFunc, opt_data) {
   var element = soy.renderAsElement(getModelFunc, opt_data);
   if (!element) {
     return null;
@@ -221,7 +208,7 @@ common.mvc.Helper.renderModel = function(getModelFunc, opt_data) {
  *     template function.
  * @return {Element} Return the element or null on failure.
  */
-common.mvc.Helper.renderModelAs = function(tag, getModelFunc, opt_data) {
+bite.common.mvc.helper.renderModelAs = function(tag, getModelFunc, opt_data) {
   var element = goog.dom.createElement(tag);
   if (!element) {
     return null;
@@ -243,9 +230,10 @@ common.mvc.Helper.renderModelAs = function(tag, getModelFunc, opt_data) {
  *     that creates the console's model.
  * @param {Object.<string>=} opt_data Optional data that can be passed to the
  *     template function.
- * @returns {boolean} Whether or not success occurred.
+ * @return {boolean} Whether or not success occurred.
  */
-common.mvc.Helper.renderModelFor = function(element, getModelFunc, opt_data) {
+bite.common.mvc.helper.renderModelFor = function(element, getModelFunc,
+                                                 opt_data) {
   if (!element) {
     return false;
   }
@@ -268,9 +256,8 @@ common.mvc.Helper.renderModelFor = function(element, getModelFunc, opt_data) {
  *     externally facing, user entered names.
  * @param {string} name The name to validate.
  * @return {boolean} Whether or not the name input value is valid.
- * @export
  */
-common.mvc.Helper.validateName = function(name) {
+bite.common.mvc.helper.validateName = function(name) {
   return /^[a-zA-Z][a-zA-Z0-9_]*$/.test(name);
 };
 

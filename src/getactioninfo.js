@@ -191,7 +191,9 @@ rpf.ContentScript.RecordHelper = function(opt_noConsole) {
    */
   this.finderConsole_ = null;
 
-  this.testest = new bite.rpf.BotHelper();
+  new bite.rpf.BotHelper();
+
+  this.rootArr_ = [];
 };
 
 
@@ -663,6 +665,31 @@ rpf.ContentScript.RecordHelper.prototype.dblClickHandler_ = function(e) {
 
 
 /**
+ * The on request handler.
+ * @param {!Object.<string, string, Object>} request Object Data sent in
+ *     the request.
+ * @param {MessageSender} sender An object containing information about the
+ *     script context that sent the request.
+ * @param {function(!*): void} callback Function to call when the request
+ *     completes.
+ * @export
+ */
+rpf.ContentScript.RecordHelper.prototype.onRequest = function(
+    request, sender, callback) {
+  switch (request['recordAction']) {
+    case Bite.Constants.RECORD_ACTION.START_RECORDING:
+      this.rootArr_ = request['params']['rootArr'];
+      this.startRecording(request['params']['noConsole']);
+      break;
+    case Bite.Constants.RECORD_ACTION.STOP_RECORDING:
+      this.rootArr_ = [];
+      this.stopRecording();
+      break;
+  }
+};
+
+
+/**
  * Stops recording mode experiment.
  * @export
  */
@@ -793,6 +820,32 @@ rpf.ContentScript.RecordHelper.prototype.getXpathStr_ = function(elem) {
 
 
 /**
+ * Returns the class name if the element is a descendant of a root element.
+ * @param {Element} elem The element was interacted with.
+ * @return {string} The class name.
+ * @private
+ */
+rpf.ContentScript.RecordHelper.prototype.checkForClassName_ = function(elem) {
+  for (var i = 0, len = this.rootArr_.length; i < len; ++i) {
+    var xpath = this.rootArr_[i]['xpath'];
+    var rootElem = null;
+    try {
+      rootElem = bot.locators.xpath.single(
+          /** @type {string} */ (xpath), goog.dom.getDocument());
+    } catch (e) {
+      return '';
+    }
+    if (rootElem) {
+      if (goog.dom.contains(rootElem, elem)) {
+        return this.rootArr_[i]['className'];
+      }
+    }
+  }
+  return '';
+};
+
+
+/**
  * Sends an action related info to background page.
  * @param {Element} elem The target element.
  * @param {string} content The content in the target element.
@@ -853,6 +906,8 @@ rpf.ContentScript.RecordHelper.prototype.sendActionBack_ = function(
                   'pathname': window.location.pathname};
   }
   var position = null;
+  var className = '';
+
   if (opt_elem) {
     var pos = goog.style.getClientPosition(opt_elem);
     var size = goog.style.getSize(opt_elem);
@@ -868,6 +923,7 @@ rpf.ContentScript.RecordHelper.prototype.sendActionBack_ = function(
                 'height': size.height,
                 'eX': eX,
                 'eY': eY};
+    className = this.checkForClassName_(opt_elem);
   }
   chrome.extension.sendRequest({'command': 'GetActionInfo',
                                 'selectors': selectors,
@@ -880,7 +936,8 @@ rpf.ContentScript.RecordHelper.prototype.sendActionBack_ = function(
                                 'position': position,
                                 'noConsole': this.noConsole_,
                                 'mode': this.recordingMode_,
-                                'xpaths': xpaths});
+                                'xpaths': xpaths,
+                                'className': className});
 };
 
 
@@ -1106,6 +1163,18 @@ rpf.ContentScript.RecordHelper.randomActions = function() {
 };
 
 
+/**
+ * Sends a message to background page to start a sequence of commands.
+ * @param {Object} params The parameters.
+ * @private
+ */
+rpf.ContentScript.RecordHelper.automateRpf_ = function(params) {
+  chrome.extension.sendRequest({
+    'command': Bite.Constants.CONSOLE_CMDS.AUTOMATE_RPF,
+    'params': params});
+};
+
+
 // Execute the run function only if it's in the main window.
 if (window == window.parent) {
   rpf.ContentScript.RecordHelper.run();
@@ -1114,13 +1183,23 @@ if (window == window.parent) {
     var uri = new goog.Uri(href);
     var queryData = uri.getQueryData();
     var keys = queryData.getKeys();
-    var parameters = {};
+    var parameters = {
+      'command': Bite.Constants.RPF_AUTOMATION.LOAD_AND_RUN_FROM_LOCAL};
     for (var i = 0, len = keys.length; i < len; ++i) {
       parameters[keys[i]] = queryData.get(keys[i]);
     }
-    chrome.extension.sendRequest({
-      'command': Bite.Constants.CONSOLE_CMDS.AUTOMATE_RPF,
-      'params': parameters});
+    rpf.ContentScript.RecordHelper.automateRpf_(parameters);
   }
+  goog.dom.getDocument().addEventListener('rpfLaunchEvent', function(e) {
+    var parameters = {
+      'command': Bite.Constants.RPF_AUTOMATION.PLAYBACK_MULTIPLE};
+    parameters['data'] = goog.json.parse(
+        goog.dom.getElement('rpfLaunchData').innerHTML);
+    rpf.ContentScript.RecordHelper.automateRpf_(parameters);
+  }, false);
 }
+
+
+chrome.extension.onRequest.addListener(
+    goog.bind(recordHelper.onRequest, recordHelper));
 

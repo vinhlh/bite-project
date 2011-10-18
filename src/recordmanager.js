@@ -135,6 +135,13 @@ rpf.RecordManager = function(scriptMgr,
    * @private
    */
   this.recordingMode_ = '';
+
+  /**
+   * The recording info.
+   * @type {Object}
+   * @private
+   */
+  this.recordingInfo_ = {};
 };
 
 
@@ -159,10 +166,13 @@ rpf.RecordManager.ELEMENT_HELPER = 'elementhelper_script.js';
  * @param {string} url The start url.
  * @param {boolean=} opt_noConsole Whether recording is started without from
  *     rpf Console UI.
+ * @param {Object=} opt_info The optional recording config info.
  * @export
  */
-rpf.RecordManager.prototype.startRecording = function(url, opt_noConsole) {
+rpf.RecordManager.prototype.startRecording = function(
+    url, opt_noConsole, opt_info) {
   this.recordingMode_ = 'rpf';
+  this.recordingInfo_ = opt_info || {};
   this.noConsole_ = !!opt_noConsole;
   this.initAllListeners_();
   if (this.isRecording_) {
@@ -230,7 +240,10 @@ rpf.RecordManager.prototype.stopRecording = function() {
   this.isRecording_ = false;
   this.removeAllListeners_();
   if (this.testTabId_ > 0) {
-    this.runCode(rpf.RecordManager.CmdCode.CLEAR, true);
+    chrome.tabs.sendRequest(
+        this.testTabId_,
+        {recordAction: Bite.Constants.RECORD_ACTION.STOP_RECORDING,
+         params: {}});
   }
 };
 
@@ -401,6 +414,24 @@ rpf.RecordManager.prototype.testBlockValidation = function(blockObj) {
 
 
 /**
+ * Gets the root array.
+ * @return {Array} The root element array.
+ * @private
+ */
+rpf.RecordManager.prototype.getRoots_ = function() {
+  var results = [];
+  if (this.recordingInfo_ && this.recordingInfo_['pageMap']) {
+    var pageMap = goog.json.parse(this.recordingInfo_['pageMap']);
+    for (var item in pageMap) {
+      results.push(
+          {'xpath': item, 'className': pageMap[item]});
+    }
+  }
+  return results;
+};
+
+
+/**
  * Starts recording in content script.
  * @export
  */
@@ -408,7 +439,12 @@ rpf.RecordManager.prototype.startRecordingInPage = function() {
   if (this.recordingMode_ == 'updater') {
     this.enterUpdaterMode();
   } else {
-    this.runCode('recordHelper.startRecording(' + this.noConsole_ + ');', true);
+    var roots = this.getRoots_();
+    chrome.tabs.sendRequest(
+        this.testTabId_,
+        {recordAction: Bite.Constants.RECORD_ACTION.START_RECORDING,
+         params: {'noConsole': this.noConsole_,
+                  'rootArr': roots}});
   }
 };
 

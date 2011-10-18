@@ -36,8 +36,8 @@
 
 goog.provide('rpf.ExportDialog');
 
+goog.require('bite.common.mvc.helper');
 goog.require('bite.webdriver');
-goog.require('common.mvc.Helper');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
@@ -49,7 +49,7 @@ goog.require('goog.ui.Dialog');
 goog.require('rpf.Console.Messenger');
 goog.require('rpf.DataModel');
 goog.require('rpf.StatusLogger');
-goog.require('rpf.soy.ExportDialog');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -206,7 +206,8 @@ rpf.ExportDialog.prototype.initComponents_ = function() {
  * @private
  */
 rpf.ExportDialog.prototype.initContent_ = function() {
-  var content = common.mvc.Helper.renderModel(rpf.soy.ExportDialog.getContent);
+  var helper = bite.common.mvc.helper;
+  var content = helper.renderModel(rpf.soy.Dialog.exportContent);
   if (!content) {
     throw 'No content was rendered.';
   }
@@ -223,7 +224,7 @@ rpf.ExportDialog.prototype.initContent_ = function() {
   }
 
   // Load all relevant elements.
-  if (!common.mvc.Helper.bulkGetElementById(elements, content)) {
+  if (!helper.bulkGetElementById(elements, content)) {
     var keys = [];
     for (key in elements) {
       if (!elements[key]) {
@@ -301,11 +302,13 @@ rpf.ExportDialog.prototype.generateUrlPageMapRow_ = function(url,
                                                              name,
                                                              element,
                                                              opt_first) {
+  var helper = bite.common.mvc.helper;
+
   var first = opt_first || false;
 
   // Create a new row by creating a table with soy.
-  var table = common.mvc.Helper.renderModel(rpf.soy.ExportDialog.getPageMap,
-                                            {'url': url, 'name': name});
+  var table = helper.renderModel(rpf.soy.Dialog.getPageMap,
+                                 {'url': url, 'name': name});
   if (!table) {
     console.error('ERROR (rpf.ExportDialog.generateUrlPageMapRow_): Failed ' +
                   'to create table.');
@@ -313,8 +316,8 @@ rpf.ExportDialog.prototype.generateUrlPageMapRow_ = function(url,
   }
 
   // Retrieve key elements from the table.
-  var row = common.mvc.Helper.getElement('export-page-map-row', table);
-  var close = common.mvc.Helper.getElement('export-page-map-close', table);
+  var row = helper.getElement('export-page-map-row', table);
+  var close = helper.getElement('export-page-map-close', table);
   if (!row || !close) {
     console.error('ERROR (rpf.ExportDialog.generateUrlPageMapRow_): New ' +
                   'table does not contain required elements.');
@@ -488,7 +491,7 @@ rpf.ExportDialog.prototype.handleImport_ = function() {
     'params': {'path': this.elements_[ids.JAVA_PACKAGE_PATH].value}
   };
   var messenger = rpf.Console.Messenger.getInstance();
-  var statusLogger = rpf.StatusLogger.getInstance()
+  var statusLogger = rpf.StatusLogger.getInstance();
   messenger.sendMessage(command,
                         goog.bind(statusLogger.setStatusCallback,
                                   statusLogger));
@@ -749,8 +752,9 @@ rpf.ExportDialog.prototype.requestDataComplete_ = function(
   names = names.sort();
 
   var testElement = this.elements_[rpf.ExportDialog.Id_.TEST_DATA];
-  common.mvc.Helper.renderModelFor(testElement, rpf.soy.ExportDialog.getTests,
-                                   {'tests': names});
+  bite.common.mvc.helper.renderModelFor(testElement,
+                                        rpf.soy.Dialog.getTests,
+                                        {'tests': names});
 
   // Set page/url mappings
   var urlPageMap = details['page_map'];

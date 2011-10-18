@@ -20,6 +20,7 @@
 
 goog.provide('rpf.DetailsDialog');
 
+goog.require('bite.common.mvc.helper');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
@@ -30,10 +31,12 @@ goog.require('goog.ui.MenuItem');
 goog.require('goog.ui.Toolbar');
 goog.require('goog.ui.ToolbarButton');
 goog.require('goog.ui.ToolbarMenuButton');
+goog.require('goog.ui.Tooltip');
 goog.require('rpf.Console.Messenger');
 goog.require('rpf.EditorManager');
 goog.require('rpf.MiscHelper');
 goog.require('rpf.ScreenShotDialog');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -143,52 +146,23 @@ rpf.DetailsDialog = function(
  * @param {string} translation The command's translation.
  * @param {string} cmdId The command id.
  * @param {string} xpath The xpath string.
+ * @param {Object} infoMap The information map of the current test.
  * @export
  */
 rpf.DetailsDialog.prototype.updateInfo =
-    function(descriptor, line, translation, cmdId, xpath) {
-  var prevBtn = null;
-  var nextBtn = null;
-  var edit = null;
+    function(descriptor, line, translation, cmdId, xpath, infoMap) {
   this.curLine_ = line;
   var dialogElem = this.detailsDialog_.getContentElement();
-  goog.dom.removeChildren(dialogElem);
-
-  cmdId = cmdId || line + '';
   var screenSrc = this.scnshotMgr_.getScreenshotManager().getScreenById(cmdId);
-  if (!screenSrc) {
-    this.screenDiv_ = goog.dom.createDom(goog.dom.TagName.DIV);
-  } else {
-    this.screenDiv_ = goog.dom.createDom(goog.dom.TagName.DIV,
-        {'id': 'screenDiv',
-         'class': 'console-details-div-screen'},
-        goog.dom.createDom(goog.dom.TagName.IMG,
-            {'src': screenSrc,
-             'width': '80%',
-             'class': 'console-details-div-screen-img'}));
-  }
-  var controlDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'ctrlDiv', 'style': 'text-align: center; margin-bottom: 10px;'},
-      prevBtn = goog.dom.createDom(goog.dom.TagName.IMG,
-          {'src': 'imgs/rpf/prevpage.png',
-           'width': '22',
-           'height': '22', 'style': 'vertical-align: middle;'}),
-      goog.dom.createDom(goog.dom.TagName.INPUT,
-          {'type': 'text', 'size': '1', 'id': 'curlineInput',
-           'style': 'vertical-align: middle;',
-           'value': '' + (line + 1)}),
-      nextBtn = goog.dom.createDom(goog.dom.TagName.IMG,
-          {'src': 'imgs/rpf/nextpage.png',
-           'width': '22', 'height': '22',
-           'style': 'vertical-align: middle;'}));
-  var toolbarDiv = goog.dom.createDom(goog.dom.TagName.CENTER,
-      {},
-      goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'toolbarDiv',
-       'class': 'console-details-div-toolbar'}));
-  goog.dom.appendChild(dialogElem, toolbarDiv);
-  goog.dom.appendChild(dialogElem, controlDiv);
-  goog.dom.appendChild(dialogElem, this.screenDiv_);
+  bite.common.mvc.helper.renderModelFor(dialogElem,
+                                        rpf.soy.Dialog.detailsContent,
+                                        {'screenSrc': screenSrc,
+                                         'line': line + 1});
+  var prevBtn = goog.dom.getElement('rpf-prev-line');
+  var nextBtn = goog.dom.getElement('rpf-next-line');
+  cmdId = cmdId || line + '';
+  this.screenDiv_ = goog.dom.getElement('rpf-details-screenshot');
+  this.editorDiv_ = goog.dom.getElement('rpf-details-editor');
   goog.events.listen(
       prevBtn,
       'click',
@@ -203,15 +177,18 @@ rpf.DetailsDialog.prototype.updateInfo =
           this.onUiEvents_,
           Bite.Constants.UiCmds.ON_NEXT_PAGE,
           {}));
+  goog.events.listen(
+      goog.dom.getElement('saveStepName'),
+      'click',
+      goog.bind(this.saveStepName_, this, infoMap, cmdId));
+  goog.events.listen(
+      goog.dom.getElement('saveClassName'),
+      'click',
+      goog.bind(this.saveClassName_, this, infoMap, cmdId));
   this.descriptor_ = descriptor;
   this.xpath_ = xpath;
-
-  this.editorDiv_ = goog.dom.createDom(goog.dom.TagName.CENTER, {},
-      goog.dom.createDom(goog.dom.TagName.DIV,
-          {'id': 'editorDiv',
-           'class': 'console-details-div-editor'}));
-  dialogElem.appendChild(this.editorDiv_);
   this.drawCmdToolbar_(line);
+  this.setStepInfo_(infoMap, cmdId);
 
   if (!this.editorShown_) {
     this.turnOnScreenView_();
@@ -223,13 +200,54 @@ rpf.DetailsDialog.prototype.updateInfo =
 
 
 /**
+ * Set the step name in the details dialog.
+ * @param {Object} infoMap The information map.
+ * @param {string} id The command id.
+ * @private
+ */
+rpf.DetailsDialog.prototype.setStepInfo_ = function(infoMap, id) {
+  var stepName = infoMap['steps'][id]['stepName'];
+  var className = infoMap['steps'][id]['pageName'];
+  var stepNameInput = goog.dom.getElement('stepNameInput');
+  var classNameInput = goog.dom.getElement('classNameInput');
+  stepNameInput.value = stepName;
+  classNameInput.value = className;
+  new goog.ui.Tooltip(stepNameInput, 'Please follow JS naming convention.');
+  new goog.ui.Tooltip(classNameInput,
+      'Please set the class name that associates with the step.');
+};
+
+
+/**
+ * Saves the step name in the details dialog.
+ * @param {Object} infoMap The information map.
+ * @param {string} id The command id.
+ * @private
+ */
+rpf.DetailsDialog.prototype.saveStepName_ = function(infoMap, id) {
+  var stepName = goog.dom.getElement('stepNameInput').value;
+  infoMap['steps'][id]['stepName'] = stepName;
+};
+
+
+/**
+ * Saves the class name in the details dialog.
+ * @param {Object} infoMap The information map.
+ * @param {string} id The command id.
+ * @private
+ */
+rpf.DetailsDialog.prototype.saveClassName_ = function(infoMap, id) {
+  var className = goog.dom.getElement('classNameInput').value;
+  infoMap['steps'][id]['pageName'] = className;
+};
+
+
+/**
  * Draw command manipulation toolbar.
  * @param {number} line The line number of the selected line.
  * @private
  */
 rpf.DetailsDialog.prototype.drawCmdToolbar_ = function(line) {
-  var toolbar = new goog.ui.Toolbar();
-
   var actionMenu = new goog.ui.ToolbarMenuButton('Actions');
   var upMenuItem = new goog.ui.MenuItem('moveUp');
   var downMenuItem = new goog.ui.MenuItem('moveDown');
@@ -278,11 +296,9 @@ rpf.DetailsDialog.prototype.drawCmdToolbar_ = function(line) {
           this.onUiEvents_,
           Bite.Constants.UiCmds.ON_REMOVE_CUR_LINE,
           {}));
-  actionMenu.setTooltip('Actions can be performed');
-  toolbar.addChild(actionMenu, true);
+  actionMenu.render(goog.dom.getElement('rpf-details-toolbar'));
 
-  this.attr_ = new goog.ui.ToolbarButton('Switch to attributes');
-  this.attr_.setTooltip('Show the attributes of this command');
+  this.attr_ = new goog.ui.CustomButton('Switch to attributes');
 
   this.attrControl_.createAttrTabs(
       this.editorDiv_, this.descriptor_,
@@ -295,8 +311,7 @@ rpf.DetailsDialog.prototype.drawCmdToolbar_ = function(line) {
           this.onUiEvents_,
           Bite.Constants.UiCmds.ON_EDIT_CMD,
           {}));
-  toolbar.addChild(this.attr_, true);
-  toolbar.render(goog.dom.getElement('toolbarDiv'));
+  this.attr_.render(goog.dom.getElement('rpf-details-toolbar'));
 };
 
 

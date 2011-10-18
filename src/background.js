@@ -15,9 +15,9 @@ goog.require('Bite.Constants');
 goog.require('bite.LoginManager');
 goog.require('bite.client.BugTemplate');
 goog.require('bite.client.TemplateManager');
+goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
-goog.require('common.net.Xhr.async');
 goog.require('goog.Timer');
 goog.require('goog.Uri');
 goog.require('goog.json');
@@ -221,7 +221,7 @@ bite.client.Background.prototype.fetchTestData_ =
   var testUrl = goog.Uri.parse(server).setPath(
       this.fetchTestsApiPath_).toString();
 
-  common.net.Xhr.async.get(testUrl,
+  bite.common.net.xhr.async.get(testUrl,
       goog.bind(this.fetchTestsDataCallback_, this, callback));
 };
 
@@ -263,7 +263,7 @@ bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
   this.updateBadge_(
       tab, {'action': bite.client.Background.FetchEventType.FETCH_BEGIN});
 
-  common.net.Xhr.async.get(this.getFetchBugsUrl_(tab.url),
+  bite.common.net.xhr.async.get(this.getFetchBugsUrl_(tab.url),
       goog.bind(this.fetchBugsDataCallback_, this, tab, callback));
 };
 
@@ -451,7 +451,7 @@ bite.client.Background.prototype.updateBugStatus_ = function(
   var url = goog.Uri.parse(server);
   url.setPath(this.bugsUpdateStatusApiPath_);
 
-  common.net.Xhr.async.post(url.toString(), queryData.toString(),
+  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
       goog.bind(this.updateBugCallback_, this, callback));
 };
 
@@ -476,7 +476,7 @@ bite.client.Background.prototype.updateBugBinding_ = function(
   var url = goog.Uri.parse(server);
   url.setPath(this.bugsUpdateBindingApiPath_);
 
-  common.net.Xhr.async.post(url.toString(), queryData.toString(),
+  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
       goog.bind(this.updateBugCallback_, this, callback));
 };
 
@@ -501,7 +501,7 @@ bite.client.Background.prototype.updateBugRecording_ = function(
   var url = goog.Uri.parse(server);
   url.setPath(this.bugsUpdateRecordingApiPath_);
 
-  common.net.Xhr.async.post(url.toString(), queryData.toString(),
+  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
       goog.bind(this.updateBugCallback_, this, callback));
 };
 
@@ -540,7 +540,7 @@ bite.client.Background.prototype.getBugData_ = function(
   url.setPath(this.getBugApiPath_);
   url.setParameterValue('id', request['id']);
   url.setParameterValue('provider', request['provider']);
-  common.net.Xhr.async.get(url.toString(),
+  bite.common.net.xhr.async.get(url.toString(),
       goog.bind(this.getBugDataCallback_, this, callback));
 };
 
@@ -621,7 +621,7 @@ bite.client.Background.prototype.logTestResult_ =
   var url = goog.Uri.parse(server);
   url.setPath(this.submitTestResultApiPath_);
 
-  common.net.Xhr.async.post(url.toString(), queryData.toString(),
+  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
       goog.bind(this.logTestResultComplete_, this, callback));
 };
 

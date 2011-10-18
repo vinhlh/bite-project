@@ -20,11 +20,14 @@
 
 goog.provide('rpf.ScreenShotDialog');
 
+goog.require('bite.common.mvc.helper');
 goog.require('bite.console.Screenshot');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
+goog.require('goog.style');
 goog.require('goog.ui.Dialog');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -52,10 +55,6 @@ rpf.ScreenShotDialog = function() {
    * Inits the screenshot dialog.
    */
   this.initScreenshotDialog_();
-
-  goog.style.setStyle(
-      this.screenShotDialog_.getElement(),
-      {'height': '55%'});
 };
 
 
@@ -79,15 +78,11 @@ rpf.ScreenShotDialog.prototype.setVisible = function(display) {
  */
 rpf.ScreenShotDialog.prototype.initScreenshotDialog_ =
     function() {
-  var dialogElem = this.screenShotDialog_.getContentElement();
-  var contentDiv = goog.dom.createDom(goog.dom.TagName.DIV,
-      {'id': 'screenshots',
-       'style': 'text-align: center; overflow-y: auto; height: 100%;'});
-  dialogElem.appendChild(contentDiv);
   this.screenShotDialog_.setTitle('Screenshots');
   this.screenShotDialog_.setButtonSet(null);
   this.screenShotDialog_.setVisible(true);
   this.screenShotDialog_.setVisible(false);
+  this.resize();
 };
 
 
@@ -98,29 +93,12 @@ rpf.ScreenShotDialog.prototype.initScreenshotDialog_ =
 rpf.ScreenShotDialog.prototype.updateScreenshotDialog_ =
     function() {
   var screenShots = this.screenshotMgr_.getScreenshots();
-  var timeStamps = this.screenshotMgr_.getTimeStamps();
-  var cmds = this.screenshotMgr_.getGeneratedCmds();
-  var scrnShotDiv = goog.dom.getElement('screenshots');
-  goog.dom.removeChildren(scrnShotDiv);
-  for (var i = 0; i < screenShots.length; i++) {
-    var anchor = goog.dom.createDom(goog.dom.TagName.A, {
-      'href': screenShots[i],
-      'target': '_blank'
-    });
-    var img = goog.dom.createDom(goog.dom.TagName.IMG, {
-      'src': screenShots[i],
-      'alt': 'na',
-      'width': '80%'
-    });
-    var k = this.screenshotMgr_.getCmdIndices()[i];
-    var id = goog.dom.createDom(goog.dom.TagName.DIV, {
-      }, this.screenshotMgr_.getCmdIndices()[i]);
-    goog.dom.appendChild(anchor, img);
-    goog.dom.appendChild(scrnShotDiv, anchor);
-    goog.dom.appendChild(scrnShotDiv, id);
-    goog.dom.appendChild(scrnShotDiv, goog.dom.createDom(
-        goog.dom.TagName.HR));
-  }
+  var dialogContainer = this.screenShotDialog_.getContentElement();
+
+  bite.common.mvc.helper.renderModelFor(
+      dialogContainer,
+      rpf.soy.Dialog.screenshotContent,
+      {'screenshots': screenShots});
 };
 
 
@@ -132,3 +110,18 @@ rpf.ScreenShotDialog.prototype.getScreenshotManager =
     function() {
   return this.screenshotMgr_;
 };
+
+
+/**
+ * Resizes the window. This is necessary because css overflow does not
+ * play nicely with percentages.
+ */
+rpf.ScreenShotDialog.prototype.resize = function() {
+  var dialogTitleHeight = 50;
+  var dialogScreenPercentage = 0.8;
+  var screenHeight = goog.dom.getViewportSize().height;
+  var contentElem = this.screenShotDialog_.getContentElement();
+  goog.style.setHeight(
+      contentElem, screenHeight * dialogScreenPercentage - dialogTitleHeight);
+};
+

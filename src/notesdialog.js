@@ -22,7 +22,7 @@
 
 goog.provide('rpf.NotesDialog');
 
-goog.require('common.net.Xhr.async');
+goog.require('bite.common.net.xhr.async');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
@@ -165,7 +165,7 @@ rpf.NotesDialog.prototype.addToCommonLib = function() {
         {'name': libName,
          'user': userName,
          'lib': lib}).toString();
-    common.net.Xhr.async.post(requestUrl, parameters,
+    bite.common.net.xhr.async.post(requestUrl, parameters,
         function(success, data) { alert(data); });
   }
 };
