@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<!--
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Use of this source code is governed by the Apache License, Version 2.0.
+See the COPYING file for details.
+-->
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Update-a-Bug</title>
+  <link rel="stylesheet" href="/styles/main.css">
+  <style>
+    .label .browser {
+      padding-left: 20px;
+      text-align: right;
+    }
+    .label {
+      font-weight: bold;
+      font-size: 110%;
+    }
+    .required {
+      color:red;
+    }
+  </style>
+  <script type="text/javascript">
+    function validate(){
+      var form = document.getElementById('f');
+      var id = form.id.value;
+      var target_element = form.target_element.value;
+      var isValid = true;
+      if(i.length == 0 || target_element.length == 0){
+        isValid = false;
+        alert("Missing one or more required values, please try again.");
+      }
+      return isValid;
+    };
+  </script>
+  <script src="/scripts/analytics.js" type="text/javascript">
+  </script>
+</head>
+<body>
+  <div width="100%" align="right"><b>{{user.email}}</b> | <a href="{{user.signUrl}}" class="gb4">Sign out</a></div>
+  <table style="margin-top: 1em;" width="100%">
+    <tbody>
+      <tr>
+        <td width="1%">
+          <a href="/"><img style="border: 0px solid ;"
+              src="/images/bite_logo_google.png" alt="Go to Home"></a></td>
+        <td style="width: 100%;">
+          <table width="100%">
+            <tbody>
+              <tr>
+                <td class="page-title">Report A Bug</td>
+              </tr>
+            </tbody>
+          </table>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+    <table width="100%">
+      <tbody>
+        <tr>
+          <td align="center">
+            <table style="margin-top: 1em; width: 80%;" cellpadding="0" cellspacing="0">
+              <tbody>
+                <tr>
+                  <td align="left">
+                    <div class="outer-box">
+                      <div class="welcome-area">
+                        <div class="welcome-msg">Please confirm the update to a <a href="http://code.google.com/p/chromium/">
+                            Chromium project</a> bug.
+                        </div>
+                      </div>
+                      <form method="post" action="{{postback_url}}" id="f" name="f" class="block" onsubmit="return validate()">
+                        <div style="width: 100%;">
+                          <table  width="100%">
+                            <tbody>
+                              <tr>
+                                <td class="label"><label>Issue ID:</label></td>
+                                <td class="input"><p>{{id}}</p></td>
+                              </tr>
+                              <tr>
+                                <td class="label"><label>Target Element:</label></td>
+                                <td class="input"><p>{{target_element_str}}</p></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <table cellpadding="0" cellspacing="0" width="100%">
+                            <tbody>
+                              <tr>
+                                <td><p class="required" style="padding:15px">Please note: After the update is submitted,
+                                    refreshing the original page will not persist the changes, <u>this is expected
+                                      behaviour</u> while the update is replicated in the system. Updates might take
+                                    120 minutes or more before they are visible on the original page. Please don't
+                                    submit multiple updates for the same bug during this time.</p></td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <table>
+                            <tbody>
+                              <tr>
+                                <td style="text-align: right;">
+                                  <input value="Submit updates" type="submit">
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <center>&copy; 2010</center>
+</body>
+</html>

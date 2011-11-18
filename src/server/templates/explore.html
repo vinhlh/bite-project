@@ -1,0 +1,195 @@
+{% extends 'view.html' %}
+
+{% block content %}
+  <script language="javascript" src="/scripts/client_script.js"></script>
+  <link rel="stylesheet" href="/styles/explore.css">
+
+  <div style="height: 55px;">
+    <img class="artifact-logo" src="{{ common.selectedscope.icon }}">
+    <div class="artifact-title">
+      {% if common.selectedscope.artifacttitle %}
+        {{ common.selectedscope.artifacttitle }}
+      {% else %}
+        {{ common.selectedscope.title }}
+      {% endif %}
+    </div>
+    <div class="artifact-notes">{{ common.selectedscope.description }}</div>
+  </div>
+
+  <div class="action-row">
+    <span class="action-label">sort by</span>
+    <span class="action-link">Title</span>
+    <span class="action-separator"> | </span>
+    <span class="action-label">view</span>
+    <span class="action-link">Tile</span>
+  </div>
+
+  <!--<script language="javascript" src="/scripts/explore.js"></script>-->
+
+  {% for row in common.selectedscope.data %}
+    <div class="data-row" id="artifact{{ row.type }}_{{ row.id }}"
+         onclick="selectArtifact(this)">
+      <div id="artifact{{ row.type }}_{{ row.id }}main" style="height: 50px;">
+        <img class="data-icon" src="{{ row.icon }}" />
+        <div class="data-title">{{ row.title }}</div>
+        {% for label in row.labels %}
+        <div class="data-label">{{ label }}</div>
+        {% endfor %}
+        {% for highlight in row.highs %}
+        <div class="data-label data-highlight"
+             title="{{ highlight.note }}">{{ highlight.title }}</div>
+        {% endfor %}
+        {% for lowlight in row.lows %}
+        <div class="data-label data-lowlight"
+             title="{{ lowlight.note }}">{{ lowlight.title }}</div>
+        {% endfor %}
+        <br />
+        {% for prop in row.props %}
+        <span>
+          <span class="prop-label">{{ prop.label }}</span>
+          <span class="prop-value">
+            {% if prop.href %}<a onclick="swallowEvent" href="{{ prop.href }}">
+              {% endif %}{{ prop.value }}{% if prop.href %}</a>{% endif %}
+          </span>
+          {% if not forloop.last %}
+          <span class="prop-separator"> | </span>
+          {% endif %}
+        </span>
+        {% endfor %}
+        {% if row.description %}
+        <div class="data-notes">{{ row.description }}</div>
+        {% endif %}
+      </div>
+    </div>
+    <div id="artifact{{ row.type }}_{{ row.id }}more" class="data-more">
+      <div class="data-actions">
+        {% for action in row.actions %}
+        <span class="data-action">{{ action.title }}</span>
+        &nbsp;
+        {% endfor %}
+      </div>
+      <table cellpadding="4">
+        <tr>
+          <td>
+            {% block explore-detail-left %}
+            {% if row.highs %}
+            <div class="more-heading">Highlights</div>
+            <ul>
+              {% for high in row.highs %}
+              <li>
+                <div class="data-label data-highlight">{{ high.title }}</div>
+                {{ high.note }}</li>
+              {% endfor %}
+              </li>
+            </ul>
+            {% endif %}
+            {% if row.lows %}
+            <div class="more-heading">Lowlights</div>
+            <ul style="margin-bottom: 0px; padding-bottom: 0px;">
+              {% for low in row.lows %}
+              <li>
+                <div class="data-label data-lowlight">{{ low.title }}</div>
+                {{ low.note }}</li>
+              {% endfor %}
+              </li>
+            </ul>
+            {% endif %}
+            {% endblock %}
+          </td>
+          <td style="">
+            {% block explore-detail-right %}
+            {% for section in row.more %}
+            <div class="more-heading" style="padding-bottom: 4px;">
+              {{ section.title }}</div>
+              {% for item in section.items %}
+              <li>{{ item.title }}</li>
+              {% endfor %}
+            {% endfor %}
+            {% endblock %}
+          </td>
+        </tr>
+      </table>
+    </div>
+  {% endfor %}
+{% endblock %}
+
+{% block details %}
+  <link rel="stylesheet" href="/styles/explore.css">
+  <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  <div id="detailsPanel" style="padding-left: 10px; display: none">
+    <div id="visualization"></div>
+    <div>
+      <table>
+        <tr>
+          <td><span class="prop-value">Completed:</td>
+          <td><span class="prop-value" id="detailCompleted"></span></td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <table>
+        <tr>
+          <td><span class="prop-value">Passed:</td>
+          <td><span class="prop-value" id="detailPassed"></span></td>
+        </tr>
+      </table>
+    </div>
+    <div>
+      <table>
+        <tr>
+          <td><span class="prop-value">Failed:</td>
+          <td><span class="prop-value" id="detailFailed"></span></td>
+        </tr>
+      </table>
+    </div>
+    <div style="padding-top: 10px">
+      <span class="prop-value">
+        Run duration:
+        <span id="detailDuration"></span>
+      </span>
+    </div>
+    <div>
+      <span class="prop-value">
+        Started:
+        <span id="detailStartTime"></span>
+      </span>
+    </div>
+    <div style="padding-top: 10px">
+      <span class="prop-value">
+        Run lead:
+        <span id="detailLead"></span>
+      </span>
+    </div>
+    <div style="padding-top: 10px">
+      <span class="prop-value">
+        My results:
+        <div id="detailResults"></div>
+      </span>
+    </div>
+  </div>
+<script type="text/javascript">
+  google.load('visualization', '1', {packages: ['imagechart']});
+  bite.server.Helper.init();
+
+  function drawVisualization(passed, failed, uncompleted) {
+    // Create and populate the data table.
+    var data = new google.visualization.DataTable();
+    data.addColumn('string', 'tests');
+    data.addColumn('number', 'passed');
+    data.addColumn('number', 'failed');
+    data.addColumn('number', 'uncompleted');
+    data.addRows(1);
+    data.setCell(0, 0, '');
+    data.setCell(0, 1, passed);
+    data.setCell(0, 2, failed);
+    data.setCell(0, 3, uncompleted);
+
+    // Create and draw the visualization.
+    new google.visualization.ImageBarChart(
+        document.getElementById('visualization')).
+        draw(data, {'isStacked': true, 'width': 400, 'height': 100,
+                    'colors': ['00FF00', 'FF0000', 'C0C0C0']
+                    });
+  }
+</script>
+{% endblock %}

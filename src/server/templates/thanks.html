@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<!--
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Use of this source code is governed by the Apache License, Version 2.0.
+See the COPYING file for details.
+-->
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Thanks for trying out BITE!</title>
+    <link type="text/css" rel="stylesheet" href="/static/thanks.css">
+  </head>
+  <body>
+    <table class="thanksContainer" width="100%" height="700px" cellpadding="0" cellspacing="0">
+      <tr height="100px">
+        <td class="bufferCell"></td>
+        <td class="textCell">
+          <img src="/imgs/bite_logo_google.png" class="biteLogo" />
+            <div class="thanksTitle">
+              Thanks for trying out BITE!
+            </div>
+            <div class="thanksInfo">
+              The extension will download in a few seconds.
+            </div>
+            <div class="thanksInfo">
+              To get started with filing a bug either select "Report Bug" from the menu or simply press Ctrl+Alt+B.
+            </div>
+            <div class="thanksInfo">
+              Visit
+              <a href="">go/bite</a>
+              for more information about BITE.
+            </div>
+            <div class="thanksInfo">
+              <a href="bin/bite_lite.crx">Click here</a>
+              if you had trouble downloading
+            </div>
+        </td>
+        <td class="bufferCell">
+          <img src="/imgs/bite_bug_filing.png" class="bugFiling" />
+        </td>
+        <td class="bufferCell"></td>
+      </tr>
+      <tr height="10px">
+        <td class="bufferCell"></td>
+        <td class="bufferCell">
+          <div class="dividerLine"></div>
+        </td>
+        <td class="bufferCell">
+          <div class="dividerLine"></div>
+        </td>
+        <td class="bufferCell"></td>
+      </tr>
+      <tr height="20px">
+        <td class="bufferCell"></td>
+        <td class="bufferCell">
+          <div class="copyrightText">
+            Copyright 2011 Google
+          </div>
+        </td>
+        <td class="bufferCell"></td>
+        <td class="bufferCell"></td>
+      </tr>
+      <tr id="footer" height="200px">
+        <td class="bufferCell"></td>
+        <td class="bufferCell"></td>
+        <td class="bufferCell"></td>
+        <td class="bufferCell"></td>
+      </tr>
+    </table>
+    <script type="text/javascript">
+      // Wait 2 seconds before downloading the extension.
+      setTimeout(function() {window.location = "bin/bite_lite.crx"}, 2000);
+    </script>
+  </body>
+</html>
+

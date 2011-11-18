@@ -13,6 +13,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 
 """Build the BITE Extension."""
@@ -32,6 +44,8 @@ CHECKOUT_CLOSURE_COMMAND = ('svn checkout http://closure-library.googlecode.com'
                             '/svn/trunk/ closure-library')
 CHECKOUT_SELENIUM_COMMAND = ('svn checkout http://selenium.googlecode.com'
                              '/svn/trunk/javascript/atoms selenium-atoms-lib')
+CHECKOUT_GDATA_COMMAND = ('hg clone https://code.google.com/p/'
+                          'gdata-python-client/')
 CLOSURE_COMPILER_URL = ('http://closure-compiler.googlecode.com/files/'
                         'compiler-latest.zip')
 SOY_COMPILER_URL = ('http://closure-templates.googlecode.com/files/'
@@ -39,7 +53,7 @@ SOY_COMPILER_URL = ('http://closure-templates.googlecode.com/files/'
 SOYDATA_URL = ('http://closure-templates.googlecode.com/svn/trunk/javascript/'
                'soydata.js')
 COMPILE_CLOSURE_COMMAND = ('closure-library/closure/bin/build/closurebuilder.py'
-                           ' --root=src'
+                           ' --root=src/client'
                            ' --root=closure-library'
                            ' --root=build_gen'
                            ' --root=selenium-atoms-lib'
@@ -201,6 +215,21 @@ def SetupSelenium():
       logging.error('Could not download the selenium library.')
       raise ClosureError('Could not find the selenium library.')
 
+def SetupGdata():
+  """Setup the gData client.
+
+  Checkout necessary files from the gData client using mercury, if they
+  don't exist.
+
+  Raises:
+    ClosureError: If the setup fails.
+  """
+  if not os.path.exists('gdata-python-client'):
+    ExecuteCommand(CHECKOUT_GDATA_COMMAND)
+    if not os.path.exists('gdata-python-client'):
+      logging.error('Could not download the gData client.')
+      raise ClosureError('Could not find the gData client.')
+
 
 def main():
   usage = 'usage: %prog [options]'
@@ -225,6 +254,7 @@ def main():
   # Get external resources.
   SetupClosure()
   SetupSelenium()
+  SetupGdata()
   SetupAce()
 
   # Compile the closure scripts.
@@ -237,7 +267,7 @@ def main():
                'popup.soy']
 
   for soy_filename in soy_files:
-    BuildSoyJs(os.path.join('src', soy_filename))
+    BuildSoyJs(os.path.join('src/client', soy_filename))
 
   js_targets = {'background.js': 'background_script.js',
                 'content.js': 'content_script.js',
@@ -248,21 +278,21 @@ def main():
                 'options/page.js': 'options_script.js'}
 
   for target in js_targets:
-    BuildClosureScript(os.path.join('src', target),
+    BuildClosureScript(os.path.join('src/client', target),
                        os.path.join('build', js_targets[target]))
 
   # Copy over the static resources
   if os.path.exists('build/styles'):
     shutil.rmtree('build/styles')
-  shutil.copytree('src/styles', 'build/styles')
+  shutil.copytree('src/client/styles', 'build/styles')
   if os.path.exists('build/imgs'):
     shutil.rmtree('build/imgs')
-  shutil.copytree('src/imgs', 'build/imgs')
-  static_files = ['src/background.html',
-                  'src/console.html',
-                  'src/options/options.html',
-                  'src/popup.html',
-                  'manifest.json']
+  shutil.copytree('src/client/imgs', 'build/imgs')
+  static_files = ['src/client/background.html',
+                  'src/client/console.html',
+                  'src/client/options/options.html',
+                  'src/client/popup.html',
+                  'src/client/manifest.json']
   for static_file in static_files:
     shutil.copy(static_file, 'build')
 
@@ -271,7 +301,9 @@ def main():
     shutil.rmtree('build/ace')
   shutil.copytree('ace/build/src', 'build/ace')
 
+  # Copy gData files to the server.
+  shutil.copytree('gdata-python-client/src/gdata', 'src/server/gdata')
+  shutil.copytree('gdata-python-client/src/atom', 'src/server/atom')
 
 if __name__ == '__main__':
   main()
-

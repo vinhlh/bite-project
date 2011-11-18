@@ -1,0 +1,738 @@
+/**
+ * Copyright 2011 Google, Inc. All Rights Reserved
+ *
+ * @author phu@google.com (Po Hu)
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+/** Reset css. */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+body,body input,body button,body td {
+  font-family: /*"Open Sans",*/"Arial", "Helvetica", sans-serif;
+  color: #222;
+  font-size:13px;
+}
+
+/** End reset css. */
+
+/** Prevent odd scroll bars. */
+body {
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+/* ACE requires that the editor container have a specified height and width. */
+#scriptsContainer {
+  background: white;
+  font-size: 14px;
+  height: 648px;
+  overflow: hidden;
+  position: relative;
+  width: 498px;
+}
+
+/** Styles for the ACE gutter. */
+.ace_rpf-gutter-running {
+  background-image: url("../imgs/rpf/running-arrow.png");
+  background-repeat: no-repeat;
+  background-position: 4px center;
+}
+
+.ace_rpf-gutter-passing {
+  background-image: url("../imgs/rpf/step-passed-16.png");
+  background-repeat: no-repeat;
+  background-position: 4px center;
+}
+
+.ace_rpf-gutter-failing {
+  background-image: url("../imgs/rpf/step-issue-16.png");
+  background-repeat: no-repeat;
+  background-position: 4px center;
+}
+
+/** ACE scrollbar. */
+.ace_editor ::-webkit-scrollbar {
+  background: transparent;
+  /* The ACE editor expects a scrollbar of width 15px. */
+  height: 15px;
+  overflow: visible;
+  width: 15px;
+}
+
+.ace_editor ::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  -webkit-border-radius: 7px;
+}
+
+.ace-editor ::-webkit-scrollbar-thumb:hover {
+  background-color: rbga(0, 0, 0, 0.3);
+}
+
+.ace_editor ::-webkit-scrollbar-button {
+  display: none;
+}
+
+.ace_editor ::-webkit-scrollbar-track {
+  background: #eee;
+  border: 0;
+}
+
+/** Styles for the More Info Panel. */
+#rpf-project-info,
+#rpf-content-map {
+  background: #fafafa;
+  border-bottom: 1px solid #d5d5d5;
+  height: 160px;
+  padding: 1px 8px;
+}
+
+#datafileContainer {
+  height: 100%;
+  resize: none;
+}
+
+/** General styles for the container. */
+.rpf-container {
+}
+
+.rpf-footer {
+  background: whiteSmoke;
+  border-top: 1px solid #ccc;
+  -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 3px;
+  height: 60px;
+  overflow: hidden;
+}
+
+.rpf-footer img {
+  float: left;
+  padding: 7px;
+}
+
+#statusLog {
+  padding: 3px;
+}
+
+/** Styles for forms */
+form td {
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+form legend {
+  font-weight: bold;
+}
+
+form div {
+  padding: 2px;
+}
+
+form ul {
+  list-style-type: none;
+}
+
+ul label {
+  display: inline-block;
+  font-weight: normal;
+  min-width: 150px;
+  padding: 4px;
+}
+
+select {
+  background-color: #ddd;
+  height: 23px;
+  margin: 0;
+}
+
+.rpf-textarea-container {
+  padding: 4px;
+}
+
+textarea {
+  background: #fff;
+  border: 1px solid transparent;
+  width: 100%;
+}
+
+textarea:focus {
+  border: 1px solid #4d90fe;
+  outline: 0;
+}
+
+input[type=text] {
+  border: 1px solid #d9d9d9;
+  border-top: 1px solid silver;
+  display: inline-block;
+  -webkit-border-radius: 1px;
+  -moz-border-radius: 1px;
+  border-radius: 1px;
+  color: #333;
+  padding-left: 8px;
+}
+
+form input[type=text] {
+  width: 100%;
+}
+
+input[type=text]:focus {
+  border: 1px solid #4d90fe;
+  outline: 0;
+}
+
+.goog-toolbar:focus {
+  outline: 1px solid #4d90fe;
+}
+
+/** Dialog box styles. */
+/* modal-dialog-* are overrides for goog.ui display defaults. */
+.modal-dialog {
+  border: 1px solid #666;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  color: #000;
+  position: absolute;
+  left: 0;
+  right: 0;
+  max-height: 80%;
+  overflow: hidden;
+  z-index: 2002;
+}
+
+.modal-dialog a,
+.modal-dialog a:link,
+.modal-dialog a:visited  {
+  color: #06c;
+  cursor: pointer;
+}
+
+.modal-dialog-bg {
+  background: #666;
+  left: 0;
+  position: absolute;
+  top: 0;
+  z-index: 1000;
+}
+
+.modal-dialog-title {
+  background: whiteSmoke;
+  border-bottom: 1px solid #ccc;
+  color: #000;
+  cursor: pointer;
+  font-size: 120%;
+  font-weight: bold;
+  /* Add padding on the right to ensure the close button has room. */
+  padding: 8px 31px 8px 8px;
+  position: relative;
+}
+
+.modal-dialog-title-close:before {
+  content: '\2715';
+}
+
+.modal-dialog-title-close {
+  color: #666;
+  cursor: default;
+  height: 15px;
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  width: 15px;
+  vertical-align: middle;
+}
+
+.modal-dialog-title-close:hover {
+  color: black;
+}
+
+.modal-dialog-buttons,
+.modal-dialog-content {
+  background-color: #fff;
+  padding: 8px;
+}
+
+.modal-dialog-content {
+  overflow: auto;
+}
+
+/** Closure style overrides. We do not import any of the closure css. */
+.goog-inline-block {
+  display: inline-block;
+  position: relative;
+}
+
+.goog-menu {
+  background: #fff;
+  border-color: #ccc #666 #666 #ccc;
+  border-style: solid;
+  border-width: 1px;
+  cursor: default;
+  font: normal 13px Arial, sans-serif;
+  margin: 0;
+  outline: none;
+  padding: 4px 0;
+  position: absolute;
+  z-index: 20000; /* Arbitrary, but some apps depend on it... */
+}
+
+.goog-menuitem {
+  color: #000;
+  list-style: none;
+  margin: 0;
+  /* 28px on the left for icon or checkbox; 7em on the right for shortcut. */
+  padding: 4px 7em 4px 28px;
+  white-space: nowrap;
+}
+
+.goog-menuitem-highlight,
+.goog-menuitem-hover {
+  background-color: #F1F1F1;
+  border-color: #d6e9f8;
+  border-style: dotted;
+  border-width: 1px 0;
+  padding-bottom: 3px;
+  padding-top: 3px;
+}
+
+.goog-toolbar {
+  background: #fafafa;
+  border-bottom: 1px solid #d5d5d5;
+  padding: 2px;
+}
+
+.goog-toolbar-button,
+.goog-custom-button,
+.goog-menu-button,
+.goog-toolbar-menu-button {
+  border: 1px solid transparent;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: px;
+  color: #333;
+  font-size: 11px;
+  font-weight: bold;
+  height: 24px;
+  list-style: none;
+  padding: 2px;
+  text-decoration: none;
+  vertical-align: middle;
+}
+
+.goog-toolbar-button-selected {
+  border: 1px solid #ccc;
+  background-color: #eee;
+  background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
+  box-shadow: inset 0px 1px 2px rbga(0, 0, 0, 0.1);
+}
+
+.goog-toolbar-button-hover {
+  border: 1px solid #c6c6c6;
+  box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.goog-toolbar-separator {
+  margin: 0 2px;
+  border-left: 1px solid #d6d6d6;
+  border-right: 1px solid #f7f7f7;
+  padding: 0;
+  width: 0;
+  text-decoration: none;
+  list-style: none;
+  outline: none;
+  vertical-align: middle;
+  line-height: normal;
+  font-size: 120%;
+  overflow: hidden;
+}
+
+.goog-menu-button,
+.goog-toolbar-menu-button,
+.goog-custom-button {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background-color: whiteSmoke;
+  height: 20px;
+  line-height: 20px;
+  padding: 2px 6px;
+  margin: 0 5px;
+}
+
+.goog-menu-button:hover,
+.goog-toolbar-menu-button:hover,
+.goog-custom-button:hover {
+  border: 1px solid #c6c6c6;
+  color: #222;
+  backgorund-color: #f8f8f8;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.goog-menu-button-dropdown,
+.goog-toolbar-menu-button-dropdown {
+  background: url('../imgs/rpf/downbtn.png');
+  background-position: center;
+  padding: 0 3px;
+  width: 7px;
+}
+
+/** Specific styles. */
+
+.centered-div {
+  text-align: center;
+}
+
+.rpf-left-panel {
+  float: left;
+}
+
+#stopAllTests {
+  float: right;
+}
+
+.rpf-right-panel {
+  text-align: center;
+}
+
+/* TODO(ralphj): Determine what below is used. */
+.console-save-dialog-local-div {
+  width: 47%;
+  float: left;
+  text-align: right;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline;
+}
+
+.console-save-dialog-div-text {
+  font-size: 12px;
+  font-weight: bold;
+  display: inline;
+}
+
+.console-div-text {
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.console-save-dialog-web-div {
+  width: 47%;
+  float: right;
+  text-align: left;
+  font-size: 12px;
+  font-weight: bold;
+  display: inline;
+}
+
+.console-save-dialog-button-div {
+  text-align: center;
+  display: block;
+}
+
+.console-save-dialog-button-img {
+  width: 20;
+  height: 20;
+}
+
+.console-play-dialog-current-step {
+  margin-left: 10px;
+  border: 1px solid #c9d7f1;
+  width: 30px;
+  color: #a00;
+}
+
+.console-play-dialog-status {
+  height: 30px;
+  text-align: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  color: red
+}
+
+.console-validate-dialog-block-radio-div {
+  width: 30%;
+  float: left;
+  text-align: right;
+  display: inline
+}
+
+.console-details-div-screen {
+  text-align: center;
+  padding: 5px
+}
+
+.console-details-div-screen-img {
+  padding: 1px;
+  border:1px solid #021a40;
+  background-color:#ff0;
+}
+
+.console-details-div-toolbar {
+  text-align: center;
+  padding-bottom: 5px
+}
+
+.console-details-div-translation {
+  text-align: center;
+  padding-bottom: 10px
+}
+
+.console-details-div-editor {
+  text-align: center;
+  width: 70%;
+}
+
+.export-content-canvas {
+  padding: 4px;
+}
+
+.export-label {
+  font-size: 9pt;
+  margin-left: 8px;
+  width: 85px;
+}
+
+.export-heading {
+  border-bottom: 2px solid #66c;
+  color: #444;
+  font-size: 11pt;
+  margin-bottom: 4px;
+  width: 100%;
+}
+
+.export-data {
+  border: 1px solid #ccc;
+  font-size: 10pt;
+  height: 100px;
+  overflow-y: scroll;
+  margin-left: 8px;
+  margin-bottom: 8px;
+  vertical-align: middle;
+}
+
+.export-table-data {
+  font-size: 9pt;
+}
+
+.console-loaddialog-content-table {
+  width: 100%;
+  height: 100%;
+}
+
+.console-loaddialog-content-table-div {
+  height: 100%;
+  width: 100%;
+  display: block;
+  overflow-y: auto;
+}
+
+.console-loaddialog-content-table-select {
+  width: 100%;
+  height: 100%;
+}
+
+.console-attributes-description-div {
+  color: orange;
+  font-size: 14px
+}
+
+.console-attributes-row-div {
+  font-size: 12px;
+  font-weight:bold;
+  text-align:center
+}
+
+.console-playdialog-playcurstep {
+  display: inline;
+  margin-left:5px
+}
+
+.console-playdialog-comments-div {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.console-playdialog-status-div {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  color: red;
+}
+
+.console-playdialog-match-html {
+  text-align: center;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.console-playdialog-comment-box {
+  display:inline;
+  height: 50px;
+  width: 300px;
+}
+
+.console-playdialog-comment-area {
+  font-size: 12px;
+  padding: 2px;
+  background-image: -webkit-gradient(
+                  linear,
+                  left bottom,
+                  left top,
+                  color-stop(0.3, rgb(105,158,255)),
+                  color-stop(0.3, rgb(110,158,255)),
+                  color-stop(0.9, rgb(255,255,255)));
+}
+
+/* Dialogs */
+div.section-title {
+  font-size: 9pt;
+  font-weight: bold;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+div.content-canvas {
+  padding: 4px;
+}
+
+td.dialog-label {
+  width: 80px;
+}
+
+label.dialog-label {
+  font-size: 9pt;
+  margin-left: 8px;
+}
+
+input.dialog-text {
+  width: 100%;
+}
+
+input.dialog-option {
+  margin-left: 12px;
+}
+
+div.option-row {
+  margin-bottom: 4px;
+}
+
+span.option-label {
+}
+
+span.option-note {
+  font-style: italic;
+  font-size: 8pt;
+}
+
+td.status-logger {
+  margin-top: 5px;
+  margin-bottom: 8px;
+  margin-left: 10px;
+  height: 60px;
+  word-wrap: break-word;
+  vertical-align: middle;
+  font-weight: bold;
+  font-size: 13px;
+}
+
+input.console-menu-button {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.ac-renderer {
+  background: white;
+  outline: 1px solid rgba(0, 0, 0, 0.2);
+  padding: 0 0 6px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  font: normal 14px Arial, sans-serif;
+  position: absolute;
+  width: 300px;
+  z-index: 3000;
+}
+
+/* Autocomplete styles */
+.ac-row {
+  cursor: pointer;
+  line-height: 24px;
+  padding: .4em;
+  z-index: 3000;
+}
+
+.ac-row:hover {
+  background: #eee;
+  z-index: 3000;
+}
+
+.ac-highlighted {
+  font-weight: bold;
+  z-index: 3000;
+}
+
+.ac-active {
+  z-index: 3000;
+}
+
+.goog-tab-bar {
+  border-bottom: 1px solid #ccc;
+  height: 28px;
+  outline: 0;
+}
+
+.goog-tab {
+  display: inline-block;
+  min-width: 54px;*min-width:70px;/*hello,IE7!*/
+  text-align: center;
+  color: #666;
+  font-size: 11px;
+  font-weight: bold;
+  height: 27px;
+  padding: 0 8px;
+  line-height: 27px;
+  -webkit-transition: all 0.218s;
+  -moz-transition: all 0.218s;
+  -o-transition: all 0.218s;
+  transition: all 0.218s;
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#f5f5f5',EndColorStr='#f1f1f1');
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  cursor: default;
+  border: 1px solid transparent;
+}
+
+.goog-tab-selected {
+  color: #202020;
+  border: 1px solid #ccc;
+  border-bottom: 1px solid #fff;
+}
+
+.goog-tab:hover {
+  color: #222;
+}
+
+.goog-tab:active {
+  color: #333;
+}
+
+.componentName {
+  color: #DD4B39;
+  text-align: left;
+  padding-bottom: 4px;
+}
+
