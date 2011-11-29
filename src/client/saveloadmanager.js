@@ -33,9 +33,9 @@ goog.require('rpf.StatusLogger');
 rpf.SaveLoadManager = function(scriptMgr, sendMessageToConsole,
     eventMgrListener) {
   this.scriptMgr_ = scriptMgr;
+
   // TODO(phu): Put the test data in get method.
   this.server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-
 
   /**
    * The function to send message to console world.
@@ -128,7 +128,8 @@ rpf.SaveLoadManager.prototype.getProject = function(name, userId,
       var jsonObj = this.getResponseJson();
       jsonObj['userId'] = userId;
       jsonObj['name'] = name;
-      sendResponse({'jsonObj': jsonObj});
+      sendResponse({'jsonObj': jsonObj,
+                    'location': 'web'});
     } else {
       sendResponse({'jsonObj': {'error': true}});
     }
@@ -219,20 +220,18 @@ rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
     params['jsFiles'] = opt_userLib;
   }
   var parameters = goog.Uri.QueryData.createFromMap(params).toString();
-  var that = this;
-  console.log(' Save Request: ' + requestUrl + '   ' + parameters);
-  goog.net.XhrIo.send(requestUrl, function() {
-    if (this.isSuccess()) {
-      var idStr = this.getResponseText().split('=')[1];
-      console.log('Created a new test in cloud successfully.');
+
+  goog.net.XhrIo.send(requestUrl, goog.bind(function(e) {
+    var xhr = e.target;
+    if (xhr.isSuccess()) {
+      var idStr = xhr.getResponseText().split('=')[1];
       if (opt_callback) {
         opt_callback({'message': rpf.StatusLogger.SAVE_SUCCESS,
                       'color': 'green'});
       }
-      that.getJsonFromWTF(idStr, rpf.MiscHelper.Modes.CONSOLE, null, null,
-          opt_noConsole);
+      this.getJsonFromWTF(idStr, null);
       if (screens) {
-        that.saveScreens_(idStr, screens);
+        this.saveScreens_(idStr, screens);
       }
     } else {
       if (opt_callback) {
@@ -240,9 +239,9 @@ rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
                       'color': 'red'});
       }
       throw new Error('Failed to create the new test. Error status: ' +
-                      this.getStatus());
+                      xhr.getStatus());
     }
-  }, 'POST', parameters);
+  }, this), 'POST', parameters);
 };
 
 
@@ -300,22 +299,23 @@ rpf.SaveLoadManager.prototype.updateTestOnWeb = function(
     params['jsFiles'] = opt_userLib;
   }
   var parameters = goog.Uri.QueryData.createFromMap(params).toString();
-  goog.net.XhrIo.send(requestUrl, function() {
-    if (this.isSuccess()) {
-      console.log('Updated the test in cloud successfully.');
+  goog.net.XhrIo.send(requestUrl, goog.bind(function(e) {
+    var xhr = e.target;
+    if (xhr.isSuccess()) {
       if (opt_callback) {
         opt_callback({'message': rpf.StatusLogger.SAVE_SUCCESS,
                       'color': 'green'});
       }
+      this.getJsonFromWTF(jsonId, null);
     } else {
       if (opt_callback) {
         opt_callback({'message': rpf.StatusLogger.SAVE_FAILED,
                       'color': 'red'});
       }
       throw new Error('Failed to update the test. Error status: ' +
-                      this.getStatus());
+                      xhr.getStatus());
     }
-  }, 'POST', parameters);
+  }, this), 'POST', parameters);
   if (screens) {
     this.saveScreens_(jsonId, screens);
   }
@@ -325,29 +325,14 @@ rpf.SaveLoadManager.prototype.updateTestOnWeb = function(
 /**
  * Updates an existing test in the cloud.
  * @param {string} jsonId the test id.
- * @param {rpf.MiscHelper.Modes} mode the RPF mode.
- * @param {boolean=} opt_forHelper Whether return the obj directly.
  * @param {Function=} opt_callback The optional callback function.
- * @param {boolean=} opt_noConsole Whether recording is done not or from rpf
- *     Console UI.
  * @export
  */
-rpf.SaveLoadManager.prototype.getJsonFromWTF = function(
-    jsonId, mode, opt_forHelper, opt_callback, opt_noConsole) {
-  console.log('Get Test from tests depot with mode:' + mode);
-  opt_noConsole = !!opt_noConsole;
+rpf.SaveLoadManager.prototype.getJsonFromWTF = function(jsonId, opt_callback) {
   var requestUrl = rpf.MiscHelper.getUrl(
       this.server,
       rpf.SaveLoadManager.STORAGE_SERVER_PATH_ + '/gettestasjson',
       {'id': jsonId});
-
-  // Send recording link into content script.
-  var recording_link = requestUrl;
-  chrome.tabs.getSelected(null, function(tab) {
-    chrome.tabs.sendRequest(tab.id,
-        {'action': Bite.Constants.HUD_ACTION.GET_RECORDING_LINK,
-         'recording_link': recording_link});
-  });
 
   goog.net.XhrIo.send(requestUrl, goog.bind(function(e) {
     var xhr = e.target;
@@ -362,26 +347,15 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(
       this.scriptMgr_.parseJsonObj(jsonObjprop);
       this.scriptMgr_.idOnWeb = jsonObj[0].id;
 
-      if (rpf.MiscHelper.Modes.CONSOLE == mode) {
-        if (!opt_noConsole) {
-          this.sendMessageToConsole_(
-              {'command': Bite.Constants.UiCmds.UPDATE_SCRIPT_INFO,
-               'params': {'name': jsonObjprop['name'],
-                          'url': jsonObjprop['url'],
-                          'script': jsonObjprop['script'],
-                          'datafile': jsonObjprop['datafile'],
-                          'userlib': jsonObjprop['userlib'],
-                          'id': jsonId,
-                          'projectname': jsonObjprop['projectname']}});
-        }
-      } else if (rpf.MiscHelper.Modes.WORKER == mode) {
-        if (opt_callback) {
-          opt_callback(jsonObjprop['url'],
-                       jsonObjprop['script'],
-                       jsonObjprop['datafile'],
-                       jsonObjprop['userlib']);
-        }
-      }
+      this.sendMessageToConsole_(
+          {'command': Bite.Constants.UiCmds.UPDATE_SCRIPT_INFO,
+           'params': {'name': jsonObjprop['name'],
+                      'url': jsonObjprop['url'],
+                      'script': jsonObjprop['script'],
+                      'datafile': jsonObjprop['datafile'],
+                      'userlib': jsonObjprop['userlib'],
+                      'id': jsonId,
+                      'projectname': jsonObjprop['projectname']}});
     } else {
       console.log(requestUrl + 'not successful...');
       if (opt_callback) {
@@ -390,21 +364,20 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(
       }
     }
   }, this));
-  if (rpf.MiscHelper.Modes.CONSOLE == mode && !opt_noConsole) {
-    requestUrl = rpf.MiscHelper.getUrl(
-        rpf.SaveLoadManager.STEPS_DEPOSIT_SERVER_,
-        '/requests',
-        {'cmd': '24',
-         'id': jsonId});
-    var that = this;
-    goog.net.XhrIo.send(requestUrl, function() {
-      console.log('Got Test with mode:' + mode);
-      var jsonObj = this.getResponseJson();
-      that.sendMessageToConsole_(
-          {'command': Bite.Constants.UiCmds.RESET_SCREENSHOTS,
-           'params': {'screenshots': jsonObj}});
-    });
-  }
+
+  // Saves the screenshots to server.
+  requestUrl = rpf.MiscHelper.getUrl(
+      rpf.SaveLoadManager.STEPS_DEPOSIT_SERVER_,
+      '/requests',
+      {'cmd': '24',
+       'id': jsonId});
+  var that = this;
+  goog.net.XhrIo.send(requestUrl, function() {
+    var jsonObj = this.getResponseJson();
+    that.sendMessageToConsole_(
+        {'command': Bite.Constants.UiCmds.RESET_SCREENSHOTS,
+         'params': {'screenshots': jsonObj}});
+  });
 };
 
 
@@ -419,14 +392,15 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(
  * @param {Object} screenshots The img data url.
  * @param {boolean} noConsole Whether it's called not or from rpf
  *     Console UI.
+ * @param {string} scriptId The script id.
  * @param {function(Object)} sendResponse The response function.
  * @export
  */
 rpf.SaveLoadManager.prototype.updateOnWeb = function(
     name, url, script, datafile, userLib, projectName,
-    screenshots, noConsole, sendResponse) {
+    screenshots, noConsole, scriptId, sendResponse) {
   // Tests are saved as new all the time, if recorded not from rpf Console UI.
-  if (this.scriptMgr_.idOnWeb && !noConsole) {
+  if (scriptId && !noConsole) {
     this.updateTestOnWeb(
         name,
         this.scriptMgr_.createJsonObj(
@@ -491,11 +465,12 @@ rpf.SaveLoadManager.prototype.saveJsonLocally = function(
     var allEntries = this.getAllLocalProjects_(projectName);
     allEntries[projectName]['tests'][jsonName] = jsonObj;
     this.updateLocalProjectDetails_(
-        allEntries[projectName], {'js_files': userLib});
+        allEntries[projectName], {'js_files': userLib, 'name': projectName});
     goog.global.localStorage[rpf.SaveLoadManager.LOCAL_STORAGE_NAME_] =
         goog.json.serialize(allEntries);
     callback({'message': rpf.StatusLogger.SAVE_SUCCESS,
               'color': 'green'});
+    this.getJsonLocally(jsonName, projectName, goog.nullFunction);
   } catch (e) {
     callback({'message': rpf.StatusLogger.SAVE_FAILED,
               'color': 'red'});
@@ -514,8 +489,19 @@ rpf.SaveLoadManager.prototype.updateLocalProjectDetails_ = function(
   if (!project['project_details']) {
     project['project_details'] = {};
   }
+  if (!project['project_details']['page_map']) {
+    project['project_details']['page_map'] = {};
+  }
+  if (!project['project_details']['java_package_path']) {
+    project['project_details']['java_package_path'] = '';
+  }
   for (var key in details) {
-    project['project_details'][key] = goog.json.parse(details[key]);
+    // js_files is in the format of JSON string, need to parse it first.
+    if (key == 'js_files') {
+      project['project_details'][key] = goog.json.parse(details[key]);
+    } else {
+      project['project_details'][key] = details[key];
+    }
   }
 };
 
@@ -580,7 +566,8 @@ rpf.SaveLoadManager.prototype.getLocalProject = function(
       'test': tests[test]});
   }
   project['tests'] = testMetaArr;
-  sendResponse({'jsonObj': project});
+  sendResponse({'jsonObj': project,
+                'location': 'local'});
 };
 
 
@@ -630,7 +617,8 @@ rpf.SaveLoadManager.prototype.saveProjectLocally = function(
     goog.global.localStorage[rpf.SaveLoadManager.LOCAL_STORAGE_NAME_] =
         goog.json.serialize(allEntries);
     callback({'message': 'Saved the project to localStorage successfully.',
-              'color': 'green'});
+              'color': 'green',
+              'project': projectName});
   } catch (exception) {
     callback({'message': 'Failed to save the project to localStorage.',
               'color': 'red'});

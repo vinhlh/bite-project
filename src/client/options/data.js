@@ -187,6 +187,8 @@ bite.options.data.validate = function(id, value) {
     case bite.options.constants.Id.AUTO_RECORD:
     case bite.options.constants.Id.FEATURES_BUGS:
     case bite.options.constants.Id.FEATURES_RPF:
+    case bite.options.constants.Id.FEATURES_REPORT:
+    case bite.options.constants.Id.FEATURES_CLOSE:
     case bite.options.constants.Id.FEATURES_TESTS:
       bite.options.data.validateCheckbox_(value, id);
       break;

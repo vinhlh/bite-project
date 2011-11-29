@@ -25,6 +25,7 @@ goog.provide('rpf.ConsoleManager.ModeInfo');
 
 goog.require('Bite.Constants');
 goog.require('bite.base.Helper');
+goog.require('bite.closure.Helper');
 goog.require('bite.client.Templates.rpfConsole');
 goog.require('bite.console.Helper');
 goog.require('bite.locators.Updater');
@@ -38,6 +39,8 @@ goog.require('goog.positioning.ClientPosition');
 goog.require('goog.positioning.Corner');
 goog.require('goog.string');
 goog.require('goog.style');
+goog.require('goog.ui.LabelInput');
+goog.require('goog.ui.MenuItem');
 goog.require('goog.ui.Option');
 goog.require('goog.ui.Toolbar');
 goog.require('goog.ui.ToolbarButton');
@@ -60,6 +63,7 @@ goog.require('rpf.SettingDialog');
 goog.require('rpf.StatusLogger');
 goog.require('rpf.Tests');
 goog.require('rpf.ValidateDialog');
+goog.require('rpf.soy.Dialog');
 
 
 
@@ -164,14 +168,7 @@ rpf.ConsoleManager = function(opt_noConsole) {
    * @type {Array.<string>}
    * @private
    */
-  this.projectNamesWeb_ = [];
-
-  /**
-   * Project names in local.
-   * @type {Array.<string>}
-   * @private
-   */
-  this.projectNamesLocal_ = [];
+  this.projectNames_ = [];
 
   if (!this.noConsole_) {
     this.init_();
@@ -189,8 +186,13 @@ rpf.ConsoleManager.prototype.init_ = function() {
 
   var toolbar = new goog.ui.Toolbar();
 
+  this.setButton(rpf.ConsoleManager.Buttons.ADD_TEST,
+                 'Add a new script',
+                 toolbar,
+                 Bite.Constants.UiCmds.ADD_NEW_TEST);
+
   this.setButton(rpf.ConsoleManager.Buttons.LOAD,
-                 'Load your script',
+                 'Toggle Project/Script panel',
                  toolbar,
                  Bite.Constants.UiCmds.LOAD_CMDS);
 
@@ -198,8 +200,9 @@ rpf.ConsoleManager.prototype.init_ = function() {
                  'Save your script',
                  toolbar,
                  Bite.Constants.UiCmds.SHOW_SAVE_DIALOG);
+
   this.setButton(rpf.ConsoleManager.Buttons.EXPORT,
-                 'Export a project',
+                 'Project details',
                  toolbar,
                  Bite.Constants.UiCmds.SHOW_EXPORT);
 
@@ -221,7 +224,7 @@ rpf.ConsoleManager.prototype.init_ = function() {
   toolbar.addChild(new goog.ui.ToolbarSeparator(), true);
 
   this.setButton(rpf.ConsoleManager.Buttons.NOTES,
-                 'Show additional script info',
+                 'Show custom Javascript functions',
                  toolbar,
                  Bite.Constants.UiCmds.SHOW_NOTES);
   this.setButton(rpf.ConsoleManager.Buttons.INFO,
@@ -236,10 +239,6 @@ rpf.ConsoleManager.prototype.init_ = function() {
                  'Show the quick command dialog',
                  toolbar,
                  Bite.Constants.UiCmds.SHOW_QUICK_CMDS);
-  this.setButton(rpf.ConsoleManager.Buttons.VALIDATE,
-                 'Switch to validation mode',
-                 toolbar,
-                 Bite.Constants.UiCmds.START_VALIDATE);
   this.setButton(rpf.ConsoleManager.Buttons.WORKER,
                  'Switch to worker mode',
                  toolbar,
@@ -255,10 +254,6 @@ rpf.ConsoleManager.prototype.init_ = function() {
                  'Show the content map',
                  toolbar,
                  Bite.Constants.UiCmds.TOGGLE_CONTENT_MAP);
-  this.setButton(rpf.ConsoleManager.Buttons.PROJECT_INFO,
-                 'Show more detailed project info',
-                 toolbar,
-                 Bite.Constants.UiCmds.TOGGLE_PROJECT_INFO);
 
   toolbar.addChild(new goog.ui.ToolbarSeparator(), true);
 
@@ -270,14 +265,15 @@ rpf.ConsoleManager.prototype.init_ = function() {
   // Allow the content map and project info buttons to have a 'selected' state.
   this.btns_[rpf.ConsoleManager.Buttons.CONTENT_MAP].setSupportedState(
       goog.ui.Component.State.SELECTED, true)
-  this.btns_[rpf.ConsoleManager.Buttons.PROJECT_INFO].setSupportedState(
+  this.btns_[rpf.ConsoleManager.Buttons.LOAD].setSupportedState(
       goog.ui.Component.State.SELECTED, true)
 
   this.modeSelector_ = this.getModeSelector_();
   toolbar.render(goog.dom.getElement('console_toolbar'));
 
   this.changeMode(Bite.Constants.ConsoleModes.IDLE);
-  this.getProjectNames_();
+
+  this.checkLocationAndSetProjects_();
 
   goog.events.listen(
       window,
@@ -294,6 +290,16 @@ rpf.ConsoleManager.prototype.init_ = function() {
                 Bite.Constants.UiCmds.ON_KEY_UP,
                 {}));
 
+  goog.events.listen(
+      goog.dom.getElement('location-local'),
+      'click',
+      goog.bind(this.checkLocationAndSetProjects_, this));
+
+  goog.events.listen(
+      goog.dom.getElement('location-web'),
+      'click',
+      goog.bind(this.checkLocationAndSetProjects_, this));
+
   goog.global.window.focus();
   chrome.extension.onRequest.addListener(
       goog.bind(this.makeConsoleCall, this));
@@ -306,15 +312,18 @@ rpf.ConsoleManager.prototype.init_ = function() {
 
 
 /**
- * Get project names.
+ * Checks the location and set the project names.
  * @private
  */
-rpf.ConsoleManager.prototype.getProjectNames_ = function() {
+rpf.ConsoleManager.prototype.checkLocationAndSetProjects_ = function() {
+  var location = this.loaderDialog_.getStorageLocation();
+  var command = location == rpf.LoaderDialog.Locations.WEB ?
+                Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_WEB :
+                Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_LOCAL;
   this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_LOCAL,
+      {'command': command,
        'params': {}},
-      goog.bind(this.setLocalProjectNames_, this));
-
+      goog.bind(this.setProjectNames_, this));
 };
 
 
@@ -323,26 +332,20 @@ rpf.ConsoleManager.prototype.getProjectNames_ = function() {
  * @param {Object} response The response object.
  * @private
  */
-rpf.ConsoleManager.prototype.setLocalProjectNames_ = function(response) {
-  this.projectNamesLocal_ = response['names'];
-  this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_WEB,
-       'params': {}},
-      goog.bind(this.setWebProjectNames_, this));
+rpf.ConsoleManager.prototype.setProjectNames_ = function(response) {
+  this.projectNames_ = response['names'];
+  this.resetProjectNames_(this.projectNames_);
 };
 
 
 /**
- * Set web project names.
- * @param {Object} response The response object.
+ * Resets the project names.
+ * @param {Array} names The project names.
  * @private
  */
-rpf.ConsoleManager.prototype.setWebProjectNames_ = function(response) {
-  this.projectNamesWeb_ = response['names'];
-  var tempNames = this.projectNamesLocal_.concat(this.projectNamesWeb_);
-  this.loaderDialog_.setProjectAutoComplete(tempNames);
-  this.saveDialog_.setProjectAutoComplete(tempNames);
-  this.exportDialog_.setProjectAutoComplete(tempNames);
+rpf.ConsoleManager.prototype.resetProjectNames_ = function(names) {
+  bite.closure.Helper.removeItemsFromSelector(this.projectSelector_);
+  bite.closure.Helper.addItemsToSelector(this.projectSelector_, names);
 };
 
 
@@ -442,7 +445,10 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
    * @type {rpf.ExportDialog}
    * @private
    */
-  this.exportDialog_ = new rpf.ExportDialog(goog.bind(this.onUiEvents, this));
+  this.exportDialog_ = new rpf.ExportDialog(
+      goog.bind(this.onUiEvents, this),
+      goog.bind(this.changeProject_, this),
+      this.messenger_);
   this.exportDialog_.init();
 
   /**
@@ -459,15 +465,6 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
    * @private
    */
   this.loaderDialog_ = new rpf.LoaderDialog(
-      this.messenger_,
-      goog.bind(this.onUiEvents, this));
-
-  /**
-   * The save dialog.
-   * @type {rpf.SaveDialog}
-   * @private
-   */
-  this.saveDialog_ = new rpf.SaveDialog(
       this.messenger_,
       goog.bind(this.onUiEvents, this));
 
@@ -512,39 +509,164 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
    * @private
    */
   this.infoDialog_ = new rpf.InfoDialog();
+
+  /**
+   * The project selector.
+   * @type {goog.ui.ComboBox}
+   * @private
+   */
+  this.projectSelector_ = null;
+
+  /**
+   * The script selector.
+   * @type {goog.ui.ComboBox}
+   * @private
+   */
+  this.scriptSelector_ = null;
+
+  this.setupProjectInfoUi_();
 };
 
 
 /**
- * The local location.
- * @type {string}
+ * Sets up the project info related UI in the main RPF console.
  * @private
  */
-rpf.ConsoleManager.LOCAL_ = 'local';
+rpf.ConsoleManager.prototype.setupProjectInfoUi_ = function() {
+  this.projectSelector_ = this.createSelector_(
+      [], 'rpf-current-project', 'Enter a project name',
+      goog.bind(this.onProjectChangeHandler_, this));
+  this.scriptSelector_ = this.createSelector_(
+      [], 'testName', 'Enter a script name',
+      goog.bind(this.onScriptChangeHandler_, this));
+  var urlInputCtrl = new goog.ui.LabelInput('Script start URL');
+  var startUrlDiv = goog.dom.getElement('startUrlDiv');
+  urlInputCtrl.render(startUrlDiv);
+  var urlInput = startUrlDiv.querySelector('.label-input-label');
+  urlInput.setAttribute('id', 'startUrl');
+  goog.style.setStyle(urlInput, {'width': '100%'});
+};
 
 
 /**
- * The web location.
- * @type {string}
+ * Loads the tests in the selector.
+ * @param {Function} callback The callback function.
+ * @param {boolean} clearTest Whether clears the test name field.
+ * @param {Array.<string>} names The script names.
+ * @param {Object=} opt_response The response object.
  * @private
  */
-rpf.ConsoleManager.WEB_ = 'web';
+rpf.ConsoleManager.prototype.loadTestsInSelector_ = function(
+    callback, clearTest, names, opt_response) {
+  bite.closure.Helper.removeItemsFromSelector(this.scriptSelector_);
+  bite.closure.Helper.addItemsToSelector(this.scriptSelector_, names);
+  if (clearTest) {
+    this.scriptSelector_.setValue('');
+  }
+  if (opt_response && opt_response['success']) {
+    this.statusLogger_.setStatus(rpf.StatusLogger.LOAD_TEST_SUCCESS, 'green');
+    this.exportDialog_.requestDataComplete(
+        this.getProjectName_(), goog.nullFunction,
+        {'jsonObj': this.loaderDialog_.getCurrentProject()});
+    this.exportDialog_.setLocation(this.loaderDialog_.getStorageLocation());
+    this.messenger_.sendStatusMessage(
+        Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED);
+    callback();
+  } else {
+    this.statusLogger_.setStatus(rpf.StatusLogger.LOAD_TEST_FAILED, 'red');
+  }
+};
 
 
 /**
- * The project names.
- * @type {string}
+ * Changes the project..
+ * @param {boolean=} opt_noCheck Whether it should check for project exists.
+ * @param {Function=} opt_callback The callback function.
  * @private
  */
-rpf.ConsoleManager.PROJECTS_ = 'projectNames';
+rpf.ConsoleManager.prototype.changeProject_ = function(
+    opt_noCheck, opt_callback) {
+  var noCheck = opt_noCheck || false;
+  var callback = opt_callback || goog.nullFunction;
+  var currentProject = this.getProjectName_();
+  if (noCheck ||
+      (currentProject &&
+       goog.array.contains(this.projectNames_, currentProject))) {
+    this.statusLogger_.setStatus(rpf.StatusLogger.LOAD_TEST, '#777');
+    this.loaderDialog_.loadProject(
+        currentProject,
+        goog.bind(this.loadTestsInSelector_, this, callback, true));
+  }
+};
 
 
 /**
- * The number of project names that is saved in localStorage.
- * @type {number}
+ * On project name change handler.
+ * @param {Event} e The change event.
  * @private
  */
-rpf.ConsoleManager.PROJECTS_LENGTH_ = 15;
+rpf.ConsoleManager.prototype.onProjectChangeHandler_ = function(e) {
+  this.changeProject_();
+};
+
+
+/**
+ * On script name change handler.
+ * @private
+ */
+rpf.ConsoleManager.prototype.onScriptChangeHandler_ = function() {
+  var currentScript = this.scriptSelector_.getValue();
+  var id = this.loaderDialog_.getIdByName(currentScript);
+  if (goog.array.contains(this.loaderDialog_.getTestNames(), currentScript)) {
+    this.statusLogger_.setStatus(rpf.StatusLogger.LOAD_TEST, '#777');
+    this.loaderDialog_.loadSelectedTest(
+        goog.bind(this.loadTestCallback_, this),
+        this.getProjectName_(),
+        currentScript);
+  }
+};
+
+
+/**
+ * Creates the project selector for choosing options.
+ * @param {Array} options The options to be showed in selector.
+ * @param {string} id The id of the div where the selector will be rendered.
+ * @param {string} text The default text.
+ * @param {Function} callback The callback function.
+ * @return {goog.ui.ComboBox} The combobox instance.
+ * @private
+ */
+rpf.ConsoleManager.prototype.createSelector_ = function(
+    options, id, text, callback) {
+  var selector_ = new goog.ui.ComboBox();
+  selector_.setUseDropdownArrow(false);
+  selector_.setDefaultText(text);
+  for (var i = 0, len = options.length; i < len; ++i) {
+    var pName = '';
+    var pId = '';
+    if (goog.isString(options[i])) {
+      pName = options[i];
+      pId = options[i];
+    } else {
+      pName = options[i]['name'];
+      pId = options[i]['id'];
+    }
+    var option = new goog.ui.ComboBoxItem(pName);
+    goog.dom.setProperties(/** @type {Element} */ (option), {'id': pId});
+    selector_.addItem(option);
+  }
+  var selectorElem = goog.dom.getElement(id);
+  selector_.render(selectorElem);
+  var inputElem = selectorElem.querySelector('.label-input-label');
+  inputElem.setAttribute('type', 'text');
+  goog.style.setStyle(inputElem, {'width': '62%'});
+  var menuElem = selectorElem.querySelector('.goog-menu');
+  goog.style.setStyle(menuElem, {'max-height': '400px', 'overflow-y': 'auto'});
+  goog.events.listen(
+      selector_, goog.ui.Component.EventType.CHANGE,
+      callback);
+  return selector_;
+};
 
 
 /**
@@ -571,49 +693,6 @@ rpf.ConsoleManager.prototype.onResize_ = function() {
   this.screenshotDialog_.resize();
   this.notesDialog_.resize();
   this.editorMngr_.resize();
-};
-
-
-/**
- * Loads the project names from localStorage.
- * @return {Array} The project names.
- * @private
- */
-rpf.ConsoleManager.prototype.loadProjectNamesFromLocalStorage_ = function() {
-  var projectStr = goog.global.localStorage.getItem(
-      rpf.ConsoleManager.PROJECTS_);
-  if (!projectStr) {
-    return [];
-  }
-  return /** @type {Array} */ (goog.json.parse(projectStr));
-};
-
-
-/**
- * Saves the project names to local storage if the project was successfully
- * loaded. If the project name already exists in the array, it will remove
- * the name first and insert the name in the beginning of the array.
- * @param {string} name The project name.
- * @private
- */
-rpf.ConsoleManager.prototype.saveProjectNamesToLocalStorage_ = function(name) {
-  var projectStr = goog.global.localStorage.getItem(
-      rpf.ConsoleManager.PROJECTS_);
-  if (!projectStr) {
-    var projectNames = [];
-  } else {
-    var projectNames = /** @type {Array} */ (goog.json.parse(projectStr));
-    var index = goog.array.indexOf(projectNames, name);
-    if (index >= 0) {
-      projectNames.splice(index, 1);
-    }
-    projectNames.unshift(name);
-    if (projectNames.length >= rpf.ConsoleManager.PROJECTS_LENGTH_) {
-      projectNames.pop();
-    }
-  }
-  goog.global.localStorage.setItem(
-      rpf.ConsoleManager.PROJECTS_, goog.json.serialize(projectNames));
 };
 
 
@@ -844,20 +923,8 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       this.validationDialog_.displayAllAttributes();
       break;
 
-    // For the export dialog.
-    case Bite.Constants.UiCmds.AUTOMATE_EXPORT_DIALOG_LOAD_PROJECT:
-      this.exportDialog_.automateDialog(params['isWeb'], params['project']);
-      break;
-
-    // For the save dialog.
-    case Bite.Constants.UiCmds.AUTOMATE_DIALOG_SAVE_TEST:
-      this.saveDialog_.automateDialog(params['project'], params['isWeb']);
-      break;
     case Bite.Constants.UiCmds.SAVE_TEST:
       this.saveTest();
-      break;
-    case Bite.Constants.UiCmds.CANCEL_CMDS:
-      this.saveDialog_.cancelCmds();
       break;
 
     // For the quick command dialog.
@@ -868,30 +935,19 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       break;
 
     // For the load dialog.
-    case Bite.Constants.UiCmds.LOAD_SELECTED_TEST:
-      this.statusLogger_.setStatus(rpf.StatusLogger.LOAD_TEST, '#777');
-      this.loaderDialog_.loadSelectedTest(
-          goog.bind(this.loadTestCallback_, this));
-      break;
     case Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_TEST:
-      this.loaderDialog_.automateDialog(
+      this.automateLoadDialog_(
           params['isWeb'],
           params['project'],
           params['test'],
-          goog.bind(this.loadTestCallback_, this));
+          goog.nullFunction);
       break;
     case Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_PROJECT:
-      this.loaderDialog_.automateDialog(
+      this.automateLoadDialog_(
           params['isWeb'],
           params['project'],
           '',
-          goog.bind(this.loadProjectCallback_, this));
-      break;
-    case Bite.Constants.UiCmds.DELETE_SELECTED_TEST:
-      this.loaderDialog_.deleteSelectedTest();
-      break;
-    case Bite.Constants.UiCmds.CANCEL_DIALOG:
-      this.loaderDialog_.cancelDialog();
+          goog.nullFunction);
       break;
     case Bite.Constants.UiCmds.SET_PROJECT_INFO:
       this.setProjectInfo(
@@ -899,12 +955,6 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       break;
 
     // For the main console.
-    case Bite.Constants.UiCmds.LOAD_PROJECT_NAME_INPUT:
-      opt_callback(this.loadProjectNamesFromLocalStorage_());
-      break;
-    case Bite.Constants.UiCmds.SAVE_PROJECT_NAME_INPUT:
-      this.saveProjectNamesToLocalStorage_(params['name']);
-      break;
     case Bite.Constants.UiCmds.SET_CONSOLE_STATUS:
       this.statusLogger_.setStatus(params['message'], params['color']);
       break;
@@ -925,9 +975,6 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
           {'command': Bite.Constants.CONSOLE_CMDS.GET_JSON_FROM_WTF,
            'params': params},
           goog.bind(this.loadTestCallback_, this));
-      break;
-    case Bite.Constants.UiCmds.UPDATE_SCRIPT_AND_DATA:
-      this.updateScriptAndData(params['script'], params['data']);
       break;
     case Bite.Constants.UiCmds.UPDATE_WHEN_ON_FAILED:
       this.setPlaybackPause(params['uiOnly']);
@@ -1037,6 +1084,9 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
     case Bite.Constants.UiCmds.SHOW_SAVE_DIALOG:
       this.showSaveDialog();
       break;
+    case Bite.Constants.UiCmds.ADD_NEW_TEST:
+      this.addNewTest_();
+      break;
     case Bite.Constants.UiCmds.SHOW_SCREENSHOT:
       this.showScreenshot();
       break;
@@ -1048,9 +1098,6 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       break;
     case Bite.Constants.UiCmds.STOP_RECORDING:
       this.stopRecording();
-      break;
-    case Bite.Constants.UiCmds.START_VALIDATE:
-      this.startValidate();
       break;
     case Bite.Constants.UiCmds.START_WORKER_MODE:
       this.startWorkerMode();
@@ -1103,16 +1150,103 @@ rpf.ConsoleManager.Buttons = {
   INFO: 'rpf-info',
   LOAD: 'rpf-loadTest',
   NOTES: 'rpf-notes',
-  PROJECT_INFO: 'rpf-project-info-button',
   RECORD: 'rpf-record',
   REFRESH: 'rpf-refresh',
   SAVE: 'rpf-saveTest',
+  ADD_TEST: 'rpf-addTest',
   SCREEN: 'rpf-screenShots',
   SETTING: 'rpf-setting',
   PLAY: 'rpf-startPlayback',
   STOP: 'rpf-stop',
-  VALIDATE: 'rpf-validate',
   WORKER: 'rpf-workerMode'
+};
+
+
+/**
+ * Automates the load dialog.
+ * @param {boolean} isWeb Whether the location is the web.
+ * @param {string} project The project name.
+ * @param {string} test The test name.
+ * @param {function(Object)} callback The callback function.
+ * @private
+ */
+rpf.ConsoleManager.prototype.automateLoadDialog_ = function(
+    isWeb, project, test, callback) {
+  this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
+  this.setLocation_(isWeb);
+  this.checkLocationAndSetProjects_();
+  this.setProjectName_(project);
+  if (test) {
+    this.changeProject_(
+        true, goog.bind(this.changeProjectCallback_, this, test));
+  } else {
+    this.changeProject_(true);
+  }
+};
+
+
+/**
+ * Adds a new test. This method will clean up the console except the project.
+ * @private
+ */
+rpf.ConsoleManager.prototype.addNewTest_ = function() {
+  this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
+  this.updateScriptInfo(
+      '', '', '', '', '', '', this.getProjectName_());
+  this.screenshotDialog_.getScreenshotManager().clear();
+  this.setStatus('Ready to add new tests.', 'green');
+};
+
+
+/**
+ * Gets the project name from UI.
+ * @return {string} The project name.
+ * @private
+ */
+rpf.ConsoleManager.prototype.getProjectName_ = function() {
+  return this.projectSelector_.getValue();
+};
+
+
+/**
+ * The callback function of changing project.
+ * @param {string} test The test name.
+ * @private
+ */
+rpf.ConsoleManager.prototype.changeProjectCallback_ = function(test) {
+  this.setScriptName_(test);
+  this.onScriptChangeHandler_();
+};
+
+
+/**
+ * Sets the location where the project is loaded from.
+ * @param {boolean} isWeb Whether the location is the web.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setLocation_ = function(isWeb) {
+  goog.dom.getElement('location-local').checked = !isWeb;
+  goog.dom.getElement('location-web').checked = isWeb;
+};
+
+
+/**
+ * Sets the script name.
+ * @param {string} script The script name.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setScriptName_ = function(script) {
+  this.scriptSelector_.setValue(script);
+};
+
+
+/**
+ * Sets the project name.
+ * @param {string} projectName The project name.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setProjectName_ = function(projectName) {
+  this.projectSelector_.setValue(projectName);
 };
 
 
@@ -1171,17 +1305,17 @@ rpf.ConsoleManager.prototype.updateElementAtLine_ = function(
   // steps in the particular test for now. The second case includes
   // while creating a new test and loads a test from web.
   if (this.projectInfo_ && this.projectInfo_.getLoadFrom() ==
-      rpf.ConsoleManager.LOCAL_) {
+      rpf.LoaderDialog.Locations.LOCAL) {
     this.messenger_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.GET_TEST_NAMES_LOCALLY,
-         'params': {'project': this.loaderDialog_.getProjectName()}},
+         'params': {'project': this.getProjectName_()}},
         goog.bind(this.showElementsAfterProjectUpdated_, this,
                   callback, cmdMap, oldXpath));
   } else {
     var data = this.getStepsFromInfoMap_(
         this.getTestName_(), this.infoMap_, oldXpath);
     this.showElementsWithSameXpath_(
-        data, rpf.ConsoleManager.WEB_, callback, cmdMap);
+        data, rpf.LoaderDialog.Locations.WEB, callback, cmdMap);
   }
 };
 
@@ -1199,11 +1333,11 @@ rpf.ConsoleManager.prototype.showElementsAfterProjectUpdated_ = function(
   this.setProjectInfo(
       response['name'],
       response['tests'],
-      rpf.ConsoleManager.LOCAL_,
+      rpf.LoaderDialog.Locations.LOCAL,
       response['details']);
   var data = this.getStepsWithSameXpath_(oldXpath);
   this.showElementsWithSameXpath_(
-      data, rpf.ConsoleManager.LOCAL_, callback, cmdMap);
+      data, rpf.LoaderDialog.Locations.LOCAL, callback, cmdMap);
 };
 
 
@@ -1258,7 +1392,7 @@ rpf.ConsoleManager.prototype.handleReplaceButton_ = function(
     if (selectedSteps[i].checked) {
       var nameAndStep = selectedSteps[i].value.split('___');
       if (this.projectInfo_ && this.projectInfo_.getLoadFrom() ==
-          rpf.ConsoleManager.LOCAL_) {
+          rpf.LoaderDialog.Locations.LOCAL) {
         this.updateElementInTest_(nameAndStep[0], nameAndStep[1], newCmdMap);
       } else {
         this.updateElement_(nameAndStep[1], newCmdMap, this.infoMap_ || {});
@@ -1268,10 +1402,10 @@ rpf.ConsoleManager.prototype.handleReplaceButton_ = function(
   // In this case, we need to load the project from local first to make sure
   // it's the latest code before modifing the tests.
   if (this.projectInfo_ && this.projectInfo_.getLoadFrom() ==
-      rpf.ConsoleManager.LOCAL_) {
+      rpf.LoaderDialog.Locations.LOCAL) {
     this.messenger_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.SAVE_PROJECT_LOCALLY,
-         'params': {'project': {'name': this.loaderDialog_.getProjectName(),
+         'params': {'project': {'name': this.getProjectName_(),
                                 'tests': this.projectInfo_.getTests()}}});
   }
   this.handleCancelButton_(onCancelHandler);
@@ -1483,15 +1617,6 @@ rpf.ConsoleManager.prototype.getExportDialog = function() {
  */
 rpf.ConsoleManager.prototype.getLoaderDialog = function() {
   return this.loaderDialog_;
-};
-
-
-/**
- * @return {rpf.SaveDialog} The save dialog.
- * @export
- */
-rpf.ConsoleManager.prototype.getSaveDialog = function() {
-  return this.saveDialog_;
 };
 
 
@@ -1988,8 +2113,7 @@ rpf.ConsoleManager.prototype.showInfo = function() {
  */
 rpf.ConsoleManager.prototype.showSaveDialog = function() {
   rpf.ConsoleManager.logEvent_('Save', '');
-
-  this.saveDialog_.setVisible(true);
+  this.saveTest();
 };
 
 
@@ -2015,12 +2139,35 @@ rpf.ConsoleManager.prototype.showExportDialog = function() {
 
 /**
  * Opens the tests loader dialog.
- * @export
  */
 rpf.ConsoleManager.prototype.loadCmds = function() {
   rpf.ConsoleManager.logEvent_('Load', '');
+  this.handleInfoPanelButton_(
+      Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
+};
 
-  this.loaderDialog_.setVisible(true);
+
+/**
+ * Gets the script id.
+ * @return {string} The script id.
+ * @private
+ */
+rpf.ConsoleManager.prototype.getScriptId_ = function() {
+  var idElement = goog.dom.getElement(
+    Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID);
+  return idElement.getAttribute('title') || '';
+};
+
+
+/**
+ * Sets the script id.
+ * @param {string} id Sets the id.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setScriptId_ = function(id) {
+  var idElement = goog.dom.getElement(
+      Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID);
+  idElement.setAttribute('title', id);
 };
 
 
@@ -2039,12 +2186,10 @@ rpf.ConsoleManager.prototype.updateScriptInfo = function(
     name, url, script, datafile, userLib, opt_id,
     opt_projectName) {
   var projectName = opt_projectName || '';
-  this.setTestName_(name, false);
-  this.setTestName_(name, true);
-  goog.dom.getElement(Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID).value =
-      opt_id;
-  this.setStartUrl(url);
+  this.setTestName_(name);
+  this.setScriptId_(opt_id || '');
 
+  this.setStartUrl(url);
 
   var result = bite.console.Helper.trimInfoMap(datafile);
   this.setDatafile_(result['datafile']);
@@ -2058,23 +2203,8 @@ rpf.ConsoleManager.prototype.updateScriptInfo = function(
     this.editorMngr_.setReadableCode();
   }
   this.projectInfo_.setProjectName(projectName);
-  goog.dom.getElement(Bite.Constants.RpfConsoleId.CONSOLE_PROJECT_NAME).value =
-      projectName;
-  console.log('  Finished loading up the new script!');
   this.messenger_.sendStatusMessage(
       Bite.Constants.COMPLETED_EVENT_TYPES.FINISHED_LOAD_TEST_IN_CONSOLE);
-};
-
-
-/**
- * Updates script and data in console.
- * @param {string} script The test content.
- * @param {string} data The test input data.
- * @export
- */
-rpf.ConsoleManager.prototype.updateScriptAndData = function(script, data) {
-  this.editorMngr_.setCode(script);
-  this.setDatafile_(data);
 };
 
 
@@ -2138,7 +2268,7 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
         {'command': Bite.Constants.CONSOLE_CMDS.RUN_GROUP_TESTS,
          'params': {'testNames': testNames,
                     'tests': this.projectInfo_.getTests(),
-                    'runName': this.loaderDialog_.getProjectName(),
+                    'runName': this.getProjectName_(),
                     'location': this.loaderDialog_.getStorageLocation()}});
     return;
   }
@@ -2169,7 +2299,7 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
         goog.bind(this.callbackOnStartPlayback_, this));
   } else {
     this.setStatus(
-        'Please check all the additional script info are filled.', 'red');
+        'Please either load or record a script to playback.', 'red');
     throw new Error('Error: Necessary fields were not all filled.');
   }
 };
@@ -2204,13 +2334,12 @@ rpf.ConsoleManager.prototype.startRecording = function(opt_pass) {
   }
 
   if (!this.noConsole_) {
+    this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
     var recordImg = goog.dom.getElement(rpf.ConsoleManager.Buttons.RECORD);
     if (recordImg) {
       var recordGrey =
           recordImg.src.indexOf(rpf.ConsoleManager.Images.RECORD_GREY);
       if (recordGrey == -1) {
-        goog.dom.getElement(rpf.ConsoleManager.Buttons.VALIDATE).src =
-            rpf.ConsoleManager.Images.VALIDATION;
         recordImg.src = rpf.ConsoleManager.Images.RECORD_GREY;
         goog.dom.getElement(rpf.ConsoleManager.Buttons.STOP).src =
             rpf.ConsoleManager.Images.STOP;
@@ -2243,6 +2372,10 @@ rpf.ConsoleManager.prototype.saveTestCallback_ = function(response) {
   this.statusLogger_.setStatus(response['message'], response['color']);
   this.messenger_.sendStatusMessage(
       Bite.Constants.COMPLETED_EVENT_TYPES.TEST_SAVED);
+  // After saving the test, it needs to load the project again to sync up.
+  this.loaderDialog_.loadProject(
+      this.getProjectName_(),
+      goog.bind(this.loadTestsInSelector_, this, goog.nullFunction, false));
 };
 
 
@@ -2254,22 +2387,83 @@ rpf.ConsoleManager.prototype.saveTestCallback_ = function(response) {
 rpf.ConsoleManager.prototype.loadTestCallback_ = function(response) {
   this.statusLogger_.setStatus(response['message'], response['color']);
   this.changeMode(Bite.Constants.ConsoleModes.VIEW);
-  this.loaderDialog_.setVisible(false);
   this.messenger_.sendStatusMessage(
       Bite.Constants.COMPLETED_EVENT_TYPES.TEST_LOADED);
 };
 
 
 /**
- * Callback for loading the project.
- * @param {Object} response The response object.
+ * Removes the redundant data from the ContentMap.
+ * @param {string} datafile The data file.
+ * @param {string} script The script.
+ * @return {string} The new data file.
  * @private
  */
-rpf.ConsoleManager.prototype.loadProjectCallback_ = function(response) {
-  this.statusLogger_.setStatus(response['message'], response['color']);
-  this.loaderDialog_.setVisible(false);
-  this.messenger_.sendStatusMessage(
-      Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED);
+rpf.ConsoleManager.prototype.removeDatafileRedundant_ = function(
+    datafile, script) {
+  if (!datafile || !script) {
+    return datafile;
+  }
+  // Assume each line contains only one data input in the following format:
+  // ContentMap["abc"] = "hello";
+  var dataLines = datafile.split('\n');
+  for (var i = 0, len = dataLines.length; i < len; ++i) {
+    var result = dataLines[i].match(/ContentMap\[\"(.*)\"\]/);
+    if (!result || !result[1]) {
+      continue;
+    }
+    if (script.indexOf(result[1]) == -1) {
+      delete dataLines[i];
+    }
+  }
+  return dataLines.join('\n');
+};
+
+
+/**
+ * Removes the redundant data from the infoMap.
+ * @param {Object} infoMap The info map.
+ * @param {string} script The script.
+ * @param {Object} screenshots The screenshots.
+ * @private
+ */
+rpf.ConsoleManager.prototype.removeInfoMapRedundant_ = function(
+    infoMap, script, screenshots) {
+  if (!infoMap || !infoMap['steps'] || !infoMap['elems']) {
+    return;
+  }
+  var steps = infoMap['steps'];
+  for (var stepId in steps) {
+    if (script.indexOf(stepId) == -1) {
+      var elemId = steps[stepId]['elemId'];
+      if (infoMap['elems'][elemId]) {
+        delete infoMap['elems'][elemId];
+      }
+      if (screenshots[stepId]) {
+        delete screenshots[stepId];
+      }
+      delete steps[stepId];
+    }
+  }
+};
+
+
+/**
+ * Gets the formatted screenshots data.
+ * @return {Object} The screenshots info.
+ * @private
+ */
+rpf.ConsoleManager.prototype.getScreenshots_ = function() {
+  var screenshots = {};
+  var screenshotMgr = this.getScreenshotDialog().getScreenshotManager();
+  var scrShots = screenshotMgr.getScreenshots();
+  var scrSteps = screenshotMgr.getCmdIndices();
+  for (var i = 0; i < scrShots.length; i++) {
+    screenshots[scrSteps[i]] = {};
+    screenshots[scrSteps[i]]['index'] = scrSteps[i];
+    screenshots[scrSteps[i]]['data'] = scrShots[i];
+  }
+  return screenshots;
 };
 
 
@@ -2285,70 +2479,69 @@ rpf.ConsoleManager.prototype.saveTest = function() {
   var userLib = 'userLib';
   var projectName = 'projectName';
   var saveWeb = true;
+  var scriptId = '';
+
+  var screenshots = this.getScreenshots_();
 
   if (!this.noConsole_) {
     testName = this.getTestName_();
-    saveWeb = goog.dom.getElement('webBox').checked;
+    saveWeb = goog.dom.getElement('location-web').checked;
     startUrl = this.getStartUrl();
-    datafile = this.getDatafile_();
-    datafile = bite.console.Helper.appendInfoMap(this.infoMap_, datafile);
-    projectName = goog.dom.getElement(
-        Bite.Constants.RpfConsoleId.CONSOLE_PROJECT_NAME).value;
-    userLib = this.getUserLib();
     scripts = this.editorMngr_.getTempCode() ||
-        this.getEditorManager().getCode();
+              this.getEditorManager().getCode();
+    datafile = this.getDatafile_();
+    // remove info map
+    this.removeInfoMapRedundant_(this.infoMap_, scripts, screenshots);
+    // remove data file
+    datafile = this.removeDatafileRedundant_(datafile, scripts);
+
+    datafile = bite.console.Helper.appendInfoMap(this.infoMap_, datafile);
+    projectName = this.getProjectName_();
+    userLib = this.getUserLib();
+    scriptId = this.getScriptId_();
   }
 
-  var screenshots = {};
-  var screenshotMgr = this.getScreenshotDialog().getScreenshotManager();
-  var scrShots = screenshotMgr.getScreenshots();
-  var scrSteps = screenshotMgr.getCmdIndices();
-  for (var i = 0; i < scrShots.length; i++) {
-    screenshots[scrSteps[i]] = {};
-    screenshots[scrSteps[i]]['index'] = scrSteps[i];
-    screenshots[scrSteps[i]]['data'] = scrShots[i];
+  if (!goog.string.trim(testName) || !goog.string.trim(projectName)) {
+    this.setStatus('Please provide both project and script name.', 'red');
+    this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
+    return;
   }
-  if (goog.string.trim(testName)) {
-    try {
-      if (saveWeb) {
-        this.messenger_.sendMessage(
-            {'command': Bite.Constants.CONSOLE_CMDS.UPDATE_ON_WEB,
-             'params': {'testName': testName,
-                        'startUrl': startUrl,
-                        'scripts': scripts,
-                        'datafile': datafile,
-                        'userLib': userLib,
-                        'projectName': projectName,
-                        'screenshots': screenshots,
-                        'noConsole': this.noConsole_}},
-             goog.bind(this.saveTestCallback_, this));
-      } else {
-        this.messenger_.sendMessage(
-          {'command': Bite.Constants.CONSOLE_CMDS.SAVE_JSON_LOCALLY,
+
+  try {
+    if (saveWeb) {
+      this.messenger_.sendMessage(
+          {'command': Bite.Constants.CONSOLE_CMDS.UPDATE_ON_WEB,
            'params': {'testName': testName,
                       'startUrl': startUrl,
                       'scripts': scripts,
                       'datafile': datafile,
                       'userLib': userLib,
-                      'projectName': projectName}},
-          goog.bind(this.saveTestCallback_, this));
-      }
-      console.log('successfully saved.');
-      // Set status in rpf Console UI.
-      if (!this.noConsole_) {
-        this.statusLogger_.setStatus(rpf.StatusLogger.SAVING, '#777');
-        this.saveDialog_.setVisible(false);
-      }
-    } catch (e) {
-      // Set status in rpf Console UI.
-      if (!this.noConsole_) {
-        this.setStatus('Failed saving because: ' + e.toString(), 'red');
-      }
-      throw new Error(e);
+                      'projectName': projectName,
+                      'screenshots': screenshots,
+                      'scriptId': scriptId,
+                      'noConsole': this.noConsole_}},
+           goog.bind(this.saveTestCallback_, this));
+    } else {
+      this.messenger_.sendMessage(
+        {'command': Bite.Constants.CONSOLE_CMDS.SAVE_JSON_LOCALLY,
+         'params': {'testName': testName,
+                    'startUrl': startUrl,
+                    'scripts': scripts,
+                    'datafile': datafile,
+                    'userLib': userLib,
+                    'projectName': projectName}},
+        goog.bind(this.saveTestCallback_, this));
     }
-  } else {
-    this.setStatus('Please give the script a name first.', 'red');
-    throw new Error('Error: Did not name the test.');
+    // Set status in rpf Console UI.
+    if (!this.noConsole_) {
+      this.statusLogger_.setStatus(rpf.StatusLogger.SAVING, '#777');
+    }
+  } catch (e) {
+    // Set status in rpf Console UI.
+    if (!this.noConsole_) {
+      this.setStatus('Failed saving because: ' + e.toString(), 'red');
+    }
+    throw new Error(e);
   }
 };
 
@@ -2412,8 +2605,6 @@ rpf.ConsoleManager.prototype.stopRecording = function() {
 
   var stopElement = goog.dom.getElement(rpf.ConsoleManager.Buttons.STOP);
   if (stopElement.src.indexOf(rpf.ConsoleManager.Images.STOP_GREY) == -1) {
-    goog.dom.getElement(rpf.ConsoleManager.Buttons.VALIDATE).src =
-        rpf.ConsoleManager.Images.VALIDATION_GREY;
     goog.dom.getElement(rpf.ConsoleManager.Buttons.RECORD).src =
         rpf.ConsoleManager.Images.RECORD;
     stopElement.src = rpf.ConsoleManager.Images.STOP_GREY;
@@ -2422,29 +2613,6 @@ rpf.ConsoleManager.prototype.stopRecording = function() {
     this.messenger_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
   }
-};
-
-
-/**
- * Starts validation mode.
- * @return {boolean} Whether or not a pass.
- * @export
- */
-rpf.ConsoleManager.prototype.startValidate = function() {
-  rpf.ConsoleManager.logEvent_('Validate', '');
-  var validateSrc = goog.dom.getElement(
-      rpf.ConsoleManager.Buttons.VALIDATE).src;
-  if (validateSrc.indexOf(rpf.ConsoleManager.Images.VALIDATION_GREY) != -1) {
-    return false;
-  }
-  if (validateSrc.indexOf('validationon') != -1) {
-    goog.dom.getElement(rpf.ConsoleManager.Buttons.VALIDATE).src =
-        rpf.ConsoleManager.Images.VALIDATION;
-  } else {
-    goog.dom.getElement(rpf.ConsoleManager.Buttons.VALIDATE).src =
-        rpf.ConsoleManager.Images.VALIDATION_ON;
-  }
-  return true;
 };
 
 
@@ -2505,13 +2673,10 @@ rpf.ConsoleManager.prototype.getStartUrl = function() {
 /**
  * Sets the test name.
  * @param {string} name The test name.
- * @param {boolean} readOnly Whether to set the read only field.
  * @private
  */
-rpf.ConsoleManager.prototype.setTestName_ = function(name, readOnly) {
-  var surfix = readOnly ? '_readonly' : '';
-  goog.dom.getElement(
-      Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME + surfix).value = name;
+rpf.ConsoleManager.prototype.setTestName_ = function(name) {
+  this.scriptSelector_.setValue(name);
 };
 
 
@@ -2521,8 +2686,7 @@ rpf.ConsoleManager.prototype.setTestName_ = function(name, readOnly) {
  * @private
  */
 rpf.ConsoleManager.prototype.getTestName_ = function() {
-  return goog.dom.getElement(
-      Bite.Constants.RpfConsoleId.ELEMENT_TEST_NAME).value;
+  return this.scriptSelector_.getValue();
 };
 
 
@@ -2539,12 +2703,12 @@ rpf.ConsoleManager.ModeInfo = function() {
   this.modeAndBtns = {};
   this.modeAndBtns[Bite.Constants.ConsoleModes.IDLE] =
       {'desc': 'Load a script or begin recording to create a new one',
-       'btns': [rpf.ConsoleManager.Buttons.LOAD,
+       'btns': [rpf.ConsoleManager.Buttons.ADD_TEST,
+                rpf.ConsoleManager.Buttons.LOAD,
                 rpf.ConsoleManager.Buttons.PLAY,
                 rpf.ConsoleManager.Buttons.RECORD,
                 rpf.ConsoleManager.Buttons.EXPORT,
                 rpf.ConsoleManager.Buttons.CONTENT_MAP,
-                rpf.ConsoleManager.Buttons.PROJECT_INFO,
                 rpf.ConsoleManager.Buttons.NOTES,
                 rpf.ConsoleManager.Buttons.SETTING,
                 rpf.ConsoleManager.Buttons.REFRESH]};
@@ -2553,7 +2717,6 @@ rpf.ConsoleManager.ModeInfo = function() {
       {'desc': 'Take actions in the browser to record them as javascript',
        'btns': [rpf.ConsoleManager.Buttons.STOP,
                 rpf.ConsoleManager.Buttons.CONTENT_MAP,
-                rpf.ConsoleManager.Buttons.PROJECT_INFO,
                 rpf.ConsoleManager.Buttons.NOTES,
                 rpf.ConsoleManager.Buttons.SETTING,
                 rpf.ConsoleManager.Buttons.REFRESH]};
@@ -2562,7 +2725,6 @@ rpf.ConsoleManager.ModeInfo = function() {
       {'desc': 'Play back a previously recorded script',
        'btns': [rpf.ConsoleManager.Buttons.SETTING,
                 rpf.ConsoleManager.Buttons.CONTENT_MAP,
-                rpf.ConsoleManager.Buttons.PROJECT_INFO,
                 rpf.ConsoleManager.Buttons.NOTES,
                 rpf.ConsoleManager.Buttons.PLAY,
                 rpf.ConsoleManager.Buttons.REFRESH]};
@@ -2580,14 +2742,14 @@ rpf.ConsoleManager.ModeInfo = function() {
 
   this.modeAndBtns[Bite.Constants.ConsoleModes.VIEW] =
       {'desc': 'Review, modify or run a script',
-       'btns': [rpf.ConsoleManager.Buttons.LOAD,
+       'btns': [rpf.ConsoleManager.Buttons.ADD_TEST,
+                rpf.ConsoleManager.Buttons.LOAD,
                 rpf.ConsoleManager.Buttons.SAVE,
                 rpf.ConsoleManager.Buttons.PLAY,
                 rpf.ConsoleManager.Buttons.SCREEN,
                 rpf.ConsoleManager.Buttons.RECORD,
                 rpf.ConsoleManager.Buttons.EXPORT,
                 rpf.ConsoleManager.Buttons.CONTENT_MAP,
-                rpf.ConsoleManager.Buttons.PROJECT_INFO,
                 rpf.ConsoleManager.Buttons.NOTES,
                 rpf.ConsoleManager.Buttons.SETTING,
                 rpf.ConsoleManager.Buttons.REFRESH]};
@@ -2844,19 +3006,19 @@ rpf.ConsoleManager.prototype.switchInfoPanel_ = function(type) {
   switch (type) {
     case Bite.Constants.RpfConsoleInfoType.NONE:
       this.btns_[rpf.ConsoleManager.Buttons.CONTENT_MAP].setSelected(false);
-      this.btns_[rpf.ConsoleManager.Buttons.PROJECT_INFO].setSelected(false);
+      this.btns_[rpf.ConsoleManager.Buttons.LOAD].setSelected(false);
       goog.style.showElement(contentMap, false);
       goog.style.showElement(projectInfo, false);
       break;
     case Bite.Constants.RpfConsoleInfoType.PROJECT_INFO:
       this.btns_[rpf.ConsoleManager.Buttons.CONTENT_MAP].setSelected(false);
-      this.btns_[rpf.ConsoleManager.Buttons.PROJECT_INFO].setSelected(true);
+      this.btns_[rpf.ConsoleManager.Buttons.LOAD].setSelected(true);
       goog.style.showElement(contentMap, false);
       goog.style.showElement(projectInfo, true);
       break;
     case Bite.Constants.RpfConsoleInfoType.CONTENT_MAP:
       this.btns_[rpf.ConsoleManager.Buttons.CONTENT_MAP].setSelected(true);
-      this.btns_[rpf.ConsoleManager.Buttons.PROJECT_INFO].setSelected(false);
+      this.btns_[rpf.ConsoleManager.Buttons.LOAD].setSelected(false);
       goog.style.showElement(contentMap, true);
       goog.style.showElement(projectInfo, false);
       break;

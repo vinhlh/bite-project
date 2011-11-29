@@ -178,14 +178,18 @@ textarea:focus {
 }
 
 input[type=text] {
-  border: 1px solid #d9d9d9;
-  border-top: 1px solid silver;
-  display: inline-block;
-  -webkit-border-radius: 1px;
-  -moz-border-radius: 1px;
-  border-radius: 1px;
-  color: #333;
+  height: 26px;
+  background-color: #fff;
+  line-height: 24px;
   padding-left: 8px;
+  color: #333;
+  border: 1px solid #d9d9d9;
+  border-top: 1px solid #c0c0c0;
+  display: inline-block;
+  vertical-align: top;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  -webkit-border-radius: 1px;
 }
 
 form input[type=text] {
@@ -194,6 +198,11 @@ form input[type=text] {
 
 input[type=text]:focus {
   border: 1px solid #4d90fe;
+  outline: 0;
+}
+
+select:focus {
+  border: 0 solid #4d90fe;
   outline: 0;
 }
 
@@ -517,8 +526,6 @@ input[type=text]:focus {
 .export-data {
   border: 1px solid #ccc;
   font-size: 10pt;
-  height: 100px;
-  overflow-y: scroll;
   margin-left: 8px;
   margin-bottom: 8px;
   vertical-align: middle;
@@ -541,6 +548,8 @@ input[type=text]:focus {
 }
 
 .console-loaddialog-content-table-select {
+  background-color: white;
+  border: 0 solid #d9d9d9;
   width: 100%;
   height: 100%;
 }
@@ -645,9 +654,14 @@ td.status-logger {
   margin-left: 10px;
   height: 60px;
   word-wrap: break-word;
-  vertical-align: middle;
   font-weight: bold;
   font-size: 13px;
+}
+
+.status-logger div {
+  text-align: center;
+  font-size: 14px;
+  line-height: 18px;
 }
 
 input.console-menu-button {
@@ -733,6 +747,11 @@ input.console-menu-button {
 .componentName {
   color: #DD4B39;
   text-align: left;
-  padding-bottom: 4px;
+  padding-bottom: 5px;
+  font-weight: bold;
+}
+
+.project-details-content-tab {
+  padding-top: 5px;
 }
 

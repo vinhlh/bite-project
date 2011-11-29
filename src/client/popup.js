@@ -78,6 +78,11 @@ bite.Popup.POPUP_ITEM_ROW_CLASS_ = 'menuitem-row';
  * @private
  */
 bite.Popup.CONSOLE_OPTIONS_ = {
+  FLUX: {
+    name: MSG_POPUP_OPTION_FLUX_NAME,
+    img: '/imgs/popup/rpf_32.png',
+    description: MSG_POPUP_OPTION_FLUX_DESC
+  },
   REPORT_BUG: {
     name: MSG_POPUP_OPTION_REPORT_BUG_NAME,
     img: '/imgs/popup/new_bug_32.png',
@@ -87,11 +92,6 @@ bite.Popup.CONSOLE_OPTIONS_ = {
     name: MSG_POPUP_OPTION_BUGS_NAME,
     img: '/imgs/popup/bugs_32.png',
     description: MSG_POPUP_OPTION_BUGS_DESC
-  },
-  FLUX: {
-    name: MSG_POPUP_OPTION_FLUX_NAME,
-    img: '/imgs/popup/rpf_32.png',
-    description: MSG_POPUP_OPTION_FLUX_DESC
   },
   TESTS: {
     name: MSG_POPUP_OPTION_TEST_NAME,
@@ -267,6 +267,16 @@ bite.Popup.prototype.initLoginComplete_ = function(callback, responseObj) {
         break;
       case 'TESTS':
         if (data.get(bite.options.constants.Id.FEATURES_TESTS) == 'true') {
+          display = true;
+        }
+        break;
+      case 'REPORT_BUG':
+        if (data.get(bite.options.constants.Id.FEATURES_REPORT) == 'true') {
+          display = true;
+        }
+        break;
+      case 'CLOSE':
+        if (data.get(bite.options.constants.Id.FEATURES_CLOSE) == 'true') {
           display = true;
         }
         break;

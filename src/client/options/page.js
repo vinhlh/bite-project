@@ -112,6 +112,8 @@ bite.options.Page.ElementName_ = {
   'featuresBugs': 'features-bugs',
   'featuresRpf' : 'features-rpf',
   'featuresTests' : 'features-tests',
+  'featuresClose': 'features-close',
+  'featuresReport': 'features-report',
 
   SAVE_BUTTON: 'save-button',
   SAVE_TIME: 'save-time',

@@ -25,7 +25,6 @@ goog.require('goog.dom.TagName');
 goog.require('goog.events');
 goog.require('goog.ui.CustomButton');
 goog.require('goog.ui.Dialog');
-goog.require('goog.ui.LabelInput');
 goog.require('goog.ui.MenuItem');
 goog.require('goog.ui.Select');
 goog.require('rpf.Attributes');
@@ -156,6 +155,7 @@ rpf.ValidateDialog.prototype.initActionSelector_ = function() {
   goog.dom.removeChildren(selectorDiv);
   this.actionSelector_ = new goog.ui.Select('Actions');
   this.actionSelector_.addItem(new goog.ui.MenuItem('verify'));
+  this.actionSelector_.addItem(new goog.ui.MenuItem('verifyNot'));
   this.actionSelector_.addItem(new goog.ui.MenuItem('move'));
   this.actionSelector_.setSelectedIndex(0);
   this.actionSelector_.render(selectorDiv);
@@ -250,7 +250,8 @@ rpf.ValidateDialog.prototype.generateDescriptor_ = function() {
          'elemVarName': this.validationElem_['elemVarName'],
          'noconsole': this.validationElem_['noConsole'],
          'iframeInfo': this.validationElem_['iframeInfo'],
-         'xpaths': this.validationElem_['xpaths']}},
+         'xpaths': this.validationElem_['xpaths'],
+         'className': this.validationElem_['className']}},
       goog.bind(this.updateEditorWithCommand_, this));
   this.clearChoiceView_();
   this.setVisible(false);

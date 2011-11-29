@@ -37,7 +37,9 @@ bite.options.constants.Id = {
   AUTO_RECORD: 'autoRecord',
   FEATURES_BUGS: 'featuresBugs',
   FEATURES_RPF: 'featuresRpf',
-  FEATURES_TESTS: 'featuresTests'
+  FEATURES_TESTS: 'featuresTests',
+  FEATURES_CLOSE: 'featuresClose',
+  FEATURES_REPORT: 'featuresReport'
 };
 
 

@@ -28,122 +28,110 @@
  */
 {template .exportContent}
 <div id="export-root" class="export-content-canvas">
-  <!-- Project Specification -->
-  <table style="width:100%">
-    <tr>
-      <td class="export-label">
-        Location
-      </td>
-      <td class="export-label">
-        <input id="location-local-export" type="radio" value="local"
-               name="export-location">
-        <label>Local</label>
-      </td>
-      <td class="export-label">
-        <input id="location-web-export" type="radio" value="web" checked
-               name="export-location">
-        <label>Web</label>
-      </td>
-      <td></td>
-    </tr>
-  </table>
-  <table style="width:100%">
-    <tr>
-      <td class="export-label">
-        Project Name
-      </td>
-      <td>
-        <input id="export-name" type="text" value="" style="width:100%">
-      </td>
-      <td style="width:40px">
-        <input id="export-button-go" type="button" value="Go"
-               style="float:right">
-      </td>
-    </tr>
-  </table>
+  <div id="project-details-tab" class="goog-tab-bar">
+    <div class="goog-tab goog-tab-selected" id="project-details-export">
+      Export
+    </div>
+    <div class="goog-tab" id="project-details-import">
+      Import
+    </div>
+    <div class="goog-tab" id="project-details-tests">
+      Tests
+    </div>
+  </div>
+  <div class="goog-tab-bar-clear">
 
-  <!-- Project data and configuration -->
-  <table style="width:100%">
-    <!-- List of tests associated with the project. -->
-    <tr>
-      <td>
-        <div id="export-test-heading" class="export-heading">
-          Tests
-        </div>
-        <div id="export-test-data" class="export-data">
-        </div>
-      </td>
-    </tr>
+  </div>
+  <div class="goog-tab-content" id="project-details-content">
+    <div id="project-details-export-content"
+         class="project-details-content-tab">
+      <table style="width:100%">
+        <!-- The interface for managing the url/page map. -->
+        <tr>
+          <td>
+            <h3 class="componentName">
+              Class Mapping
+            </h3>
+            <div class="export-data" style="max-height:350px;overflow-y:auto;">
+              <table style="width:100%">
+                <thead>
+                  <tr>
+                    <th style="width:70%" class="export-table-data">
+                      Url (substring match)
+                    </th>
+                    <th style="width:20%" class="export-table-data">
+                      Class Name
+                    </th>
+                    <th style="text-align:right;">
+                      <img id="export-add-class" width="18" height="18"
+                           src="imgs/rpf/plus.png">
+                    </th>
+                  </tr>
+                </thead>
+                <tbody id="export-page-table-body">
+                </tbody>
+              </table>
+            </div>
+          </td>
+        </tr>
 
-    <!-- The interface for managing the url/page map. -->
-    <tr>
-      <td>
-        <div class="export-heading">
-          Url/Class Mapping
-        </div>
-        <div class="export-data">
-          <table style="width:100%">
-            <thead>
-              <tr>
-                <th style="width:75%" class="export-table-data">
-                  Url (substring match)
-                </th>
-                <th style="width:20%" class="export-table-data">
-                  Class Name
-                </th>
-                <th>
-                  <img id="export-add-class" width="22" height="22"
-                       src="imgs/rpf/plus.png">
-                </th>
-              </tr>
-            </thead>
-            <tbody id="export-page-table-body">
-            </tbody>
-          </table>
-        </div>
-      </td>
-    </tr>
+        <!-- Java specific information. -->
+        <tr>
+          <td>
+            <h3 class="componentName">
+              Java Configuration
+            </h3>
+            <div>
+              <table style="width:100%">
+                <tr>
+                  <td class="export-label">
+                    Package Path
+                  </td>
+                  <td>
+                    <input id="export-java-package-path" type="text"
+                           style="width:100%">
+                  </td>
+                </tr>
+                <tr>
+                  <td class="export-label">
+                    Interval in ms
+                  </td>
+                  <td>
+                    <input id="export-java-interval" type="text"
+                           style="width:100%">
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+      </table>
+      <div id="export-button-save" value="Save" style="float:left;"
+           title="Save project details."></div>
 
-    <!-- Java specific information. -->
-    <tr>
-      <td>
-        <div class="export-heading">
-          Java Configuration
-        </div>
-        <div>
-          <table style="width:100%">
-            <tr>
-              <td class="export-label">
-                Package Path
-              </td>
-              <td>
-                <input id="export-java-package-path" type="text"
-                       style="width:100%">
-              </td>
-            </tr>
-            <tr>
-              <td class="export-label">
-                Interval in ms
-              </td>
-              <td>
-                <input id="export-java-interval" type="text"
-                       style="width:100%">
-              </td>
-            </tr>
-          </table>
-        </div>
-      </td>
-    </tr>
-  </table>
-
-  <!-- Dialog's footer -->
-  <div class="console-footer">
-    <input id="export-button-save" type="button" value="Save"
-           style="float:left" title="Save project details.">
-    <input id="export-button-import" type="button" value="Import"
-           title="Load data.rpf from disk using package path.">
-    <input id="export-button-export" type="button" value="Export"
-           title="Load data.rpf from disk using package path.">
+      <div id="export-button-export" value="Export"
+           title="Export the project to your client."></div>
+    </div>
+    <div id="project-details-import-content" style="visible:hidden;"
+         class="project-details-content-tab">
+      <h3 class="componentName">
+        Package Path
+      </h3>
+      <input id="import-java-package-path" type="text" style="width:100%">
+      <div id="export-button-import" value="Import"
+           title="Load data.rpf from disk using package path."
+           style="padding-top:6px;"></div>
+    </div>
+    <div id="project-details-tests-content" style="visible:hidden;"
+         class="project-details-content-tab">
+      <h3 class="componentName">
+        Tests
+      </h3>
+      <div id="export-test-data" class="export-data">
+      </div>
+      <div id="delete-tests-button">
+      </div>
+    </div>
   </div>
 </div>
 {/template}
@@ -154,17 +142,12 @@
  * @param tests
  */
 {template .getTests}
-<table style="width:100%">
-  <tbody>
-    {foreach $test in $tests}
-      <tr>
-        <td class="export-table-data">
-          {$test}
-        </td>
-      </tr>
-    {/foreach}
-  </tbody>
-</table>
+<select id="project-details-tests-selector" multiple="multiple"
+        style="height:250px" class="console-loaddialog-content-table-select">
+  {foreach $test in $tests}
+  <option value="{$test}" title="">{$test}</option>
+  {/foreach}
+</select>
 {/template}
 
 
@@ -177,13 +160,13 @@
 <table>
   <tr id="export-page-map-row">
     <td>
-      <input style="width:100%" type="text" value="{$url}">
+      <input style="width:100%;border:0;" type="text" value="{$url}">
     </td>
     <td>
-      <input style="width:100%" type="text" value="{$name}">
+      <input style="width:100%;border:0;" type="text" value="{$name}">
     </td>
-    <td>
-      <img id="export-page-map-close" width="22" height="22"
+    <td style="text-align:right;">
+      <img id="export-page-map-close" width="18" height="18"
            src="imgs/rpf/dialog_close_box.gif">
     </td>
   </tr>
@@ -192,65 +175,10 @@
 
 
 /**
- * Creates the content for the load project dialog.
+ * Creates the dropdown button.
  */
-{template .getLoadContent}
-<div class="content-canvas">
-  <table class="console-loaddialog-content-table">
-    <tr>
-      <td>
-        <label class="dialog-label">Location</label>
-      </td>
-      <td colspan="2">
-        <input type="radio" name="storageLocation" id="location-local"
-               value="local">
-        <label class="dialog-label">Local</label>
-        <input type="radio" name="storageLocation" id="location-web"
-               value="web"
-               checked style="margin-left: 20px">
-        <label class="dialog-label">Web</label>
-      </td>
-    </tr>
-    <tr style="height:24px">
-      <td style="width:70px">
-        <label class="dialog-label">
-          Project
-        </label>
-      </td>
-      <td>
-        <input id="project-name" type="text" value="" style="width:100%" />
-      </td>
-      <td style="width:40px">
-        <input id="load-go-button" type="button" value="Go"
-               style="float:right" />
-      </td>
-    </tr>
-  </table>
-
-  <div style="padding-top:8px" class="console-loaddialog-content-table-div">
-    <select id="load-tests" multiple="multiple" style="height:250px"
-            class="console-loaddialog-content-table-select">
-    </select>
-  </div>
-
-  <div id="load-footer" class="console-save-dialog-button-div console-footer">
-    <div id="status" class="console-save-dialog-div-text" style="float:left">
-    </div>
-    <input id="deleteTestDialog" type="button" value="Delete" />
-    <input id="loadTestDialog" type="button" value="Load Test" />
-    <input id="cancelTestDialog" type="button" value="Cancel" />
-  </div>
-</div>
-{/template}
-
-
-/**
- * Create a new test option.
- * @param name
- * @param displayInfo
- */
-{template .getOption}
-<option value="{$name}" title="{$displayInfo}">{$name}</option>
+{template .getDropdownBtn}
+<img src="imgs/rpf/downbtn.png">
 {/template}
 
 

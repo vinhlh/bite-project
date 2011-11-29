@@ -224,7 +224,8 @@ rpf.CodeGenerator.RecordActions = {
   SELECT: 'select',
   SUBMIT: 'submit',
   TYPE: 'type',
-  VERIFY: 'verify'
+  VERIFY: 'verify',
+  VERIFYNOT: 'verifyNot'
 };
 
 
@@ -724,7 +725,8 @@ rpf.CodeGenerator.prototype.generateScriptAndDataFileForCmd = function(
       playAction == rpf.CodeGenerator.RecordActions.MOVE ||
       playAction == rpf.CodeGenerator.RecordActions.DBLCLICK ||
       playAction == rpf.CodeGenerator.RecordActions.ENTER ||
-      playAction == rpf.CodeGenerator.RecordActions.SUBMIT) {
+      playAction == rpf.CodeGenerator.RecordActions.SUBMIT ||
+      playAction == rpf.CodeGenerator.RecordActions.VERIFYNOT) {
     return this.generateCmdOneArg_(
         /** @type {rpf.CodeGenerator.PlaybackActions} */ (playAction),
         rpf.CodeGenerator.getElemByIdCmd(cmdMap['id']),

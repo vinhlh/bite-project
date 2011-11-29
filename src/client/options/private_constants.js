@@ -48,7 +48,9 @@ bite.options.private_constants.Key = {
   'autoRecord': 'bite.options.rpf.autoRecord',
   'featuresBugs': 'bite.options.popup.Bugs',
   'featuresRpf': 'bite.options.popup.Rpf',
-  'featuresTests': 'bite.options.popup.Tests'
+  'featuresTests': 'bite.options.popup.Tests',
+  'featuresClose': 'bite.options.popup.Close',
+  'featuresReport': 'bite.options.popup.Report'
 };
 
 
@@ -79,6 +81,8 @@ bite.options.private_constants.Default = {
   'autoRecord': 'false',
   'featuresBugs': 'false',
   'featuresRpf': 'true',
-  'featuresTests': 'false'
+  'featuresTests': 'false',
+  'featuresClose': 'false',
+  'featuresReport': 'true'
 };
 

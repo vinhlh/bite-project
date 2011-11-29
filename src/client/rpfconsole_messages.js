@@ -110,8 +110,7 @@ rpf.StatusLogger.LOAD_TEST_SUCCESS = [
  * @type {string}
  */
 rpf.StatusLogger.LOAD_TEST_FAILED = [
-  'Failed loading...',
-  'It could be an appengine hiccup or authentication expiration.'].join('<br>');
+  'Failed loading...'].join('<br>');
 
 
 /**

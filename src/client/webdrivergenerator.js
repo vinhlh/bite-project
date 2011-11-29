@@ -127,17 +127,15 @@ bite.webdriver.convertProjectData_ = function(data) {
 /**
  * Gets the page class object, which has the following format:
  * {pageName: {'copyright': string,
- *             'imports': {'default': string,
- *                         'custom': {pageName: true}},
+ *             'imports': string,
  *             'classSig': string,
  *             'properties': [var declaration string],
  *             'rest': string,
  *             'selectors': {xpath/selector string: true},
- *             'methods': {original method name: {'methodId': string,
- *                                                'data': [data input]}},
  *             'modules': {module name:
- *                {'methodNames': [{'realMethod': real method name,
- *                                  'originalMethod': ori method name,
+ *                {'methodNames': [{'className': the class the method belongs,
+ *                                  'xpathName': the xpath variable name,
+ *                                  'action': the action,
  *             // data input could be a string or an object
  *             // The Object is for verifying different attributes in a command.
  *                                  'data': [data input]}],
@@ -151,22 +149,16 @@ bite.webdriver.convertProjectData_ = function(data) {
  */
 bite.webdriver.getPageClassHeader_ = function(pageName) {
   var copyright = bite.webdriver.generateCopyrightAndPackage_();
-  var imports = bite.webdriver.generateImports_();
+  var imports = bite.webdriver.generatePageImports_();
   var classDoc = bite.webdriver.generateClassDoc_(pageName);
   var classSig = bite.webdriver.generateClass_(pageName, 'BasePage');
   var logger = bite.webdriver.generateLogger_(pageName, 2);
-  var executeJavascript = bite.webdriver.addIndentations(2, [
-      '',
-      'public ' + pageName + ' executeJavascript(String code) {',
-      '  ((JavascriptExecutor) driver).executeScript(code);',
-      '  return this;',
-      '}']).join('\n');
   var constructor = bite.webdriver.generateConstructor_(2, pageName);
   constructor += bite.webdriver.generateCommands_(4, ['super(driver);']);
-  constructor += '\n' + bite.webdriver.generateClosing_(2) + executeJavascript;
+  constructor += '\n' + bite.webdriver.generateClosing_(2);
 
   return {'copyright': copyright,
-          'imports': {'default': imports, 'custom': {}},
+          'imports': imports,
           // Class signature.
           'classSig': [classDoc, classSig, logger].join('\n'),
           // A list of selector/xpath variables to declare.
@@ -175,10 +167,6 @@ bite.webdriver.getPageClassHeader_ = function(pageName) {
           'rest': constructor,
           // A map to make sure no dup selector/xpath exists.
           'selectors': {},
-          // Each method corresponds to
-          // methodId (str), which is used to distinguish dups
-          // and data (Arr), which is the data input.
-          'methods': {},
           // Key is module name and value is a tuple of
           // original name and real name.
           'modules': {}};
@@ -231,6 +219,25 @@ bite.webdriver.variableIndex_ = 0;
  * @private
  */
 bite.webdriver.author_ = '';
+
+
+/**
+ * The supported actions.
+ * @type {Array}
+ * @private
+ */
+bite.webdriver.supportedActions_ = [
+  rpf.CodeGenerator.RecordActions.CLICK,
+  rpf.CodeGenerator.RecordActions.ENTER,
+  rpf.CodeGenerator.RecordActions.TYPE,
+  rpf.CodeGenerator.RecordActions.MOVE,
+  rpf.CodeGenerator.RecordActions.CHANGE,
+  rpf.CodeGenerator.RecordActions.VERIFY,
+  rpf.CodeGenerator.RecordActions.VERIFYNOT,
+  rpf.CodeGenerator.RecordActions.SUBMIT,
+  rpf.CodeGenerator.RecordActions.DRAG,
+  rpf.CodeGenerator.PlaybackActions.SELECT
+];
 
 
 /**
@@ -332,35 +339,43 @@ bite.webdriver.generateJavaDoc_ = function(lines) {
 
 
 /**
- * Generates the Java imports.
+ * Generates the Java imports for base page.
  * @return {string} The generated lines.
  * @private
  */
 bite.webdriver.generateImports_ = function() {
   return [
     'import com.google.common.base.Function;',
-    'import com.google.common.io.Resources;',
     'import com.google.common.time.DefaultSleeper;',
     'import com.google.common.time.Sleeper;',
     'import com.google.testing.webdriver.support.ui.ExpectedConditions;',
-    'import com.google.testing.webdriver.support.ui.Wait;',
     'import org.openqa.selenium.By;',
-    'import org.openqa.selenium.Keys;',
     'import org.openqa.selenium.JavascriptExecutor;',
+    'import org.openqa.selenium.Keys;',
     'import org.openqa.selenium.WebDriver;',
     'import org.openqa.selenium.WebElement;',
     'import org.openqa.selenium.interactions.Actions;',
     'import org.openqa.selenium.support.ui.WebDriverWait;',
-    'import org.xml.sax.SAXException;',
-    'import java.io.IOException;',
-    'import java.lang.Exception;',
-    'import java.lang.StackTraceElement;',
-    'import java.lang.Thread;',
     'import java.util.HashMap;',
     'import java.util.List;',
     'import java.util.concurrent.TimeUnit;',
     'import java.util.logging.Level;',
     'import java.util.logging.Logger;'
+  ].join('\n');
+};
+
+
+/**
+ * Generates the Java imports for page classes.
+ * @return {string} The generated lines.
+ * @private
+ */
+bite.webdriver.generatePageImports_ = function() {
+  return [
+    'import org.openqa.selenium.WebDriver;',
+    'import java.util.logging.Level;',
+    'import java.util.logging.Logger;',
+    'import java.util.HashMap;'
   ].join('\n');
 };
 
@@ -480,7 +495,7 @@ bite.webdriver.generateWebElementBySelector_ = function(selector, action) {
           '      isThrow = false;',
           '    }',
           '    if (isThrow) {',
-          '      throw new CustomException("Element exists error.");',
+          '      throw new CustomException("Element should not exist.");',
           '    }'].join('\n');
 };
 
@@ -512,6 +527,8 @@ bite.webdriver.generateWebdriverCmd_ = function(action) {
       return ['element.submit();'];
     case rpf.CodeGenerator.PlaybackActions.SELECT:
       return ['selectOption(element, data);'];
+    case rpf.CodeGenerator.RecordActions.DRAG:
+      return [''];
   }
   return [''];
 };
@@ -544,6 +561,7 @@ bite.webdriver.generateExceptionFile_ = function() {
 bite.webdriver.generateBasePage_ = function(project) {
   var header = bite.webdriver.generateCopyrightAndPackage_();
   var imports = bite.webdriver.generateImports_();
+  var classDoc = bite.webdriver.generateClassDoc_('', 'The base class.');
   var classSig = bite.webdriver.generateClass_('BasePage');
   var classProperties = bite.webdriver.generateBaseClassVariables_(2);
   var constructor = bite.webdriver.generateConstructor_(2, 'BasePage');
@@ -596,7 +614,7 @@ bite.webdriver.generateBasePage_ = function(project) {
   var verify = bite.webdriver.addIndentations(2, [
      'public void verifyElement(WebElement elem,' +
      ' HashMap<String, String> data) {',
-     '  for (String key: data.keySet()) {',
+     '  for (String key : data.keySet()) {',
      '    String value = data.get(key);',
      '    if (key == "elementText") {',
      '      if (!elem.getText().equals(value)) {',
@@ -633,11 +651,22 @@ bite.webdriver.generateBasePage_ = function(project) {
      '    }',
      '  }',
      '}']).join('\n');
+  var executeJavascript = bite.webdriver.addIndentations(2, [
+     '',
+     'public void executeJavascript(String code) {',
+     '  ((JavascriptExecutor) driver).executeScript(code);',
+     '}']).join('\n');
+  var actions = '';
+  for (var i = 0, len = bite.webdriver.supportedActions_.length; i < len; ++i) {
+    actions += bite.webdriver.getActionMethod_(
+        bite.webdriver.supportedActions_[i]);
+  }
   var classEnd = bite.webdriver.generateClosing_(0);
-  return [header, '', imports, '', classSig, classProperties, constructor,
-          '', waitElementFunc, '', verifyTextEquals, '',
+  return [header, '', imports, '', classDoc, classSig, classProperties,
+          constructor, '', waitElementFunc, '', verifyTextEquals, '',
           selectOption, '', sleep, '',
-          debugLog, '', verify, '', classEnd].join('\n');
+          debugLog, '', verify, '', executeJavascript, '',
+          actions, '', classEnd].join('\n');
 };
 
 
@@ -656,6 +685,27 @@ bite.webdriver.generateLogger_ = function(page, num) {
 
 
 /**
+ * Changes the step name to be the selector name
+ * @param {string} stepName The step name.
+ * @return {string} The selector name.
+ * @private
+ */
+bite.webdriver.getSelectorName_ = function(stepName) {
+  // In the auto generated step id, there will be "-" in it.
+  // So in this case, it means users have renamed it.
+  var index = stepName.indexOf('-');
+  if (index == -1) {
+    return stepName;
+  }
+  // Remove the action prefix
+  var temp = stepName.substr(index + 1, stepName.length);
+  temp = temp.toLowerCase();
+  temp = goog.string.toCamelCase(temp);
+  return temp.replace(/-/g, '').toUpperCase();
+};
+
+
+/**
  * Generates the selector declaration.
  * @param {string} name The name of the selector.
  * @param {string} value The value of the selector.
@@ -665,7 +715,7 @@ bite.webdriver.generateLogger_ = function(page, num) {
  */
 bite.webdriver.generateSelectorVar_ = function(name, value, num) {
   return bite.webdriver.addIndentations(num,
-      ['private static final String ' + name + ' =',
+      ['public static final String ' + name + ' =',
        '    "' + bite.webdriver.escapeDoubleQuotes_(value) + '";']).join('\n');
 };
 
@@ -679,15 +729,7 @@ bite.webdriver.generateSelectorVar_ = function(name, value, num) {
 bite.webdriver.constructPageStrings_ = function(pages) {
   var pageStrs = {};
   for (var page in pages) {
-    var imports = pages[page]['imports'];
-    var customArr = ['import ' + bite.webdriver.packageName_ + '.BasePage;'];
-    for (var imp in imports['custom']) {
-      customArr.push(
-          'import ' + bite.webdriver.packageName_ + '.' + imp + ';');
-    }
-    imports = [imports['default'], ''].concat(customArr);
-    imports.push('');
-    imports = imports.join('\n');
+    var imports = [pages[page]['imports'], ''].join('\n');
     var properties = bite.webdriver.addIndentations(
         2, pages[page]['properties']).join('\n');
     pageStrs[page] = [pages[page]['copyright'],
@@ -794,89 +836,45 @@ bite.webdriver.quote_ = function(opt_str) {
 bite.webdriver.getDataArg_ = function(action) {
   if (action == rpf.CodeGenerator.RecordActions.TYPE ||
       action == rpf.CodeGenerator.RecordActions.CHANGE ||
-      action == rpf.CodeGenerator.PlaybackActions.SELECT ||
-      action == 'verifyNot') {
+      action == rpf.CodeGenerator.PlaybackActions.SELECT) {
     return 'String data';
   } else if (action == rpf.CodeGenerator.RecordActions.VERIFY) {
-    return 'HashMap data';
+    return 'HashMap<String, String> data';
   }
   return '';
 };
 
 
 /**
- * Changes the step name to be a method name.
- * @param {string} stepName The step name.
- * @return {string} The method name.
- * @private
- */
-bite.webdriver.getMethodName_ = function(stepName) {
-  // In the auto generated step id, there will be "-" in it.
-  // So in this case, it means users have renamed it.
-  if (stepName.indexOf('-') == -1) {
-    return stepName;
-  }
-  var temp = stepName.toLowerCase();
-  temp = goog.string.toCamelCase(temp);
-  return temp.replace(/-/g, '');
-};
-
-
-/**
  * Generates an action method.
- * @param {string} stepId The step id.
- * @param {Object} infoMap The info map.
- * @param {number} num The number of spaces.
- * @param {string} selector The selector string.
- * @param {Object} pages The page objects.
- * @param {Object} tupleMethodMap The id to method map.
- * @param {string} curPageName The current page name.
- * @return {string} The generated method code.
+ * @param {string} action The action string.
  * @private
  */
-bite.webdriver.generateActionMethod_ = function(
-    stepId, infoMap, num, selector, pages, tupleMethodMap, curPageName) {
-  var stepInfo = infoMap['steps'][stepId];
-  var methodId = stepInfo['action'] + selector;
-  pages[curPageName]['methods'][stepInfo['stepName']] = {
-    'methodId': methodId,
-    'data': [bite.webdriver.quote_(
-             bite.base.Helper.dataFile[stepInfo['varName']])]
-  };
-  if (!tupleMethodMap[methodId]) {
-    tupleMethodMap[methodId] = bite.webdriver.getMethodName_(
-        stepInfo['stepName']);
-
-    // The following code adds javadoc, method signature, log, and action.
-    var wdCode = bite.webdriver.generateJavaDoc_(
-        ['Performs a ' + stepInfo['action'] + ' on a ' +
-         stepInfo['tagName'] + ' element.',
-         '',
-         '@return Instance of ' + stepInfo['returnPageName']]);
-    var args = bite.webdriver.getDataArg_(stepInfo['action']);
-    wdCode.push('public ' + stepInfo['returnPageName'] + ' ' +
-                bite.webdriver.getMethodName_(stepInfo['stepName']) +
-                '(' + args + ') {');
-    var tempArr = ['logger.log(Level.INFO, "' +
-                   bite.webdriver.getMethodName_(stepInfo['stepName']) +
-                   ' started.");',
-                   'logDebugInfo("' + stepId + '");'];
-    if (bite.webdriver.codeParams_['interval']) {
-      tempArr.push('sleep(' + bite.webdriver.codeParams_['interval'] + ');');
-    }
-    tempArr = tempArr.concat(bite.webdriver.generateWebElementBySelector_(
-        selector, stepInfo['action']));
-    tempArr = tempArr.concat(
-        bite.webdriver.generateWebdriverCmd_(stepInfo['action']));
-    tempArr.push('return new ' + stepInfo['returnPageName'] + '(driver);');
-    tempArr = bite.webdriver.addIndentations(num, tempArr);
-    wdCode = wdCode.concat(tempArr);
-    wdCode.push('}');
-    wdCode.push('');
-    return bite.webdriver.addIndentations(num, wdCode).join('\n');
-  } else {
-    return '';
+bite.webdriver.getActionMethod_ = function(action) {
+  // The following code adds javadoc, method signature, log, and action.
+  var wdCode = bite.webdriver.generateJavaDoc_(
+      ['Performs a ' + action + ' on an element.']);
+  var args = ['String xpath'];
+  var actionArg = bite.webdriver.getDataArg_(action);
+  if (actionArg) {
+    args.push(actionArg);
   }
+  var argStr = args.join(', ');
+  wdCode.push('public void ' + action + '(' + argStr + ') {');
+  var tempArr = ['logger.log(Level.INFO, "Performed a ' + action +
+                 ' action on the element with xpath: " + xpath);'];
+  if (bite.webdriver.codeParams_['interval']) {
+    tempArr.push('sleep(' + bite.webdriver.codeParams_['interval'] + ');');
+  }
+  tempArr = tempArr.concat(bite.webdriver.generateWebElementBySelector_(
+      'xpath', action));
+  tempArr = tempArr.concat(
+      bite.webdriver.generateWebdriverCmd_(action));
+  tempArr = bite.webdriver.addIndentations(2, tempArr);
+  wdCode = wdCode.concat(tempArr);
+  wdCode.push('}');
+  wdCode.push('');
+  return bite.webdriver.addIndentations(2, wdCode).join('\n');
 };
 
 
@@ -922,57 +920,59 @@ bite.webdriver.generateModuleMethod_ = function(
     moduleSteps, curPageName, moduleName, num, startUrl, page) {
   // Adds the javadoc.
   var wdCode = bite.webdriver.generateJavaDoc_(
-      ['Performs a sequence of actions for ' + moduleName + '.',
-       '',
-       '@return Instance of ' + curPageName]);
+      ['Performs a sequence of actions for ' + moduleName + '.']);
   // Adds the log.
   var tempArr = ['logger.log(Level.INFO, "' + moduleName + ' started.");'];
 
   // Adds the chained steps.
   var stepsChain = [];
   var allArgs = [];
-  var prefix = '';
   var index = 0;
   for (var i = 0, len = moduleSteps.length; i < len; ++i) {
-    if (i == 0) {
-      prefix = 'return this';
-    } else {
-      prefix = '    ';
-    }
+    var prefix = 'this.';
     var data = moduleSteps[i]['data'];
     // This is used to show the arguments in each step call.
     var tempArg = [];
     // This is used to show the arguments in module signature.
     var tempArg2 = [];
+    // Prepares the args strings for both in the signature and in each
+    // individual step call.
     for (var k = 0, lenK = data.length; k < lenK; ++k) {
       if (data[k]) {
         var varId = 'data' + index++;
         tempArg.push(varId);
         var argType = 'String';
         if (typeof(data[k]) == 'object') {
-          argType = 'HashMap';
+          argType = 'HashMap<String, String>';
         }
         // The format is like  HashMap data1
         tempArg2.push(argType + ' ' + varId);
       }
     }
     var tempArgStr = tempArg.join(', ');
-    stepsChain.push(prefix + '.' + moduleSteps[i]['realMethod'] +
-                    '(' + tempArgStr + ')');
+
     if (tempArgStr) {
       // Format: HashMap data0, String data1, ...
       allArgs.push(tempArg2.join(', '));
     }
-    if (i == len - 1) {
-      // Format: page.method1(data0)
-      //             .method2(data1);
-      stepsChain[i] += ';';
+
+    if (moduleSteps[i]['className'] && moduleSteps[i]['xpathName']) {
+      var xpathName = moduleSteps[i]['className'] + '.' +
+                      moduleSteps[i]['xpathName'];
+      if (tempArgStr) {
+        tempArgStr = [xpathName, tempArgStr].join(', ');
+      } else {
+        tempArgStr = xpathName;
+      }
     }
+
+    stepsChain.push(prefix + moduleSteps[i]['action'] +
+                    '(' + tempArgStr + ');');
   }
   tempArr = tempArr.concat(stepsChain);
 
   //Adds the method signature.
-  wdCode.push('public ' + curPageName + ' ' +
+  wdCode.push('public void ' +
               moduleName + '(' + allArgs.join(', ') + ') {');
 
   wdCode = wdCode.concat(
@@ -992,32 +992,20 @@ bite.webdriver.generateModuleMethod_ = function(
 bite.webdriver.generateBiteTest_ = function(pages) {
   var copyright = bite.webdriver.generateCopyrightAndPackage_(
       bite.webdriver.packageNameTest_);
-  var imports = ['import com.google.testing.util.Tag;',
-                 'import com.google.testing.util.FileUtil;',
+  var imports = ['import com.google.common.base.Charsets;',
+                 'import com.google.common.io.Files;',
+                 'import com.google.testing.util.Tag;',
                  'import com.google.testing.util.TestUtil;',
-                 'import com.google.testing.webdriver.Builder;',
-                 '',
                  'import junit.framework.TestCase;',
-                 '',
                  'import org.openqa.selenium.WebDriver;',
                  'import org.openqa.selenium.remote.DesiredCapabilities;',
                  'import org.openqa.selenium.remote.RemoteWebDriver;',
-                 '',
                  'import java.io.*;',
                  'import java.net.URL;',
-                 '',
                  'import java.util.HashMap;',
                  'import java.util.logging.Level;',
                  'import java.util.logging.Logger;',
-                 '',
                  ''];
-  var pageImports = [];
-  for (var page in pages) {
-    pageImports.push('import ' + bite.webdriver.packageName_ +
-                     '.' + page + ';');
-  }
-  // Adds the generated page imports.
-  imports = imports.concat(pageImports);
   imports = imports.join('\n');
   var classDoc = bite.webdriver.generateClassDoc_('', 'The test file.');
   var classSig = bite.webdriver.generateClass_('Tests', 'TestCase');
@@ -1031,13 +1019,17 @@ bite.webdriver.generateBiteTest_ = function(pages) {
     '  File folder = new File(location);',
     '  File[] listOfFiles = folder.listFiles();',
     '  String jsStr = "";',
+    '  if (listOfFiles == null) {',
+    '    return jsStr;',
+    '  }',
     '  for (int i = 0; i < listOfFiles.length; ++i) {',
     '    File currentFile = listOfFiles[i];',
     '    if (currentFile.isFile()) {',
     '      if (currentFile.getName().indexOf(".js") != -1) {',
     '        try {',
-    '          jsStr += FileUtil.getFileContents(currentFile.toString());',
+    '          jsStr += Files.toString(currentFile, Charsets.UTF_8);',
     '        } catch (IOException e) {',
+    '          logger.log(Level.INFO, "Can not load the JS file.");',
     '        }',
     '      }',
     '    }',
@@ -1098,10 +1090,15 @@ bite.webdriver.generateBiteTest_ = function(pages) {
       testMethods = testMethods.concat(
           ['  @Tag("SmokeTest")',
            '  public void ' + moduleName + '() {',
-           '    ' + bite.webdriver.generateNavigation_(startUrl),
-           '    ' + page + ' page = new ' + page + '(driver);',
+           '    try {',
+           '      ' + bite.webdriver.generateNavigation_(startUrl),
+           '      ' + page + ' page = new ' + page + '(driver);',
            bite.webdriver.getTestMethod_(
                pages[page]['modules'][module], module),
+           '    } catch (CustomException e) {',
+           '      e.printStackTrace();',
+           '      fail(e.getMessage());',
+           '    }',
            '  }',
            '']);
     }
@@ -1131,30 +1128,29 @@ bite.webdriver.getTestMethod_ = function(module, moduleName) {
   var argArr = [];
   var methodArr = [];
   var declarationArr = [];
-  var prefix = '';
   bite.webdriver.variableIndex_ = 0;
 
   for (var i = 0, len = methodNames.length; i < len; ++i) {
-    if (i == 0) {
-      prefix = 'page';
-    } else {
-      prefix = '    ';
-    }
+    var prefix = 'page';
     var method = methodNames[i];
+
+    var xpathName = '';
+    if (method['className'] && method['xpathName']) {
+      xpathName = method['className'] + '.' + method['xpathName'];
+    }
+    var methodInfo = {'action': method['action'],
+                      'xpath': xpathName};
 
     bite.webdriver.pushDataInput_(
         method['data'], argArr, methodArr, prefix,
-        method['realMethod'], declarationArr);
+        methodInfo, declarationArr);
 
-    if (i == len - 1) {
-      methodArr[i] += ';';
-    }
   }
   if (isModule) {
     // Format: HashMap data0 = new HashMap();
     //         page.moduleName(data0);
-    declarationArr = bite.webdriver.addIndentations(4, declarationArr);
-    declarationArr.push('    page.' + moduleName +
+    declarationArr = bite.webdriver.addIndentations(6, declarationArr);
+    declarationArr.push('      page.' + moduleName +
                         '(' + argArr.join(', ') + ');');
     return declarationArr.join('\n');
   }
@@ -1162,7 +1158,7 @@ bite.webdriver.getTestMethod_ = function(module, moduleName) {
   //         page.methodName1(data0)
   //             .methodName2();
   declarationArr = declarationArr.concat(methodArr);
-  return bite.webdriver.addIndentations(4, declarationArr).join('\n');
+  return bite.webdriver.addIndentations(6, declarationArr).join('\n');
 };
 
 
@@ -1172,12 +1168,12 @@ bite.webdriver.getTestMethod_ = function(module, moduleName) {
  * @param {Array} argArr An array of arguments.
  * @param {Array} methodArr An array of method calls.
  * @param {string} prefix The prefix of the method call.
- * @param {string} realMethodName The real method's name.
+ * @param {Object} methodInfo The method related info.
  * @param {Array} declarationArr The array of hashmap declarations.
  * @private
  */
 bite.webdriver.pushDataInput_ = function(
-    dataArr, argArr, methodArr, prefix, realMethodName,
+    dataArr, argArr, methodArr, prefix, methodInfo,
     declarationArr) {
   var data = dataArr[0];
   if (typeof(data) == 'object') {
@@ -1197,9 +1193,18 @@ bite.webdriver.pushDataInput_ = function(
     // ex. ['arg1']
     argArr.push(data);
   }
+  if (methodInfo['xpath']) {
+    if (data) {
+      // In the format of page.action(Page1.xpath1, "user inputs")
+      data = [methodInfo['xpath'], data].join(', ');
+    } else {
+      // In the format of page.action(Page1.xpath1)
+      data = methodInfo['xpath'];
+    }
+  }
   // This array has the individual action method calls.
   // ex. ['.method1("arg1")']
-  methodArr.push(prefix + '.' + realMethodName + '(' + data + ')');
+  methodArr.push(prefix + '.' + methodInfo['action'] + '(' + data + ');');
 };
 
 
@@ -1279,14 +1284,13 @@ bite.webdriver.getLastRedirection_ = function(
  * @param {number} selectorIndex The selector index counter.
  * @param {Object} selectorMap A mppater for whether the given selector exists.
  * @param {Object} pages The page object containing info to construct the class.
- * @param {Object} tupleMethodMap The map used to determine a method exists.
  * @param {Array} moduleSteps The steps of a module.
  * @return {Object} The updated selector index, page name and url.
  * @private
  */
 bite.webdriver.parseTestLines_ = function(
     lines, infoMap, curPageName, curUrl, urlPageMap, selectorIndex,
-    selectorMap, pages, tupleMethodMap, moduleSteps) {
+    selectorMap, pages, moduleSteps) {
   var playbackActions = rpf.CodeGenerator.PlaybackActions;
   var page = null;
   var pageName = '';
@@ -1321,7 +1325,6 @@ bite.webdriver.parseTestLines_ = function(
       selectorMap = bite.webdriver.getSelectorMap_(curPageName, pages);
 
       stepInfo['url'] = curUrl;
-      stepInfo['returnPageName'] = curPageName;
       var elemInfo = infoMap['elems'][stepInfo['elemId']];
       var curStep = curId;
 
@@ -1332,49 +1335,30 @@ bite.webdriver.parseTestLines_ = function(
             nextRedirect, urlPageMap, pages);
         nextCmdClassName = page['pageName'];
       }
-      // The next cmd class name could be either assigned by a specified class
-      // or based on the info in a redirection.
-      if (nextCmdClassName) {
-        infoMap['steps'][curStep]['returnPageName'] = nextCmdClassName;
-        if (!pages[curPageName]['imports']['custom'][nextCmdClassName]) {
-          pages[curPageName]['imports']['custom'][nextCmdClassName] = true;
-        }
-      }
 
       var selector = elemInfo['xpaths'][0];
       var selectorKey = selector.replace(/\W+/g, '');
 
       // Only adds the selector declaration if it doesn't exist yet.
       if (!selectorMap[selectorKey]) {
-        selectorMap[selectorKey] = 'selector' + selectorIndex++;
+        selectorIndex++;
+        selectorMap[selectorKey] = bite.webdriver.getSelectorName_(
+            stepInfo['stepName']);
         pages[curPageName]['properties'].push(
             bite.webdriver.generateSelectorVar_(
             selectorMap[selectorKey], selector, 0));
       }
 
-      // Generates the action method in the page class.
-      var newMethod = bite.webdriver.generateActionMethod_(
-          curStep, infoMap, 2, selectorMap[selectorKey],
-          pages, tupleMethodMap, curPageName);
-
-      // There are possible dup of methods. Only added once.
-      pages[curPageName]['rest'] += newMethod ? ('\n' + newMethod) : '';
-
-      // Adds each mapped method name to module.
-      var methodId =
-          pages[curPageName]['methods'][stepInfo['stepName']]['methodId'];
-
-      // tupleMethodMap[methodId] is the real method name.
       moduleSteps.push(
-          {'originalMethod': stepInfo['stepName'],
-           'realMethod': tupleMethodMap[methodId],
+          {'className': curPageName,
+           'xpathName': selectorMap[selectorKey],
+           'action': stepInfo['action'],
            'data': [bite.webdriver.getDataValue_(stepInfo, elemInfo)]});
     } else if (line.indexOf(rpf.CodeGenerator.PlaybackActions.CALL) == 0) {
       var command = 'getCurrentJsCommand("BiteRpfAction.' + line + '")';
       // TODO(phu): Add executeAsyncScript method.
       moduleSteps.push({
-        'originalMethod': 'executeJavascript',
-        'realMethod': 'executeJavascript',
+        'action': 'executeJavascript',
         'data': [command]});
     } else if (line.indexOf(playbackActions.REDIRECT_TO) == 0) {
       page = bite.webdriver.getPageInfoFromLine_(line, urlPageMap, pages);
@@ -1442,7 +1426,6 @@ bite.webdriver.generatePages_ = function(
     codeArr, infoMap, startUrlArr, urlPageMap, testNameArr, datafileArr) {
   var pages = {};
   var selectorMap = {};
-  var tupleMethodMap = {};
   var selectorIndex = 0;
   var curId = '';
   var curStep = '';
@@ -1487,7 +1470,7 @@ bite.webdriver.generatePages_ = function(
     // Loops through the test script and collect info.
     var results = bite.webdriver.parseTestLines_(
         lines, infoMap, curPageName, curUrl, urlPageMap, selectorIndex,
-        selectorMap, pages, tupleMethodMap, moduleSteps);
+        selectorMap, pages, moduleSteps);
     curUrl = results['curUrl'];
     curPageName = results['curPageName'];
     selectorIndex = results['selectorIndex'];
@@ -1498,10 +1481,6 @@ bite.webdriver.generatePages_ = function(
           bite.webdriver.generateModuleMethod_(
           moduleSteps, curPageName, moduleName, 2, startUrl,
           pages[moduleStartPage]);
-    }
-    // This is used to import dependent generated page.
-    if (!pages[moduleStartPage]['imports']['custom'][curPageName]) {
-      pages[moduleStartPage]['imports']['custom'][curPageName] = true;
     }
   }
 

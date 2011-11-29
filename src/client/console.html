@@ -17,12 +17,14 @@ See the COPYING file for details.
   <body onLoad="rpf.ConsoleManager.getInstance();">
     <div id="t1" class="rpf-container">
       <div id="console_toolbar" class="console-toolbar">
-        <input id="rpf-loadTest" type="image"  src="imgs/rpf/loadfile.png"
+        <input id="rpf-addTest" type="image"  src="imgs/rpf/plus.png"
                width="20" class="console-menu-button" />
-        <input id="rpf-saveTest" type="image" src="imgs/rpf/writefile.png"
+        <input id="rpf-loadTest" type="image"  src="imgs/rpf/writefile.png"
+               width="20" class="console-menu-button" />
+        <input id="rpf-saveTest" type="image" src="imgs/rpf/loadfile.png"
                width="20" class="console-menu-button" />
         <input type="image" id="rpf-export"
-               src="imgs/rpf/export.png" width="22" />
+               src="imgs/rpf/createsuite.png" width="22" />
 
         <input id="rpf-startPlayback" type="image" src="imgs/rpf/play.png"
                width="22" class="console-menu-button" />
@@ -37,17 +39,11 @@ See the COPYING file for details.
                class="console-menu-button"/>
         <input type="image" id="rpf-workerMode" src="imgs/rpf/workermode.png"
                width="22" class="console-menu-button" />
-        <input type="image" id="rpf-validate"
-               src="imgs/rpf/validation-disabled.png" width="22"
-               class="console-menu-button" />
-        <input type="image" id="rpf-notes" src="imgs/rpf/createsuite.png"
+        <input type="image" id="rpf-notes" src="imgs/rpf/one_up_page_view.svg"
                width="22" class="console-menu-button" />
         <input type="image" id="rpf-info" src="imgs/rpf/info.png"
                width="24" class="console-menu-button" />
 
-        <input type="image" id="rpf-project-info-button"
-               src="imgs/rpf/projectinfo.svg" width="24"
-               class="console-menu-button" />
         <input type="image" id="rpf-content-map-button"
                src="imgs/rpf/contentmap.svg" width="24"
                class="console-menu-button" />
@@ -61,25 +57,32 @@ See the COPYING file for details.
         <div id="viewMode"></div>
       </div>
       <div id="rpf-project-info">
-        <form>
-          <span>
-            <label for="rpf-current-project">Project</label>
-            <input type="text" name="rpf-current-project"
-                   id="rpf-current-project" disabled>
-          </span>
-          <span>
-            <label for="testId">ID</label>
-            <input type="text" name="testId" id="testId" disabled>
-          </span>
-          <span>
-            <label for="testName">Name</label>
-            <input type="text" name="testName" id="testName_readonly" disabled>
-          </span>
-          <span>
-            <label for="starturl">URL</label>
-            <input type="text" name="startUrl" id="startUrl" size="22">
-          </span>
-        </form>
+        <div style="border-bottom:solid 1px #D5D5D5;padding:5px 0 8px 0;">
+          <h3 class="componentName">Project</h3>
+          <div name="rpf-current-project" id="rpf-current-project"
+               style="display:inline;width:60%;"></div>
+          <div style="display:inline;padding-left:15px;">
+            <input type="radio" name="projectLocation" id="location-local"
+                   value="local">
+            <label class="dialog-label">Local</label>
+            <input type="radio" name="projectLocation" id="location-web"
+                   value="web"
+                   checked style="margin-left: 20px">
+            <label class="dialog-label">Web</label>
+          </div>
+        </div>
+
+        <div style="padding:5px 0 5px 0;">
+          <h3 class="componentName">Script</h3>
+          <div name="testName" id="testName"
+               style="display:inline;width:60%;"></div>
+          <div style="display:inline;padding-left:21px;vertical-align:bottom;">
+            <input type="image" name="testId" id="testId"
+                   src="imgs/rpf/ghost-avatar.svg">
+          </div>
+        </div>
+
+        <div name="startUrl" id="startUrlDiv" style="padding-top:6px;"></div>
       </div>
       <div id="rpf-content-map">
         <textarea rows="4" id="datafileContainer"
@@ -90,9 +93,17 @@ See the COPYING file for details.
         <div id="bookData"></div>
       </div>
       <div class="rpf-footer">
-        <img src="imgs/bite-logo_100x100.png"
-             width="40px" height="40px">
-        <div id="statusLog" class="status-logger"></div>
+        <table width="100%">
+          <tr>
+            <td width="45px">
+              <img src="imgs/bite-logo_100x100.png"
+                   width="40px" height="40px">
+            </td>
+            <td style="vertical-align:middle;">
+              <div id="statusLog" class="status-logger"></div>
+            </td>
+          </tr>
+        </table>
       </div>
     </div>
   </body>

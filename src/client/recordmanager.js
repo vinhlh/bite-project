@@ -421,7 +421,10 @@ rpf.RecordManager.prototype.testBlockValidation = function(blockObj) {
 rpf.RecordManager.prototype.getRoots_ = function() {
   var results = [];
   if (this.recordingInfo_ && this.recordingInfo_['pageMap']) {
-    var pageMap = goog.json.parse(this.recordingInfo_['pageMap']);
+    var pageMap = this.recordingInfo_['pageMap'];
+    if (typeof pageMap == 'string') {
+      pageMap = goog.json.parse(pageMap);
+    }
     for (var item in pageMap) {
       results.push(
           {'xpath': item, 'className': pageMap[item]});

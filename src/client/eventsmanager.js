@@ -952,22 +952,6 @@ rpf.EventsManager.prototype.automateRpf = function(params) {
           Bite.Constants.COMPLETED_EVENT_TYPES.TEST_LOADED);
       stepArr.push(temp);
 
-      temp = this.automator_.getStepObject(
-          Bite.Constants.ListenerDestination.CONSOLE,
-          Bite.Constants.UiCmds.AUTOMATE_DIALOG_SAVE_TEST,
-          {'project': params['project'],
-           'isWeb': false},
-          Bite.Constants.COMPLETED_EVENT_TYPES.AUTOMATE_SAVE_DIALOG);
-      stepArr.push(temp);
-
-      temp = this.automator_.getStepObject(
-          Bite.Constants.ListenerDestination.CONSOLE,
-          Bite.Constants.UiCmds.AUTOMATE_EXPORT_DIALOG_LOAD_PROJECT,
-          {'project': params['project'],
-           'isWeb': false},
-          Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_LOADED_IN_EXPORT);
-      stepArr.push(temp);
-
       if (params['autoPlay']) {
         // Automatically playback the loaded script.
         temp = this.automator_.getStepObject(
@@ -1154,6 +1138,7 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['projectName'],
           params['screenshots'],
           params['noConsole'],
+          params['scriptId'],
           sendResponse);
       break;
     case Bite.Constants.CONSOLE_CMDS.DELETE_CMD:
@@ -1300,7 +1285,8 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['elemVarName'],
           params['noConsole'],
           params['iframeInfo'],
-          params['xpaths']);
+          params['xpaths'],
+          params['className']);
       sendResponse({'scriptInfo': scriptInfo});
       break;
     case Bite.Constants.CONSOLE_CMDS.DELETE_TEST_ON_WTF:
@@ -1311,11 +1297,7 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['project'], params['testNames'], sendResponse);
       break;
     case Bite.Constants.CONSOLE_CMDS.GET_JSON_FROM_WTF:
-      this.saveLoadMgr_.getJsonFromWTF(
-          params['jsonId'],
-          params['mode'],
-          params['forHelper'],
-          sendResponse);
+      this.saveLoadMgr_.getJsonFromWTF(params['jsonId'], sendResponse);
       break;
     case Bite.Constants.CONSOLE_CMDS.STOP_RECORDING:
       this.recordMgr_.stopRecording();

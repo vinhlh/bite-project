@@ -213,6 +213,16 @@ rpf.ContentScript.RecordHelper.MAX_ = 999;
 
 
 /**
+ * The elements that could not trigger drag events.
+ * @type {Object}
+ * @private
+ */
+rpf.ContentScript.RecordHelper.DRAG_FILTER_ = {
+  'select': true
+};
+
+
+/**
  * Opens the locator helper dialog.
  * TODO(phu): Move the bite console to common lib and call it directly.
  * @private
@@ -530,12 +540,13 @@ rpf.ContentScript.RecordHelper.prototype.mouseUpHandler_ = function(e) {
     var dx = e.screenX - this.currentElemCursorPos['x'];
     var dy = e.screenY - this.currentElemCursorPos['y'];
     if ((dx < 10 && dx > -10) && (dy < 10 && dy > -10)) {
-      console.log('Minor mouse drag, ignore.');
       return;
     } else {
-      if (this.checkInRecordingArea_(this.curMouseDownElement_)) {
-        console.log('Visible mouse drag, will record.');
-        this.sendActionBack(this.elemUnderCursor_, dx + 'x' + dy, 'drag', e);
+      var tagName = this.curMouseDownElement_.tagName.toLowerCase();
+      if (this.checkInRecordingArea_(this.curMouseDownElement_) &&
+          !rpf.ContentScript.RecordHelper.DRAG_FILTER_[tagName]) {
+        this.sendActionBack(
+            this.curMouseDownElement_, dx + 'x' + dy, 'drag', e);
       }
     }
   }
@@ -554,8 +565,8 @@ rpf.ContentScript.RecordHelper.prototype.mouseDownHandler_ = function(e) {
   var content = this.elemDescriptor_.getText(this.elemUnderCursor_);
   if (e.button == 0 && this.recordingMode_ == 'rpf') {
     this.currentElemCursorPos = {'x': e.screenX, 'y': e.screenY};
+    this.curMouseDownElement_ = this.elemUnderCursor_;
     if (this.elemUnderCursor_.tagName.toLowerCase() != 'select') {
-      this.curMouseDownElement_ = this.elemUnderCursor_;
       this.sendActionBack(this.elemUnderCursor_, content, 'click', e);
     }
   } else if (e.button == 2) {

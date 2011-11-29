@@ -36,6 +36,7 @@
 
 goog.provide('rpf.ExportDialog');
 
+goog.require('bite.closure.Helper');
 goog.require('bite.common.mvc.helper');
 goog.require('bite.webdriver');
 goog.require('goog.dom');
@@ -45,7 +46,9 @@ goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
 goog.require('goog.format.JsonPrettyPrinter');
 goog.require('goog.json');
+goog.require('goog.ui.CustomButton');
 goog.require('goog.ui.Dialog');
+goog.require('goog.ui.TabBar');
 goog.require('rpf.Console.Messenger');
 goog.require('rpf.DataModel');
 goog.require('rpf.StatusLogger');
@@ -59,9 +62,11 @@ goog.require('rpf.soy.Dialog');
  * of the information in the selected format.
  * @param {function(Bite.Constants.UiCmds, Object, Event, function(Object)=)}
  *     onUiEvents The function to handle the specific event.
+ * @param {function()} reloadProject The method to reload the project.
+ * @param {rpf.Console.Messenger} messenger The messenger instance.
  * @constructor
  */
-rpf.ExportDialog = function(onUiEvents) {
+rpf.ExportDialog = function(onUiEvents, reloadProject, messenger) {
   /**
    * The project data loaded from the server.
    * @type {Object}
@@ -105,11 +110,39 @@ rpf.ExportDialog = function(onUiEvents) {
   this.ready_ = false;
 
   /**
-   * The autocomplete box.
-   * @type {goog.ui.AutoComplete.Basic}
+   * The project name.
+   * @type {string}
    * @private
    */
-  this.autocomplete_ = null;
+  this.projectName_ = '';
+
+  /**
+   * The location.
+   * @type {string}
+   * @private
+   */
+  this.location_ = '';
+
+  /**
+   * The test ids.
+   * @type {!Array.<string>}
+   * @private
+   */
+  this.ids_ = [];
+
+  /**
+   * The method to reload the current project.
+   * @type {function()}
+   * @private
+   */
+  this.reloadProject_ = reloadProject;
+
+  /**
+   * The messenger.
+   * @type {rpf.Console.Messenger}
+   * @private
+   */
+  this.messenger_ = messenger;
 
   /**
    * The function to handle the specific event.
@@ -128,18 +161,14 @@ rpf.ExportDialog = function(onUiEvents) {
 rpf.ExportDialog.Id_ = {
   ADD: 'export-add-class',
   EXPORT: 'export-button-export',
-  GO: 'export-button-go',
   INTERVAL: 'export-java-interval',
   JAVA_PACKAGE_PATH: 'export-java-package-path',
+  JAVA_PACKAGE_IMPORT: 'import-java-package-path',
   IMPORT: 'export-button-import',
-  LOCAL: 'location-local-export',
-  NAME: 'export-name',
   PAGE_TABLE_BODY: 'export-page-table-body',
   ROOT: 'export-root',
   SAVE: 'export-button-save',
-  TEST_DATA: 'export-test-data',
-  TEST_HEADING: 'export-test-heading',
-  WEB: 'location-web-export'
+  TEST_DATA: 'export-test-data'
 };
 
 
@@ -201,9 +230,88 @@ rpf.ExportDialog.prototype.initComponents_ = function() {
   var rootElement = this.elements_[rpf.ExportDialog.Id_.ROOT];
   this.dialog_ = new goog.ui.Dialog();
   this.dialog_.getContentElement().appendChild(rootElement);
-  this.dialog_.setTitle('Export Project');
+  this.dialog_.setTitle('Project details');
   this.dialog_.setButtonSet(null);
   this.dialog_.setVisible(false);
+
+  var topTab = new goog.ui.TabBar();
+  goog.events.listen(topTab, goog.ui.Component.EventType.SELECT,
+                     goog.bind(this.onTabSelected_, this));
+  topTab.decorate(goog.dom.getElement('project-details-tab'));
+  this.renderButtons_();
+};
+
+
+/**
+ * Renders the buttons.
+ * @private
+ */
+rpf.ExportDialog.prototype.renderButtons_ = function() {
+  var deleteButton = new goog.ui.CustomButton('Delete');
+
+  goog.events.listen(
+      deleteButton,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.onDeleteTests_, this));
+  deleteButton.render(goog.dom.getElement('delete-tests-button'));
+
+  var saveButton = new goog.ui.CustomButton('Save');
+
+  goog.events.listen(
+      saveButton,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.handleSave_, this));
+  saveButton.render(this.elements_[rpf.ExportDialog.Id_.SAVE]);
+
+  var importButton = new goog.ui.CustomButton('Import');
+
+  goog.events.listen(
+      importButton,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.handleImport_, this));
+  importButton.render(this.elements_[rpf.ExportDialog.Id_.IMPORT]);
+
+  var exportButton = new goog.ui.CustomButton('Export');
+
+  goog.events.listen(
+      exportButton,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.handleExport_, this));
+  exportButton.render(this.elements_[rpf.ExportDialog.Id_.EXPORT]);
+};
+
+
+/**
+ * On removing the selected tests.
+ * @private
+ */
+rpf.ExportDialog.prototype.onDeleteTests_ = function() {
+  var selectedTestNames = [];
+  var selectedTestIds = [];
+  var location = this.location_;
+  var selector = goog.dom.getElement('project-details-tests-selector');
+  for (var i = 0; i < selector.options.length; ++i) {
+    if (selector.options[i].selected) {
+      selectedTestNames.push(selector.options[i].value);
+      if (this.ids_ && this.ids_[i]) {
+        selectedTestIds.push(this.ids_[i]);
+      }
+    }
+  }
+  if (selectedTestNames.length > 0) {
+    if (location == rpf.LoaderDialog.Locations.LOCAL) {
+      this.messenger_.sendMessage(
+          {'command': Bite.Constants.CONSOLE_CMDS.DELETE_TEST_LOCAL,
+           'params': {'project': this.projectName_,
+                      'testNames': selectedTestNames}},
+          this.reloadProject_);
+    } else {
+      this.messenger_.sendMessage(
+          {'command': Bite.Constants.CONSOLE_CMDS.DELETE_TEST_ON_WTF,
+           'params': {'jsonIds': selectedTestIds}},
+          this.reloadProject_);
+    }
+  }
 };
 
 
@@ -248,34 +356,29 @@ rpf.ExportDialog.prototype.initContent_ = function() {
 
 
 /**
+ * Handles a tab selected event.
+ * @param {Object} e The event object.
+ * @private
+ */
+rpf.ExportDialog.prototype.onTabSelected_ = function(e) {
+  var tabSelected = e.target;
+  var id = tabSelected.getContentElement().id;
+  var contentDiv = goog.dom.getElement('project-details-content');
+  var tabs = contentDiv.querySelectorAll('.project-details-content-tab');
+  bite.closure.Helper.setElementsVisibility(/** @type {Array} */ (tabs), false);
+  var selectedTab = goog.dom.getElement(id + '-content');
+  bite.closure.Helper.setElementsVisibility([selectedTab], true);
+};
+
+
+/**
  * Setup handlers for the dialog.  This function is intended to only be called
  * by init.
  * @private
  */
 rpf.ExportDialog.prototype.initStaticHandlers_ = function() {
   // State changing button handlers
-  var element = this.elements_[rpf.ExportDialog.Id_.NAME];
-  this.handlersStatic_.listen(element, goog.events.EventType.KEYPRESS,
-                              goog.bind(this.handleEnter_, this));
-
-  element = this.elements_[rpf.ExportDialog.Id_.GO];
-  this.handlersStatic_.listen(element, goog.events.EventType.CLICK,
-                              goog.bind(this.requestData_, this,
-                                        goog.nullFunction));
-
-  element = this.elements_[rpf.ExportDialog.Id_.SAVE];
-  this.handlersStatic_.listen(element, goog.events.EventType.CLICK,
-                              goog.bind(this.handleSave_, this));
-
-  element = this.elements_[rpf.ExportDialog.Id_.IMPORT];
-  this.handlersStatic_.listen(element, goog.events.EventType.CLICK,
-                              goog.bind(this.handleImport_, this));
-
-  element = this.elements_[rpf.ExportDialog.Id_.EXPORT];
-  this.handlersStatic_.listen(element, goog.events.EventType.CLICK,
-                              goog.bind(this.handleExportClicked_, this));
-
-  element = this.elements_[rpf.ExportDialog.Id_.ADD];
+  var element = this.elements_[rpf.ExportDialog.Id_.ADD];
   this.handlersStatic_.listen(element, goog.events.EventType.CLICK,
                               goog.bind(this.handleAdd_, this));
 };
@@ -408,31 +511,6 @@ rpf.ExportDialog.prototype.handleAdd_ = function() {
 
 
 /**
- * Handles the pressing of the enter key from the project name textbox.  When
- * pressed it acts like pressing the go button and will send out a request
- * for project data.
- * @param {Event} event The event fired when the keyboard is pressed for the
- *     project name textbox.
- * @private
- */
-rpf.ExportDialog.prototype.handleEnter_ = function(event) {
-  if (event.keyCode == goog.events.KeyCodes.ENTER) {
-    this.requestData_();
-  }
-};
-
-
-/**
- * Handles the clicking of the export button. Note the project must be
- *     automatically reloaded to sync up the changes before exporting.
- * @private
- */
-rpf.ExportDialog.prototype.handleExportClicked_ = function() {
-  this.requestData_(goog.bind(this.handleExport_, this));
-};
-
-
-/**
  * Exports the generated Java files by downloading a zip.
  * @param {Object} data The consolidated data.
  * @private
@@ -489,14 +567,32 @@ rpf.ExportDialog.prototype.handleImport_ = function() {
   var ids = rpf.ExportDialog.Id_;
   var command = {
     'command': Bite.Constants.CONSOLE_CMDS.LOAD_PROJECT_FROM_LOCAL_SERVER,
-    'params': {'path': this.elements_[ids.JAVA_PACKAGE_PATH].value}
+    'params': {'path': this.elements_[ids.JAVA_PACKAGE_IMPORT].value}
   };
   var messenger = rpf.Console.Messenger.getInstance();
+  messenger.sendMessage(command, goog.bind(this.onImportCallback_, this));
   var statusLogger = rpf.StatusLogger.getInstance();
-  messenger.sendMessage(command,
-                        goog.bind(statusLogger.setStatusCallback,
-                                  statusLogger));
   statusLogger.setStatus('Importing the project from your client...');
+};
+
+
+/**
+ * Handles the clicking of the import button. By default, it will send a ping
+ * to local server and try to import the project defined in data.rpf, and
+ * then save the project to localStorage for further manipulation.
+ * @private
+ */
+rpf.ExportDialog.prototype.onImportCallback_ = function(response) {
+  // Updates the status for saving the project locally.
+  var statusLogger = rpf.StatusLogger.getInstance();
+  statusLogger.setStatusCallback(response);
+  // If the project was successfully loaded, load it in the console.
+  if (response['project']) {
+    this.onUiEvents_(Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_PROJECT,
+        {'isWeb': false,
+         'project': response['project']},
+        /** @type {Event} */ ({}));
+  }
 };
 
 
@@ -509,9 +605,16 @@ rpf.ExportDialog.prototype.handleImport_ = function() {
  * @private
  */
 rpf.ExportDialog.prototype.handleExport_ = function() {
+  var name = this.projectName_;
+  if (!name) {
+    rpf.StatusLogger.getInstance().setStatus(
+        'Please load a project first.', 'red');
+    return;
+  }
+
   var dataModel = new rpf.DataModel();
   var result = dataModel.consolidateData(
-      {'name': this.elements_[rpf.ExportDialog.Id_.NAME].value,
+      {'name': this.projectName_,
        'tests': this.data_['tests'],
        'project_details': this.data_['project_details']});
   var data = result['data'];
@@ -553,8 +656,10 @@ rpf.ExportDialog.prototype.handleExport_ = function() {
  * @private
  */
 rpf.ExportDialog.prototype.handleSave_ = function() {
-  var name = this.elements_[rpf.ExportDialog.Id_.NAME].value;
+  var name = this.projectName_;
   if (!name) {
+    rpf.StatusLogger.getInstance().setStatus(
+        'Please load a project first.', 'red');
     return;
   }
 
@@ -629,50 +734,14 @@ rpf.ExportDialog.prototype.handleSaveComplete_ = function(name, responseObj) {
 
 
 /**
- * Sends a request for the specified project given the current search state.
- * While the request is being processed a loading icon is displayed.
- * @param {function()=} opt_callback The optional callback function.
+ * Clears the project info dialog UI.
  * @private
  */
-rpf.ExportDialog.prototype.requestData_ = function(opt_callback) {
-  var name = this.elements_[rpf.ExportDialog.Id_.NAME].value;
-  if (!name) {
-    return;
-  }
-
-  rpf.StatusLogger.getInstance().setStatus(rpf.StatusLogger.LOAD_TEST,
-                                           '#777');
-
-  // Clear major elements
+rpf.ExportDialog.prototype.clear_ = function() {
+  //Clear major elements
   this.elements_[rpf.ExportDialog.Id_.TEST_DATA].innerHTML = '';
   this.elements_[rpf.ExportDialog.Id_.PAGE_TABLE_BODY].innerHTML = '';
   this.elements_[rpf.ExportDialog.Id_.JAVA_PACKAGE_PATH].value = '';
-
-  // Disable dialog elements
-  for (var key in rpf.ExportDialog.Id_) {
-    var id = rpf.ExportDialog.Id_[key];
-    var element = this.elements_[id];
-    element.setAttribute('disabled', 'disabled');
-  }
-
-  var location = this.getStorageLocation_();
-  var data = {
-    'command': '',
-    'params': {
-      'name': name
-    }
-  };
-
-  if ('web' == location) {
-    // Send request to the server for the project details and set of associated
-    // tests (and test data).
-    data['command'] = Bite.Constants.CONSOLE_CMDS.GET_PROJECT;
-  } else {
-    data['command'] = Bite.Constants.CONSOLE_CMDS.GET_LOCAL_PROJECT;
-  }
-  rpf.Console.Messenger.getInstance().sendMessage(data,
-      goog.bind(this.requestDataComplete_, this, name,
-                opt_callback || goog.nullFunction));
 };
 
 
@@ -682,11 +751,12 @@ rpf.ExportDialog.prototype.requestData_ = function(opt_callback) {
  * @param {string} name The name of the project that is being saved.
  * @param {function()} callback The callback function.
  * @param {Object} responseObj The object returned from the request.
- * @private
  */
-rpf.ExportDialog.prototype.requestDataComplete_ = function(
+rpf.ExportDialog.prototype.requestDataComplete = function(
     name, callback, responseObj) {
   var statusLogger = rpf.StatusLogger.getInstance();
+  this.clear_();
+
   // Enable dialog elements
   for (var key in rpf.ExportDialog.Id_) {
     var id = rpf.ExportDialog.Id_[key];
@@ -755,10 +825,17 @@ rpf.ExportDialog.prototype.requestDataComplete_ = function(
 
   // Get list of test names and update appropriate dialog element with data.
   var names = [];
-  for (var i = 0, len = tests.length; i < len; ++i) {
+  var ids = [];
+
+  goog.array.sortObjectsByKey(tests, 'test_name');
+  for (var i = 0; i < tests.length; ++i) {
     names.push(tests[i]['test_name']);
+    var temp = tests[i]['id'];
+    if (temp) {
+      ids.push(temp);
+    }
   }
-  names = names.sort();
+  this.ids_ = ids;
 
   var testElement = this.elements_[rpf.ExportDialog.Id_.TEST_DATA];
   bite.common.mvc.helper.renderModelFor(testElement,
@@ -771,10 +848,10 @@ rpf.ExportDialog.prototype.requestDataComplete_ = function(
   for (var key in urlPageMap) {
     urls.push(key);
   }
-  urls = urls.sort();
+  urls = urls.sort().reverse();
 
   var urlPageMapElement = this.elements_[rpf.ExportDialog.Id_.PAGE_TABLE_BODY];
-  for (i = 0, len = urls.length; i < len; ++i) {
+  for (var i = 0, len = urls.length; i < len; ++i) {
     var url = urls[i];
     var pageName = urlPageMap[url];
     this.generateUrlPageMapRow_(url, pageName, urlPageMapElement);
@@ -783,12 +860,16 @@ rpf.ExportDialog.prototype.requestDataComplete_ = function(
   // Set webdriver configuration
   var javaPackagePath = this.elements_[rpf.ExportDialog.Id_.JAVA_PACKAGE_PATH];
   javaPackagePath.value = details['java_package_path'];
+  javaPackagePath = this.elements_[rpf.ExportDialog.Id_.JAVA_PACKAGE_IMPORT];
+  javaPackagePath.value= details['java_package_path'];
 
   if (details['params']) {
     var codeParams = goog.json.parse(details['params']);
     var intervalInput = this.elements_[rpf.ExportDialog.Id_.INTERVAL];
     intervalInput.value = codeParams['interval'] ? codeParams['interval'] : '';
   }
+
+  this.setProjectName_(details['name']);
 
   statusLogger.setStatus(rpf.StatusLogger.LOAD_TEST_SUCCESS, 'green');
   var messenger = rpf.Console.Messenger.getInstance();
@@ -810,23 +891,21 @@ rpf.ExportDialog.prototype.setVisible = function(display) {
 
 
 /**
- * Sets the location where the project is loaded from.
- * @param {boolean} isWeb Whether the location is the web.
- * @private
- */
-rpf.ExportDialog.prototype.setLocation_ = function(isWeb) {
-  this.elements_[rpf.ExportDialog.Id_.LOCAL].checked = !isWeb;
-  this.elements_[rpf.ExportDialog.Id_.WEB].checked = isWeb;
-};
-
-
-/**
  * Sets the project name.
  * @param {string} projectName The project name.
  * @private
  */
 rpf.ExportDialog.prototype.setProjectName_ = function(projectName) {
-  this.elements_[rpf.ExportDialog.Id_.NAME].value = projectName;
+  this.projectName_ = projectName;
+};
+
+
+/**
+ * Sets the location.
+ * @param {string} location The location.
+ */
+rpf.ExportDialog.prototype.setLocation = function(location) {
+  this.location_ = location;
 };
 
 
@@ -836,39 +915,6 @@ rpf.ExportDialog.prototype.setProjectName_ = function(projectName) {
  * @private
  */
 rpf.ExportDialog.prototype.getStorageLocation_ = function() {
-  if (this.elements_[rpf.ExportDialog.Id_.LOCAL].checked) {
-    return this.elements_[rpf.ExportDialog.Id_.LOCAL].value;
-  } else if (this.elements_[rpf.ExportDialog.Id_.WEB].checked) {
-    return this.elements_[rpf.ExportDialog.Id_.WEB].value;
-  }
-
-  rpf.StatusLogger.getInstance().setStatus('Please select a location.', 'red');
-  throw new Error('No location was specified.');
-};
-
-
-/**
- * Automates the dialog.
- * @param {boolean} isWeb Whether the location is the web.
- * @param {string} project The project name.
- */
-rpf.ExportDialog.prototype.automateDialog = function(isWeb, project) {
-  this.setLocation_(isWeb);
-  this.setProjectName_(project);
-  this.requestData_();
-};
-
-
-/**
- * Sets the project name autocomplete.
- * @param {Array} names The array of project names.
- */
-rpf.ExportDialog.prototype.setProjectAutoComplete = function(names) {
-  if (this.autocomplete_) {
-    this.autocomplete_.dispose();
-    this.autocomplete_ = null;
-  }
-  this.autocomplete_ = new goog.ui.AutoComplete.Basic(
-      names, this.elements_[rpf.ExportDialog.Id_.NAME], false);
+  return this.location_;
 };
 

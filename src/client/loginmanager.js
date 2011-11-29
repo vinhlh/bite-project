@@ -36,7 +36,21 @@ goog.require('goog.string');
  * @constructor
  * @export
  */
-bite.LoginManager = function() {};
+bite.LoginManager = function() {
+  /**
+   * The current logged in user.
+   * @type {string}
+   * @private
+   */
+  this.username_ = '';
+
+  /**
+   * The login or out url.
+   * @type {string}
+   * @private
+   */
+  this.loginOrOutUrl_ = '';
+};
 goog.addSingletonGetter(bite.LoginManager);
 
 
@@ -58,6 +72,14 @@ bite.LoginManager.CHECK_LOGIN_STATUS_PATH_ = '/check_login_status';
  * @export
  */
 bite.LoginManager.prototype.getCurrentUser = function(callback) {
+  if (this.username_) {
+    // If the username exists, no need to send an additional ping to server,
+    // if the sync issue happens, we should periodically ping server to
+    // refresh.
+    callback(this.buildResponseObject_(
+        true, this.loginOrOutUrl_, this.username_));
+    return;
+  }
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
   url.setPath(bite.LoginManager.CHECK_LOGIN_STATUS_PATH_);
@@ -96,11 +118,11 @@ bite.LoginManager.prototype.getCurrentUserCallback_ =
       loginOrOutUrl = server + loginOrOutUrl;
     }
 
-    // TODO(michaelwill): We should probably cache this value in the future,
-    // but the sync issues will require some thought.
-    var username = response['user'] || '';
+    this.username_ = response['user'] || '';
+    this.loginOrOutUrl_ = loginOrOutUrl;
 
-    responseObj = this.buildResponseObject_(true, loginOrOutUrl, username);
+    responseObj = this.buildResponseObject_(
+        true, loginOrOutUrl, this.username_);
   } catch (e) {
     responseObj = this.buildResponseObject_(false, '', '');
   }

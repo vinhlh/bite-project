@@ -369,11 +369,11 @@ Bite.Constants.UiCmds = {
   // For main console.
   ADD_GENERATED_CMD: 'addGeneratedCmd',
   ADD_NEW_COMMAND: 'addNewCommand',
+  ADD_NEW_TEST: 'addNewTest',
   ADD_SCREENSHOT: 'addScreenShot',
   CHANGE_MODE: 'changeMode',
   HIGHLIGHT_LINE: 'highlightLine',
   LOAD_CMDS: 'loadCmds',
-  LOAD_PROJECT_NAME_INPUT: 'loadProjectNameInput',
   LOAD_TEST_FROM_LOCAL: 'loadTestFromLocal',
   LOAD_TEST_FROM_WTF: 'loadTestFromWtf',
   ON_CONSOLE_CLOSE: 'onConsoleClose',
@@ -383,7 +383,6 @@ Bite.Constants.UiCmds = {
   ON_SHOW_MORE_INFO: 'onShowMoreInfo',
   OPEN_VALIDATION_DIALOG: 'openValidationDialog',
   RESET_SCREENSHOTS: 'resetScreenShots',
-  SAVE_PROJECT_NAME_INPUT: 'saveProjectNameInput',
   SET_CONSOLE_STATUS: 'setConsoleStatus',
   SET_FINISHED_TESTS_NUMBER: 'setFinishedTestsNumber',
   SET_START_URL: 'setStartUrl',
@@ -396,7 +395,6 @@ Bite.Constants.UiCmds = {
   SHOW_SETTING: 'showSetting',
   SHOW_PLAYBACK_RUNTIME: 'showPlaybackRuntime',
   START_RECORDING: 'startRecording',
-  START_VALIDATE: 'startValidate',
   START_WORKER_MODE: 'startWorkerMode',
   STOP_RECORDING: 'stopRecording',
   TOGGLE_CONTENT_MAP: 'showContentMap',
@@ -405,7 +403,6 @@ Bite.Constants.UiCmds = {
   UPDATE_ELEMENT_AT_LINE: 'updateElementAtLine',
   UPDATE_LOCATOR: 'updateLocator',
   UPDATE_PLAYBACK_STATUS: 'updatePlaybackStatus',
-  UPDATE_SCRIPT_AND_DATA: 'updateScriptAndData',
   UPDATE_SCRIPT_INFO: 'updateScriptInfo',
   UPDATE_WHEN_ON_FAILED: 'updateWhenOnFailed',
   UPDATE_WHEN_RUN_FINISHED: 'updateWhenRunFinished',
@@ -446,20 +443,12 @@ Bite.Constants.UiCmds = {
   CHOOSE_VALIDATION_POSITION: 'chooseValidatePosition',
   DISPLAY_ALL_ATTRIBUTES: 'displayAllAttributes',
 
-  // For export dialog.
-  AUTOMATE_EXPORT_DIALOG_LOAD_PROJECT: 'automateExportDialogLoadProject',
-
   // For savedialog.
-  AUTOMATE_DIALOG_SAVE_TEST: 'automateDialogSaveTest',
-  CANCEL_CMDS: 'cancelCmds',
   SAVE_TEST: 'saveTestToServer',
 
   // For loaddialog.
   AUTOMATE_DIALOG_LOAD_PROJECT: 'automateDialogLoadProject',
   AUTOMATE_DIALOG_LOAD_TEST: 'automateDialogLoadTest',
-  CANCEL_DIALOG: 'cancelDialog',
-  DELETE_SELECTED_TEST: 'deleteSelectedTest',
-  LOAD_SELECTED_TEST: 'loadSelectedTest',
   SET_PROJECT_INFO: 'setProjectInfo',
 
   // For quick command dialog.
@@ -488,7 +477,6 @@ Bite.Constants.RpfConsoleInfoType = {
  * @enum {string}
  */
 Bite.Constants.RpfConsoleId = {
-  CONSOLE_PROJECT_NAME: 'projectName',
   CONTENT_MAP_CONTAINER: 'rpf-content-map',
   CURRENT_PROJECT: 'rpf-current-project',
   DATA_CONTAINER: 'datafileContainer',
