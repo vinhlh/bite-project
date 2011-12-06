@@ -1,0 +1,69 @@
+/**
+ * Copyright 2011 Google Inc. All Rights Reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * @fileoverview Style definitions for the "Thanks for trying out BITE"
+ * page.
+ *
+ * Colors used:
+ *   #888 Light grey for page footer.
+ *
+ * @author bustamante@google.com (Richard Bustamante)
+ */
+
+
+table.thanksContainer {
+  margin-top: 100px;
+}
+
+td.bufferCell {
+  width: 20%;
+}
+
+td.textCell {
+  width: 20%;
+  font-family: tahoma;
+}
+
+div.thanksTitle {
+  padding-top: 14px;
+  font-size: 14pt;
+  font-weight: bold;
+}
+
+div.thanksInfo {
+  font-size: 11pt;
+  padding-top: 14px;
+  width: 300px;
+}
+
+div.dividerLine {
+  background-color: #888;
+  height: 1px;
+  width: 100%;
+}
+
+div.copyrightText {
+  font-size: 9pt;
+  color: #888;
+}
+
+img.biteLogo {
+  width: 210px;
+}
+
+img.bugFiling {
+  width: 380px;
+}
+

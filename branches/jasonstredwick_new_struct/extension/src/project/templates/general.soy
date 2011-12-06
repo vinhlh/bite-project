@@ -1,0 +1,78 @@
+// Copyright 2011 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/*
+ * @fileoverview Template for General Details model.
+ *
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+
+{namespace bite.project.soy.General}
+
+
+/**
+ * Defines the model for a project's general details that allows users to
+ * explore the details of a group.
+ */
+{template .getModel}
+<div class="detail-window" id="project-general-window">
+  <table>
+    <tr>
+      <td>Project Name</td>
+      <td>
+        <input id="project-name" type="text" value=""></input>
+      </td>
+    </tr>
+    <tr>
+      <td>Project Description</td>
+      <td>
+        <textarea id="project-description"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td>Bug Provider</td>
+      <td>
+        <select id="project-bug-provider">
+          <option value="issue-tracker">Issue Tracker</option>
+          <option value="">Buganizer</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        Bug Provider Info
+      </td>
+      <td>
+        <input id="project-bug-provider-info" type="text" value=""></input>
+      </td>
+    </tr>
+    <tr>
+      <td>Test Case Manager</td>
+      <td>
+        <select id="project-tcm">
+          <option value="gtcm">gTCM</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td>Project Url</td>
+      <td>
+        <input id="project-tcm-info" type="text" value=""></input>
+      </td>
+    </tr>
+  </table>
+</div>
+{/template}
+

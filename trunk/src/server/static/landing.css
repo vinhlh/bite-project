@@ -1,0 +1,347 @@
+/* General Styling */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: arial, tahoma, sans-serif;
+  color: #112758;
+}
+
+/* Content Positioning */
+#wrapper {
+  position: relative;
+  height: 100%;
+  width: 900px;
+  margin: 0 auto;
+}
+
+#contentBody {
+  position: absolute;
+  top: 50%;
+  width: 900px;
+  height: 472px;
+  margin-top: -236px;
+  border: 2px solid white;
+  border-radius: 8px;
+  -moz-border-radius: 8px;
+  padding: 8px 8px 8px 8px;
+}
+
+#login {
+  position: absolute;
+  top: -20px;
+  right: 10px;
+  padding: 4px;
+}
+
+/* Header, Logo and Notes */
+div.headercell {
+  position: relative;
+  height:200px;
+  width: 430px;
+  float: left;
+  padding: 8px 8px 8px 8px;
+  border: 2px solid #7d9fef;
+  background-color: #F9F9F9;
+  border-bottom-width: 1px;
+}
+
+div#logocell {
+  background-image: url('/imgs/bite_logo_google.png');
+  background-repeat: no-repeat;
+  background-position: 4px 4px;
+  border-right-width: 0px;
+  border-top-left-radius: 8px;
+  -moz-border-right-width: 0px;
+  -moz-border-radius-topleft: 8px;
+  text-align: right;
+  vertical-align: bottom;
+  display: table-cell;
+  padding: 0px 0px 0px 0px;
+  height: 216px;
+  width: 447px;
+}
+
+div#notescell {
+  border-left-width: 0px;
+  border-top-right-radius: 8px;
+  -moz-border-radius-topright: 8px;
+}
+
+div.rolecell, div.rolecell:hover {
+  position: relative;
+  height:44px;
+  width: 206px;
+  float: left;
+  padding: 8px 8px 8px 8px;
+  border: 2px solid #7d9fef;
+  border-top-width: 0px;
+  background-color: #F9F9F9;
+  border-right-width: 1px;
+  border-left-width: 0px;
+  cursor: pointer;
+}
+
+div.rolecell:hover {
+  background-color: #112758;
+  color: #F0F0FC;
+}
+
+div.rolecell-left, div.rolecell-left:hover {
+  border-left-width: 2px;
+  width: 207px;
+  border-bottom-left-radius: 8px;
+  -moz-border-radius-bottomleft: 8px;
+}
+
+div.rolecell-right, div.rolecell-right:hover {
+  border-right-width: 2px;
+  border-bottom-right-radius: 8px;
+  -moz-border-radius-bottomright: 8px;
+  width: 207px;
+}
+
+p {
+  font-style: italic;
+  text-align: justify;
+  color: #666666;
+}
+
+a {
+  text-decoration: none;
+  color: #2c60d8;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+div.notescontact {
+  text-align: right;
+  padding-top: 24px;
+  color: #666666;
+  font-size: .9em;
+}
+
+/* Download Button and Popup */
+div.download, div.download:hover {
+  display: inline-block;
+  position: relative;
+  right: 10px;
+  top: 145px;
+  width: 120px;
+  background-image: -webkit-gradient(linear, left top, left bottom,
+    color-stop(0.25, rgb(176,196,247)),
+    color-stop(0.75, rgb(121,154,238))
+  );
+  background-image: -moz-linear-gradient(center top,
+    rgb(176, 196, 247),
+    rgb(176, 196, 247) 25%,
+    rgb(121, 154, 238) 75%,
+    rgb(121, 154, 238)
+  );
+  border: 1px solid #2b60d9;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  padding: 8px 8px 8px 8px;
+  text-align: right;
+  cursor: pointer;
+  -webkit-box-shadow: 0 2px 6px #999;
+  -moz-box-shadow: 0 2px 6px #999;
+}
+
+div.download:hover {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+    color-stop(0.0, #2b60d9),
+    color-stop(1.0, #112758));
+  background-image: -moz-linear-gradient(center top, #2b60d9, #112758);
+  color: white;
+  cursor: pointer;
+}
+
+div.downloadButton {
+  font-size: 1.2em;
+  font-weight: bold;
+  text-align: center;
+}
+
+div.downloadTitle {
+  font-size: 0.9em;
+  font-weight: bold;
+  text-align: left;
+}
+
+.download-popup {
+  display: none;
+  position: absolute;
+  top: -1px;
+  left: 134px;
+  z-index: 65535;
+  width: 270px;
+  background-image: -webkit-gradient(linear, left top, left bottom,
+    color-stop(0.0, #f6f8fe),
+    color-stop(1.0, #bbcdf9));
+  background-image: -moz-linear-gradient(center top, #f6f8fe, #bbcdf9);
+  border: 1px solid #2b60d9;
+  border-radius: 4px;
+  -moz-border-radius: 4px;
+  border-top-left-radius: 0px;
+  -moz-border-radius-topleft: 0px;
+  padding: 0px 0px 0px 0px;
+  text-align: left;
+  color: #112758;
+}
+
+div.download:hover .download-popup {
+  display: block;
+}
+
+.popupTitle {
+  border-bottom: 1px solid #2b60d9;
+  padding: 8px 4px 8px 4px;
+  font-size: .8em;
+}
+
+.downloadItem, .downloadItem:hover {
+  padding: 4px 4px 4px 4px;
+  margin-bottom: 2px;
+}
+
+.downloadItem:hover {
+  background-image: -moz-linear-gradient(center top, #112758, #2b60d9);
+  background-image: -webkit-gradient(linear, left top, left bottom,
+    color-stop(1.0, #112758),
+    color-stop(0.0, #2b60d9));
+  color: #F9F9F9;
+}
+
+.downloadTitle {
+  font-size: .9em;
+  font-weight: bold;
+}
+
+.downloadNotes {
+  font-size: .8em;
+  color: #333333;
+  white-space: nowrap;
+  font-style: italic;
+}
+
+.downloadItem:hover .downloadNotes {
+  color: #F9F9F9;
+}
+
+/* Generic Section Buttons */
+div.roletitle {
+    font-weight: bold;
+    text-align: center;
+    padding-bottom: 2px;
+    margin-bottom: 4px;
+    border-bottom: 1px solid #7d9fef;
+}
+
+div.rolenotes {
+    font-size: .8em;
+    font-style: italic;
+    text-align: center;
+}
+
+div.rolecell:hover div.rolenotes,
+div.rolecell:hover div.roletitle {
+    color: #F0F0FC;
+}
+
+
+/* Specific Section Buttons (Lead Tools, Scenarios, Etc.) */
+div#leadtools {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0.0, #f6f8fe),
+      color-stop(1.0, #bbcdf9));
+  background-image: -moz-linear-gradient(center top, #f6f8fe, #bbcdf9);
+  color: #112758;
+}
+
+div#leadtools div.roletitle {
+  border-bottom-color: #bbcdf9;
+}
+
+div#leadtools:hover {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0.0, #2b60d9),
+      color-stop(1.0, #112758));
+  background-image: -moz-linear-gradient(center top, #2b60d9, #112758);
+}
+
+div#leadtools:hover div.roletitle {
+  border-bottom-color: #112758;
+}
+
+div#tutorials {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0.0, #fefeec),
+      color-stop(1.0, #fcfd9b));
+  background-image: -moz-linear-gradient(center top, #fefeec, #fcfd9b);
+  color: #5d4709;
+}
+
+div#tutorials div.roletitle {
+  border-bottom-color: #F8EF6D;
+}
+
+div#tutorials:hover {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0.0, #b67e08),
+      color-stop(1.0, #5d4709));
+  background-image: -moz-linear-gradient(center top, #b67e08, #5d4709);
+}
+
+div#tutorials:hover div.roletitle {
+  border-bottom-color: #5d4709;
+}
+
+div#designs {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0.0, #f0fded),
+      color-stop(1.0, #aaf59b));
+  background-image: -moz-linear-gradient(center top, #f0fded, #aaf59b);
+  color: #0E3F0D;
+}
+
+div#designs div.roletitle {
+  border-bottom-color: #aaf59b;
+}
+
+div#designs:hover {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0.0, #1c891b),
+      color-stop(1.0, #0E3F0D));
+  background-image: -moz-linear-gradient(center top, #1c891b, #0E3F0D);
+}
+
+div#designs:hover div.roletitle {
+  border-bottom-color: #0E3F0D;
+}
+
+div#issues {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+      color-stop(0.0, #ffebeb),
+      color-stop(1.0, #f8acac));
+  background-image: -moz-linear-gradient(center top, #ffebeb, #f8acac);
+  color: #420303;
+}
+
+div#issues div.roletitle {
+  border-bottom-color: #f8acac;
+}
+
+div#issues:hover {
+  background-image: -webkit-gradient(linear, left top, left bottom,
+    color-stop(0.0, #a40505),
+    color-stop(1.0, #420303)
+  );
+  background-image: -moz-linear-gradient(center top, #a40505, #420303);
+}
+
+div#issues:hover div.roletitle {
+  border-bottom-color: #420303;
+}

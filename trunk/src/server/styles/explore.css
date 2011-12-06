@@ -1,0 +1,190 @@
+/**
+ * Copyright 2011 Google, Inc. All Rights Reserved
+ *
+ * @author phu@google.com (Po Hu)
+ */
+
+img.artifact-logo {
+  height: 50px;
+  float: left;
+  margin-right: 4px;
+  margin-bottom: 4px;
+}
+
+div.artifact-title {
+  font-weight: bold;
+}
+
+div.artifact-notes {
+  font-size: .9em;
+}
+
+div.action-row {
+  padding-bottom: 2px;
+  border-top: 1px solid #C6C6C6;
+  border-bottom: 1px solid #C6C6C6;
+  text-align: right;
+  margin-bottom: 8px;
+}
+
+span.action-label {
+  color: #666;
+  font-size: .9em;
+}
+
+span.action-link {
+  color: rgb(51, 102, 209);
+  font-weight: bold;
+  font-size: .9em;
+  cursor: pointer;
+}
+
+span.action-value {
+  font-weight: bold;
+  font-size: .9em;
+}
+
+span.action-separator {
+  color: #666;
+  font-size: .9em;
+}
+
+img.data-icon {
+  margin-right: 4px;
+  float: left;
+  height: 40px;
+  width: 40px;
+}
+
+div.data-title {
+  font-weight: bold;
+  display: inline;
+}
+
+div.data-label {
+  font-size: .75em;
+  background-color: rgb(51, 102, 209);
+  color: white;
+  -webkit-border-radius: 4px;
+  padding-right: 4px;
+  padding-left: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  margin-left: 4px;
+  display: inline;
+  cursor: pointer;
+}
+
+div.data-highlight {
+  background-color: #005000;
+}
+
+div.data-lowlight {
+  background-color: #900;
+}
+
+div.data-row {
+  min-height: 55px;
+  margin-bottom: 8px;
+  padding: 4px 4px 4px 4px;
+  cursor: pointer;
+}
+
+div.data-row-selected {
+  border: 1px solid rgb(51, 96, 205);
+  padding: 3px 3px 3px 3px;
+  -webkit-border-top-left-radius: 4px;
+  -webkit-border-top-right-radius: 4px;
+  margin-bottom: 0px;
+}
+
+div.data-more {
+  border: 1px solid rgb(51, 96, 205);
+  background-color: rgb(233, 238, 253);
+  display: none;
+  border-top: 0px;
+  -webkit-border-bottom-left-radius: 4px;
+  -webkit-border-bottom-right-radius: 4px;
+  margin-bottom: 8px;
+}
+
+div.data-actions {
+  background-color: rgb(51, 96, 205);
+  color: white;
+  border-bottom: 1px solid rgb(51, 96, 205);
+  padding-left: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+span.data-action {
+  font-weight: bold;
+  font-size: .9em;
+  cursor: pointer;
+  padding-right: 5px;
+}
+
+span.data-action:hover {
+  background-color: blue;
+}
+
+div.data-notes {
+  font-size: .9em;
+  font-style: italic;
+  text-wrapping: none;
+}
+
+div.more-heading {
+  font-weight: bold;
+  font-size: .9em;
+}
+
+span.prop-label {
+  font-weight: bold;
+  font-size: .8em;
+}
+
+span.prop-link {
+  color: rgb(51, 102, 209);
+  font-weight: bold;
+  font-size: .8em;
+  cursor: pointer;
+}
+
+span.prop-value {
+  font-size: .8em;
+}
+
+span.prop-separator {
+  color: #333;
+  font-size: .8em;
+}
+
+div.suite-setting {
+  background-color: #BAC9FF;
+  width: 100%;
+  height: 20px;
+}
+
+div.suite-setting-mainnav-name {
+  padding-left: 8px;
+  padding-right: 2px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  -webkit-border-radius: 4px;
+  margin: 2px 2px 2px 2px;
+  float: left;
+  font-weight: bold;
+  color: rgb(51, 102, 209);
+}
+
+div.suite-setting-mainnav-value {
+  padding-right: 8px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  -webkit-border-radius: 4px;
+  margin: 2px 2px 2px 2px;
+  float: left;
+  color: rgb(51, 102, 209);
+}
+

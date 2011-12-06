@@ -1,0 +1,41 @@
+/**
+ * Copyright 2011 Google, Inc. All Rights Reserved
+ *
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+.detail-window {
+  border: 1px solid #000;
+  line-height: 30px;
+  margin: 0px;
+  padding: 20px 5px 0px 50px;
+  width: auto;
+}
+
+.detail-window table {
+  width: 100%;
+}
+
+.detail-window td {
+  border: 1px solid #000;
+  padding: 2px 5px;
+}
+
+.detail-window td:first-child {
+  text-align: right;
+  vertical-align: top;
+}
+
+.detail-window td:last-child {
+  padding: 2px 20px 2px 5px;
+  min-width: 300px;
+}
+
+.detail-window input {
+  width: 70%;
+}
+
+.detail-window textarea {
+  width: 70%;
+}
+

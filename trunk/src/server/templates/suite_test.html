@@ -1,0 +1,72 @@
+<html>
+<!--
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Use of this source code is governed by the Apache License, Version 2.0.
+See the COPYING file for details.
+-->
+  <head>
+
+  </head>
+  <body>
+    <h1>Test suite functionalities.</h1>
+    <form name="suiteInfo" action="/suite/add" method="get">
+      <table>
+        <tr>
+          <td>Suite Name:</td>
+          <td><input type="text" name="suiteName" id="suiteName"></td>
+        </tr>
+        <tr>
+          <td>Project Name:</td>
+          <td><input type="text" name="projectName" id="projectName"></td>
+        </tr>
+        <tr>
+          <td>Description:</td>
+          <td><input type="text" name="description" id="description"></td>
+        </tr>
+      </table>
+      <input type="submit" value="Add Suite">
+    </form>
+
+    <h1>Test project functionalities.</h1>
+    <form name="projectInfo" action="/project/add" method="get">
+      <table>
+        <tr>
+          <td>Project Name:</td>
+          <td><input type="text" name="name"></td>
+        </tr>
+        <tr>
+          <td>Description:</td>
+          <td><input type="text" name="description"></td>
+        </tr>
+      </table>
+      <input type="submit" value="Add Project">
+    </form>
+
+    <h1>Test load suites of project functionality.</h1>
+    <form name="projectInfo" action="/suite/load_project" method="get">
+      <table>
+        <tr>
+          <td>Project Name:</td>
+          <td><input type="text" name="projectName"></td>
+        </tr>
+      </table>
+      <input type="submit" value="Load Suites">
+    </form>
+
+    <h1>Test load a suite functionality.</h1>
+    <form name="suiteInfo" action="/suite/load" method="get">
+      <table>
+        <tr>
+          <td>Suite Name:</td>
+          <td><input type="text" name="suiteName"></td>
+        </tr>
+        <tr>
+          <td>Project Name:</td>
+          <td><input type="text" name="projectName"></td>
+        </tr>
+      </table>
+      <input type="submit" value="Load Suite">
+    </form>
+  </body>
+</html>
