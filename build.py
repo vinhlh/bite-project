@@ -1,4 +1,4 @@
-#!/usr/bin/python2.6
+#!/usr/bin/python
 #
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
@@ -36,6 +36,7 @@ import optparse
 import os
 import shutil
 import subprocess
+import sys
 import urllib
 import zipfile
 
@@ -52,19 +53,23 @@ SOY_COMPILER_URL = ('http://closure-templates.googlecode.com/files/'
                     'closure-templates-for-javascript-latest.zip')
 SOYDATA_URL = ('http://closure-templates.googlecode.com/svn/trunk/javascript/'
                'soydata.js')
-COMPILE_CLOSURE_COMMAND = ('closure-library/closure/bin/build/closurebuilder.py'
-                           ' --root=src/client'
-                           ' --root=closure-library'
-                           ' --root=build_gen'
-                           ' --root=selenium-atoms-lib'
-                           ' --input=%(input)s'
-                           ' --output_mode=compiled'
-                           ' --output_file=%(output)s'
-                           ' --compiler_jar=compiler.jar')
-SOY_COMPILER_COMMAND = ('java -jar SoyToJsSrcCompiler.jar'
-                        ' --shouldProvideRequireSoyNamespaces'
-                        ' --outputPathFormat %(output)s'
-                        ' %(file)s')
+CLOSURE_COMPILER = os.path.join('closure-library', 'closure', 'bin', 'build',
+                                'closurebuilder.py')
+CLIENT_SRC = os.path.join('src', 'client')
+SERVER_SRC = os.path.join('src', 'server')
+COMPILE_CLOSURE_COMMAND = ' '.join([sys.executable, CLOSURE_COMPILER,
+                                    ('--root=%s' % CLIENT_SRC),
+                                    '--root=closure-library',
+                                    '--root=build_gen',
+                                    '--root=selenium-atoms-lib',
+                                    '--input=%(input)s',
+                                    '--output_mode=compiled',
+                                    '--output_file=%(output)s',
+                                    '--compiler_jar=compiler.jar'])
+SOY_COMPILER_COMMAND = ' '.join(['java -jar SoyToJsSrcCompiler.jar',
+                                 '--shouldProvideRequireSoyNamespaces',
+                                 '--outputPathFormat %(output)s',
+                                 '%(file)s'])
 
 
 class ClosureError(Exception):
@@ -180,22 +185,24 @@ def SetupClosure():
       raise ClosureError('Could not find the closure compiler.')
 
   # Download the soy compiler jar if it doesn't exist.
+  soyutils_src = os.path.join('build_gen', 'soyutils_usegoog.js')
   if (not os.path.exists('SoyToJsSrcCompiler.jar') or
-      not os.path.exists('build_gen/soyutils_usegoog.js')):
+      not os.path.exists(soyutils_src)):
     (soy_compiler_zip, _) = urllib.urlretrieve(SOY_COMPILER_URL)
     soy_compiler_zipfile = zipfile.ZipFile(soy_compiler_zip)
     soy_compiler_zipfile.extract('SoyToJsSrcCompiler.jar')
     soy_compiler_zipfile.extract('soyutils_usegoog.js', 'build_gen')
     if (not os.path.exists('SoyToJsSrcCompiler.jar') or
-        not os.path.exists('build_gen/soyutils_usegoog.js')):
+        not os.path.exists(soyutils_src)):
       logging.error('Could not download the soy compiler jar.')
       raise ClosureError('Could not find the soy compiler.')
 
   # Download required soydata file, which is required for soyutils_usegoog.js
   # to work.
-  if not os.path.exists('build_gen/soydata.js'):
-    urllib.urlretrieve(SOYDATA_URL, 'build_gen/soydata.js')
-    if not os.path.exists('build_gen/soydata.js'):
+  soydata_src = os.path.join('build_gen', 'soydata.js')
+  if not os.path.exists(soydata_src):
+    urllib.urlretrieve(SOYDATA_URL, soydata_src)
+    if not os.path.exists(soydata_src):
       logging.error('Could not download soydata.js.')
       raise ClosureError('Could not fine soydata.js')
 
@@ -209,9 +216,10 @@ def SetupSelenium():
   Raises:
     ClosureError: If the setup fails.
   """
-  if not os.path.exists('selenium-atoms-lib/bot.js'):
+  bot_src = os.path.join('selenium-atoms-lib', 'bot.js')
+  if not os.path.exists(bot_src):
     ExecuteCommand(CHECKOUT_SELENIUM_COMMAND)
-    if not os.path.exists('selenium-atoms-lib/bot.js'):
+    if not os.path.exists(bot_src):
       logging.error('Could not download the selenium library.')
       raise ClosureError('Could not find the selenium library.')
 
@@ -244,10 +252,11 @@ def main():
     exit()
 
   # Set up the directories that will be built into.
+  options_dst = os.path.join('build', 'options')
   if not os.path.exists('build'):
     os.mkdir('build')
-  if not os.path.exists('build/options'):
-    os.mkdir('build/options')
+  if not os.path.exists(options_dst):
+    os.mkdir(options_dst)
   if not os.path.exists('build_gen'):
     os.mkdir('build_gen')
 
@@ -267,7 +276,7 @@ def main():
                'popup.soy']
 
   for soy_filename in soy_files:
-    BuildSoyJs(os.path.join('src/client', soy_filename))
+    BuildSoyJs(os.path.join(CLIENT_SRC, soy_filename))
 
   js_targets = {'background.js': 'background_script.js',
                 'content.js': 'content_script.js',
@@ -278,32 +287,42 @@ def main():
                 'options/page.js': 'options_script.js'}
 
   for target in js_targets:
-    BuildClosureScript(os.path.join('src/client', target),
+    BuildClosureScript(os.path.join(CLIENT_SRC, target),
                        os.path.join('build', js_targets[target]))
 
   # Copy over the static resources
-  if os.path.exists('build/styles'):
-    shutil.rmtree('build/styles')
-  shutil.copytree('src/client/styles', 'build/styles')
-  if os.path.exists('build/imgs'):
-    shutil.rmtree('build/imgs')
-  shutil.copytree('src/client/imgs', 'build/imgs')
-  static_files = ['src/client/background.html',
-                  'src/client/console.html',
-                  'src/client/options/options.html',
-                  'src/client/popup.html',
-                  'src/client/manifest.json']
+  styles_dst = os.path.join('build', 'styles')
+  styles_src = os.path.join(CLIENT_SRC, 'styles')
+  if os.path.exists(styles_dst):
+    shutil.rmtree(styles_dst)
+  shutil.copytree(styles_src, styles_dst)
+
+  imgs_dst = os.path.join('build', 'imgs')
+  imgs_src = os.path.join(CLIENT_SRC, 'imgs')
+  if os.path.exists(imgs_dst):
+    shutil.rmtree(imgs_dst)
+  shutil.copytree(imgs_src, imgs_dst)
+
+  static_files = [os.path.join(CLIENT_SRC, 'background.html'),
+                  os.path.join(CLIENT_SRC, 'console.html'),
+                  os.path.join(CLIENT_SRC, 'options', 'options.html'),
+                  os.path.join(CLIENT_SRC, 'popup.html'),
+                  os.path.join(CLIENT_SRC, 'manifest.json')]
   for static_file in static_files:
     shutil.copy(static_file, 'build')
 
   # Copy the required ACE files.
-  if os.path.exists('build/ace'):
-    shutil.rmtree('build/ace')
-  shutil.copytree('ace/build/src', 'build/ace')
+  ace_dst = os.path.join('build', 'ace')
+  ace_src = os.path.join('ace', 'build', 'src')
+  if os.path.exists(ace_dst):
+    shutil.rmtree(ace_dst)
+  shutil.copytree(ace_src, ace_dst)
 
   # Copy gData files to the server.
-  shutil.copytree('gdata-python-client/src/gdata', 'src/server/gdata')
-  shutil.copytree('gdata-python-client/src/atom', 'src/server/atom')
+  shutil.copytree(os.path.join('gdata-python-client', 'src', 'gdata'),
+                  os.path.join(SERVER_SRC, 'gdata'))
+  shutil.copytree(os.path.join('gdata-python-client', 'src', 'atom'),
+                  os.path.join(SERVER_SRC, 'atom'))
 
 if __name__ == '__main__':
   main()
