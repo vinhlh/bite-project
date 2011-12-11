@@ -1,0 +1,28 @@
+{
+  "name": "BITE Project",
+  "version": "0.1.0",
+  "description": "BITE Project",
+
+  "permissions": ["tabs", "*://*/*", "file:///*"],
+  "background_page": "/background.html",
+
+  "icons": { "16": "/images/icons/onebit_48.png",
+             "48": "/images/icons/onebit_48.png",
+            "128": "/images/icons/onebit_48.png" },
+
+  "browser_action": {
+    "default_icon": "/images/icons/onebit_48.png",
+    "default_title": "BITE Project",
+    "default_tooltip": "BITE Project"
+  },
+
+  "content_scripts": [
+    {
+      "css": ["/styles/compiled_test_css.css"],
+      "js": ["/scripts/content_test_script.js"],
+      "matches": ["*://*/*", "file:///*"],
+      "run_at": "document_start"
+    }
+  ]
+}
+

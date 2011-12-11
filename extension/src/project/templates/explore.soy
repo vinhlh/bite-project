@@ -1,0 +1,75 @@
+// Copyright 2011 Google Inc. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/*
+ * @fileoverview Template for Explore model.
+ *
+ * @author jasonstredwick@google.com (Jason Stredwick)
+ */
+
+
+{namespace bite.project.soy.Explore}
+
+
+/**
+ * Defines the model for a project's general view that allows users to
+ * explore groups.
+ */
+{template .getModel}
+<div class="data-window" id="project-general-window">
+  <div class="data-section">
+    <div>
+      <img class="drill-icon" id="project-general-subscription-drilldown"
+           src="images/icons/onebit_28.png">
+      <div class="drill-title">My Subscriptions</div>
+    </div>
+    <div class="data-block" id="project-general-subscriptions">
+    </div>
+  </div>
+
+  <div class="data-section">
+    <div>
+      <img class="drill-icon" id="project-general-search-drilldown"
+           src="images/icons/onebit_28.png">
+      <div class="drill-title">Search For Other Projects</div>
+    </div>
+    <div class="data-block" id="project-general-search-results">
+      <input type="text" value=""></input>
+    </div>
+  </div>
+
+  <div class="data-section">
+    <div>
+      <img class="drill-icon" id="project-general-browse-drilldown"
+           src="images/icons/onebit_28.png">
+      <div class="drill-title">Browse Popular Projects</div>
+    </div>
+    <div class="data-block" id="project-general-browse-results">
+    </div>
+  </div>
+</div>
+{/template}
+
+
+/**
+ * Create the popup.
+ */
+{template .createPopup}
+<div class="data-popup">
+  <div>Details</div>
+  <div>Unsubscript</div>
+  <div>Archive project</div>
+</div>
+{/template}
+

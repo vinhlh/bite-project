@@ -1,0 +1,18 @@
+/**
+ * Copyright 2010 Google, Inc.
+ * All Rights Reserved
+ *
+ * recordmanager.css
+ * @author alexto@google.com (Alexis O. Torres)
+ */
+
+/**
+ * Use this to control the color and positioning of the higlight box.
+ */
+#recordingHighlightBox{
+  background-color: #FF6;  /* Use a light yellow color.*/
+  z-index: 50000;           /* Make the highlight rectangle to be at the top */
+  opacity: 0.6;
+  border: 1px solid red;
+  border-radius: 0px;
+}
