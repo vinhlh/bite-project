@@ -134,7 +134,8 @@ def ExecuteCommand(command):
   print 'Running command: %s' % command
   process = subprocess.Popen(command.split(' '),
                              stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
+                             stderr=subprocess.PIPE,
+                             shell=True)
   results = process.communicate()
   if process.returncode:
     logging.error(results[1])
