@@ -22,12 +22,14 @@
 goog.provide('rpf.Attributes');
 
 goog.require('goog.dom');
+goog.require('goog.dom.classes');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');
 goog.require('goog.style');
 goog.require('goog.ui.CustomButton');
 goog.require('goog.ui.Dialog');
 goog.require('goog.ui.TabBar');
+goog.require('goog.ui.ToggleButton');
 goog.require('rpf.Console.Messenger');
 
 
@@ -71,11 +73,23 @@ rpf.Attributes = function(id, onUiEvents) {
   this.lineNum_ = -1;
 
   /**
+   * The current level of descriptor that is selected.
+   */
+  this.currentLevel_ = 0;
+
+  /**
    * The messenger.
    * @type {rpf.Console.Messenger}
    * @private
    */
   this.messenger_ = rpf.Console.Messenger.getInstance();
+
+  /**
+   * The button to update the current element.
+   * @type {goog.ui.ToggleButton}
+   * @private
+   */
+  this.updateButton_ = null;
 
   /**
    * The function to handle the specific event.
@@ -125,12 +139,7 @@ rpf.Attributes.prototype.createAttrTabs = function(
                 {'width': '80%'},
                 goog.dom.createDom(goog.dom.TagName.INPUT,
                     {'type': 'text', 'style': 'width: 100%',
-                     'id': 'xpath' + this.id_, 'value': xpath})),
-            goog.dom.createDom(goog.dom.TagName.TD,
-                {'align': 'right', 'id': 'updateXpathTd'},
-                updateXpathBtn = goog.dom.createDom(goog.dom.TagName.INPUT,
-                    {'type': 'button', 'id': 'updateXpath' + this.id_,
-                     'value': 'Update Xpath'}))));
+                     'id': 'xpath' + this.id_, 'value': xpath}))));
     var updateAllDiv = goog.dom.createDom(goog.dom.TagName.DIV,
         {'id': 'updateAllDivInAttribute' + this.id_});
   }
@@ -160,12 +169,6 @@ rpf.Attributes.prototype.createAttrTabs = function(
     dialog.appendChild(xpathTitle);
     dialog.appendChild(xpathTable);
     dialog.appendChild(updateAllDiv);
-    if (this.id_ == rpf.Attributes.UITypes.VALIDATION_DIALOG) {
-      goog.style.setStyle(updateXpathBtn, 'display', 'none');
-    } else {
-      goog.events.listen(updateXpathBtn, 'click',
-          goog.bind(this.callbackStartUpdateMode_, this));
-    }
   }
   dialog.appendChild(tabBarTitle);
   dialog.appendChild(tabBar);
@@ -184,12 +187,63 @@ rpf.Attributes.prototype.createAttrTabs = function(
  * @private
  */
 rpf.Attributes.prototype.callbackStartUpdateMode_ = function() {
+  var updateButton = this.updateButton_.getElement();
+  if (goog.dom.classes.has(updateButton, 'goog-custom-button-checked')) {
+    this.updateButton_.setCaption('Stop');
+    this.messenger_.sendMessage(
+        {'command': Bite.Constants.CONSOLE_CMDS.ENTER_UPDATER_MODE,
+         'params': {}});
+    this.onUiEvents_(
+        Bite.Constants.UiCmds.CHECK_TAB_READY_TO_UPDATE,
+        {},
+        /** @type {Event} */ ({}));
+    this.messenger_.sendMessage(
+        {'command': Bite.Constants.CONSOLE_CMDS.SET_ACTION_CALLBACK},
+        goog.bind(this.callbackOnReceiveAction_, this));
+  } else {
+    this.setBackUpdateButton_();
+  }
+};
+
+
+/**
+ * Enters the updater mode and awaits the user to update the selected xpath.
+ * @param {boolean=} opt_resetClass Whether to reset the class name.
+ * @private
+ */
+rpf.Attributes.prototype.setBackUpdateButton_ = function(opt_resetClass) {
+  this.updateButton_.setCaption('Update');
+  this.updateButton_.setState(goog.ui.Component.State.CHECKED, false);
   this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.ENTER_UPDATER_MODE,
+      {'command': Bite.Constants.CONSOLE_CMDS.END_UPDATER_MODE,
        'params': {}});
-  this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.SET_ACTION_CALLBACK},
-      goog.bind(this.callbackOnReceiveAction_, this));
+};
+
+
+/**
+ * Get the xpath input element.
+ * @return {Element} The xpath element.
+ */
+rpf.Attributes.prototype.getXpathInput = function() {
+  return goog.dom.getElement('xpath' + this.id_);
+};
+
+
+/**
+ * When receives the new xpath, it replaces the old one with the new one.
+ */
+rpf.Attributes.prototype.updateElementInfo = function() {
+  if (this.lineNum_ > 0) {
+    var currentCmdMap = {};
+    currentCmdMap['xpaths'] = [this.getXpathInput().value];
+    currentCmdMap['descriptor'] = this.descriptor_;
+    this.onUiEvents_(
+        Bite.Constants.UiCmds.UPDATE_ELEMENT_AT_LINE,
+        {'line': this.lineNum_,
+         'cmdMap': currentCmdMap},
+        /** @type {Event} */ ({}),
+        goog.bind(this.showUpdateAllUi_, this));
+  }
 };
 
 
@@ -199,20 +253,13 @@ rpf.Attributes.prototype.callbackStartUpdateMode_ = function() {
  * @private
  */
 rpf.Attributes.prototype.callbackOnReceiveAction_ = function(response) {
+  this.setBackUpdateButton_(true);
+  // Updates the xpath input.
   goog.dom.getElement('xpath' + this.id_).value =
       response['cmdMap']['xpaths'][0];
-
-  this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.END_UPDATER_MODE,
-       'params': {}});
-  if (this.lineNum_ > 0) {
-    this.onUiEvents_(
-        Bite.Constants.UiCmds.UPDATE_ELEMENT_AT_LINE,
-        {'line': this.lineNum_,
-         'cmdMap': response['cmdMap']},
-        /** @type {Event} */ ({}),
-        goog.bind(this.showUpdateAllUi_, this));
-  }
+  // Updates the descriptor inputs.
+  this.descriptor_ = response['cmdMap']['descriptor'];
+  this.showTabContent_(this.currentLevel_);
 };
 
 
@@ -248,25 +295,38 @@ rpf.Attributes.prototype.cancelUpdateAllUi_ = function() {
 rpf.Attributes.prototype.getButtonSet_ = function(dialog) {
   var buttonSetDiv = goog.dom.createDom(goog.dom.TagName.DIV, {
     'id': 'buttonSetDiv' + this.id_,
-    'style': 'text-align:right'
+    'style': 'text-align:left;padding-top:5px;'
   });
-  var testButton = new goog.ui.CustomButton('Test');
-  testButton.setTooltip('Highlight the found elems in the interacted page.');
+  var updateButton = new goog.ui.ToggleButton('Update');
+  updateButton.setTooltip(
+      'Update the element in the tab under record by right click.');
+  this.updateButton_ = updateButton;
+  var updateDiv = goog.dom.createDom(goog.dom.TagName.DIV, {
+    'id': 'updateDiv' + this.id_,
+    'style': 'display:inline'
+  });
+  var testButton = new goog.ui.CustomButton('Ping');
+  testButton.setTooltip(
+      'Temporarily highlight the found elems in the tab under record.');
   var testDiv = goog.dom.createDom(goog.dom.TagName.DIV, {
     'id': 'testDiv' + this.id_,
     'style': 'display:inline'
   });
-  var generateButton = new goog.ui.CustomButton('Generate');
-  generateButton.setTooltip('Add/Replace the line with specified validation.');
+  var generateButton = new goog.ui.CustomButton('Save');
+  generateButton.setTooltip('Generate or update the step.');
   var generateDiv = goog.dom.createDom(goog.dom.TagName.DIV, {
     'id': 'generateDiv' + this.id_,
     'style': 'display:inline'
   });
+  buttonSetDiv.appendChild(updateDiv);
   buttonSetDiv.appendChild(testDiv);
   buttonSetDiv.appendChild(generateDiv);
   dialog.appendChild(buttonSetDiv);
   generateButton.render(goog.dom.getElement('generateDiv' + this.id_));
   if (this.id_ == rpf.Attributes.UITypes.DETAILS_DIALOG) {
+    updateButton.render(goog.dom.getElement('updateDiv' + this.id_));
+    goog.events.listen(updateButton, goog.ui.Component.EventType.ACTION,
+        this.callbackStartUpdateMode_, false, this);
     testButton.render(goog.dom.getElement('testDiv' + this.id_));
     goog.events.listen(testButton, goog.ui.Component.EventType.ACTION,
         this.testDescriptor_, false, this);
@@ -295,9 +355,12 @@ rpf.Attributes.prototype.generateDescriptor_ = function() {
  */
 rpf.Attributes.prototype.testDescriptor_ = function() {
   this.updateDescriptor_();
-  this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.TEST_DESCRIPTOR,
-       'params': {'descriptor': this.descriptor_}});
+  var message = {'command': Bite.Constants.CONSOLE_CMDS.TEST_DESCRIPTOR,
+                 'params': {'descriptor': this.descriptor_}};
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.CHECK_TAB_READY,
+      {'message': message},
+      /** @type {Event} */ ({}));
 };
 
 
@@ -341,6 +404,17 @@ rpf.Attributes.prototype.onTabSelected_ = function(e) {
   var id = tabSelected.getContentElement().id;
   var parts = id.split('_');
   var level = parseInt(parts.pop(), 10);
+  this.currentLevel_ = level;
+  this.showTabContent_(level);
+};
+
+
+/**
+ * Show tab content.
+ * @param {number} level The level.
+ * @private
+ */
+rpf.Attributes.prototype.showTabContent_ = function(level) {
   var desc = this.descriptor_;
   for (var i = 0; i < level; i++) {
     desc = desc['parentElem'];

@@ -373,6 +373,8 @@ Bite.Constants.UiCmds = {
   ADD_NEW_TEST: 'addNewTest',
   ADD_SCREENSHOT: 'addScreenShot',
   CHANGE_MODE: 'changeMode',
+  CHECK_TAB_READY: 'checkTabReady',
+  CHECK_TAB_READY_TO_UPDATE: 'checkTabReadyToUpdate',
   HIGHLIGHT_LINE: 'highlightLine',
   LOAD_CMDS: 'loadCmds',
   LOAD_TEST_FROM_LOCAL: 'loadTestFromLocal',

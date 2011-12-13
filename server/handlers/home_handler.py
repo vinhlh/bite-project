@@ -57,8 +57,19 @@ class BiteHomeHandler(base.BaseHandler):
     self.RenderTemplate('base.html', {})
 
 
+class AutomateHandler(base.BaseHandler):
+  """The handler for automating rpf."""
+
+  def get(self):
+    self.post()
+
+  def post(self):
+    self.RenderTemplate('base.html', {})
+
+
 application = webapp.WSGIApplication(
-    [('/home', BiteHomeHandler)],
+    [('/home', BiteHomeHandler),
+     ('/automateRpf', AutomateHandler)],
     debug=True)
 
 

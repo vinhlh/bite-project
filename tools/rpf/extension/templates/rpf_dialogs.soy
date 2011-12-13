@@ -269,7 +269,7 @@
   </div>
   <div id="playbackstatus"></div>
   <div id="matchHtmlDiv"></div>
-  <div id="choiceset"></div>
+  <div id="choiceset" style="padding-top:10px;"></div>
 </div>
 {/template}
 
@@ -399,18 +399,19 @@
 </div>
 <div id="rpf-details-editor">
 </div>
-<div id="rpf-details-moreinfo">
+<div id="rpf-details-moreinfo"
+     style="border-top:1px solid #D5D5D5;margin-top:6px;padding-top:6px;">
   <h3 class="componentName">More Info</h3>
   <table>
     <tr>
       <td><label for="stepNameInput">Step name</label></td>
       <td><input type="text" id="stepNameInput" name="stepNameInput"></td>
-      <td><input type="button" id="saveStepName" value="Save"></td>
+      <td><div id="saveStepName"></div>
     </tr>
     <tr>
       <td><label for="classNameInput">Class name</label></td>
       <td><input type="text" id="classNameInput" name="classNameInput"></td>
-      <td><input type="button" id="saveClassName" value="Save"></td>
+      <td><div id="saveClassName"></div>
     </tr>
   </table>
 </div>

@@ -20,7 +20,7 @@
 # This version number forces folks to deploy with:
 #     appcfg.py -V <desired_app_version> /path/to/bundle
 
-application: biteserver
+application: flux-ite
 version: invalid-do-not-change-see-comments
 runtime: python
 api_version: 1
@@ -75,6 +75,10 @@ handlers:
 # User facing pages.
 - url: /
   script: handlers/home.py
+  login: required
+  secure: always
+- url: /automateRpf
+  script: handlers/home_handler.py
   login: required
   secure: always
 - url: /get_latest_extension

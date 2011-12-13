@@ -123,12 +123,13 @@ rpf.PlayDialog.prototype.setVisible = function(display) {
 /**
  * Automates this dialog.
  * @param {Array} testInfo The tests to be selected in selector.
+ * @param {boolean} runAll Whether to run all of the tests.
  */
-rpf.PlayDialog.prototype.automateDialog = function(testInfo) {
-  if (testInfo) {
+rpf.PlayDialog.prototype.automateDialog = function(testInfo, runAll) {
+  if (runAll || testInfo) {
     var selector = goog.dom.getElement('playdialog-tests');
     for (var i = 0; i < selector.options.length; ++i) {
-      if (testInfo[selector.options[i].value]) {
+      if (runAll || testInfo[selector.options[i].value]) {
         selector.options[i].selected = true;
       }
     }
@@ -477,9 +478,10 @@ rpf.PlayDialog.prototype.updateCmd = function() {
  * @private
  */
 rpf.PlayDialog.prototype.callbackStartUpdateMode_ = function(response) {
-  this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.ENTER_UPDATER_MODE,
-       'params': {}});
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.CHECK_TAB_READY_TO_UPDATE,
+      {},
+      /** @type {Event} */ ({}));
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.SET_ACTION_CALLBACK},
       goog.bind(this.callbackOnReceiveAction_, this));

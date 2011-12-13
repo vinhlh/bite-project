@@ -178,18 +178,27 @@ rpf.RecordManager.prototype.startRecording = function(opt_noConsole, opt_info) {
 /**
  * Callback after checking whether the tab under record exists.
  * @param {Function} callback The callback function.
+ * @param {Object} injectedTabs The injected tabs.
  * @param {Tab} tab The tab.
  * @private
  */
 rpf.RecordManager.prototype.checkTestTabExistsCallback_ = function(
-    callback, tab) {
+    callback, injectedTabs, tab) {
   var result = {};
   if (!tab) {
     result['success'] = false;
+    result['message'] = 'The tab under record is missing.' +
+                        'Please set a new one first.';
   } else {
-    result['success'] = true;
-    result['url'] = tab.url;
-    this.scriptMgr_.startUrl = tab.url;
+    if (injectedTabs[tab.id]) {
+      result['success'] = true;
+      result['url'] = tab.url;
+      this.scriptMgr_.startUrl = tab.url;
+    } else {
+      result['success'] = false;
+      result['message'] = 'Your tab under record is not ready.' +
+                          'Please refresh the tab.';
+    }
   }
   callback(result);
 };
@@ -198,11 +207,12 @@ rpf.RecordManager.prototype.checkTestTabExistsCallback_ = function(
 /**
  * Checks whether the tab under record exists.
  * @param {Function} callback The callback function.
+ * @param {Object} tabs The tabs that have injection.
  */
-rpf.RecordManager.prototype.checkTestTabExists = function(callback) {
+rpf.RecordManager.prototype.checkTestTabExists = function(callback, tabs) {
   chrome.tabs.get(
       this.testTabId_,
-      goog.bind(this.checkTestTabExistsCallback_, this, callback));
+      goog.bind(this.checkTestTabExistsCallback_, this, callback, tabs));
 };
 
 
@@ -370,6 +380,7 @@ rpf.RecordManager.prototype.highlightRecordTab = function(opt_callback) {
  */
 rpf.RecordManager.prototype.enterUpdaterMode = function() {
   this.recordingMode_ = 'updater';
+  this.highlightRecordTab();
   chrome.tabs.executeScript(this.testTabId_,
       {code: 'recordHelper.enterUpdaterMode();'});
 };
@@ -406,6 +417,7 @@ rpf.RecordManager.prototype.testLocator = function(locators, callback) {
  * @private
  */
 rpf.RecordManager.prototype.testDescriptor_ = function(descriptor) {
+  this.highlightRecordTab();
   chrome.tabs.executeScript(this.testTabId_,
       {code: 'recordHelper.outlineElems_(' + descriptor + ');'});
 };

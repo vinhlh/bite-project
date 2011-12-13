@@ -239,6 +239,11 @@ rpf.ValidateDialog.prototype.generateDescriptor_ = function() {
   if (typeof(content) != 'string') {
     content = content['value'];
   }
+  var xpathInput = this.attrControl_.getXpathInput();
+  var xpaths = this.validationElem_['xpaths'];
+  if (xpathInput && typeof xpaths == 'object') {
+    xpaths[0] = xpathInput.value;
+  }
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.GENERATE_NEW_COMMAND,
        'params': {
@@ -250,7 +255,7 @@ rpf.ValidateDialog.prototype.generateDescriptor_ = function() {
          'elemVarName': this.validationElem_['elemVarName'],
          'noconsole': this.validationElem_['noConsole'],
          'iframeInfo': this.validationElem_['iframeInfo'],
-         'xpaths': this.validationElem_['xpaths'],
+         'xpaths': xpaths,
          'className': this.validationElem_['className']}},
       goog.bind(this.updateEditorWithCommand_, this));
   this.clearChoiceView_();

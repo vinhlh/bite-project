@@ -117,6 +117,13 @@ rpf.EventsManager = function() {
   this.latestEnterTime_ = 0;
 
   /**
+   * The map of the tabs that have content script injected.
+   * @type {Object}
+   * @private
+   */
+  this.injectedTabs_ = {};
+
+  /**
    * Logger for logging.
    * @type {rpf.ConsoleLogger}
    * @private
@@ -987,16 +994,20 @@ rpf.EventsManager.prototype.automateRpf = function(params) {
       this.automator_.start(stepArr);
       break;
     case Bite.Constants.RPF_AUTOMATION.PLAYBACK_MULTIPLE:
-      // Assume all of the tests are from the same project for now.
-      // This will no longer be true once we open suite creation to users.
-      var testInfo = {};
-      for (var name in params['data']) {
-        testInfo = params['data'][name];
+      if (params['projectName'] && params['location']) {
+        this.startAutoPlayMultipleTests_(
+            params['projectName'], params['location'], {}, true);
+      } else {
+        // Assume all of the tests are from the same project for now.
+        // This will no longer be true once we open suite creation to users.
+        var testInfo = {};
+        for (var name in params['data']) {
+          testInfo = params['data'][name];
+        }
+        testInfo = goog.json.parse(testInfo);
+        this.startAutoPlayMultipleTests_(
+            testInfo['projectName'], testInfo['testLocation'], params['data']);
       }
-      testInfo = goog.json.parse(testInfo);
-      this.startAutoPlayMultipleTests_(
-          testInfo['projectName'], testInfo['testLocation'], params['data']);
-      //this.automator_.start(stepArray, opt_callback);
       break;
   }
 };
@@ -1007,9 +1018,11 @@ rpf.EventsManager.prototype.automateRpf = function(params) {
  * @param {string} project The project name.
  * @param {string} location Where the project comes from.
  * @param {Object} testInfo The tests info.
+ * @param {boolean=} opt_runAll Whether to run all of the tests.
+ * @private
  */
 rpf.EventsManager.prototype.startAutoPlayMultipleTests_ = function(
-    project, location, testInfo) {
+    project, location, testInfo, opt_runAll) {
   var stepArr = [];
   var temp = this.automator_.getStepObject(
       Bite.Constants.ListenerDestination.RPF,
@@ -1036,7 +1049,8 @@ rpf.EventsManager.prototype.startAutoPlayMultipleTests_ = function(
   temp = this.automator_.getStepObject(
       Bite.Constants.ListenerDestination.CONSOLE,
       Bite.Constants.UiCmds.AUTOMATE_PLAY_MULTIPLE_TESTS,
-      {'testInfo': testInfo},
+      {'testInfo': testInfo,
+       'runAll': opt_runAll || false},
       Bite.Constants.COMPLETED_EVENT_TYPES.RUN_PLAYBACK_STARTED);
   stepArr.push(temp);
   this.automator_.start(stepArr);
@@ -1324,6 +1338,9 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
       this.removeAllListeners();
       this.recordMgr_.endUpdaterMode();
       break;
+    case Bite.Constants.CONSOLE_CMDS.RECORD_PAGE_LOADED_COMPLETE:
+      this.setInjectedTab_(sender.tab.id);
+      break;
     case Bite.Constants.CONSOLE_CMDS.TEST_LOCATOR:
       this.recordMgr_.testLocator(params['locators'], sendResponse);
       break;
@@ -1331,8 +1348,20 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
       goog.Timer.callOnce(goog.bind(this.testAutomation, this), 1500);
       break;
     case Bite.Constants.CONSOLE_CMDS.CHECK_READY_TO_RECORD:
-      this.recordMgr_.checkTestTabExists(sendResponse);
+      this.recordMgr_.checkTestTabExists(sendResponse, this.injectedTabs_);
       break;
+  }
+};
+
+
+/**
+ * Sets the console tab id.
+ * @param {number} id The tab id.
+ * @private
+ */
+rpf.EventsManager.prototype.setInjectedTab_ = function(id) {
+  if (id) {
+    this.injectedTabs_[id] = true;
   }
 };
 

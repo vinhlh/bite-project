@@ -435,6 +435,7 @@ class AddRealTimeRunHandler(base.BaseHandler):
     test_info_list_str = self.GetRequiredParameter('testInfoList')
     project_name = self.GetOptionalParameter('projectName', 'default')
     suite_name = self.GetOptionalParameter('suiteName', 'default')
+    user_agent = self.GetOptionalParameter('userAgent', '')
 
     test_info_list = basic_util.ParseJsonStr(test_info_list_str)
 
@@ -462,7 +463,8 @@ class AddRealTimeRunHandler(base.BaseHandler):
 
     # Creates the run.
     run_key = deferred_util.StartRun(suite.key(), run_name, test_list, '',
-                                     [suite_name], [], None, '', user)
+                                     [suite_name, user_agent], [], None, '',
+                                     user)
 
     self.response.out.write(run_key)
 

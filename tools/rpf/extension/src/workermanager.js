@@ -20,6 +20,7 @@ goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.json');
 goog.require('goog.net.XhrIo');
+goog.require('goog.userAgent');
 goog.require('rpf.MiscHelper');
 goog.require('rpf.soy.Dialog');
 
@@ -280,6 +281,16 @@ rpf.WorkerManager.prototype.runFinishCallback_ = function(response) {
 
 
 /**
+ * Gets the user agent string.
+ * @return {string} The user agent string.
+ * @private
+ */
+rpf.WorkerManager.prototype.getUserAgent_ = function() {
+  return goog.userAgent.getUserAgentString() || '';
+};
+
+
+/**
  * Sends the tests info to server and starts a new run.
  * @param {Array} testInfoArr The tests to be run.
  * @param {string} runName The run name.
@@ -293,6 +304,7 @@ rpf.WorkerManager.prototype.startRunOnServer_ = function(
     'runName': runName,
     'projectName': 'testProject',
     'suiteName': 'testSuite',
+    'userAgent': this.getUserAgent_(),
     'testInfoList': goog.json.serialize(testInfoArr)}).toString();
   goog.net.XhrIo.send(requestUrl, goog.bind(function(e) {
     var xhr = e.target;

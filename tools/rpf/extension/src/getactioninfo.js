@@ -1222,20 +1222,40 @@ rpf.ContentScript.RecordHelper.automateRpf_ = function(params) {
 };
 
 
+/**
+ * Groups the parameters in URL to an object.
+ * @param {string} url The current page url.
+ * @private
+ */
+rpf.ContentScript.RecordHelper.getParamsFromUrl_ = function(url) {
+  var uri = new goog.Uri(href);
+  var queryData = uri.getQueryData();
+  var keys = queryData.getKeys();
+  var parameters = {};
+  for (var i = 0, len = keys.length; i < len; ++i) {
+    parameters[keys[i]] = queryData.get(keys[i]);
+  }
+  return parameters;
+};
+
+
 // Execute the run function only if it's in the main window.
 if (window == window.parent) {
   rpf.ContentScript.RecordHelper.run();
   var href = window.location.href;
+  var parameters = null;
   if (href.indexOf('localhost:7171') != -1) {
-    var uri = new goog.Uri(href);
-    var queryData = uri.getQueryData();
-    var keys = queryData.getKeys();
-    var parameters = {
-      'command': Bite.Constants.RPF_AUTOMATION.LOAD_AND_RUN_FROM_LOCAL};
-    for (var i = 0, len = keys.length; i < len; ++i) {
-      parameters[keys[i]] = queryData.get(keys[i]);
-    }
+    parameters = rpf.ContentScript.RecordHelper.getParamsFromUrl_(href);
+    parameters['command'] =
+        Bite.Constants.RPF_AUTOMATION.LOAD_AND_RUN_FROM_LOCAL;
     rpf.ContentScript.RecordHelper.automateRpf_(parameters);
+  } else if (href.indexOf('.com/automateRpf') != -1) {
+    parameters = rpf.ContentScript.RecordHelper.getParamsFromUrl_(href);
+    parameters['command'] =
+        Bite.Constants.RPF_AUTOMATION.PLAYBACK_MULTIPLE;
+    if (parameters['projectName'] && parameters['location']) {
+      rpf.ContentScript.RecordHelper.automateRpf_(parameters);
+    }
   }
   goog.dom.getDocument().addEventListener('rpfLaunchEvent', function(e) {
     var parameters = {

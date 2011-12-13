@@ -198,13 +198,19 @@ rpf.DetailsDialog.prototype.updateInfo =
           this.onUiEvents_,
           Bite.Constants.UiCmds.ON_NEXT_PAGE,
           {}));
+  var saveStepButton = new goog.ui.CustomButton('Save');
+  saveStepButton.setTooltip('Saves the step name.');
+  saveStepButton.render(goog.dom.getElement('saveStepName'));
+  var saveClassButton = new goog.ui.CustomButton('Save');
+  saveClassButton.setTooltip('Saves the class name this step belongs to.');
+  saveClassButton.render(goog.dom.getElement('saveClassName'));
   goog.events.listen(
-      goog.dom.getElement('saveStepName'),
-      'click',
+      saveStepButton,
+      goog.ui.Component.EventType.ACTION,
       goog.bind(this.saveStepName_, this, infoMap, cmdId));
   goog.events.listen(
-      goog.dom.getElement('saveClassName'),
-      'click',
+      saveClassButton,
+      goog.ui.Component.EventType.ACTION,
       goog.bind(this.saveClassName_, this, infoMap, cmdId));
   this.descriptor_ = descriptor;
   this.xpath_ = xpath;
@@ -460,6 +466,7 @@ rpf.DetailsDialog.prototype.replaceLine = function() {
   var newCode = rpf.MiscHelper.replaceDescriptor(
       oldLine, rpf.MiscHelper.getStringWithSpaces(this.descriptor_, 1));
   this.editorMgr_.replaceCommand(newCode, this.curLine_);
+  this.attrControl_.updateElementInfo();
 };
 
 

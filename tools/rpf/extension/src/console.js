@@ -1109,7 +1109,8 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
     // For the playback dialog.
     case Bite.Constants.UiCmds.AUTOMATE_PLAY_MULTIPLE_TESTS:
       this.playbackRuntimeDialog_.setVisible(true);
-      this.playbackRuntimeDialog_.automateDialog(params['testInfo']);
+      this.playbackRuntimeDialog_.automateDialog(
+          params['testInfo'], params['runAll']);
       this.messenger_.sendStatusMessage(
           Bite.Constants.COMPLETED_EVENT_TYPES.RUN_PLAYBACK_STARTED);
       break;
@@ -1350,6 +1351,12 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       this.stopRecording();
       this.warnRecordTabClosed_();
       break;
+    case Bite.Constants.UiCmds.CHECK_TAB_READY:
+      this.checkTabReady_(params['message']);
+      break;
+    case Bite.Constants.UiCmds.CHECK_TAB_READY_TO_UPDATE:
+      this.checkTabReadyToUpdate_();
+      break;
     default:
       break;
   }
@@ -1549,10 +1556,14 @@ rpf.ConsoleManager.prototype.updateElement_ = function(
   var elemId = originalInfoMap['steps'][stepId]['elemId'];
   var elem = originalInfoMap['elems'][elemId];
   var oldXpath = elem['xpaths'][0];
-  elem['selectors'] = cmdMap['selectors'];
+  if (goog.isDef(cmdMap['selectors'])) {
+    elem['selectors'] = cmdMap['selectors'];
+  }
   elem['xpaths'] = cmdMap['xpaths'];
   elem['descriptor'] = cmdMap['descriptor'];
-  elem['iframeInfo'] = cmdMap['iframeInfo'];
+  if (goog.isDef(cmdMap['iframeInfo'])) {
+    elem['iframeInfo'] = cmdMap['iframeInfo'];
+  }
   return oldXpath;
 };
 
@@ -2201,7 +2212,7 @@ rpf.ConsoleManager.prototype.updateProjectJsFiles_ = function(details) {
     // Before implementing multiple JS supports,
     // we use the first JS in the file.
     if (details['js_files'][0]) {
-      file = details['js_files'][0]['code'];
+      file = details['js_files'][0]['code'] || '';
     }
   }
   this.notesDialog_.replaceContent(file);
@@ -2606,6 +2617,46 @@ rpf.ConsoleManager.prototype.callbackOnStartPlayback_ = function(response) {
 
 
 /**
+ * Checks whether it's ready to enter update mode.
+ * @private
+ */
+rpf.ConsoleManager.prototype.checkTabReadyToUpdate_ = function() {
+  var message = {'command': Bite.Constants.CONSOLE_CMDS.ENTER_UPDATER_MODE,
+                 'params': {}};
+  this.checkTabReady_(message);
+};
+
+
+/**
+ * Checks whether it's ready to enter update mode.
+ * @param {Object} messageObj The message body object.
+ * @private
+ */
+rpf.ConsoleManager.prototype.checkTabReady_ = function(messageObj) {
+  this.messenger_.sendMessage(
+      {'command': Bite.Constants.CONSOLE_CMDS.CHECK_READY_TO_RECORD,
+       'params': {}},
+      goog.bind(this.checkReadyCallback_, this, messageObj));
+};
+
+
+/**
+ * Callback after checking the tab under record exists.
+ * @param {Object} messageObj The message body object.
+ * @param {Object} response The response object.
+ * @private
+ */
+rpf.ConsoleManager.prototype.checkReadyCallback_ = function(
+    messageObj, response) {
+  if (response['success']) {
+    this.messenger_.sendMessage(messageObj);
+  } else {
+    this.setStatus(response['message'], 'red');
+  }
+};
+
+
+/**
  * Starts recording user's interactions.
  * @param {boolean=} opt_pass Whether pass the isPlaying_ checking.
  * @export
@@ -2640,8 +2691,7 @@ rpf.ConsoleManager.prototype.checkReadyToRecordCallback_ = function(response) {
     }
     this.startRecording_();
   } else {
-    this.setStatus(
-        'The tab under record is missing. Please set a new one first.', 'red');
+    this.setStatus(response['message'], 'red');
   }
 };
 
@@ -3222,9 +3272,7 @@ rpf.ConsoleManager.prototype.selectUpdaterMode_ = function(e) {
   this.modeSelector_.setVisible(false);
   this.locatorUpdater_ = new bite.locators.Updater(this.messenger_);
   this.locatorUpdater_.render(goog.dom.getElement('bookData'));
-  this.messenger_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.ENTER_UPDATER_MODE,
-       'params': {}});
+  this.checkTabReadyToUpdate_();
 };
 
 

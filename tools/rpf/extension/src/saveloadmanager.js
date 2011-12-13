@@ -585,6 +585,7 @@ rpf.SaveLoadManager.prototype.getLocalProject = function(
       'test': tests[test]});
   }
   project['tests'] = testMetaArr;
+  project['name'] = name;
   sendResponse({'jsonObj': project,
                 'location': 'local'});
 };
