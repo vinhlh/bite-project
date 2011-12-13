@@ -15,394 +15,362 @@
 # limitations under the License.
 
 
-"""Build BITE."""
+"""Build the BITE Extension."""
 
 __author__ = ('ralphj@google.com (Julie Ralph)'
-              'jasonstredwick@google.com (Jason Stredwick)')
-
+              'jason.stredwick@gmail.com (Jason Stredwick)')
 
 import logging
+import optparse
 import os
 import shutil
+import subprocess
 import sys
+import urllib
+import zipfile
 
-from builddefs.tools import access as tools
-from builddefs.tools import base
 
-
-# Commands used by the build script.
-COMMAND_BUILD = 'build'
-COMMAND_CLEAN = 'clean'
-COMMAND_HELP = 'help'
-
-# Command options.
-COMMAND_OPTION_ALL = 'all'
-COMMAND_OPTION_EXPUNGE = 'expunge'
-COMMAND_OPTION_EXTENSION = 'extension'
-COMMAND_OPTION_SERVER = 'server'
-COMMAND_OPTION_SERVER_APPENGINE = 'server_appengine'
-
-### Root paths
-# The relative path from the build script to where all dependencies are stored.
-DEPS_ROOT = 'deps'
-# The relative path from the build script to where all outputs are stored.
+# Common folders.
+GENFILES_ROOT = 'genfiles'
 OUTPUT_ROOT = 'output'
-# The relative path from the build script to the extension server generated
-# files.
-EXTENSION_ROOT = os.path.join(OUTPUT_ROOT, 'extension')
-SERVER_APPENGINE_ROOT = os.path.join(OUTPUT_ROOT, 'server-appengine')
-SERVER_ROOT = SERVER_APPENGINE_ROOT
+DEPS_ROOT = 'deps'
 
-# Outline the dependencies for building BITE; how to install and to where.
+# Common roots
+BUG_ROOT = os.path.join('tools', 'bug', 'extension')
+RPF_ROOT = os.path.join('tools', 'rpf', 'extension')
+
+# Output paths
+EXTENSION_DST = os.path.join(OUTPUT_ROOT, 'extension')
+SERVER_DST = os.path.join(OUTPUT_ROOT, 'server')
+IMGS_DST = os.path.join(EXTENSION_DST, 'imgs')
+OPTIONS_DST = os.path.join(EXTENSION_DST, 'options')
+STYLES_DST = os.path.join(EXTENSION_DST, 'styles')
+
+# Keywords for DEPS
+CHECKOUT_COMMAND = 'checkout'
+ROOT = 'root'
+URL = 'url'
+
+# Define dependencies that are checkout from various repositories.
 DEPS = {
   'ace': {
-    'tool': 'git',
-    'command': 'clone',
-    'url': 'git://github.com/ajaxorg/ace.git',
-    'output': os.path.join(DEPS_ROOT, 'ace')
+    ROOT: os.path.join(DEPS_ROOT, 'ace'),
+    URL: 'git://github.com/ajaxorg/ace.git',
+    CHECKOUT_COMMAND: 'git clone %s %s'
   },
-
-  'atoms': {
-    'tool': 'svn',
-    'command': 'checkout',
-    'url': 'http://selenium.googlecode.com/svn/trunk/javascript/atoms',
-    'output': os.path.join(DEPS_ROOT, 'selenium-atoms-lib')
+  'gdata-python-client': {
+    ROOT: os.path.join(DEPS_ROOT, 'gdata-python-client'),
+    URL: 'http://code.google.com/p/gdata-python-client/',
+    CHECKOUT_COMMAND: 'hg clone %s %s'
   },
-
-  'gdata': {
-    'tool': 'hg',
-    'command': 'clone',
-    'url': 'https://code.google.com/p/gdata-python-client/',
-    'output': os.path.join(DEPS_ROOT, 'gdata')
+  'selenium-atoms-lib': {
+    ROOT: os.path.join(DEPS_ROOT, 'selenium-atoms-lib'),
+    URL: 'http://selenium.googlecode.com/svn/trunk/javascript/atoms',
+    CHECKOUT_COMMAND: 'svn checkout %s %s'
+  },
+  'closure-library': {
+    ROOT: os.path.join(DEPS_ROOT, 'closure', 'closure-library'),
+    URL: 'http://closure-library.googlecode.com/svn/trunk/',
+    CHECKOUT_COMMAND: 'svn checkout %s %s'
   }
 }
 
+CLOSURE_COMPILER_ROOT = os.path.join(DEPS_ROOT, 'closure')
+CLOSURE_COMPILER_JAR = os.path.join(CLOSURE_COMPILER_ROOT, 'compiler.jar')
+CLOSURE_COMPILER_URL = ('http://closure-compiler.googlecode.com/files/'
+                        'compiler-latest.zip')
 
-class Error(Exception):
-  """General exception for this module."""
+SOY_COMPILER_ROOT = os.path.join(DEPS_ROOT, 'soy')
+SOY_COMPILER_JAR = os.path.join(SOY_COMPILER_ROOT, 'SoyToJsSrcCompiler.jar')
+SOY_COMPILER_URL = ('http://closure-templates.googlecode.com/files/'
+                    'closure-templates-for-javascript-latest.zip')
+SOY_COMPILER_SRC = os.path.join(DEPS_ROOT, 'soy', 'src')
+SOYDATA_URL = ('http://closure-templates.googlecode.com/svn/trunk/javascript/'
+               'soydata.js')
+
+# Compiling commands.
+CLOSURE_COMPILER = os.path.join(DEPS['closure-library'][ROOT], 'closure',
+                                'bin', 'build', 'closurebuilder.py')
+COMPILE_CLOSURE_COMMAND = ' '.join([
+  sys.executable, CLOSURE_COMPILER,
+  ('--root=%s' % os.path.join('common', 'extension')),
+  ('--root=%s' % os.path.join('extension', 'src')),
+  ('--root=%s' % os.path.join(BUG_ROOT, 'src')),
+  ('--root=%s' % os.path.join(RPF_ROOT, 'src')),
+  ('--root=%s' % DEPS['closure-library'][ROOT]),
+  ('--root=%s' % SOY_COMPILER_SRC),
+  ('--root=%s' % GENFILES_ROOT),
+  ('--root=%s' % DEPS['selenium-atoms-lib'][ROOT]),
+  '--input=%(input)s',
+  '--output_mode=compiled',
+  '--output_file=%(output)s',
+  ('--compiler_jar=%s' % CLOSURE_COMPILER_JAR)])
+
+SOY_COMPILER_COMMAND = ' '.join([('java -jar %s' % SOY_COMPILER_JAR),
+                                 '--shouldProvideRequireSoyNamespaces',
+                                 '--outputPathFormat %(output)s',
+                                 '%(input)s'])
+
+
+class ClosureError(Exception):
   pass
 
 
-def CreateRoots():
-  """Ensure the common folders exist and are writable."""
-  paths = [DEPS_ROOT, OUTPUT_ROOT]
-  for path in paths:
-    if os.path.exists(path) and not os.path.isdir(path):
-      logging.error('%s already exists and is not a directory.' % path)
-      raise Error
-    elif not os.path.exists(path):
-      os.mkdir(path)
-
-    if not os.access(path, os.W_OK):
-      logging.error('%s is not writable.' % path)
-      raise Error
+def Clean():
+  """Clean removes the generated files and output."""
+  if os.path.exists(OUTPUT_ROOT):
+    shutil.rmtree(OUTPUT_ROOT)
+  if os.path.exists(GENFILES_ROOT):
+    shutil.rmtree(GENFILES_ROOT)
 
 
-def Initialize():
-  """Ensures the folders and tools are present."""
-  print('Initializing build.')
-  try:
-    CreateRoots()
-
-    # Initialize the tools and library dependencies.
-    tools.Initialize(DEPS_ROOT)
-    InitializeDeps()
-  except (base.ToolError, Error):
-    print('Exiting ...')
-    sys.exit()
+def CleanExpunge():
+  """Cleans up the generated and output files plus the dependencies."""
+  if os.path.exists(DEPS_ROOT):
+    shutil.rmtree(DEPS_ROOT)
+  Clean()
 
 
-def InitializeDeps():
-  """Ensures the library dependencies are present."""
-  failed = False
-  for key in DEPS:
-    dep = DEPS[key]
-
-    command = dep['command']
-    output = dep['output']
-    tool_name = dep['tool']
-    url = dep['url']
-
-    print('Initializing library dependency (%s).' % url)
-
-    try:
-      if not os.path.exists(output):
-        tool = tools.Get(tool_name)
-        tool.Execute([command, url, output], DEPS_ROOT)
-        if not os.path.exists(output):
-          logging.error('...Failed')
-          raise Error
-    except (base.ToolError, Error):
-      failed = True
-
-  if failed:
-    raise Error
-
-
-def Build(target):
-  """Build the specified target(s).
-
-  The main build function ensures the assumptions about individual targets'
-  state are held.
+def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
+  """Compile a script based on the given input file.
 
   Args:
-    target: The target to build. (string)
+    filename: The base name of the script to compile. (string)
+    filepath: The location of the the script. (string)
+    suffix_in: The suffix to add to the basename for input. (string)
+    suffix_out: The suffix to add to the basename for output. (string)
+    command: The compile command to use.
+
+  Raises:
+    ClosureError: If closure fails to compile the given input file.
   """
-  try:
-    if target == COMMAND_OPTION_ALL:
-      Clean(COMMAND_OPTION_EXTENSION)
-      BuildExtension()
-      Clean(COMMAND_OPTION_SERVER_APPENGINE)
-      BuildServerAppengine()
-    elif target == COMMAND_OPTION_EXTENSION:
-      Clean(COMMAND_OPTION_EXTENSION)
-      BuildExtension()
-    elif target == COMMAND_OPTION_SERVER:
-      # TODO(jasonstredwick): Refactor for genericity.
-      Clean(COMMAND_OPTION_SERVER_APPENGINE)
-      BuildServerAppengine()
-    elif target == COMMAND_OPTION_SERVER_APPENGINE:
-      Clean(COMMAND_OPTION_SERVER_APPENGINE)
-      BuildServerAppengine()
-    else:
-      logging.error('Target (%s) not recognized for build.' % target)
-      raise Error
-  except Error:
-    pass
+  input = os.path.join(filepath, ('%s%s' % (filename_base, suffix_in)))
+  output = os.path.join(GENFILES_ROOT, ('%s%s' % (filename_base, suffix_out)))
 
-
-def BuildExtension():
-  """Construct the BITE extension.
-
-  Assumes that no material is present in the output folder.
-  """
-  # Construct extension folder structure.
-  os.mkdir(EXTENSION_ROOT)
-  if not os.path.exists(EXTENSION_ROOT):
-    logging.error('Failed to create output folder for extension.')
+  # For speed, only compile the script if it is not already compiled.
+  if os.path.exists(output):
     return
 
-  # Move over extension folders.
-  extension_folders = ['styles', 'imgs']
-  for folder in extension_folders:
-    path_src = os.path.join('extension', folder)
-    path_dst = os.path.join(EXTENSION_ROOT, folder)
-    if os.path.exists(path_dst):
-      shutil.rmtree(path_dst)
-    shutil.copytree(path_src, path_dst)
-
-  # Move static resources.
-  html_path = os.path.join('extension', 'html')
-  static_files = [os.path.join(html_path, 'background.html'),
-                  os.path.join(html_path, 'popup.html'),
-                  os.path.join('extension', 'src', 'options', 'options.html'),
-                  os.path.join('extension', 'manifest.json')]
-  for static_file in static_files:
-    shutil.copy(static_file, EXTENSION_ROOT)
-
-  # Combine tool resources
-  # TODO (jasonstredwick): Fix this.
-  rpf_path = os.path.join('tools', 'rpf', 'extension')
-  static_files = [os.path.join(rpf_path, 'html', 'console.html')]
-  for static_file in static_files:
-    shutil.copy(static_file, EXTENSION_ROOT)
-  static_files = [os.path.join(rpf_path, 'styles', 'recordmodemanager.css')]
-  for static_file in static_files:
-    shutil.copy(static_file, os.path.join(EXTENSION_ROOT, 'styles'))
-  # Copy the required ACE files.
-  ace_dst = os.path.join(EXTENSION_ROOT, 'ace')
-  ace_src = os.path.join(DEPS['ace']['output'], 'build', 'src')
-  shutil.copytree(ace_src, ace_dst)
-
-  # Compile the soy templates.
-  genfiles_path = 'genfiles'
-  os.mkdir(genfiles_path)
-
-  extension_src_path = os.path.join('extension', 'templates')
-  bug_src_path = os.path.join('tools', 'bug', 'extension', 'templates')
-  rpf_src_path = os.path.join('tools', 'rpf', 'extension', 'templates')
-  soy_files = {'popup': extension_src_path,
-               'rpfconsole': rpf_src_path,
-               'rpf_dialogs': rpf_src_path,
-               'locatorsupdater': rpf_src_path,
-               'consoles': bug_src_path,
-               'newbug_console': bug_src_path,
-               'newbug_type_selector': bug_src_path}
-
-  try:
-    soy_compiler = tools.Get(tools.SOY_TO_JS_COMPILER)
-  except base.ToolError:
-    logging.error('Extension build process failed, halting.')
-    Clean(COMMAND_OPTION_EXTENSION)
-    return
-
-  for filename in soy_files:
-    src = os.path.join(soy_files[filename], filename) + '.soy'
-    dst = os.path.join(genfiles_path, filename) + '.js'
-    params = ['--shouldProvideRequireSoyNamespaces',
-              ('--outputPathFormat %s' % dst),
-              src]
-    try:
-      soy_compiler.Execute(params, DEPS_ROOT)
-      if not os.path.exists(dst):
-        raise Error
-    except (base.ToolError, Error):
-      logging.error('Failed to compile soy file (%s).' % filename)
-      shutil.rmtree(genfiles_path)
-      Clean(COMMAND_OPTION_EXTENSION)
-      return
-
-  # Compile javascript.
-  js_targets = {os.path.join(extension_src_path, 'background.js'):
-                os.path.join(EXTENSION_ROOT, 'background_script.js'),
-                os.path.join(rpf_src_path, 'console.js'):
-                os.path.join(EXTENSION_ROOT, 'console_script.js'),
-                os.path.join(extension_src_path, 'content.js'):
-                os.path.join(EXTENSION_ROOT, 'content_script.js'),
-                os.path.join(extension_src_path, 'elementhelper.js'):
-                os.path.join(EXTENSION_ROOT, 'elementhelper_script.js'),
-                os.path.join(rpf_src_path, 'getactioninfo.js'):
-                os.path.join(EXTENSION_ROOT, 'getactioninfo_script.js'),
-                os.path.join(extension_src_path, 'popup.js'):
-                os.path.join(EXTENSION_ROOT, 'popup_script.js'),
-                os.path.join(extension_src_path, 'options', 'page.js'):
-                os.path.join(EXTENSION_ROOT, 'options_script.js')}
-
-  try:
-    closure_builder = tools.Get(tools.CLOSURE_COMPILER)
-  except base.ToolError:
-    logging.error('Extension build process failed, halting.')
-    shutil.rmtree(genfiles_path)
-    Clean(COMMAND_OPTION_EXTENSION)
-    return
-
-  for target in js_targets:
-    src = target
-    dst = js_targets[target]
-    params = [('--root=%s' % genfiles_path),
-              ('--root=%s' % extension_src_path),
-              ('--root=%s' % rpf_src_path),
-              ('--root=%s' % bug_src_path),
-              ('--root=%s' % 'common'),
-              # TODO (jasonstredwick): Figure out how to link this dep.
-              ('--root=%s' % os.path.join(DEPS_ROOT, 'soy-compiler')),
-              ('--root=%s' % DEPS['atoms']['output']),
-              ('--input=%s' % src),
-              ('--output_file=%s' % dst),
-              ('--output_mode=compiled')]
-    try:
-      closure_builder.Execute(params, DEPS_ROOT)
-      if not os.path.exists(dst):
-        raise Error
-    except (base.ToolError, Error):
-      logging.error('Failed to compile JavaScript file (%s).' % filename)
-      shutil.rmtree(genfiles_path)
-      Clean(COMMAND_OPTION_EXTENSION)
-      return
-
-  # Clean up generated files.
-  shutil.rmtree(genfiles_path)
+  data = {'input': input,
+          'output': output}
+  result = ExecuteCommand(command % data)
+  if result or not os.path.exists(output):
+    raise ClosureError('Failed while compiling %s.' % input)
 
 
-def BuildServerAppengine():
-  # Copy gData files to the server.
-  shutil.copytree('gdata-python-client/src/gdata', 'src/server/gdata')
-  shutil.copytree('gdata-python-client/src/atom', 'src/server/atom')
-
-
-def Clean(target):
-  """Cleans the given target; i.e. remove it.
+def ExecuteCommand(command):
+  """Execute the given command and return the output.
 
   Args:
-    target: The target to remove. (string)
+    command: A string representing the command to execute.
+
+  Returns:
+    The return code of the process.
   """
-  try:
-    if target == COMMAND_OPTION_EXPUNGE:
-      if os.path.exists(DEPS_ROOT):
-        shutil.rmtree(DEPS_ROOT)
-      if os.path.exists(OUTPUT_ROOT):
-        shutil.rmtree(OUTPUT_ROOT)
-      CreateRoots()
-    elif target == COMMAND_OPTION_ALL:
-      if os.path.exists(OUTPUT_ROOT):
-        shutil.rmtree(OUTPUT_ROOT)
-      CreateRoots()
-    elif target == COMMAND_OPTION_EXTENSION:
-      if os.path.exists(EXTENSION_ROOT):
-        shutil.rmtree(EXTENSION_ROOT)
-    elif target == COMMAND_OPTION_SERVER:
-      if os.path.exists(SERVER_ROOT):
-        shutil.rmtree(SERVER_ROOT)
-    elif target == COMMAND_OPTION_SERVER_APPENGINE:
-      if os.path.exists(SERVER_APPENGINE_ROOT):
-        shutil.rmtree(SERVER_APPENGINE_ROOT)
-    else:
-      logging.error('Target (%s) not recognized for clean.' % target)
-      raise Error
-  except (OSError, Error):
-    logging.error('clean failed; could not remove root folders.')
-    raise Error
+  print 'Running command: %s' % command
+  process = subprocess.Popen(command.split(' '),
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+  results = process.communicate()
+  if process.returncode:
+    logging.error(results[1])
+  return process.returncode
 
 
-def Usage():
-  """Displays how to use the build script."""
-  usage = '\n'.join([
-    'Usage: python build.py <command> <option>',
-    '',
-    'Available commands:',
-    '  %s\t\t\tBuilds the given targets.',
-    '  %s\t\t\tCleans up the generated output.',
-    '  %s\t\t\tDisplays this usage message.',
-    '',
-    'Available options:',
-    '  %s\t\t\tRemoves all targets, but does not include tools and ',
-    '  \t\t\texternal dependencies.',
-    '  %s\t\tRemoves all targets and all tools and dependencies.',
-    '  \t\t\t(Only applies to clean)',
-    '  %s\t\tThe BITE extension.',
-    '  %s\t\tThe default server build (AppEngine).',
-    '  %s\tThe AppEngine server build.'
-  ])
+def SetupClosureCompiler():
+  """Setup the closure library and compiler.
 
-  # Replace commands.
-  usage = (usage %
-            # Replace commands.
-           (COMMAND_BUILD, COMMAND_CLEAN, COMMAND_HELP,
-            # Replace options.
-            COMMAND_OPTION_ALL, COMMAND_OPTION_EXPUNGE,
-            COMMAND_OPTION_EXTENSION, COMMAND_OPTION_SERVER,
-            COMMAND_OPTION_SERVER_APPENGINE))
+  Checkout the closure library using svn if it doesn't exist. Also, download
+  the closure compiler.
 
-  print(usage)
+  Raises:
+    ClosureError: If the setup fails.
+  """
+  # Download the compiler jar if it doesn't exist.
+  if not os.path.exists(CLOSURE_COMPILER_JAR):
+    print('Downloading closure compiler jar file.')
+    (compiler_zip, _) = urllib.urlretrieve(CLOSURE_COMPILER_URL)
+    compiler_zipfile = zipfile.ZipFile(compiler_zip)
+    compiler_zipfile.extract('compiler.jar', CLOSURE_COMPILER_ROOT)
+    if not os.path.exists(CLOSURE_COMPILER_JAR):
+      logging.error('Could not download the closure compiler jar.')
+      raise ClosureError('Could not find the closure compiler.')
+
+
+def SetupDep(dep_name):
+  """Download the dependency to the correct location.
+
+  Args:
+    dep_name: The name of the dependency to setup. (string)
+  """
+  dep = DEPS[dep_name]
+  if not os.path.exists(dep[ROOT]):
+    ExecuteCommand(dep[CHECKOUT_COMMAND] % (dep[URL], dep[ROOT]))
+    if not os.path.exists(dep[ROOT]):
+      logging.error('Could not checkout %s from %s.' % (dep_name, dep[URL]))
+      raise ClosureError('Could not set up %s.' % dep_name)
+
+
+def SetupSoyCompiler():
+  """Setup the closure library and compiler.
+
+  Checkout the closure library using svn if it doesn't exist. Also, download
+  the closure compiler.
+
+  Raises:
+    ClosureError: If the setup fails.
+  """
+  # Download the soy compiler jar if it doesn't exist.
+  soyutils_src = os.path.join(SOY_COMPILER_SRC, 'soyutils_usegoog.js')
+  if (not os.path.exists(SOY_COMPILER_JAR) or
+      not os.path.exists(soyutils_src)):
+    print('Downloading soy compiler and utils.')
+    (soy_compiler_zip, _) = urllib.urlretrieve(SOY_COMPILER_URL)
+    soy_compiler_zipfile = zipfile.ZipFile(soy_compiler_zip)
+    soy_compiler_zipfile.extract('SoyToJsSrcCompiler.jar', SOY_COMPILER_ROOT)
+    soy_compiler_zipfile.extract('soyutils_usegoog.js', SOY_COMPILER_SRC)
+    if (not os.path.exists(SOY_COMPILER_JAR) or
+        not os.path.exists(soyutils_src)):
+      logging.error('Could not download the soy compiler jar.')
+      raise ClosureError('Could not find the soy compiler.')
+
+  # Download required soydata file, which is required for soyutils_usegoog.js
+  # to work.
+  soydata_src = os.path.join(SOY_COMPILER_SRC, 'soydata.js')
+  if not os.path.exists(soydata_src):
+    urllib.urlretrieve(SOYDATA_URL, soydata_src)
+    if not os.path.exists(soydata_src):
+      logging.error('Could not download soydata.js.')
+      raise ClosureError('Could not fine soydata.js')
 
 
 def main():
-  """The main entry point for the script."""
-  argc = len(sys.argv)
-  args = sys.argv
-  if argc == 1 or args[1] == COMMAND_HELP or argc != 3:
-    Usage()
-    sys.exit()
+  usage = 'usage: %prog [options]'
+  parser = optparse.OptionParser(usage)
+  parser.add_option('--clean', dest='build_clean',
+                    action='store_true', default=False,
+                    help='Clean the build directories.')
+  parser.add_option('--expunge', dest='build_expunge',
+                    action='store_true', default=False,
+                    help='Clean the build directories and deps.')
+  (options, _) = parser.parse_args()
 
-  command = None
-  command_name = args[1]
-  if command_name == COMMAND_BUILD:
-    command = Build
-  elif command_name == COMMAND_CLEAN:
-    command = Clean
-  else:
-    Usage()
-    sys.exit()
+  # Exit if only want to clean.
+  if options.build_clean:
+    Clean()
+    exit()
+  elif options.build_expunge:
+    CleanExpunge()
+    exit()
 
-  try:
-    Initialize()
-    command and command(args[2])
-  except Error:
-    pass
+  # Set up the directories that will be built into.
+  paths = [GENFILES_ROOT, DEPS_ROOT]
+  for path in paths:
+    if not os.path.exists(path):
+      os.mkdir(path)
 
-  print('exiting...')
+  # Get external resources.
+  for dep_name in DEPS:
+    SetupDep(dep_name)
+  SetupClosureCompiler()
+  SetupSoyCompiler()
 
+  # Compile the closure scripts.
+  # Soy
+  soy_files = {
+    'popup': os.path.join('extension', 'templates'),
+    'consoles': os.path.join(BUG_ROOT, 'templates'),
+    'newbug_console': os.path.join(BUG_ROOT, 'templates'),
+    'newbug_type_selector': os.path.join(BUG_ROOT, 'templates'),
+    'rpfconsole': os.path.join(RPF_ROOT, 'templates'),
+    'rpf_dialogs': os.path.join(RPF_ROOT, 'templates'),
+    'locatorsupdater': os.path.join(RPF_ROOT, 'templates'),
+    'explore': os.path.join('extension', 'src', 'project', 'templates'),
+    'general': os.path.join('extension', 'src', 'project', 'templates'),
+    'member': os.path.join('extension', 'src', 'project', 'templates'),
+    'settings': os.path.join('extension', 'src', 'project', 'templates')
+  }
+
+  for soy_filename in soy_files:
+    soy_filepath = soy_files[soy_filename]
+    CompileScript(soy_filename, soy_filepath, '.soy', '.soy.js',
+                  SOY_COMPILER_COMMAND)
+
+  # JavaScript
+  js_targets = {
+    'background': os.path.join('extension', 'src'),
+    'content': os.path.join('extension', 'src'),
+    'getactioninfo': os.path.join(RPF_ROOT, 'src'),
+    'console': os.path.join(RPF_ROOT, 'src'),
+    'elementhelper': os.path.join('extension', 'src'),
+    'popup': os.path.join('extension', 'src'),
+    'page': os.path.join('extension', 'src', 'options')
+  }
+
+  for target in js_targets:
+    target_filepath = js_targets[target]
+    CompileScript(target, target_filepath, '.js', '_script.js',
+                  COMPILE_CLOSURE_COMMAND)
+
+  # Remove the outputs, so they will be created again.
+  if os.path.exists(OUTPUT_ROOT):
+    shutil.rmtree(OUTPUT_ROOT)
+  os.mkdir(OUTPUT_ROOT)
+
+  # Create extension bundle.
+  print('Creating extension bundle.')
+  #   Create the extension bundle and options path.
+  paths = [EXTENSION_DST, OPTIONS_DST, STYLES_DST]
+  for path in paths:
+    if not os.path.exists(path):
+      os.mkdir(path)
+
+  #   Manifest
+  shutil.copy(os.path.join('extension', 'manifest.json'), EXTENSION_DST)
+
+  #   Styles
+  styles = [os.path.join('extension', 'styles', 'consoles.css'),
+            os.path.join('extension', 'styles', 'options.css'),
+            os.path.join('extension', 'styles', 'popup.css'),
+            os.path.join('extension', 'styles', 'rpf_console.css'),
+            os.path.join(RPF_ROOT, 'styles', 'recordmodemanager.css')]
+  for style in styles:
+    shutil.copy(style, STYLES_DST)
+
+  #   Images
+  shutil.copytree(os.path.join('extension', 'imgs'), IMGS_DST)
+
+  #   HTML
+  html = [os.path.join('extension', 'html', 'background.html'),
+          os.path.join('extension', 'html', 'popup.html'),
+          os.path.join('extension', 'src', 'options', 'options.html'),
+          os.path.join(RPF_ROOT, 'html', 'console.html')]
+  for html_file in html:
+    shutil.copy(html_file, EXTENSION_DST)
+
+  #   Scripts
+  scripts = []
+  for target in js_targets:
+    shutil.copy(os.path.join(GENFILES_ROOT, ('%s_script.js' % target)),
+                EXTENSION_DST)
+
+  #   Copy the required ACE files.
+  ace_dst = os.path.join(EXTENSION_DST, 'ace')
+  ace_src = os.path.join(DEPS['ace'][ROOT], 'build', 'src')
+  if os.path.exists(ace_dst):
+    shutil.rmtree(ace_dst)
+  shutil.copytree(ace_src, ace_dst)
+
+  # Create server bundle.
+  print('Creating server bundle.')
+  server_src = 'server'
+  shutil.copytree(server_src, SERVER_DST)
+
+  gdata_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'gdata')
+  shutil.copytree(gdata_src, os.path.join(SERVER_DST, 'gdata'))
+
+  atom_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'atom')
+  shutil.copytree(atom_src, os.path.join(SERVER_DST, 'atom'))
 
 if __name__ == '__main__':
   main()
-
