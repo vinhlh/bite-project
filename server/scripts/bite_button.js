@@ -13,7 +13,6 @@
 // limitations under the License.
 
 
-
 /**
  * The expected ID of the install BITE link.
  */
