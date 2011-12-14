@@ -89,6 +89,24 @@ bite.client.TemplateManager.FETCH_TEMPLATE_PATH_ = '/get_templates';
 
 
 /**
+ * The default bug template.  It is used when no other template is provide.
+ * @type {bite.client.BugTemplate}
+ * @private
+ */
+bite.client.TemplateManager.DEFAULT_TEMPLATE_ = {
+  id: 'bite_default_bug',
+  name: 'Other',
+  urls: [],
+  project: 'Other',
+  backendProject: '',
+  backendProvider: Bite.Constants.Providers.ISSUETRACKER,
+  selectorText: 'Other',
+  displayOrder: 0,
+  noteText: 'Describe your problem: '
+};
+
+
+/**
  * Helper function which converts a BugTemplateList into an array of objects
  * where each object contains the project name and a list of templates
  * within in the project.
@@ -168,6 +186,7 @@ bite.client.TemplateManager.prototype.getTemplatesForUrl =
  */
 bite.client.TemplateManager.prototype.getTemplatesForUrlInternal_ =
     function(callback, url, templates) {
+  var hasTemplate = false;
   var relevantTemplates = {};
   for (var templateId in templates) {
     var template = templates[templateId];
@@ -175,9 +194,17 @@ bite.client.TemplateManager.prototype.getTemplatesForUrlInternal_ =
       var curUrl = template.urls[i];
       if (curUrl == 'all' || goog.string.startsWith(url, curUrl)) {
         relevantTemplates[templateId] = template;
+        hasTemplate = true;
       }
     }
   }
+
+  // Add default template if no templates are relevant.
+  if (!hasTemplate) {
+    template = bite.client.TemplateManager.DEFAULT_TEMPLATE_;
+    relevantTemplates[template.id] = template;
+  }
+
   callback(relevantTemplates);
 };
 
@@ -238,16 +265,7 @@ bite.client.TemplateManager.prototype.loadTemplates_ = function(callback) {
  * @private
  */
 bite.client.TemplateManager.prototype.useDefaultTemplate_ = function() {
-  this.templates_ =
-  {bite_default_bug:
-    {id: 'bite_default_bug',
-     name: 'Other',
-     urls: [],
-     project: 'Other',
-     backendProject: '',
-     backendProvider: Bite.Constants.Providers.ISSUETRACKER,
-     selectorText: 'Other',
-     displayOrder: 0,
-     noteText: 'Describe your problem: '}};
+  template = bite.client.TemplateManager.DEFAULT_TEMPLATE_;
+  this.templates_ = {};
+  this.templates_[template.id] = template;
 };
-
