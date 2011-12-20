@@ -22,7 +22,7 @@ goog.provide('bite.client.console.NewBugTypeSelector');
 
 goog.require('Bite.Constants');
 goog.require('bite.client.BugTemplate');
-goog.require('bite.client.Resizer');
+goog.require('bite.ux.Dragger');
 goog.require('bite.client.console.NewBug');
 goog.require('bite.client.console.NewBugTypeSelectorTemplate');
 goog.require('goog.array');
@@ -100,7 +100,7 @@ bite.client.console.NewBugTypeSelector = function(templateCallback,
 
   /**
    * Manages dragging the element.
-   * @type {bite.client.Resizer}
+   * @type {bite.ux.Dragger}
    * @private
    */
   this.dragger_ = null;
@@ -144,8 +144,7 @@ bite.client.console.NewBugTypeSelector.prototype.load = function(templates) {
 
   var headerElement =
       this.rootElement_.querySelector('.bite-header');
-  this.dragger_ = new bite.client.Resizer(this.rootElement_, headerElement,
-                                          true);
+  this.dragger_ = new bite.ux.Dragger(this.rootElement_, headerElement);
   this.attachHandlers_(bugTypes);
   this.isActive_ = true;
 };

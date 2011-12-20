@@ -24,7 +24,7 @@
 
 goog.provide('bite.client.ElementSelector');
 
-goog.require('bite.client.Resizer');
+goog.require('bite.ux.Dragger');
 goog.require('bite.client.console.NewBugTemplate');
 goog.require('common.client.RecordModeManager');
 goog.require('goog.dom');
@@ -84,7 +84,7 @@ bite.client.ElementSelector = function(opt_cancelCallback) {
 
   /**
    * Manages dragging the popup.
-   * @type {bite.client.Resizer}
+   * @type {bite.ux.Dragger}
    * @private
    */
   this.dragger_ = null;
@@ -120,7 +120,7 @@ bite.client.ElementSelector.prototype.startRecording = function(callback) {
       this.popup_,
       (viewport.width - popupSize.width) / 2,
       (viewport.height - popupSize.height) / 2);
-  this.dragger_ = new bite.client.Resizer(this.popup_, headerElement, true);
+  this.dragger_ = new bite.ux.Dragger(this.popup_, headerElement);
   this.setHandlers_();
   return true;
 };

@@ -20,6 +20,7 @@
 
 
 goog.require('Bite.Constants');
+goog.require('bite.ux.Container');
 goog.require('goog.dom');
 goog.require('goog.json');
 goog.require('goog.testing.PropertyReplacer');
@@ -36,12 +37,12 @@ var container = null;
 var mockSendRequest = function(data, callback) {
   if (data['action'] == Bite.Constants.HUD_ACTION.GET_LOCAL_STORAGE) {
     if (data['key'] ==
-        bite.client.Container.Keys_.CONSOLE_LOCATION + 'test_console') {
+        bite.ux.Container.Keys_.CONSOLE_LOCATION + 'test_console') {
       var positionData = goog.json.serialize(
           {position: {x: 20, y: 20},
            size: {height: 450, width: 350}});
       callback(positionData);
-    } else if (data['key'] == bite.client.Container.Keys_.SHOWN_MESSAGES +
+    } else if (data['key'] == bite.ux.Container.Keys_.SHOWN_MESSAGES +
                'shown_message') {
       callback('t');
     } else {
@@ -67,11 +68,11 @@ function tearDown() {
 
 
 function testSetContentFromHtml() {
-  container = new bite.client.Container('dev.biteserver.prom.google.com',
-                                        'test_console',
-                                        'Header',
-                                        'Subheader',
-                                        false);
+  container = new bite.ux.Container('dev.biteserver.prom.google.com',
+                                    'test_console',
+                                    'Header',
+                                    'Subheader',
+                                    false);
   assertEquals('test_console', container.getRoot().id);
 
   container.setContentFromHtml('Test Paragraph');
@@ -87,11 +88,11 @@ function testSetContentFromHtml() {
 
 
 function testSetContentFromElement() {
-  container = new bite.client.Container('dev.biteserver.prom.google.com',
-                                        'test_console',
-                                        'Header',
-                                        'Subheader',
-                                        false);
+  container = new bite.ux.Container('dev.biteserver.prom.google.com',
+                                    'test_console',
+                                    'Header',
+                                    'Subheader',
+                                    false);
   var element = goog.dom.createDom('p', null, 'Test Paragraph');
   container.setContentFromElement(element);
   assertEquals(
@@ -107,22 +108,22 @@ function testConsoleWithSavedLocation() {
   };
   stubs.set(bite.client.Resizer, 'updatePosition', mockUpdatePosition);
 
-  container = new bite.client.Container('dev.biteserver.prom.google.com',
-                                        'test_console',
-                                        'Header',
-                                        'Subheader',
-                                        true);
+  container = new bite.ux.Container('dev.biteserver.prom.google.com',
+                                    'test_console',
+                                    'Header',
+                                    'Subheader',
+                                    true);
   assertEquals(450, container.getRoot().clientHeight);
   assertEquals(350, container.getRoot().clientWidth);
 }
 
 
 function testShowInfoMessage() {
-  container = new bite.client.Container('dev.biteserver.prom.google.com',
-                                        'test_console',
-                                        'Header',
-                                        'Subheader',
-                                        false);
+  container = new bite.ux.Container('dev.biteserver.prom.google.com',
+                                    'test_console',
+                                    'Header',
+                                    'Subheader',
+                                    false);
   container.showInfoMessage('Message a');
   container.showInfoMessage('Message b');
   infobarInnerHTML =
@@ -133,11 +134,11 @@ function testShowInfoMessage() {
 
 
 function testShowInfoMessageOnce() {
-  container = new bite.client.Container('dev.biteserver.prom.google.com',
-                                        'test_console',
-                                        'Header',
-                                        'Subheader',
-                                        false);
+  container = new bite.ux.Container('dev.biteserver.prom.google.com',
+                                    'test_console',
+                                    'Header',
+                                    'Subheader',
+                                    false);
   container.showInfoMessageOnce('shown_message', 'Shown before');
   container.showInfoMessageOnce('new_message', 'Never shown before');
   infobarInnerHTML =

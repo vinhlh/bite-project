@@ -298,8 +298,8 @@ def main():
 
   # JavaScript
   js_targets = {
-    'background': os.path.join('extension', 'src'),
-    'content': os.path.join('extension', 'src'),
+    'background': os.path.join('extension', 'src', 'bite'),
+    'content': os.path.join('extension', 'src', 'bite'),
     'getactioninfo': os.path.join(RPF_ROOT, 'src'),
     'console': os.path.join(RPF_ROOT, 'src'),
     'elementhelper': os.path.join('extension', 'src'),

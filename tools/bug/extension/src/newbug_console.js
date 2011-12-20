@@ -25,7 +25,7 @@ goog.provide('bite.client.console.NewBug');
 
 goog.require('Bite.Constants');
 goog.require('bite.client.BugTemplate');
-goog.require('bite.client.Container');
+goog.require('bite.ux.Container');
 goog.require('bite.client.TemplateManager');
 goog.require('bite.client.Templates');
 goog.require('bite.client.console.NewBugTemplate');
@@ -69,7 +69,7 @@ bite.client.console.NewBug = function(user, opt_callback) {
 
   /**
    * Container for the new bug console.
-   * @type {bite.client.Container}
+   * @type {bite.ux.Container}
    * @private
    */
   this.container_ = null;
@@ -895,10 +895,10 @@ bite.client.console.NewBug.prototype.show = function(
   this.url_ = this.getCurrentUrl_();
 
 
-  this.container_ = new bite.client.Container(server,
-                                              'bite-newbug-console',
-                                              'New Bug', 'File a new bug',
-                                              false, true);
+  this.container_ = new bite.ux.Container(server,
+                                          'bite-newbug-console',
+                                          'New Bug', 'File a new bug',
+                                          false, true);
   var templatesByProject = bite.client.TemplateManager.getTemplatesByProject(
       this.templates_);
   this.container_.setContentFromHtml(

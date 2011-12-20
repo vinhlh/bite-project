@@ -19,6 +19,7 @@
  */
 
 
+goog.require('bite.ux.Resizer');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.math.Size');
@@ -57,7 +58,7 @@ function tearDown() {
 }
 
 function testUpdate() {
-  var resizer = new bite.client.Resizer(container, container);
+  var resizer = new bite.ux.Resizer(container, container);
   assertEquals(300, resizer.getSize().width);
   assertEquals(301, resizer.getSize().height);
   assertEquals(101, resizer.getPosition().x);
@@ -77,7 +78,7 @@ function testUpdate() {
 }
 
 function testDrag() {
-  var resizer = new bite.client.Resizer(container, container);
+  var resizer = new bite.ux.Resizer(container, container);
   goog.testing.events.fireMouseDownEvent(
       container,
       goog.events.BrowserEvent.MouseButton.LEFT,
@@ -99,7 +100,7 @@ function testDrag() {
 }
 
 function testSEResize() {
-  var resizer = new bite.client.Resizer(container, container);
+  var resizer = new bite.ux.Resizer(container, container);
 
   var seCorner = goog.dom.getElementByClass('se-resizer');
 
@@ -123,7 +124,7 @@ function testSEResize() {
 }
 
 function testNWResize() {
-  var resizer = new bite.client.Resizer(container, container);
+  var resizer = new bite.ux.Resizer(container, container);
 
   var nwCorner = goog.dom.getElementByClass('nw-resizer');
 

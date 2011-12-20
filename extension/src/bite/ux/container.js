@@ -23,11 +23,13 @@
  */
 
 
-goog.provide('bite.client.Container');
+goog.provide('bite.ux.Container');
 
 goog.require('Bite.Constants');
-goog.require('bite.client.Resizer');
 goog.require('bite.client.Templates');
+goog.require('bite.ux.Dragger');
+goog.require('bite.ux.Resizer');
+goog.require('common.dom.element');
 goog.require('goog.Timer');
 goog.require('goog.dom');
 goog.require('goog.events');
@@ -57,7 +59,7 @@ goog.require('soy');
  * @param {string=} opt_tooltip The optional tooltip of this dialog.
  * @constructor
  */
-bite.client.Container = function(server, consoleId, headerText,
+bite.ux.Container = function(server, consoleId, headerText,
                                  opt_headerSubtext, opt_savePosition,
                                  opt_hideOnLoad, opt_tooltip) {
   /**
@@ -101,10 +103,10 @@ bite.client.Container = function(server, consoleId, headerText,
   this.root_ = container;
 
   var content = goog.dom.getElementByClass(
-      bite.client.Container.Classes_.CONTENT, this.root_);
+      bite.ux.Container.Classes_.CONTENT, this.root_);
   if (!content) {
     throw Error(
-        'The element ' + bite.client.Container.Classes_.CONTENT +
+        'The element ' + bite.ux.Container.Classes_.CONTENT +
         ' could not be found');
   }
 
@@ -116,11 +118,11 @@ bite.client.Container = function(server, consoleId, headerText,
   this.content_ = content;
 
   var infobar = goog.dom.getElementByClass(
-      bite.client.Container.Classes_.INFOBAR, this.root_);
+      bite.ux.Container.Classes_.INFOBAR, this.root_);
 
   if (!infobar) {
     throw Error(
-        'The element ' + bite.client.Container.Classes_.INFOBAR +
+        'The element ' + bite.ux.Container.Classes_.INFOBAR +
         ' could not be found');
   }
 
@@ -140,23 +142,33 @@ bite.client.Container = function(server, consoleId, headerText,
    */
   this.messageCounter_ = 0;
 
-  var callback = function() {};
+  var savePositionCallback = function() {};
   if (opt_savePosition) {
-    callback = goog.bind(this.setLastSizeAndPosition_, this);
+    savePositionCallback = goog.bind(this.setLastSizeAndPosition_, this);
   }
 
   /**
-   * Resizer which controls dragging and resizing of the container.
-   * @type {!bite.client.Resizer}
+   * Resizer for the container.
+   * @type {!bite.ux.Resizer}
    * @private
    */
-  this.resizer_ = new bite.client.Resizer(
-      this.root_,
-      goog.dom.getElementByClass(
-          bite.client.Container.Classes_.HEADER, this.root_),
-      false,
-      callback,
-      callback);
+  this.resizer_ = new bite.ux.Resizer(this.root_, savePositionCallback);
+
+  // Used as the drag element for the container.
+  var header = goog.dom.getElementByClass(bite.ux.Container.Classes_.HEADER,
+                                          this.root_);
+  var updateResizer = goog.bind(this.resizer_.recalculate, this.resizer_);
+  var dragCallback = function() {
+    updateResizer();
+    savePositionCallback();
+  };
+
+  /**
+   * Dragger for the container.
+   * @type {!bite.ux.Dragger}
+   * @private
+   */
+  this.dragger_ = new bite.ux.Dragger(this.root_, header, dragCallback);
 
   this.getSavedConsoleLocation_();
 
@@ -165,7 +177,7 @@ bite.client.Container = function(server, consoleId, headerText,
   }
 
   var closeButton = goog.dom.getElementByClass(
-      bite.client.Container.Classes_.CLOSE_BUTTON, this.root_);
+      bite.ux.Container.Classes_.CLOSE_BUTTON, this.root_);
   this.eventHandler_.listen(
       closeButton, goog.events.EventType.CLICK, this.closeHandler_);
 };
@@ -177,7 +189,7 @@ bite.client.Container = function(server, consoleId, headerText,
  * @typedef {{position: {x: number, y: number},
  *            size: {height: number, width: number}}}
  */
-bite.client.Container.Location;
+bite.ux.Container.Location;
 
 /**
  * Key prefixs used to keep persistent information in local storage.
@@ -187,7 +199,7 @@ bite.client.Container.Location;
  * @enum {string}
  * @private
  */
-bite.client.Container.Keys_ = {
+bite.ux.Container.Keys_ = {
   CONSOLE_LOCATION: 'bite-client-background-console-location-',
   SHOWN_MESSAGES: 'bite-client-background-shown-messages-'
 };
@@ -195,10 +207,10 @@ bite.client.Container.Keys_ = {
 
 /**
  * Default location for a new console window.
- * @type {bite.client.Container.Location}
+ * @type {bite.ux.Container.Location}
  * @private
  */
-bite.client.Container.DEFAULT_CONSOLE_LOCATION_ =
+bite.ux.Container.DEFAULT_CONSOLE_LOCATION_ =
     {position: {x: 10, y: 10},
      size: {height: 400, width: 450}};
 
@@ -208,7 +220,7 @@ bite.client.Container.DEFAULT_CONSOLE_LOCATION_ =
  * @enum {string}
  * @private
  */
-bite.client.Container.Classes_ = {
+bite.ux.Container.Classes_ = {
   CLOSE_BUTTON: 'bite-close-button',
   CONTENT: 'bite-console-content',
   HEADER: 'bite-header',
@@ -220,7 +232,7 @@ bite.client.Container.Classes_ = {
 /**
  * Makes the console visible.
  */
-bite.client.Container.prototype.show = function() {
+bite.ux.Container.prototype.show = function() {
   goog.style.setStyle(this.root_, 'visibility', 'visible');
 };
 
@@ -228,7 +240,7 @@ bite.client.Container.prototype.show = function() {
 /**
  * Hides the console.
  */
-bite.client.Container.prototype.hide = function() {
+bite.ux.Container.prototype.hide = function() {
   goog.style.setStyle(this.root_, 'visibility', 'hidden');
 };
 
@@ -237,7 +249,7 @@ bite.client.Container.prototype.hide = function() {
  * Returns whether or not the console is currently visible.
  * @return {boolean} True if the console is visible.
  */
-bite.client.Container.prototype.isVisible = function() {
+bite.ux.Container.prototype.isVisible = function() {
   return goog.style.getStyle(this.root_, 'visibility') == 'visible';
 };
 
@@ -245,7 +257,7 @@ bite.client.Container.prototype.isVisible = function() {
 /**
  * Destroys the current console.
  */
-bite.client.Container.prototype.remove = function() {
+bite.ux.Container.prototype.remove = function() {
   this.eventHandler_.removeAll();
   goog.dom.getDocument().body.removeChild(this.root_);
 };
@@ -255,7 +267,7 @@ bite.client.Container.prototype.remove = function() {
  * Sets the content of the container.
  * @param {string} innerHtml The HTML string describing the content.
  */
-bite.client.Container.prototype.setContentFromHtml = function(innerHtml) {
+bite.ux.Container.prototype.setContentFromHtml = function(innerHtml) {
   this.content_.innerHTML = innerHtml;
 };
 
@@ -264,7 +276,7 @@ bite.client.Container.prototype.setContentFromHtml = function(innerHtml) {
  * Sets the content of the container from an element.
  * @param {Element} element The element to set as the content.
  */
-bite.client.Container.prototype.setContentFromElement = function(element) {
+bite.ux.Container.prototype.setContentFromElement = function(element) {
   this.setContentFromHtml(element.innerHTML);
 };
 
@@ -274,7 +286,7 @@ bite.client.Container.prototype.setContentFromElement = function(element) {
  * more than once, earlier callbacks are ignored.
  * @param {function()} callback The callback.
  */
-bite.client.Container.prototype.setCloseCallback = function(callback) {
+bite.ux.Container.prototype.setCloseCallback = function(callback) {
   this.closeCallback_ = callback;
 };
 
@@ -286,11 +298,11 @@ bite.client.Container.prototype.setCloseCallback = function(callback) {
  * @param {string} id A unique string identifying the message.
  * @param {string} message The text of the message.
  */
-bite.client.Container.prototype.showInfoMessageOnce = function(id, message) {
+bite.ux.Container.prototype.showInfoMessageOnce = function(id, message) {
 
   chrome.extension.sendRequest(
       {'action': Bite.Constants.HUD_ACTION.GET_LOCAL_STORAGE,
-       'key': bite.client.Container.Keys_.SHOWN_MESSAGES + id},
+       'key': bite.ux.Container.Keys_.SHOWN_MESSAGES + id},
       goog.bind(this.showInfoMessageCallback_, this, message, id));
 };
 
@@ -303,7 +315,7 @@ bite.client.Container.prototype.showInfoMessageOnce = function(id, message) {
  *     message should automatically go away.
  * @export
  */
-bite.client.Container.prototype.showInfoMessage = function(
+bite.ux.Container.prototype.showInfoMessage = function(
     message, opt_autoHideInterval) {
   this.addInfobarMessage_(message, null, opt_autoHideInterval);
 };
@@ -313,7 +325,7 @@ bite.client.Container.prototype.showInfoMessage = function(
  * Returns the root element of the container
  * @return {Element} The root element.
  */
-bite.client.Container.prototype.getRoot = function() {
+bite.ux.Container.prototype.getRoot = function() {
   return this.root_;
 };
 
@@ -322,8 +334,8 @@ bite.client.Container.prototype.getRoot = function() {
  * Hides the infobar.
  * @private
  */
-bite.client.Container.prototype.hideInfobar_ = function() {
-  goog.dom.classes.add(this.infobar_, bite.client.Container.Classes_.HIDDEN);
+bite.ux.Container.prototype.hideInfobar_ = function() {
+  goog.dom.classes.add(this.infobar_, bite.ux.Container.Classes_.HIDDEN);
 };
 
 
@@ -331,8 +343,8 @@ bite.client.Container.prototype.hideInfobar_ = function() {
  * Displays the infobar.
  * @private
  */
-bite.client.Container.prototype.showInfobar_ = function() {
-  goog.dom.classes.remove(this.infobar_, bite.client.Container.Classes_.HIDDEN);
+bite.ux.Container.prototype.showInfobar_ = function() {
+  goog.dom.classes.remove(this.infobar_, bite.ux.Container.Classes_.HIDDEN);
 };
 
 
@@ -344,7 +356,7 @@ bite.client.Container.prototype.showInfobar_ = function() {
  * @param {?string} shown Null if the message has not been shown.
  * @private
  */
-bite.client.Container.prototype.showInfoMessageCallback_ = function(message,
+bite.ux.Container.prototype.showInfoMessageCallback_ = function(message,
                                                                     messageId,
                                                                     shown) {
   if (!shown) {
@@ -361,7 +373,7 @@ bite.client.Container.prototype.showInfoMessageCallback_ = function(message,
  *     message should automatically go away.
  * @private
  */
-bite.client.Container.prototype.addInfobarMessage_ =
+bite.ux.Container.prototype.addInfobarMessage_ =
     function(message, messageId, opt_autoHideInterval) {
   if (this.messageCounter_ == 0) {
     this.showInfobar_();
@@ -392,7 +404,7 @@ bite.client.Container.prototype.addInfobarMessage_ =
  * @param {?string} messageId The id of the message to remove.
  * @private
  */
-bite.client.Container.prototype.removeMessage_ =
+bite.ux.Container.prototype.removeMessage_ =
     function(messageElement, messageId) {
   if (!goog.dom.contains(this.infobar_, messageElement)) {
     return;
@@ -405,7 +417,7 @@ bite.client.Container.prototype.removeMessage_ =
   if (messageId) {
     chrome.extension.sendRequest(
         {'action': Bite.Constants.HUD_ACTION.SET_LOCAL_STORAGE,
-         'key': bite.client.Container.Keys_.SHOWN_MESSAGES + messageId,
+         'key': bite.ux.Container.Keys_.SHOWN_MESSAGES + messageId,
          'value': 't'});
   }
 };
@@ -418,13 +430,13 @@ bite.client.Container.prototype.removeMessage_ =
  * ID as this is opened, it will use the last saved size and position.
  * @private
  */
-bite.client.Container.prototype.setLastSizeAndPosition_ = function() {
-  var consoleLocation = {position: this.resizer_.getPosition(),
+bite.ux.Container.prototype.setLastSizeAndPosition_ = function() {
+  var consoleLocation = {position: this.getPosition(),
                          size: {width: this.root_.clientWidth,
                                 height: this.root_.clientHeight}};
   chrome.extension.sendRequest(
       {action: Bite.Constants.HUD_ACTION.SET_LOCAL_STORAGE,
-       key: bite.client.Container.Keys_.CONSOLE_LOCATION + this.consoleId_,
+       key: bite.ux.Container.Keys_.CONSOLE_LOCATION + this.consoleId_,
        value: goog.json.serialize(consoleLocation)});
 };
 
@@ -433,10 +445,10 @@ bite.client.Container.prototype.setLastSizeAndPosition_ = function() {
  * Requests the location information for a newly opened console.
  * @private
  */
-bite.client.Container.prototype.getSavedConsoleLocation_ = function() {
+bite.ux.Container.prototype.getSavedConsoleLocation_ = function() {
   chrome.extension.sendRequest(
       {action: Bite.Constants.HUD_ACTION.GET_LOCAL_STORAGE,
-       key: bite.client.Container.Keys_.CONSOLE_LOCATION + this.consoleId_},
+       key: bite.ux.Container.Keys_.CONSOLE_LOCATION + this.consoleId_},
       goog.bind(this.handleGetSavedConsoleLocation_, this));
 };
 
@@ -450,17 +462,17 @@ bite.client.Container.prototype.getSavedConsoleLocation_ = function() {
  *     localStorage, or null if there is no stored location.
  * @private
  */
-bite.client.Container.prototype.handleGetSavedConsoleLocation_ =
+bite.ux.Container.prototype.handleGetSavedConsoleLocation_ =
     function(rawLocation) {
-  var location = bite.client.Container.DEFAULT_CONSOLE_LOCATION_;
+  var location = bite.ux.Container.DEFAULT_CONSOLE_LOCATION_;
   if (rawLocation) {
     try {
-      location = /** @type {!bite.client.Container.Location} */
+      location = /** @type {!bite.ux.Container.Location} */
           (goog.json.parse(rawLocation));
     } catch (error) {
       chrome.extension.sendRequest(
           {action: Bite.Constants.HUD_ACTION.REMOVE_LOCAL_STORAGE,
-           key: bite.client.Container.Keys_.CONSOLE_LOCATION +
+           key: bite.ux.Container.Keys_.CONSOLE_LOCATION +
                 this.consoleId_});
     }
   }
@@ -470,13 +482,13 @@ bite.client.Container.prototype.handleGetSavedConsoleLocation_ =
 
 /**
  * Updates the console to the size and location given in the parameter.
- * @param {!bite.client.Container.Location} location The location info.
+ * @param {!bite.ux.Container.Location} location The location info.
  */
-bite.client.Container.prototype.updateConsolePosition = function(location) {
-  this.resizer_.updateSize(
-      {width: location['size']['width'],
-       height: location['size']['height']});
-  this.resizer_.updatePosition(location.position);
+bite.ux.Container.prototype.updateConsolePosition = function(location) {
+  common.dom.element.setPosition(this.root_, location.position);
+  common.dom.element.setSize(this.root_, location.size);
+  this.resizer_.recalculate();
+  this.dragger_.recalculate();
 };
 
 
@@ -484,7 +496,7 @@ bite.client.Container.prototype.updateConsolePosition = function(location) {
  * Handles the event when the user clicks on the close button.
  * @private
  */
-bite.client.Container.prototype.closeHandler_ = function() {
+bite.ux.Container.prototype.closeHandler_ = function() {
   this.closeCallback_();
 };
 
@@ -493,7 +505,7 @@ bite.client.Container.prototype.closeHandler_ = function() {
  * Handles the event when the user closes the infobar.
  * @private
  */
-bite.client.Container.prototype.closeInfobarHandler_ = function() {
+bite.ux.Container.prototype.closeInfobarHandler_ = function() {
   this.hideInfobar_();
 };
 

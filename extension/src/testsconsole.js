@@ -23,7 +23,7 @@
 goog.provide('bite.client.TestsConsole');
 
 goog.require('Bite.Constants');
-goog.require('bite.client.Container');
+goog.require('bite.ux.Container');
 goog.require('bite.client.Templates');
 goog.require('goog.dom');
 goog.require('goog.events.EventHandler');
@@ -40,7 +40,7 @@ goog.require('soy');
 bite.client.TestsConsole = function(user, server) {
   /**
    * The tests console container.
-   * @type {bite.client.Container}
+   * @type {bite.ux.Container}
    * @private
    */
   this.container_ = null;
@@ -131,9 +131,9 @@ bite.client.TestsConsole.prototype.showConsole = function() {
  * @private
  */
 bite.client.TestsConsole.prototype.load_ = function(user, server) {
-  this.container_ = new bite.client.Container(server, 'bite-tests-console',
-                                              'Tests', 'Lists Available Tests',
-                                              true);
+  this.container_ = new bite.ux.Container(server, 'bite-tests-console',
+                                          'Tests', 'Lists Available Tests',
+                                          true);
   var rootFolder = chrome.extension.getURL('');
   this.container_.setContentFromHtml(bite.client.Templates.testsConsole(
       {rootFolder: rootFolder,

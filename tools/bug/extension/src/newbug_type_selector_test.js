@@ -150,9 +150,9 @@ function testLoad() {
              goog.testing.mockmatchers.isString,
              goog.testing.mockmatchers.isFunction).$times(3);
   stubs_.set(goog.events.EventHandler.prototype, 'listen', mockListen);
-  var mockResizer = mocks_.createStrictMock(bite.client.Resizer);
-  var mockResizerCtor = mocks_.createConstructorMock(bite.client, 'Resizer');
-  mockResizerCtor(fakeRoot, fakeElement, true).$returns(mockResizer);
+  var mockDragger = mocks_.createStrictMock(bite.ux.Dragger);
+  var mockDraggerCtor = mocks_.createConstructorMock(bite.client, 'Dragger');
+  mockDraggerCtor(fakeRoot, fakeElement, true).$returns(mockDragger);
   mocks_.$replayAll();
   this.newBugTypeSelector.load(testTemplates);
   mocks_.$verifyAll();

@@ -22,7 +22,7 @@
 goog.provide('rpf.ContentScript.RecordHelper');
 
 goog.require('Bite.Constants');
-goog.require('bite.client.Container');
+goog.require('bite.ux.Container');
 goog.require('bite.client.Templates');
 goog.require('bite.rpf.BotHelper');
 goog.require('common.client.ElementDescriptor');
@@ -193,7 +193,7 @@ rpf.ContentScript.RecordHelper = function(opt_noConsole) {
 
   /**
    * The xpath finder console.
-   * @type {bite.client.Container}
+   * @type {bite.ux.Container}
    * @private
    */
   this.finderConsole_ = null;
@@ -232,7 +232,7 @@ rpf.ContentScript.RecordHelper.prototype.openLocatorDialog_ = function() {
     this.finderConsole_.show();
     return;
   }
-  this.finderConsole_ = new bite.client.Container(
+  this.finderConsole_ = new bite.ux.Container(
       '', 'bite-locator-console-container',
       'Xpath Finder',
       '', true, false, 'Press Shift to pause & resume Xpath changes');

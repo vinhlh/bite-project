@@ -25,7 +25,7 @@ goog.provide('bite.client.BugsConsole');
 goog.require('bite.client.BugDetailsPopup');
 goog.require('bite.client.BugHelper');
 goog.require('bite.client.BugOverlay');
-goog.require('bite.client.Container');
+goog.require('bite.ux.Container');
 goog.require('bite.client.MiniBugPopup');
 goog.require('bite.client.Templates');
 goog.require('goog.dom');
@@ -46,7 +46,7 @@ goog.require('soy');
 bite.client.BugsConsole = function(user, server, overlay) {
   /**
    * The bugs console container.
-   * @type {bite.client.Container}
+   * @type {bite.ux.Container}
    * @private
    */
   this.container_ = null;
@@ -193,9 +193,9 @@ bite.client.BugsConsole.prototype.showConsole = function() {
  * @private
  */
 bite.client.BugsConsole.prototype.load_ = function(user, server) {
-  this.container_ = new bite.client.Container(server, 'bite-bugs-console',
-                                              'Bugs', 'Explore existing bugs',
-                                              true);
+  this.container_ = new bite.ux.Container(server, 'bite-bugs-console',
+                                          'Bugs', 'Explore existing bugs',
+                                          true);
   var rootFolder = chrome.extension.getURL('');
   this.container_.setContentFromHtml(bite.client.Templates.bugConsole(
       {rootFolder: rootFolder}));
