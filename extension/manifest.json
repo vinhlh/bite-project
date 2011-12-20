@@ -1,6 +1,6 @@
 {
   "name": "BITE",
-  "version": "1.0.0.0",
+  "version": "2.0.0.0",
   "description": "BITE is a suite of tools that lets you test the web from the web, offering tools that accelerate exploratory testing.",
   "options_page": "options.html",
   "browser_action": {

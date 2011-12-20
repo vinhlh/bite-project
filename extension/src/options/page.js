@@ -128,8 +128,7 @@ bite.options.Page.ElementName_ = {
  */
 bite.options.Page.MapValues_ = {
   'dev': bite.options.constants.ServerChannelOption.DEV,
-  'beta': bite.options.constants.ServerChannelOption.BETA,
-  'ext': bite.options.constants.ServerChannelOption.EXTERNAL,
+  'sta': bite.options.constants.ServerChannelOption.STAGING,
   'rel': bite.options.constants.ServerChannelOption.RELEASE
 };
 
