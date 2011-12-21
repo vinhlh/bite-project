@@ -28,7 +28,7 @@ import urllib2
 #pylint: disable-msg=C6204
 #Unused argument
 #pylint: disable-msg=W0613
-import simplejson as json
+import json
 from bite_exceptions import basic_exception
 
 def ParseJsonStr(json_str):

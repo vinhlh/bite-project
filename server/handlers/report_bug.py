@@ -33,7 +33,7 @@ import gdata
 import gdata.client
 import gdata.gauth
 import gdata.projecthosting.client
-import simplejson
+import json
 
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -285,7 +285,7 @@ class UpdateStatusHandler(ReportBugHandler):
                 'error': str(e)[:300]}
 
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(simplejson.dumps(result))
+    self.response.out.write(json.dumps(result))
 
 class BindingActions(object):
   """Holds the valid actions during binding operations."""
@@ -314,7 +314,7 @@ class UpdateBindingHandler(base.BaseHandler):
     bugs.UpdateTargetElement(issue_key, target_element)
 
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(simplejson.dumps({'success': True}))
+    self.response.out.write(json.dumps({'success': True}))
 
 
 class UpdateRecordingHandler(base.BaseHandler):
@@ -333,7 +333,7 @@ class UpdateRecordingHandler(base.BaseHandler):
     bugs.UpdateRecording(issue_key, recording_link)
 
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(simplejson.dumps({'success': True}))
+    self.response.out.write(json.dumps({'success': True}))
 
 
 application = webapp.WSGIApplication(

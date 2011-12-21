@@ -33,7 +33,7 @@ except ImportError:
   pass  # This will fail on unittest, ok to pass.
 
 import logging
-import simplejson
+import json
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -93,7 +93,7 @@ class GetAllTestNamesAndIds(base.BaseHandler):
       }
       tests.append(test_data)
 
-    self.response.out.write(simplejson.dumps(tests))
+    self.response.out.write(json.dumps(tests))
 
 
 class GetTestAsJson(base.BaseHandler):
@@ -108,15 +108,15 @@ class GetTestAsJson(base.BaseHandler):
       return
 
     file_text = test_metadata.GetText()
-    json_obj = simplejson.loads(file_text)
+    json_obj = json.loads(file_text)
 
     response = []
     json_obj['projectname'] = test_metadata.project
 
     # TODO(michaelwill): This should really only be returning one item.
     # It returns a list because the WTF legacy API returned a list.
-    response.append({'id': test_id, 'json': simplejson.dumps(json_obj)})
-    self.response.out.write(simplejson.dumps(response))
+    response.append({'id': test_id, 'json': json.dumps(json_obj)})
+    self.response.out.write(json.dumps(response))
 
 
 class DeleteTest(base.BaseHandler):
@@ -127,7 +127,7 @@ class DeleteTest(base.BaseHandler):
 
   def post(self):
     test_ids = self.GetRequiredParameter('ids')
-    instances = storage.FetchByIds(simplejson.loads(test_ids))
+    instances = storage.FetchByIds(json.loads(test_ids))
     if instances:
       storage.DeleteMetadata(instances)
     self.response.out.write('delete successfully.')
@@ -143,14 +143,14 @@ class UpdateTest(base.BaseHandler):
     js_files = self.GetOptionalParameter('jsFiles')
 
     if js_files:
-      js_files = simplejson.loads(js_files)
+      js_files = json.loads(js_files)
 
     test_metadata = storage.FetchById(test_id)
     if not test_metadata:
       self.error(400)
       return
 
-    json_obj = simplejson.loads(json)
+    json_obj = json.loads(json)
     new_test_name = json_obj['name']
     storage_project.UpdateProject(project, {'js_files': js_files})
     test_metadata.Update(project, new_test_name, json)
@@ -165,9 +165,9 @@ class SaveTest(base.BaseHandler):
     js_files = self.GetOptionalParameter('jsFiles')
 
     if js_files:
-      js_files = simplejson.loads(js_files)
+      js_files = json.loads(js_files)
 
-    json_obj = simplejson.loads(json)
+    json_obj = json.loads(json)
     new_test_name = json_obj['name']
 
     if storage.FetchByProjectAndTestName(project, new_test_name):
@@ -188,8 +188,9 @@ class SaveZipFile(base.BaseHandler):
     """Given a set of files as a json string and saves to db.
 
     Raises:
-      simplejson.JSONDecodeError: Raised if there was an error parsing the json
-        string.
+      TypeError: Unsupported key type; json.
+      OverflowError: Circular reference; json.
+      ValueError: Invalid value, out of range; json.
       zip_util.BadInput: Raised for bad inputs supplied to zip_util functions.
     """
     json_string = self.GetRequiredParameter('json')
@@ -251,8 +252,8 @@ class GetProject(base.BaseHandler):
     }
 
     try:
-      self.response.out.write(simplejson.dumps(data))
-    except simplejson.JSONDecodeError:
+      self.response.out.write(json.dumps(data))
+    except (TypeError, OverflowError, ValueError):
       self.error(400)
 
 
@@ -265,8 +266,8 @@ class SaveProject(base.BaseHandler):
     data_string = self.GetRequiredParameter('data')
 
     try:
-      data = simplejson.loads(data_string)
-    except simplejson.JSONDecodeError:
+      data = json.loads(data_string)
+    except (TypeError, OverflowError, ValueError):
       # TODO(jasonstredwick): Change from error codes to an error response.
       self.error(400)
       return
@@ -291,7 +292,7 @@ class GetProjectNames(base.BaseHandler):
   def post(self):
     """Returns the project names."""
     names = storage_project.GetProjectNames()
-    self.response.out.write(simplejson.dumps(names))
+    self.response.out.write(json.dumps(names))
 
 
 application = webapp.WSGIApplication(

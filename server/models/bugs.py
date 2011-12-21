@@ -21,7 +21,7 @@ Bug is a model for crawled bug information stored in AppEngine's Datastore.
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
-import simplejson
+import json
 
 from google.appengine.ext import db
 
@@ -98,7 +98,7 @@ class Bug(db.Model):
   modified = db.DateTimeProperty(required=False, auto_now=True)
 
 
-class BugEncoder(simplejson.JSONEncoder):
+class BugEncoder(json.JSONEncoder):
   """Encoder that knows how to encode Bugs objects."""
 
   # Disable 'Invalid method name' lint error.
@@ -136,7 +136,7 @@ class BugEncoder(simplejson.JSONEncoder):
               'has_recording': obj.has_recording,
               'recording_link': obj.recording_link}
     else:
-      return simplejson.JSONEncoder.default(self, obj)
+      return json.JSONEncoder.default(self, obj)
 
 
 def Store(bug_id, title, summary, priority, project, provider, status, author,
@@ -346,4 +346,4 @@ def JsonEncode(bugs):
   Returns:
     JSON encoded str representation of the list.
   """
-  return simplejson.dumps(bugs, cls=BugEncoder)
+  return json.dumps(bugs, cls=BugEncoder)

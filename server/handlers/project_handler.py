@@ -16,8 +16,8 @@
 
 """Bite project handler."""
 
-__author__ = 'phu@google.com (Po Hu)'
-__author__ = 'jasonstredwick@google.com (Jason Stredwick)'
+__author__ = ('phu@google.com (Po Hu)'
+              'jasonstredwick@google.com (Jason Stredwick)')
 
 #Import not at top
 #pylint: disable-msg=C6204
@@ -30,7 +30,6 @@ try:
 except ImportError:
   pass
 
-import simplejson
 import urllib
 
 from google.appengine.ext import webapp

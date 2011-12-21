@@ -33,7 +33,7 @@ import atom.url
 import gdata
 import gdata.client
 import gdata.gauth
-import simplejson
+import json
 
 from google.appengine.api import users
 from google.appengine.ext import webapp
@@ -131,7 +131,7 @@ class CheckLoginStatus(webapp.RequestHandler):
           'url': GetLoginUrl()
           }
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(simplejson.dumps(response))
+    self.response.out.write(json.dumps(response))
 
 
 application = webapp.WSGIApplication(

@@ -27,7 +27,7 @@ try:
 except ImportError:
   pass  # This will fail on unittest, ok to pass.
 
-import simplejson
+import json
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -53,7 +53,7 @@ class UploadHandler(base.BaseHandler):
     if labels:
       # If present, labels is a JSON encoded list of strings,
       # decode it.
-      labels = simplejson.loads(labels)
+      labels = json.loads(labels)
 
     screenshot = screenshots.Add(data=data, source=source, source_id=source_id,
                                  project=project, caption=caption,
@@ -63,7 +63,7 @@ class UploadHandler(base.BaseHandler):
     screenshot_url = screenshots_util.RetrievalUrl(
         self.request.url, screenshot_id)
     self.response.out.write(
-        simplejson.dumps({'id': screenshot_id, 'url': screenshot_url}))
+        json.dumps({'id': screenshot_id, 'url': screenshot_url}))
 
 
 class GetHandler(base.BaseHandler):
@@ -100,7 +100,7 @@ class SearchHandler(base.BaseHandler):
     request_url = self.request.url
     result = [screenshots_util.RetrievalUrl(request_url, curr.key().id())
               for curr in matches]
-    self.response.out.write(simplejson.dumps(result))
+    self.response.out.write(json.dumps(result))
 
 
 application = webapp.WSGIApplication(

@@ -28,7 +28,7 @@ except ImportError:
 import re
 import sys
 
-import simplejson
+import json
 
 from google.appengine.api import memcache
 from google.appengine.api import users
@@ -405,8 +405,7 @@ class TesterTestsHandler(SiteCompatHandler):
     self.get()
 
 
-_NO_USER_RESPONSE = simplejson.dumps({'user': None,
-                                      'test': None})
+_NO_USER_RESPONSE = json.dumps({'user': None, 'test': None})
 
 
 # Disable 'Invalid method name' lint error.
@@ -427,7 +426,7 @@ class MyTestsHandler(SiteCompatHandler):
         test_data = {'test_id': assign.key().name(),
                      'test_url': test.start_url,
                      'verification_steps': test.steps}
-      response = simplejson.dumps(
+      response = json.dumps(
           {'user': user.email(),
            'test': test_data})
 
@@ -471,7 +470,7 @@ class StatsHandler(SiteCompatHandler):
         result = self.GetTopLevelStats()
         memcache.set(stats_key, result, 1800)  # Cache for 30 mins.
     self.response.headers['Content-Type'] = JSON_CONTENT_TYPE
-    self.response.out.write(simplejson.dumps(result))
+    self.response.out.write(json.dumps(result))
 
   def GetPersonalStats(self):
     """Gets a list of results submitted by the current user.
@@ -597,7 +596,7 @@ class ListHandler(SiteCompatHandler):
                   for r in available_runs]
 
     self.response.headers['Content-Type'] = JSON_CONTENT_TYPE
-    self.response.out.write(simplejson.dumps(response))
+    self.response.out.write(json.dumps(response))
 
 
 # Disable 'Invalid method name' lint error.

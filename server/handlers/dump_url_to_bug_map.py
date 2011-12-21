@@ -25,7 +25,7 @@ try:
 except ImportError:
   pass  # This will fail on unittest, ok to pass.
 
-import simplejson
+import json
 
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -37,7 +37,7 @@ class DumpUrlToBugMapHandler(webapp.RequestHandler):
   def get(self):
     query = url_bug_map.UrlBugMap.all()
     all_url_bug_maps = [urlbugmap for urlbugmap in query.fetch(limit=10000)]
-    self.response.out.write(simplejson.dumps(all_url_bug_maps))
+    self.response.out.write(json.dumps(all_url_bug_maps))
     self.response.headers['Content-Type'] = 'application/json'
 
 

@@ -23,7 +23,7 @@ this should be easy to change in the future.
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import logging
-import simplejson
+import json
 
 from google.appengine.ext import db
 
@@ -86,8 +86,8 @@ def GetProjectJson(name):
     return None
 
   try:
-    return simplejson.dumps(obj)
-  except simplejson.JSONDecodeError:
+    return json.dumps(obj)
+  except (TypeError, OverflowError, ValueError):
     return None
 
 

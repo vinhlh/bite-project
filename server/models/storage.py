@@ -24,7 +24,7 @@ __author__ = 'michaelwill@google.com (Michael Williamson)'
 
 import logging
 import re
-import simplejson
+import json
 import uuid
 from google.appengine.ext import db
 from googledocs import docs_gateway
@@ -88,7 +88,7 @@ class StorageMetadata(db.Model):
     """Gets the active test version."""
     result = ''
     if self.test:
-      test = simplejson.loads(self.test)
+      test = json.loads(self.test)
       result = test['active']
     return result
 
@@ -114,11 +114,11 @@ class StorageMetadata(db.Model):
     """Updates the test metadata stored."""
     result = ''
     if self.test:
-      cur_test = simplejson.loads(self.test)
+      cur_test = json.loads(self.test)
       cur_test['backup2'] = cur_test['backup1']
       cur_test['backup1'] = cur_test['active']
       cur_test['active'] = new_contents
-      result = simplejson.dumps(cur_test)
+      result = json.dumps(cur_test)
     return result
 
 
@@ -150,7 +150,7 @@ def GetSingletonDocsGateway():
 
 def GetTestString(contents):
   """Gets the test contents to be saved in the metadata."""
-  return simplejson.dumps(
+  return json.dumps(
       {'active': contents,
        'backup1': '',
        'backup2': ''});
