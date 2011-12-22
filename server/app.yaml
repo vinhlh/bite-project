@@ -20,10 +20,11 @@
 # This version number forces folks to deploy with:
 #     appcfg.py -V <desired_app_version> /path/to/bundle
 
-application: flux-ite
+application: invalid-name
 version: invalid-do-not-change-see-comments
-runtime: python
+runtime: python27
 api_version: 1
+threadsafe: false # Can't set to true until all handlers are redone.
 
 builtins:
 - remote_api: on
@@ -32,6 +33,30 @@ builtins:
 - deferred: on
 
 handlers:
+
+# Bugs
+#   Bugs API
+#   [POST]; create a new bug
+- url: /bugs
+  script: bugs.handlers.bugs.create.app
+  secure: always
+  login: required
+#   [GET, PUT]; get/update a bug by id
+- url: /bugs/\d+
+  script: bugs.handlers.bugs.access.app
+  secure: always
+  login: required
+#   [GET]; retrieve a list of bugs
+- url: /bugs/all
+  script: bugs.handlers.bugs.all.app
+  secure: always
+  login: required
+#   [GET]: retrieve a list of bugs by url
+- url: /bugs/url
+  script: bugs.handlers.bugs.url.app
+  secure: always
+  login: required
+
 
 # Client API URLs.
 - url: /get_bugs_for_url

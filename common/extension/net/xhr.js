@@ -83,6 +83,23 @@ bite.common.net.xhr.async.post = function(url, data, opt_callback) {
 
 
 /**
+ * Puts data to the given url and returns the response.
+ * @param {string} url The url.
+ * @param {string} data The data to send; in string form.  Caller is
+ *     responsible for encoding the string if necessary.
+ * @param {function(boolean, string)=} opt_callback The callback that is fired
+ *     when the request is complete.  The boolean input is the success of the
+ *     action.  If the action failed the string will be a simple error message.
+ *     Decoding does not occur for the response string, and is up to the caller
+ *     if necessary.
+ */
+bite.common.net.xhr.async.put = function(url, data, opt_callback) {
+  var callback = opt_callback || null;
+  bite.common.net.xhr.async.send_(url, callback, 'PUT', data);
+};
+
+
+/**
  * Start an asynchronous request for each element in the array at the same
  * time.  Each time a request completes the app function is applied to the
  * element along with the success of the request and the data, or error, from
@@ -327,4 +344,3 @@ bite.common.net.xhr.async.sendMultiple_ = function(inputData,
                                                    complete) {
 };
 */
-

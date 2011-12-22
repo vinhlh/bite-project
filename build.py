@@ -36,7 +36,7 @@ OUTPUT_ROOT = 'output'
 DEPS_ROOT = 'deps'
 
 # Common roots
-BUG_ROOT = os.path.join('tools', 'bug', 'extension')
+BUG_ROOT = os.path.join('tools', 'bugs', 'extension')
 RPF_ROOT = os.path.join('tools', 'rpf', 'extension')
 
 # Output paths
@@ -365,6 +365,9 @@ def main():
   print('Creating server bundle.')
   server_src = 'server'
   shutil.copytree(server_src, SERVER_DST)
+
+  bugs_src = os.path.join('tools', 'bugs', 'server', 'appengine')
+  shutil.copytree(bugs_src, os.path.join(SERVER_DST, 'bugs'))
 
   gdata_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'gdata')
   shutil.copytree(gdata_src, os.path.join(SERVER_DST, 'gdata'))

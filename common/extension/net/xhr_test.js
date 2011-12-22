@@ -133,6 +133,9 @@ function testResponse() {
 
   callback = goog.partial(validate, 'AsyncPost' + msg, true, response);
   bite.common.net.xhr.async.post(url, data, callback);
+
+  callback = goog.partial(validate, 'AsyncPut' + msg, true, response);
+  bite.common.net.xhr.async.put(url, data, callback);
 }
 
 
@@ -156,6 +159,12 @@ function testNoCallback() {
   } catch (error) {
     fail(msg + 'AsyncPost' + errorMsg + error);
   }
+
+  try {
+    bite.common.net.xhr.async.put(url, data);
+  } catch (error) {
+    fail(msg + 'AsyncPut' + errorMsg + error);
+  }
 }
 
 
@@ -173,6 +182,9 @@ function testRequestFailedException() {
 
   callback = goog.partial(validate, 'AsyncPost' + msg, false, FAIL_MESSAGE);
   bite.common.net.xhr.async.post(url, data, callback);
+
+  callback = goog.partial(validate, 'AsyncPut' + msg, false, FAIL_MESSAGE);
+  bite.common.net.xhr.async.put(url, data, callback);
 }
 
 
@@ -192,5 +204,8 @@ function testMissingUrl() {
   callback = goog.partial(validate, 'AsyncPost' + msg, false,
                           bite.common.net.xhr.ErrorMessage_.MISSING_URL);
   bite.common.net.xhr.async.post(url, data, callback);
-}
 
+  callback = goog.partial(validate, 'AsyncPut' + msg, false,
+                          bite.common.net.xhr.ErrorMessage_.MISSING_URL);
+  bite.common.net.xhr.async.put(url, data, callback);
+}

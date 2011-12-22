@@ -314,6 +314,7 @@ Bite.Constants.TestResult = {
  * @enum {string}
  */
 Bite.Constants.Providers = {
+  DATASTORE: 'datastore',
   ISSUETRACKER: 'issuetracker'
 };
 
