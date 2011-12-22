@@ -354,6 +354,10 @@ def main():
     shutil.copy(os.path.join(GENFILES_ROOT, ('%s_script.js' % target)),
                 EXTENSION_DST)
 
+  #   Changes the name from page_script.js to options_script.js.
+  shutil.move(os.path.join(EXTENSION_DST, 'page_script.js'),
+              os.path.join(EXTENSION_DST, 'options_script.js'))
+
   #   Copy the required ACE files.
   ace_dst = os.path.join(EXTENSION_DST, 'ace')
   ace_src = os.path.join(DEPS['ace'][ROOT], 'build', 'src')

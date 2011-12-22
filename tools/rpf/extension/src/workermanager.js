@@ -1,4 +1,4 @@
-// Copyright 2010 Google Inc. All Rights Reserved.
+// Copyright 2011 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -370,7 +370,6 @@ rpf.WorkerManager.prototype.pushTest_ = function(
        'datafile': result['datafile'],
        'userLib': testObj['userlib'],
        'needOverride': false,
-       'noConsole': false,
        'continueOnFailure': true,
        'testName': testObj['name'],
        'testId': id,

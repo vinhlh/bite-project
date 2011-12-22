@@ -69,12 +69,10 @@ goog.require('rpf.soy.Dialog');
 
 /**
  * A class for handling console related functions.
- * @param {boolean=} opt_noConsole Whether ConsoleManager is constructed with
- *     rpf Console UI or not.
  * @constructor
  * @export
  */
-rpf.ConsoleManager = function(opt_noConsole) {
+rpf.ConsoleManager = function() {
   /**
    * The messenger.
    * @type {rpf.Console.Messenger}
@@ -135,13 +133,6 @@ rpf.ConsoleManager = function(opt_noConsole) {
   this.userId_ = '';
 
   /**
-   * Whether ConsoleManager is constructed with rpf Console UI or not.
-   * @type {boolean}
-   * @private
-   */
-  this.noConsole_ = !!opt_noConsole;
-
-  /**
    * What additional information should be shown about the project. This
    * info will be shown below the toolbar.
    * @type {Bite.Constants.RpfConsoleInfoType}
@@ -177,9 +168,7 @@ rpf.ConsoleManager = function(opt_noConsole) {
    */
   this.initialScript_ = '';
 
-  if (!this.noConsole_) {
-    this.init_();
-  }
+  this.init_();
 };
 goog.addSingletonGetter(rpf.ConsoleManager);
 
@@ -2105,9 +2094,6 @@ rpf.ConsoleManager.prototype.logInfo = function(log, opt_level, opt_color) {
  * @export
  */
 rpf.ConsoleManager.prototype.setStatus = function(status, opt_color) {
-  if (this.noConsole_) {
-    return;
-  }
   var color = opt_color || 'blue';
   var statusDiv = '<div style="color:' + color + '">' +
                   status + '</div>';
@@ -2276,12 +2262,6 @@ rpf.ConsoleManager.prototype.getInsertLineNum = function() {
  */
 rpf.ConsoleManager.prototype.addNewCommand = function(
     pCmd, opt_dCmd, opt_index, opt_cmdMap) {
-  // Save new command, if no rpf Console UI is constructed.
-  if (this.noConsole_) {
-    this.recordedScript_ += pCmd;
-    return;
-  }
-
   var dCmd = opt_dCmd || '';
   var code = this.editorMngr_.getTempCode();
   if (this.viewMode_ == Bite.Constants.ViewModes.CODE) {
@@ -2531,9 +2511,6 @@ rpf.ConsoleManager.prototype.setDatafile_ = function(value) {
  * @private
  */
 rpf.ConsoleManager.prototype.checkRunnable_ = function() {
-  if (this.noConsole_) {
-    return true;
-  }
   var startUrl = this.getStartUrl();
   var scripts = this.editorMngr_.getCode();
   return goog.string.trim(startUrl) != '' && goog.string.trim(scripts) != '';
@@ -2573,16 +2550,10 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
     this.playbackRuntimeDialog_.setMultipleTestsVisibility(false);
     var scripts = opt_script ? opt_script : this.editorMngr_.getTempCode() ||
                   this.editorMngr_.getCode();
-    if (this.noConsole_) {
-      var datafile = '';
-      var startUrl = goog.global.location.href;
-      var userLib = '';
-    } else {
-      var datafile = this.getDatafile_();
-      var startUrl = goog.string.trim(this.getStartUrl());
-      var userLib = this.notesDialog_.getUserLibAsRunnable();
-      this.playbackRuntimeDialog_.clearMatchHtml();
-    }
+    var datafile = this.getDatafile_();
+    var startUrl = goog.string.trim(this.getStartUrl());
+    var userLib = this.notesDialog_.getUserLibAsRunnable();
+    this.playbackRuntimeDialog_.clearMatchHtml();
     this.setPlayStatus(true);
     this.messenger_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.CHECK_PLAYBACK_OPTION_AND_RUN,
@@ -2591,8 +2562,7 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
                     'scripts': scripts,
                     'infoMap': this.infoMap_,
                     'datafile': datafile,
-                    'userLib': userLib,
-                    'noConsole': this.noConsole_}},
+                    'userLib': userLib}},
         goog.bind(this.callbackOnStartPlayback_, this));
   } else {
     this.setStatus(
@@ -2610,7 +2580,7 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
 rpf.ConsoleManager.prototype.callbackOnStartPlayback_ = function(response) {
   this.messenger_.sendStatusMessage(
       Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_STARTED);
-  if (response['isPrepDone'] && !this.noConsole_) {
+  if (response['isPrepDone']) {
     this.playbackRuntimeDialog_.switchChoiceSet(false);
   }
 };
@@ -2701,22 +2671,15 @@ rpf.ConsoleManager.prototype.checkReadyToRecordCallback_ = function(response) {
  * @private
  */
 rpf.ConsoleManager.prototype.startRecording_ = function() {
-  if (!this.noConsole_) {
-    this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
-    this.setRecordStatus(true);
-    this.changeMode(Bite.Constants.ConsoleModes.RECORD);
-    var url = goog.string.trim(this.getStartUrl());
-    this.messenger_.sendMessage(
-        {'command': Bite.Constants.CONSOLE_CMDS.START_RECORDING,
-         'params': {'info': {'pageMap': this.projectInfo_.getPageMap(),
-                             'xpathFinderOn':
-                                 this.settingDialog_.getUseXpath()}}});
-  } else {
-    var url = goog.global.location.href;
-    this.messenger_.sendMessage(
+  this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
+  this.setRecordStatus(true);
+  this.changeMode(Bite.Constants.ConsoleModes.RECORD);
+  var url = goog.string.trim(this.getStartUrl());
+  this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.START_RECORDING,
-       'params': {'url': url, 'noConsole': this.noConsole_}});
-  }
+       'params': {'info': {'pageMap': this.projectInfo_.getPageMap(),
+                           'xpathFinderOn':
+                               this.settingDialog_.getUseXpath()}}});
 };
 
 
@@ -2856,23 +2819,21 @@ rpf.ConsoleManager.prototype.saveTest = function() {
 
   var screenshots = this.getScreenshots_();
 
-  if (!this.noConsole_) {
-    testName = this.getTestName_();
-    saveWeb = goog.dom.getElement('location-web').checked;
-    startUrl = this.getStartUrl();
-    scripts = this.editorMngr_.getTempCode() ||
-              this.getEditorManager().getCode();
-    datafile = this.getDatafile_();
-    // remove info map
-    this.removeInfoMapRedundant_(this.infoMap_, scripts, screenshots);
-    // remove data file
-    datafile = this.removeDatafileRedundant_(datafile, scripts);
+  testName = this.getTestName_();
+  saveWeb = goog.dom.getElement('location-web').checked;
+  startUrl = this.getStartUrl();
+  scripts = this.editorMngr_.getTempCode() ||
+            this.getEditorManager().getCode();
+  datafile = this.getDatafile_();
+  // remove info map
+  this.removeInfoMapRedundant_(this.infoMap_, scripts, screenshots);
+  // remove data file
+  datafile = this.removeDatafileRedundant_(datafile, scripts);
 
-    datafile = bite.console.Helper.appendInfoMap(this.infoMap_, datafile);
-    projectName = this.getProjectName_();
-    userLib = this.getUserLib();
-    scriptId = this.getScriptId_();
-  }
+  datafile = bite.console.Helper.appendInfoMap(this.infoMap_, datafile);
+  projectName = this.getProjectName_();
+  userLib = this.getUserLib();
+  scriptId = this.getScriptId_();
 
   if (!goog.string.trim(testName) || !goog.string.trim(projectName)) {
     this.setStatus('Please provide both project and script name.', 'red');
@@ -2891,8 +2852,7 @@ rpf.ConsoleManager.prototype.saveTest = function() {
                       'userLib': userLib,
                       'projectName': projectName,
                       'screenshots': screenshots,
-                      'scriptId': scriptId,
-                      'noConsole': this.noConsole_}},
+                      'scriptId': scriptId}},
            goog.bind(this.saveTestCallback_, this));
     } else {
       this.messenger_.sendMessage(
@@ -2906,14 +2866,10 @@ rpf.ConsoleManager.prototype.saveTest = function() {
         goog.bind(this.saveTestCallback_, this));
     }
     // Set status in rpf Console UI.
-    if (!this.noConsole_) {
-      this.statusLogger_.setStatus(rpf.StatusLogger.SAVING, '#777');
-    }
+    this.statusLogger_.setStatus(rpf.StatusLogger.SAVING, '#777');
   } catch (e) {
     // Set status in rpf Console UI.
-    if (!this.noConsole_) {
-      this.setStatus('Failed saving because: ' + e.toString(), 'red');
-    }
+    this.setStatus('Failed saving because: ' + e.toString(), 'red');
     throw new Error(e);
   }
 };
@@ -2969,13 +2925,6 @@ rpf.ConsoleManager.prototype.setPlayStatus = function(playing, opt_result) {
  */
 rpf.ConsoleManager.prototype.stopRecording = function() {
   rpf.ConsoleManager.logEvent_('Stop', '');
-  // Just send message to stop recording, if no rpf Console UI is constructed.
-  if (this.noConsole_) {
-    this.messenger_.sendMessage(
-        {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
-    return;
-  }
-
   this.setRecordStatus(false);
   this.changeMode(Bite.Constants.ConsoleModes.VIEW);
   this.messenger_.sendMessage(
@@ -3293,9 +3242,6 @@ rpf.ConsoleManager.prototype.onScreenChange_ = function(e) {
  * @export
  */
 rpf.ConsoleManager.prototype.changeMode = function(mode) {
-  if (this.noConsole_) {
-    return;
-  }
   this.mode_ = mode;
   goog.global.document.title = 'RPF - ' + mode;
   for (var i in rpf.ConsoleManager.Buttons) {

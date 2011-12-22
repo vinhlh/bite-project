@@ -24,10 +24,11 @@
       "exclude_globs": [ "*://code.google.com/*" ]
     }
   ],
+  "incognito": "spanning",
   "permissions": [
     "tabs",
     "<all_urls>",
-    "management"
+    "management",
+    "unlimitedStorage"
   ]
 }
-

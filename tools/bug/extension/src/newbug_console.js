@@ -509,6 +509,44 @@ bite.client.console.NewBug.prototype.submitHandler_ = function() {
 
 
 /**
+ * Saves the script to server.
+ * @private
+ */
+bite.client.console.NewBug.prototype.saveScriptToServer_ = function() {
+  var datafile = bite.console.Helper.appendInfoMap(
+      this.recordingInfoMap_, this.recordingData_);
+  chrome.extension.sendRequest(
+      {'command': Bite.Constants.CONSOLE_CMDS.UPDATE_ON_WEB,
+       'params': {'testName': this.titleTextArea_.value,
+                  'startUrl': goog.global.location.href,
+                  'scripts': this.recordingScript_,
+                  'datafile': datafile,
+                  'userLib': '',
+                  'projectName': 'bugs',
+                  'screenshots': '',
+                  'needOverride': ''}});
+};
+
+
+/**
+ * Returns the new script url.
+ * @param {string} server The server url.
+ * @param {string} project The project name.
+ * @param {string} script The script name.
+ * @private
+ */
+bite.client.console.NewBug.prototype.getNewScriptUrl_ = function(
+    server, project, script) {
+  var url = new goog.Uri(server);
+  url.setPath('automateRpf');
+  url.setParameterValue('projectName', project);
+  url.setParameterValue('scriptName', script);
+  url.setParameterValue('location', 'web');
+  return url.toString();
+};
+
+
+/**
  * Finishes the submission of a new bug after receiving the server url.
  * @param {string} url The server url.
  * @private
@@ -531,6 +569,8 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(url) {
   var postUrl = new goog.Uri(server);
   postUrl.setPath('/bugs/new');
 
+  notes += this.getNewScriptUrl_(server, 'bugs', title);
+
   var descriptor =
       common.client.ElementDescriptor.generateElementDescriptorNAncestors(
           this.selectedElement_, 3);
@@ -544,6 +584,8 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(url) {
     label = 'NOT_SELECTED';
   }
   bite.client.console.NewBug.logEvent_('SubmitNewBugScreenshot', label);
+
+  this.saveScriptToServer_();
 
   // Construct new bug data and send a post to the server.
   var data = {
@@ -758,8 +800,7 @@ bite.client.console.NewBug.prototype.playRecordingScript_ = function() {
                 'infoMap': this.recordingInfoMap_,
                 'preparationDone': false,
                 'userLib': '',
-                'needOverride': '',
-                'noConsole': true}});
+                'needOverride': ''}});
 };
 
 

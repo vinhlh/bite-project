@@ -43,6 +43,7 @@ from crawlers import crawler_util
 from handlers import base
 from models import bugs
 from models import bugs_util
+from models import credentials
 from models import screenshots
 from models import url_bug_map
 from utils import url_util

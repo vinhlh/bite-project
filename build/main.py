@@ -90,7 +90,7 @@ COMMAND_MAP = {
             OPTION_SERVER_APPENGINE: build.ServerAppEngine
         }
     },
-    COMMND_CLEAN: {
+    COMMAND_CLEAN: {
         HELP: 'Build the given target(s).',
         OPTION_HELP: {
             OPTION_ALL: 'Remove all build targets',
@@ -107,7 +107,7 @@ COMMAND_MAP = {
             OPTION_SERVER_APPENGINE: clean.ServerAppEngine
         }
     },
-    COMMND_HELP: {
+    COMMAND_HELP: {
         HELP: 'Displays usage for given command',
         OPTION_HELP: {},
         OPTION_MAP: {

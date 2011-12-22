@@ -495,14 +495,12 @@ rpf.PlayBackManager.prototype.getAllStepsFromScript = function(scriptStr) {
 
 /**
  * Init the resuming playbck.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
-rpf.PlayBackManager.prototype.initResumePlayback_ = function(opt_noConsole) {
+rpf.PlayBackManager.prototype.initResumePlayback_ = function() {
   this.addTabUpdatedListener_();
   this.replayTabReady_ = false;
-  this.initReplayPage(this.callBackAfterTabUpdated, opt_noConsole);
+  this.initReplayPage(this.callBackAfterTabUpdated);
   this.startTimer();
 };
 
@@ -513,12 +511,10 @@ rpf.PlayBackManager.prototype.initResumePlayback_ = function(opt_noConsole) {
  * @param {string} scriptStr The raw script string.
  * @param {string} datafile The corresponding data file.
  * @param {string} userLib The user specified library.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @export
  */
 rpf.PlayBackManager.prototype.runTest = function(
-    url, scriptStr, datafile, userLib, opt_noConsole) {
+    url, scriptStr, datafile, userLib) {
   if ('string' != typeof(scriptStr)) {
     var log = 'Error: script string type is ' + typeof(scriptStr);
     this.logger_.saveLogAndHtml(log,
@@ -545,19 +541,16 @@ rpf.PlayBackManager.prototype.runTest = function(
   this.realTimeBack_ = '';
   this.failureRetryTimes_ = 0;
   this.addTabUpdatedListener_();
-  this.startReplay_(null, opt_noConsole);
+  this.startReplay_(null);
 };
 
 
 /**
  * Starts replay by creating a playback window.
  * @param {?function()=} opt_callback The optional callback function.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
-rpf.PlayBackManager.prototype.startReplay_ = function(opt_callback,
-                                                     opt_noConsole) {
+rpf.PlayBackManager.prototype.startReplay_ = function(opt_callback) {
   // If screen.width is twice larger than screen.height,
   // then we could just use half of the screen width.
   var callback = opt_callback || null;
@@ -572,7 +565,7 @@ rpf.PlayBackManager.prototype.startReplay_ = function(opt_callback,
        top: 25,
        left: 650},
       goog.bind(function(win) {
-        this.callbackStartReplayOne_(callback, win, opt_noConsole);
+        this.callbackStartReplayOne_(callback, win);
       }, this));
 };
 
@@ -581,18 +574,15 @@ rpf.PlayBackManager.prototype.startReplay_ = function(opt_callback,
  * Sets the playback window id.
  * @param {function()} callback The callback function.
  * @param {Object} win The window object.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
 rpf.PlayBackManager.prototype.callbackStartReplayOne_ = function(
-    callback, win, opt_noConsole) {
+    callback, win) {
   this.playbackWinId_ = win.id;
   chrome.tabs.getAllInWindow(win.id,
                              goog.bind(function(tabs) {
                                this.callbackStartReplayTwo_(callback,
-                                                            tabs,
-                                                            opt_noConsole);
+                                                            tabs);
                              }, this));
 };
 
@@ -601,17 +591,15 @@ rpf.PlayBackManager.prototype.callbackStartReplayOne_ = function(
  * Sets the playback tab id.
  * @param {function()} callback The callback function.
  * @param {Array} tabs The tabs of the playback window.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
 rpf.PlayBackManager.prototype.callbackStartReplayTwo_ = function(
-    callback, tabs, opt_noConsole) {
+    callback, tabs) {
   this.playbackTabId_ = tabs[0].id;
   if (callback) {
     callback();
   } else {
-    this.initReplayPage(this.kickOffTest_, opt_noConsole);
+    this.initReplayPage(this.kickOffTest_);
   }
 };
 
@@ -619,38 +607,32 @@ rpf.PlayBackManager.prototype.callbackStartReplayTwo_ = function(
 /**
  * Inits the playback page by executing content scripts.
  * @param {function()} callbackFunc The callback function after init.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @export
  */
-rpf.PlayBackManager.prototype.initReplayPage = function(callbackFunc,
-                                                        opt_noConsole) {
+rpf.PlayBackManager.prototype.initReplayPage = function(callbackFunc) {
   chrome.tabs.executeScript(
      this.playbackTabId_,
-     {code: 'try {removeListener(' + opt_noConsole +
-         ');} catch(e) {console.log(e.message);}',
+     {code: 'try {removeListener();} catch(e) {console.log(e.message);}',
       allFrames: true});
-  this.callbackInitReplayPageTwo_(callbackFunc, opt_noConsole);
+  this.callbackInitReplayPageTwo_(callbackFunc);
 };
 
 
 /**
  * Executes user library if specified.
  * @param {function()} callbackFunc The callback function after init.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
-rpf.PlayBackManager.prototype.callbackInitReplayPageTwo_ =
-    function(callbackFunc, opt_noConsole) {
+rpf.PlayBackManager.prototype.callbackInitReplayPageTwo_ = function(
+    callbackFunc) {
   if (this.userLib_) {
     chrome.tabs.executeScript(this.playbackTabId_,
                               {code: this.userLib_,
                                allFrames: true},
-                              goog.bind(callbackFunc, this, opt_noConsole));
+                              goog.bind(callbackFunc, this));
   } else {
     if (callbackFunc) {
-      callbackFunc.apply(this, [opt_noConsole]);
+      callbackFunc.apply(this, []);
     }
   }
 };
@@ -658,19 +640,16 @@ rpf.PlayBackManager.prototype.callbackInitReplayPageTwo_ =
 
 /**
  * Kicks off the test after all the preparation.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
-rpf.PlayBackManager.prototype.kickOffTest_ = function(opt_noConsole) {
+rpf.PlayBackManager.prototype.kickOffTest_ = function() {
   this.currentStep_ = 0;
   this.startTimeEachRun_ = 0;
   this.replayTabReady_ = false;
   this.preparationDone_ = true;
   this.playbackTimer_.start();
   goog.events.listen(this.playbackTimer_, goog.Timer.TICK,
-                     goog.bind(this.waitForElementReadyAndExecCmds, this,
-                               opt_noConsole));
+                     goog.bind(this.waitForElementReadyAndExecCmds, this));
 };
 
 
@@ -869,11 +848,9 @@ rpf.PlayBackManager.prototype.setElapseTime_ = function() {
 /**
  * Checks if it's ready to play the next command.
  * @return {boolean} Whether ready for the next command.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
-rpf.PlayBackManager.prototype.checkReadyForNext_ = function(opt_noConsole) {
+rpf.PlayBackManager.prototype.checkReadyForNext_ = function() {
   var urlChange = this.checkPageReady_();
   var preCmdDone = this.isPreCmdDone();
   var sleepReady = this.checkSleepReady_();
@@ -888,18 +865,18 @@ rpf.PlayBackManager.prototype.checkReadyForNext_ = function(opt_noConsole) {
     logText = ('The url change has not finished. Elapsed: ' +
                this.elapsedTime_);
     console.log(logText);
-    this.updateRuntimeStatus_(logText, 'red', opt_noConsole);
+    this.updateRuntimeStatus_(logText, 'red');
   }
   if (!preCmdDone) {
     logText = 'The previous command has not finished. Elapsed: ' +
         this.elapsedTime_;
     console.log(logText);
-    this.updateRuntimeStatus_(logText, 'red', opt_noConsole);
+    this.updateRuntimeStatus_(logText, 'red');
   }
   if (!sleepReady) {
     logText = 'Still waiting for the sleep. Elapsed: ' + this.elapsedTime_;
     console.log(logText);
-    this.updateRuntimeStatus_(logText, 'black', opt_noConsole);
+    this.updateRuntimeStatus_(logText, 'black');
   }
   if (!userPauseReady) {
     console.log('Waiting for user pause');
@@ -929,15 +906,12 @@ rpf.PlayBackManager.prototype.setUserStop = function(userStop) {
  * The cleanup part called after the playback is done.
  * @param {Bite.Constants.WorkerResults} status The result status.
  * @param {string} log The log.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @export
  */
-rpf.PlayBackManager.prototype.finishCurrentRun = function(
-    status, log, opt_noConsole) {
+rpf.PlayBackManager.prototype.finishCurrentRun = function(status, log) {
   this.currentRunStatus_ = status;
   this.removeTabUpdatedListener_();
-  if (!this.getAutoRunningTestId_() && !opt_noConsole) {
+  if (!this.getAutoRunningTestId_()) {
     // This is to make the corresponding UI change.
     this.sendMessageToConsole_(
         {'command': Bite.Constants.UiCmds.UPDATE_WHEN_RUN_FINISHED,
@@ -1067,13 +1041,11 @@ rpf.PlayBackManager.prototype.createLogJsonStr_ = function(
 
 /**
  * The playback finishes successfully.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
-rpf.PlayBackManager.prototype.onSuccess_ = function(opt_noConsole) {
+rpf.PlayBackManager.prototype.onSuccess_ = function() {
   var log = 'Finished replay!';
-  this.finishCurrentRun(Bite.Constants.WorkerResults.PASS, log, opt_noConsole);
+  this.finishCurrentRun(Bite.Constants.WorkerResults.PASS, log);
   console.log(log);
   this.logger_.saveLogAndHtml(log,
                               rpf.ConsoleLogger.LogLevel.INFO,
@@ -1169,11 +1141,9 @@ rpf.PlayBackManager.prototype.isRedirection_ = function(step) {
 
 /**
  * Executes a client command in content script.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @export
  */
-rpf.PlayBackManager.prototype.executeCmd = function(opt_noConsole) {
+rpf.PlayBackManager.prototype.executeCmd = function() {
   this.previousCmdDone_ = false;
   // TODO(phu): Remove this check after making sure each run cmd can get back.
   var nextStep = this.currentStep_ + 1;
@@ -1240,36 +1210,30 @@ rpf.PlayBackManager.prototype.setStepTimeout_ = function() {
 
 /**
  * User explicitly stops the current playback.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @export
  */
-rpf.PlayBackManager.prototype.userSetStop = function(opt_noConsole) {
+rpf.PlayBackManager.prototype.userSetStop = function() {
   if (this.userStop_) {
     return;
   }
   this.userStop_ = true;
   var log = 'Run has been stopped.';
-  this.finishCurrentRun(Bite.Constants.WorkerResults.STOPPED, log,
-                        opt_noConsole);
+  this.finishCurrentRun(Bite.Constants.WorkerResults.STOPPED, log);
   this.logger_.saveLogAndHtml(log);
 };
 
 
 /**
  * Waits for ready and executes a command.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @export
  */
-rpf.PlayBackManager.prototype.waitForElementReadyAndExecCmds = function(
-    opt_noConsole) {
+rpf.PlayBackManager.prototype.waitForElementReadyAndExecCmds = function() {
   console.log('This run elapsed:' +
               (this.getDate_().getTime() - this.startTimeEachRun_));
   if (this.userStop_) {
     console.log('This is going to be removed, if this line' +
                 'will not show up any more.');
-    this.userSetStop(opt_noConsole);
+    this.userSetStop();
     return;
   }
   if (this.userSpecifiedPauseStep_ == this.currentStep_) {
@@ -1283,12 +1247,12 @@ rpf.PlayBackManager.prototype.waitForElementReadyAndExecCmds = function(
       this.eachCmdTimeout_) {
     this.checkFailureCondition();
   }
-  if (this.checkReadyForNext_(opt_noConsole)) {
+  if (this.checkReadyForNext_()) {
     this.eachCmdTimeout_ = rpf.PlayBackManager.EACH_CMD_TIMEOUT_;
     this.currentCmd_ = this.scripts_[this.currentStep_];
     console.log('Running:' + this.currentCmd_ + '//' + this.currentStep_ +
                 '//' + this.scripts_.length);
-    if (!this.getAutoRunningTestId_() && !opt_noConsole) {
+    if (!this.getAutoRunningTestId_()) {
       this.sendMessageToConsole_(
           {'command': Bite.Constants.UiCmds.UPDATE_CURRENT_STEP,
            'params': {'curStep': this.currentStep_}});
@@ -1301,12 +1265,12 @@ rpf.PlayBackManager.prototype.waitForElementReadyAndExecCmds = function(
     }
     var commandType = rpf.CodeGenerator.testCmdType(this.currentCmd_);
     if (commandType == 0 || commandType == 1) {
-      this.executeCmd(opt_noConsole);
+      this.executeCmd();
     } else if (this.currentCmd_.indexOf(
         rpf.CodeGenerator.PlaybackActions.REDIRECT) === 0 ||
         this.currentCmd_.indexOf(
             rpf.CodeGenerator.PlaybackActions.REDIRECT_TO) === 0) {
-      this.callBackAfterExecCmds('', opt_noConsole);
+      this.callBackAfterExecCmds('');
     } else if (this.currentCmd_.indexOf(
         rpf.PlayBackManager.CmdTypes.SLEEP) === 0) {
       this.userSetSleepTime_ = parseInt(this.currentCmd_.match(/\d+/), 10);
@@ -1315,17 +1279,17 @@ rpf.PlayBackManager.prototype.waitForElementReadyAndExecCmds = function(
       this.userSetSleepStart_ = this.getDate_().getTime();
       console.log('The current step will sleep for ' + this.userSetSleepTime_);
       this.sleepReady_ = false;
-      this.callBackAfterExecCmds('', opt_noConsole);
+      this.callBackAfterExecCmds('');
     } else if (this.currentCmd_.indexOf(
         rpf.PlayBackManager.CmdTypes.CHANGE_URL) === 0) {
       var newUrl = this.currentCmd_.substring(10, this.currentCmd_.length - 2);
       console.log('The new url is: ' + newUrl);
       this.replayTabReady_ = false;
       chrome.tabs.update(this.playbackTabId_, {url: newUrl});
-      this.callBackAfterExecCmds('', opt_noConsole);
+      this.callBackAfterExecCmds('');
     } else {
       console.log('Encountered an unknown line.' + this.currentCmd_);
-      this.callBackAfterExecCmds('', opt_noConsole);
+      this.callBackAfterExecCmds('');
     }
     // this.setStepTimeout_();
   } else {
@@ -1369,13 +1333,10 @@ rpf.PlayBackManager.prototype.getAndClearFailureLog = function() {
  * Updates the playback runtime status.
  * @param {string} text The status text.
  * @param {string} color The text color.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @private
  */
-rpf.PlayBackManager.prototype.updateRuntimeStatus_ =
-    function(text, color, opt_noConsole) {
-  if (!this.getAutoRunningTestId_() && !opt_noConsole) {
+rpf.PlayBackManager.prototype.updateRuntimeStatus_ = function(text, color) {
+  if (!this.getAutoRunningTestId_()) {
     this.sendMessageToConsole_(
         {'command': Bite.Constants.UiCmds.UPDATE_PLAYBACK_STATUS,
          'params': {'text': text,
@@ -1398,13 +1359,11 @@ rpf.PlayBackManager.prototype.checkFailureCondition = function() {
 /**
  * The callback after the executing a command.
  * @param {string} result The result string.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @param {string=} opt_log The optional log.
  * @export
  */
 rpf.PlayBackManager.prototype.callBackAfterExecCmds =
-    function(result, opt_noConsole, opt_log) {
+    function(result, opt_log) {
   var log = 'Result for:' + this.currentStep_ + 'is:' + result;
   console.log(log);
   this.logger_.saveLogAndHtml(log,
@@ -1417,16 +1376,15 @@ rpf.PlayBackManager.prototype.callBackAfterExecCmds =
     var logText = 'Failed because "' + opt_log + '"\n' +
                   'Already elapsed: ' + this.elapsedTime_;
     console.log(logText);
-    this.updateRuntimeStatus_(logText, 'red', opt_noConsole);
+    this.updateRuntimeStatus_(logText, 'red');
     return;
   }
-  this.updateRuntimeStatus_('Successfully finished the current step.',
-                            'green', opt_noConsole);
+  this.updateRuntimeStatus_('Successfully finished the current step.', 'green');
   this.failureRetryTimes_ = 0;
 
   this.setNextRunnableCmd_();
   if (this.currentStep_ >= this.scripts_.length) {
-    this.onSuccess_(opt_noConsole);
+    this.onSuccess_();
     return;
   }
 
@@ -1458,16 +1416,13 @@ rpf.PlayBackManager.prototype.setNextRunnableCmd_ = function() {
 
 /**
  * Starts the listeners inside content script.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @export
  */
-rpf.PlayBackManager.prototype.callBackAfterTabUpdated = function(
-    opt_noConsole) {
+rpf.PlayBackManager.prototype.callBackAfterTabUpdated = function() {
   console.log('finished page init and set replay tab ready.' +
               'Now it should be able to run the next CMD!');
   chrome.tabs.executeScript(this.playbackTabId_,
-                            {code: 'startListener(' + opt_noConsole + ');',
+                            {code: 'startListener();',
                              allFrames: true});
 };
 
@@ -1479,8 +1434,6 @@ rpf.PlayBackManager.prototype.callBackAfterTabUpdated = function(
  * @param {string} scripts The raw script string.
  * @param {string} datafile The corresponding data file.
  * @param {string} userLib The user specified library.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @param {Object=} opt_infoMap The info map.
  * @param {boolean=} opt_continueOnFailure Whether should continue or
  *     show update UI on failure.
@@ -1490,7 +1443,7 @@ rpf.PlayBackManager.prototype.callBackAfterTabUpdated = function(
  * @param {string=} opt_testLocation The test location.
  */
 rpf.PlayBackManager.prototype.checkPlaybackOptionAndRun = function(
-    method, startUrl, scripts, datafile, userLib, opt_noConsole, opt_infoMap,
+    method, startUrl, scripts, datafile, userLib, opt_infoMap,
     opt_continueOnFailure, opt_testName, opt_testId, opt_projectName,
     opt_testLocation) {
   this.continueOnFailure_ = opt_continueOnFailure || false;
@@ -1500,7 +1453,7 @@ rpf.PlayBackManager.prototype.checkPlaybackOptionAndRun = function(
   this.currentTestId_ = opt_testId || '';
   this.infoMap_ = opt_infoMap || {};
   if (this.isPreparationDone()) {
-    this.initResumePlayback_(opt_noConsole);
+    this.initResumePlayback_();
     if (method == Bite.Constants.PlayMethods.ALL) {
       this.setStepMode(false);
     } else {
@@ -1512,7 +1465,7 @@ rpf.PlayBackManager.prototype.checkPlaybackOptionAndRun = function(
       this.setStepMode(true);
       this.setUserPauseReady(true);
     }
-    this.runTest(startUrl, scripts, datafile, userLib, opt_noConsole);
+    this.runTest(startUrl, scripts, datafile, userLib);
   }
 };
 
