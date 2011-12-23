@@ -25,7 +25,6 @@ version: invalid-do-not-change-see-comments
 runtime: python27
 threadsafe: yes
 api_version: 1
-threadsafe: false # Can't set to true until all handlers are redone.
 
 builtins:
 - appstats: on
