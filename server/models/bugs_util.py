@@ -98,10 +98,8 @@ def GetUserLink(provider, email):
     Str of the url to the profile of the user.
   """
   # Using else as a catch-all to default to issue tracker.
-  if not provider or not email:
-    return ''
   user_link = ''
-  if Provider.ISSUETRACKER
+  if email and provider == Provider.ISSUETRACKER
     user_link = 'http://code.google.com/u/' + email.split('@')[0]
   return encoding_util.EncodeToAscii(user_link)
 
