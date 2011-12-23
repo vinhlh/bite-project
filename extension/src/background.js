@@ -711,7 +711,7 @@ bite.client.Background.logEvent = function(category, action, label) {
 bite.client.Background.prototype.captureVisibleTab_ = function(callback) {
   chrome.tabs.captureVisibleTab(
       null, null,
-      goog.partial(rpf.MiscHelper.resizeImage, callback, 600, null));
+      goog.partial(rpf.MiscHelper.resizeImage, callback, 800, null));
 };
 
 

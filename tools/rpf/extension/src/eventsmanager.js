@@ -68,25 +68,11 @@ rpf.EventsManager = function() {
   this.saveLoadMgr_ = null;
 
   /**
-   * The function to get the common libs object.
-   * @type {Function}
-   * @private
-   */
-  this.getCommonLibs_ = null;
-
-  /**
    * The callback function for receiving an action event.
    * @type {Function}
    * @private
    */
   this.onReceiveActionCallback_ = null;
-
-  /**
-   * The function to set the common lib.
-   * @type {Function}
-   * @private
-   */
-  this.setCommonLib_ = null;
 
   /**
    * The rpf console's tab id.
@@ -357,25 +343,11 @@ rpf.EventsManager.prototype.onUpdateHandler_ = function(
 
 /**
  * Sets up the common functions.
- * @param {function():Object} getCommonLibs Gets the common libs object.
- * @param {function(string, string)} setCommonLib Sets the common lib.
  * @param {function(Object, Object, function(Object))} rpfListener
  *     The listener in rpf.js.
  * @export
  */
-rpf.EventsManager.prototype.setupCommonFuncs = function(
-    getCommonLibs, setCommonLib, rpfListener) {
-
-  /**
-   * The function to get the common libs object.
-   */
-  this.getCommonLibs_ = getCommonLibs;
-
-  /**
-   * The function to set a common lib.
-   */
-  this.setCommonLib__ = setCommonLib;
-
+rpf.EventsManager.prototype.setupCommonFuncs = function(rpfListener) {
   this.automator_ = new rpf.Automator(
       goog.bind(this.sendMessageToConsole_, this),
       this.boundOnMessageFunc,
@@ -462,17 +434,6 @@ rpf.EventsManager.prototype.addTestTabRemovedListener = function() {
 
 
 /**
- * Sets this.noConsole_ value.
- * @param {?boolean} noConsole Whether or not recording and playback functions
- *     are called from rpf Console UI.
- * @private
- */
-rpf.EventsManager.prototype.setNoConsoleValue_ = function(noConsole) {
-  this.noConsole_ = noConsole;
-};
-
-
-/**
  * Callback after a tab updated.
  * @param {number} tabId The tab id.
  * @param {{status: string, url: string, pinned: boolean}}
@@ -523,8 +484,7 @@ rpf.EventsManager.prototype.callBackTabUpdated_ =
         changeInfo['status'] == rpf.EventsManager.TabStatus_.COMPLETE) {
       console.log('caught an event of replay tab is changed.');
       this.playbackMgr_.initReplayPage(
-          this.playbackMgr_.callBackAfterTabUpdated, this.noConsole_);
-      this.setNoConsoleValue_(null);
+          this.playbackMgr_.callBackAfterTabUpdated);
       if (this.playbackMgr_.isReplayTabReady()) {
         console.log('Currently only the first url change is counted.');
       }
@@ -634,10 +594,6 @@ rpf.EventsManager.prototype.sendMessageToContent_ = function(
 
 /**
  * Writes a command to console.
- * @param {function(Array, string, rpf.CodeGenerator.DomTags,
- *     rpf.CodeGenerator.RecordActions, string, string, boolean=, Object=,
- *     Array=, string=)}
- *     generateCmd The function to generate the command.
  * @param {Array} selectors The element css selectors.
  * @param {string} content The input content.
  * @param {rpf.CodeGenerator.DomTags} nodeType The nodetype of the element.
@@ -645,8 +601,6 @@ rpf.EventsManager.prototype.sendMessageToContent_ = function(
  * @param {string} descriptor The descriptive info of the element.
  * @param {string} elemVarName The variable name of the element.
  * @param {number=} opt_index The command's index string.
- * @param {boolean=} opt_noConsole Whether or not it's called from rpf
- *     Console UI.
  * @param {Object=} opt_iframeInfo The iframe info where the element was from.
  * @param {Array=} opt_xpaths The optional xpath array.
  * @param {string=} opt_mode The optional mode string.
@@ -654,12 +608,12 @@ rpf.EventsManager.prototype.sendMessageToContent_ = function(
  * @export
  */
 rpf.EventsManager.prototype.writeUserActionToConsole = function(
-    generateCmd, selectors, content, nodeType, action,
-    descriptor, elemVarName, opt_index, opt_noConsole, opt_iframeInfo,
+    selectors, content, nodeType, action,
+    descriptor, elemVarName, opt_index, opt_iframeInfo,
     opt_xpaths, opt_mode, opt_className) {
-  var cmdInfo = generateCmd(
+  var cmdInfo = this.codeGen_.generateScriptAndDataFileForCmd(
       selectors, content, nodeType, action, descriptor,
-      elemVarName, opt_noConsole, opt_iframeInfo, opt_xpaths, opt_className);
+      elemVarName, opt_iframeInfo, opt_xpaths, opt_className);
 
   if (action == rpf.CodeGenerator.RecordActions.VERIFY &&
       opt_mode == 'updater') {
@@ -668,20 +622,22 @@ rpf.EventsManager.prototype.writeUserActionToConsole = function(
         'cmd': cmdInfo['cmd'],
         'data': cmdInfo['data'],
         'index': opt_index,
-        'noConsole': opt_noConsole,
         'cmdMap': cmdInfo['cmdMap']});
     }
     this.onReceiveActionCallback_ = null;
   } else {
-    if (!opt_noConsole) {
-      this.sendMessageToConsole_(
-          {'command': Bite.Constants.UiCmds.ADD_GENERATED_CMD,
-           'params': {'cmd': cmdInfo['cmd']}});
+    this.sendMessageToConsole_(
+        {'command': Bite.Constants.UiCmds.ADD_GENERATED_CMD,
+         'params': {'cmd': cmdInfo['cmd']}});
+    var translation = '';
+    try {
+      translation = this.codeGen_.translateCmd(
+          cmdInfo['cmd'], cmdInfo['data'], goog.json.parse(descriptor));
+    } catch (e) {
+      console.log('The translation process failed.. ' + e.message);
     }
-
     this.writeACmdToConsole(cmdInfo['cmd'], cmdInfo['data'],
-                            opt_index, opt_noConsole,
-                            cmdInfo['cmdMap']);
+                            opt_index, cmdInfo['cmdMap'], translation);
   }
 };
 
@@ -702,31 +658,18 @@ rpf.EventsManager.prototype.writeUrlChangeToConsole = function(pCmd) {
  * @param {string} pCmd The generated command.
  * @param {string=} opt_dCmd The data file entry.
  * @param {number=} opt_index The command's index string.
- * @param {boolean=} opt_noConsole Whether or not rpf Console UI is
- *     constructed.
  * @param {Object=} opt_cmdMap The cmd map.
- * @export
+ * @param {string=} opt_translation The plain English.
  */
 rpf.EventsManager.prototype.writeACmdToConsole = function(
-    pCmd, opt_dCmd, opt_index, opt_noConsole, opt_cmdMap) {
-  var noConsole = opt_noConsole || false;
-  if (!noConsole) {
-    this.sendMessageToConsole_(
-        {'command': Bite.Constants.UiCmds.ADD_NEW_COMMAND,
-         'params': {'pCmd': pCmd,
-                    'dCmd': opt_dCmd,
-                    'cmdMap': opt_cmdMap,
-                    'index': opt_index}});
-  } else {
-    var readableCmd = this.codeGen_.translateCmd(pCmd, opt_dCmd || '');
-    var dCmd = opt_dCmd || '';
-    this.sendMessageToContent_(
-        {'action': Bite.Constants.UiCmds.ADD_NEW_COMMAND,
-         'pCmd': pCmd,
-         'dCmd': dCmd,
-         'cmdMap': opt_cmdMap,
-         'readableCmd': readableCmd});
-  }
+    pCmd, opt_dCmd, opt_index, opt_cmdMap, opt_translation) {
+  this.sendMessageToConsole_(
+      {'command': Bite.Constants.UiCmds.ADD_NEW_COMMAND,
+       'params': {'pCmd': pCmd,
+                  'dCmd': opt_dCmd,
+                  'cmdMap': opt_cmdMap,
+                  'index': opt_index,
+                  'readableCmd': opt_translation}});
 };
 
 
@@ -799,7 +742,6 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
   var selectors = request['selectors'];
   var xpaths = request['xpaths'];
   var iframeInfo = request['iframeInfo'];
-  var noConsole = request['noConsole'];
   var position = request['position'];
 
   this.logger_.saveLogAndHtml('Caught an event: ' + action);
@@ -822,7 +764,7 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
       this.latestEnterTime_ = goog.now();
       return;
     case 'click':
-      delayTime = 300;
+      delayTime = 0; //Revert to 300 if necessary.
       break;
     case 'submit':
       if (goog.now() - this.latestEnterTime_ > 500) {
@@ -834,7 +776,7 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
       break;
   }
 
-  if (!noConsole && rpf.EventsManager.isTakingScreenshots_) {
+  if (rpf.EventsManager.isTakingScreenshots_) {
     this.captureVisibleTab(
         this.recordMgr_.getTestWindowId(),
         goog.partial(
@@ -852,7 +794,6 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
   goog.Timer.callOnce(goog.bind(
       this.writeUserActionToConsole,
       this,
-      goog.bind(this.codeGen_.generateScriptAndDataFileForCmd, this.codeGen_),
       selectors,
       content,
       request['nodeType'],
@@ -860,7 +801,6 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
       request['descriptor'],
       request['elemVarName'],
       -1,
-      noConsole,
       iframeInfo,
       xpaths,
       request['mode'],
@@ -911,8 +851,7 @@ rpf.EventsManager.prototype.callBackOnRequest = function(
         this.playbackMgr_.setFailureLog(request['result']);
       }
 
-      this.playbackMgr_.callBackAfterExecCmds(
-          result, request['noConsole'], request['result']);
+      this.playbackMgr_.callBackAfterExecCmds(result, request['result']);
       if (request['realTimeMap']) {
         this.playbackMgr_.realTimeBag = request['realTimeMap'];
       }
@@ -1009,7 +948,66 @@ rpf.EventsManager.prototype.automateRpf = function(params) {
             testInfo['projectName'], testInfo['testLocation'], params['data']);
       }
       break;
+    case Bite.Constants.RPF_AUTOMATION.AUTOMATE_SINGLE_SCRIPT:
+      this.automateSingleScript_(
+          params['projectName'], params['location'], params['scriptName'],
+          params['autoPlay']);
+      break;
   }
+};
+
+
+/**
+ * Start the automation to load and possibly playback a script.
+ * @param {string} project The project name.
+ * @param {string} location Where the project comes from.
+ * @param {string} script The script name.
+ * @param {boolean} autoPlay Whether to auto play the script.
+ * @private
+ */
+rpf.EventsManager.prototype.automateSingleScript_ = function(
+    project, location, script, autoPlay) {
+  var stepArr = [];
+  var temp = this.automator_.getStepObject(
+      Bite.Constants.ListenerDestination.RPF,
+      Bite.Constants.CONTROL_CMDS.CREATE_WINDOW,
+      {'refresh': true},
+      Bite.Constants.COMPLETED_EVENT_TYPES.RPF_CONSOLE_OPENED);
+  stepArr.push(temp);
+
+  temp = this.automator_.getStepObject(
+      Bite.Constants.ListenerDestination.EVENT_MANAGER,
+      Bite.Constants.CONSOLE_CMDS.STOP_GROUP_TESTS,
+      {},
+      Bite.Constants.COMPLETED_EVENT_TYPES.STOPPED_GROUP_TESTS);
+  stepArr.push(temp);
+
+  temp = this.automator_.getStepObject(
+      Bite.Constants.ListenerDestination.CONSOLE,
+      Bite.Constants.UiCmds.AUTOMATE_DIALOG_LOAD_TEST,
+      {'project': project,
+       'test': script,
+       'isWeb': location == 'web'},
+      Bite.Constants.COMPLETED_EVENT_TYPES.TEST_LOADED);
+  stepArr.push(temp);
+
+  if (autoPlay) {
+    // Automatically playback the loaded script.
+    temp = this.automator_.getStepObject(
+        Bite.Constants.ListenerDestination.CONSOLE,
+        Bite.Constants.UiCmds.SHOW_PLAYBACK_RUNTIME,
+        {},
+        Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_DIALOG_OPENED);
+    stepArr.push(temp);
+
+    temp = this.automator_.getStepObject(
+        Bite.Constants.ListenerDestination.CONSOLE,
+        Bite.Constants.UiCmds.SET_PLAYBACK_ALL,
+        {},
+        Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_STARTED);
+    stepArr.push(temp);
+  }
+  this.automator_.start(stepArr);
 };
 
 
@@ -1096,13 +1094,6 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
       this.logger_.saveLogAndHtml(
           params['log'], params['level'], params['color']);
       break;
-    case Bite.Constants.CONSOLE_CMDS.GET_COMMON_LIBS:
-      sendResponse({'commonLibs': this.getCommonLibs_(),
-                    'lib': params['lib']});
-      break;
-    case Bite.Constants.CONSOLE_CMDS.SET_COMMON_LIB:
-      this.setCommonLib__(params['name'], params['value']);
-      break;
     case Bite.Constants.CONSOLE_CMDS.EXECUTE_SCRIPT_IN_RECORD_PAGE:
       this.executeScriptStr_(
           this.recordMgr_.getTestTabId(),
@@ -1159,7 +1150,6 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['userLib'],
           params['projectName'],
           params['screenshots'],
-          params['noConsole'],
           params['scriptId'],
           sendResponse);
       break;
@@ -1219,7 +1209,6 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['scripts'],
           params['datafile'],
           params['userLib'],
-          params['noConsole'],
           params['infoMap'],
           params['continueOnFailure'],
           params['testName'],
@@ -1234,12 +1223,14 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['data']);
       break;
     case Bite.Constants.CONSOLE_CMDS.START_RECORDING:
-      this.recordMgr_.startRecording(
-          params['noConsole'], params['info']);
+      this.recordMgr_.startRecording(params['info']);
       break;
     case Bite.Constants.CONSOLE_CMDS.SET_TAB_AND_START_RECORDING:
-      this.recordMgr_.setRecordingTab(sender.tab.id, sender.tab.windowId);
-      this.recordMgr_.startRecording(params['url'], params['noConsole']);
+      var started = this.recordMgr_.startRecording(
+          null, sender.tab.id, sender.tab.windowId);
+      if (started) {
+        this.setConsoleTabId(sender.tab.id);
+      }
       break;
     case Bite.Constants.CONSOLE_CMDS.SAVE_ZIP:
       this.saveLoadMgr_.saveZip(params['files'], sendResponse);
@@ -1305,7 +1296,6 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['action'],
           params['descriptor'],
           params['elemVarName'],
-          params['noConsole'],
           params['iframeInfo'],
           params['xpaths'],
           params['className']);

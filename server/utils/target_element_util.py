@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,3 +77,4 @@ def ExtractTargetElement(text):
   logging.debug(
       'ExtractTargetElement: target_element information: %s', target_element)
   return target_element
+

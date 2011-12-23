@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -111,3 +109,4 @@ def GetEventsData(get_event_func, project_name):
     if temp_data:
       events_data.append(temp_data)
   return events_data
+

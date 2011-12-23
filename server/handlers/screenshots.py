@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,19 +16,9 @@
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-# Disable 'Statement before imports'
-# pylint: disable-msg=C6205
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import json
+import webapp2
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 from handlers import base
 from models import screenshots
 from utils import screenshots_util
@@ -103,16 +91,8 @@ class SearchHandler(base.BaseHandler):
     self.response.out.write(json.dumps(result))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/screenshots/upload', UploadHandler),
      ('/screenshots/fetch', GetHandler),
      ('/screenshots/search', SearchHandler)
     ], debug=True)
-
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

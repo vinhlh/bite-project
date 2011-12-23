@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,18 +23,10 @@ explicit.
 
 __author__ = 'michaelwill@google.com (Michael Williamson)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import logging
 import json
+import webapp2
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 from handlers import base
 from models import storage
 from models import storage_project
@@ -295,7 +285,7 @@ class GetProjectNames(base.BaseHandler):
     self.response.out.write(json.dumps(names))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/storage/add_test_metadata', AddPreexistingDocsMetadata),
      ('/storage/getalltestsasjson', GetAllTestNamesAndIds),
      ('/storage/gettestasjson', GetTestAsJson),
@@ -308,11 +298,3 @@ application = webapp.WSGIApplication(
      ('/storage/saveproject', SaveProject),
      ('/storage/getprojectnames', GetProjectNames)
     ])
-
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

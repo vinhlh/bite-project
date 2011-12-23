@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,33 +16,20 @@
 
 __author__ = 'phu@google.com (Po Hu)'
 
-#Import not at top
-#pylint: disable-msg=C6204
-#Statement before imports
-#pylint: disable-msg=C6205
-#Invalid method name
-#pylint: disable-msg=C6409
-try:
-  import auto_import_fixer
-except ImportError:
-  pass
-
 import os
 import sys
 
 try:
   from google.appengine.api import users
-  from google.appengine.ext import webapp
-  from google.appengine.ext.webapp.util import run_wsgi_app
   from handlers import base
+  import webapp2
 except ImportError:
   file_dir = os.path.dirname(__file__)
   project_dir = os.path.join(file_dir, '..')
   sys.path.append(project_dir)
   from google.appengine.api import users
-  from google.appengine.ext import webapp
-  from google.appengine.ext.webapp.util import run_wsgi_app
   from handlers import base
+  import webapp2
 
 
 class Error(Exception):
@@ -71,15 +56,8 @@ class TestAddTestsHandler(base.BaseHandler):
     self.RenderTemplate('add_tests.html', {})
 
 
-application = webapp.WSGIApplication(
+app = webappw.WSGIApplication(
     [('/testing/suite_test', TestSuiteHandler),
      ('/testing/add_tests', TestAddTestsHandler)],
     debug=True)
 
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

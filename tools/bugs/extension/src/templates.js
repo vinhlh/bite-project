@@ -201,7 +201,7 @@ bite.client.TemplateManager.prototype.getTemplatesForUrlInternal_ =
 
   // Add default template if no templates are relevant.
   if (!hasTemplate) {
-    template = bite.client.TemplateManager.DEFAULT_TEMPLATE_;
+    var template = bite.client.TemplateManager.DEFAULT_TEMPLATE_;
     relevantTemplates[template.id] = template;
   }
 
@@ -265,7 +265,7 @@ bite.client.TemplateManager.prototype.loadTemplates_ = function(callback) {
  * @private
  */
 bite.client.TemplateManager.prototype.useDefaultTemplate_ = function() {
-  template = bite.client.TemplateManager.DEFAULT_TEMPLATE_;
+  var template = bite.client.TemplateManager.DEFAULT_TEMPLATE_;
   this.templates_ = {};
   this.templates_[template.id] = template;
 };

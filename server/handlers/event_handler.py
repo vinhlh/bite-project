@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,21 +16,8 @@
 
 __author__ = 'phu@google.com (Po Hu)'
 
-# Import not at top
-#pylint: disable-msg=C6204
-# Statement before imports
-#pylint: disable-msg=C6205
-# Invalid method name
-#pylint: disable-msg=C6409
-# Use default membership test instead of 'has_key'
-#pylint: disable-msg=C6401
-try:
-  import auto_import_fixer
-except ImportError:
-  pass
+import webapp2
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 from handlers import base
 from handlers import common_util
 from models import bite_event
@@ -58,14 +43,7 @@ class ShowEventsHandler(base.BaseHandler):
         basic_util.DumpJsonStr({'details': data}))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/event/show_all', ShowEventsHandler)],
     debug=True)
 
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

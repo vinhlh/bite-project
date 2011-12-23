@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,24 +21,14 @@ aspects like watchdog job, reports, dimensions, retry logic, etc.
 
 __author__ = 'phu@google.com (Po Hu)'
 
-# Import not at top
-# pylint: disable-msg=C6204
-# Use has_key to test membership
-# pylint: disable-msg=C6401
-# Dangerous default value {}
-# pylint: disable-msg=W0102
 import datetime
 import logging
-try:
-  from google.appengine.ext import db
-  from models import bite_event
-  from models import bite_project
-  from utils import basic_util
-except ImportError:
-  from google.appengine.ext import db
-  from models import bite_event
-  from models import bite_project
-  from utils import basic_util
+
+from google.appengine.ext import db
+
+from models import bite_event
+from models import bite_project
+from utils import basic_util
 
 
 DEFAULT_SUITE_TIMEOUT = 9999
@@ -313,3 +301,4 @@ def AddSuite(name, project_name, description='', labels=None, configs='',
                       name=suite.name, labels=suite.labels,
                       project=suite.parent().name)
   return suite
+

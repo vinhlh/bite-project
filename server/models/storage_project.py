@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -193,4 +191,3 @@ def DeleteFiles(project):
   js_files = project.jsfile_set.get()
   if js_files:
     db.delete(js_files)
-

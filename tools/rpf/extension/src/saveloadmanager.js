@@ -204,14 +204,12 @@ rpf.SaveLoadManager.prototype.deleteTestOnWtf = function(
  * @param {string=} opt_projectName The project name.
  * @param {Object=} opt_screens The optional screen data url.
  * @param {string=} opt_url The optional url.
- * @param {boolean=} opt_noConsole Whether recording is done not or from rpf
- *     Console UI.
  * @param {function(Object)=} opt_callback The response function.
  * @param {string=} opt_userLib The user library.
  * @export
  */
 rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
-    jsonName, jsonObj, opt_projectName, opt_screens, opt_url, opt_noConsole,
+    jsonName, jsonObj, opt_projectName, opt_screens, opt_url,
     opt_callback, opt_userLib) {
   var projectName = opt_projectName ||
                     rpf.SaveLoadManager.WEB_DEFAULT_PROJECT_;
@@ -407,17 +405,15 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(jsonId, opt_callback) {
  * @param {string} userLib User's own lib for the project.
  * @param {string} projectName Project name.
  * @param {Object} screenshots The img data url.
- * @param {boolean} noConsole Whether it's called not or from rpf
- *     Console UI.
  * @param {string} scriptId The script id.
  * @param {function(Object)} sendResponse The response function.
  * @export
  */
 rpf.SaveLoadManager.prototype.updateOnWeb = function(
     name, url, script, datafile, userLib, projectName,
-    screenshots, noConsole, scriptId, sendResponse) {
+    screenshots, scriptId, sendResponse) {
   // Tests are saved as new all the time, if recorded not from rpf Console UI.
-  if (scriptId && !noConsole) {
+  if (scriptId) {
     this.updateTestOnWeb(
         name,
         this.scriptMgr_.createJsonObj(
@@ -433,7 +429,6 @@ rpf.SaveLoadManager.prototype.updateOnWeb = function(
         projectName,
         screenshots,
         url,
-        noConsole,
         sendResponse,
         userLib);
   }

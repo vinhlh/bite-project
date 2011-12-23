@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +30,8 @@ except ImportError:
 import logging
 import re
 import sys
+import webapp2
+
 import gdata
 import gdata.client
 import gdata.projecthosting
@@ -40,8 +40,6 @@ import gdata.projecthosting.client
 from google.appengine.api import memcache
 from google.appengine.api.labs import taskqueue
 from google.appengine.ext import deferred
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 
 from crawlers import crawler_util
 from handlers import base
@@ -66,7 +64,7 @@ class RecrawlProjectWorker(base.BaseHandler):
     project_name = self.GetRequiredParameter('project_name')
     start_index = self.GetOptionalParameter('start_index', None)
     if not start_index:
-      last = crawl_state.GetLastCrawlResults(bugs_util.ISSUETRACKER,
+      last = crawl_state.GetLastCrawlResults(bugs_util.Provider.ISSUETRACKER,
                                              project_name)
       start_index = last.end_index
     else:
@@ -94,14 +92,14 @@ class RecrawlProjectWorker(base.BaseHandler):
     (new_updates, total, unused_seen) = GetNewUpdates(issues, True)
     if not new_updates:
       crawl_state.StoreCrawlResults(
-          bugs_util.ISSUETRACKER, project_name,
+          bugs_util.Provider.ISSUETRACKER, project_name,
           start_index, start_index, 0)
       self.response.out.write('Done.')
       return  # Reached the end of the crawl.
     deferred.defer(crawler_util.SpawnDetailsCrawlersIssueTracker,
                    new_updates, project_name, True)
     crawl_state.StoreCrawlResults(
-        bugs_util.ISSUETRACKER, project_name, start_index,
+        bugs_util.Provider.ISSUETRACKER, project_name, start_index,
         start_index + total, len(new_updates))
     # Don't overwelm the provider, throttle to once per second.
     taskqueue.add(url='/tasks/crawl/issuetracker/recrawl_project',
@@ -205,17 +203,10 @@ def GetUpdatesUrl(project_name, max_results=1000):
           (project_name, max_results))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/tasks/crawl/issuetracker/crawl_recent_updates',
       CrawlRecentUpdatesWorker),
      ('/tasks/crawl/issuetracker/recrawl_project',
       RecrawlProjectWorker)],
     debug=True)
 
-
-def main(unused_argv):
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main(sys.argv)

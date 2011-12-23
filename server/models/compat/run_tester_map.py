@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -98,3 +96,4 @@ def GetMappingsForTester(user, prefetch_ref_properties=True):
     return _PrefetchRefprops(mappings, RunTesterMap.run)
   else:
     return mappings
+

@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,9 +20,9 @@ this should be easy to change in the future.
 
 __author__ = 'michaelwill@google.com (Michael Williamson)'
 
+import json
 import logging
 import re
-import json
 import uuid
 from google.appengine.ext import db
 from googledocs import docs_gateway

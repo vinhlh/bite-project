@@ -370,7 +370,6 @@ rpf.WorkerManager.prototype.pushTest_ = function(
        'datafile': result['datafile'],
        'userLib': testObj['userlib'],
        'needOverride': false,
-       'noConsole': false,
        'continueOnFailure': true,
        'testName': testObj['name'],
        'testId': id,

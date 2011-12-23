@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,14 +26,10 @@ __author__ = 'phu@google.com (Po Hu)'
 #pylint: disable-msg=W0703
 import datetime
 import logging
-try:
-  import auto_import_fixer
-except ImportError:
-  pass
+import webapp2
 
 from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
+
 from handlers import base
 from handlers import deferred_util
 from models import bite_project
@@ -557,7 +551,7 @@ class GetNumOfStatus(base.BaseHandler):
     self.response.out.write(str(number))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/run/add', AddRunHandler),
      ('/run/delete', DeleteRunHandler),
      ('/run/get_runs', GetRunsOfSuiteHandler),
@@ -573,10 +567,3 @@ application = webapp.WSGIApplication(
      ('/run/add_realtime_run', AddRealTimeRunHandler)],
     debug=True)
 
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

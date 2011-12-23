@@ -70,10 +70,7 @@ rpf.Rpf = function() {
    */
   this.eventsMgr_ = rpf.EventsManager.getInstance();
 
-  this.eventsMgr_.setupCommonFuncs(
-      goog.bind(this.getCommonLibs, this),
-      goog.bind(this.setCommonLib, this),
-      goog.bind(this.callBackOnRequest, this));
+  this.eventsMgr_.setupCommonFuncs(goog.bind(this.callBackOnRequest, this));
 
   /**
    * @type {Object}
@@ -88,8 +85,6 @@ rpf.Rpf = function() {
 
   chrome.extension.onRequest.addListener(
       this.boundOnRequestFunc);
-
-  this.fetchCommonLibs();
 };
 goog.addSingletonGetter(rpf.Rpf);
 
@@ -381,72 +376,5 @@ rpf.Rpf.prototype.setWindowId = function(winId) {
 rpf.Rpf.prototype.focusRpf = function() {
   chrome.windows.update(this.windowId_, { focused: true });
   this.eventsMgr_.stopRecordingFromUi();
-};
-
-
-/**
- * @return {Object} Gets the common libs.
- * @export
- */
-rpf.Rpf.prototype.getCommonLibs = function() {
-  return this.commonLibs_;
-};
-
-
-/**
- * @param {string} name The common lib name.
- * @param {string} value The lib value.
- * @export
- */
-rpf.Rpf.prototype.setCommonLib = function(name, value) {
-  if (!this.commonLibs_[name]) {
-    this.commonLibs_[name] = {};
-  }
-  this.commonLibs_[name]['lib'] = value;
-};
-
-
-/**
- * Fetches the common libs.
- * @param {function()=} opt_callback The optional callback function.
- * @export
- * TODO(michaelwill): This and getCommonLibs() do not belong in this file.
- */
-rpf.Rpf.prototype.fetchCommonLibs = function(opt_callback) {
-  var requestUrl = rpf.MiscHelper.getUrl(
-      rpf.MiscHelper.COMMON_LIB_SERVER,
-      '/get_common_libs', {});
-
-  var callback = (opt_callback) ? opt_callback : goog.nullFunction;
-  bite.common.net.xhr.async.get(requestUrl,
-      goog.bind(this.fetchCommonLibsCallback_, this, callback));
-};
-
-
-/**
- * Callback for the fetch common libs server request.
- * @param {function()} callback Callback function.
- * @param {boolean} success Whether or not the request was successful.
- * @param {string} data The data string from the request or an error string if
- *     the request failed.
- * @private
- */
-rpf.Rpf.prototype.fetchCommonLibsCallback_ =
-    function(callback, success, data) {
-  var errorStr = '';
-
-  try {
-    if (success) {
-      this.commonLibs_ = goog.json.parse(data);
-      callback();
-      return;
-    } else {
-      errorStr = data;
-    }
-  } catch (error) {
-    errorStr = error;
-  }
-
-  console.error('Getting common libs encountered: ' + errorStr);
 };
 
