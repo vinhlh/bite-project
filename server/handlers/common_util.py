@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
@@ -19,10 +19,6 @@
 __author__ = 'phu@google.com (Po Hu)'
 
 
-#Import not at top
-#pylint: disable-msg=C6204
-#Catch Exception or StandardError
-#pylint: disable-msg=W0703
 from models import bite_event
 from utils import bite_constants
 

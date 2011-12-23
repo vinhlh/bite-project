@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
@@ -20,7 +20,7 @@ __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import StringIO
 import zipfile
-import simplejson
+import json
 
 
 class BadInput(Exception):
@@ -41,11 +41,11 @@ def JsonStringToZip(data):
 
   Raises:
     BadInput: Raised by ObjToZip.
-    simplejson.JSONDecodeError: An error that occurs while converting the data
+    json.JSONDecodeError: An error that occurs while converting the data
       into an object.
   """
   try:
-    obj = simplejson.loads(data)
+    obj = json.loads(data)
   except TypeError:
     raise BadInput('Invalid data received.')
 

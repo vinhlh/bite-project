@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -22,28 +22,11 @@ validation of request parameters.
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import os
 import urllib2
-
-try:
-  from google.appengine.ext import ereporter
-  from google.appengine.ext import webapp
-  from google.appengine.ext.webapp import template
-except ImportError:
- pass  # This will fail on unittest, ok to pass.
-
-import os
-import urllib2
+import webapp2
 
 from google.appengine.ext import ereporter
-from google.appengine.ext import webapp
 from google.appengine.ext.webapp import template
 
 
@@ -75,7 +58,7 @@ class InvalidIntValueError(Error):
     Error.__init__(self, msg=msg)
 
 
-class BaseHandler(webapp.RequestHandler):
+class BaseHandler(webapp2.RequestHandler):
   """Base class for the application handlers.
 
   Defines common functionality used by various handlers. As a rule of thumb,

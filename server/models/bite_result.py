@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -24,16 +24,10 @@ __author__ = 'phu@google.com (Po Hu)'
 import datetime
 import logging
 import random
-#Import not at top
-#pylint: disable-msg=C6204
-try:
-  from google.appengine.ext import db
-  from models import bite_event
-  from models import bite_run
-except ImportError:
-  from google.appengine.ext import db
-  from models import bite_event
-  from models import bite_run
+
+from google.appengine.ext import db
+from models import bite_event
+from models import bite_run
 
 
 class Error(Exception):

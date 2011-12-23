@@ -14,37 +14,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Bite event handler."""
+"""Test cycle management."""
 
-__author__ = 'phu@google.com (Po Hu)'
+__author__ = 'alexis.torres@gmail.com (Alexis O. Torres)'
 
+import logging
 import webapp2
 
 from handlers import base
-from handlers import common_util
-from models import bite_event
-from utils import basic_util
+from models import test_cycle
 
-
-class Error(Exception):
-  pass
-
-
-class ShowEventsHandler(base.BaseHandler):
-  """The handler for showing the Bite events."""
+class TestCyclesHandler(base.BaseHandler):
+  """Handles managing of cycles."""
 
   def get(self):
-    self.post()
-
-  def post(self):
-    """Shows the Bite suites info."""
-    project_name = self.GetOptionalParameter('projectName', '')
-    data = bite_event.GetEventsData(common_util.GetEventData,
-                                    project_name)
-    self.response.out.write(
-        basic_util.DumpJsonStr({'details': data}))
-
+    cycles = test_cycle.FetchTestCycles()    
+    self.response.headers['Content-Type'] = 'application/json'
+    self.response.out.write(test_cycle.JsonEncode(cycles))
 
 app = webapp2.WSGIApplication(
-    [('/event/show_all', ShowEventsHandler)],
+    [('/cycles', TestCyclesHandler),
+     ('/cycles/all', TestCyclesHandler)],
     debug=True)

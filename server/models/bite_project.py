@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -23,7 +23,7 @@ a lead.
 __author__ = 'phu@google.com (Po Hu)'
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
-import simplejson
+import json
 
 from google.appengine.ext import db
 from models import model_helper
@@ -95,7 +95,7 @@ def AddProject(name, data):
   # Assume name is ascii.
   project = BiteProject.get_or_insert(key_name=str(name), name=name)
   if data:
-    data_obj = simplejson.loads(data)
+    data_obj = json.loads(data)
     model_helper.Update(project, data_obj, exclude=['name'])
     project.put()
 
@@ -121,7 +121,7 @@ def ListProjects():
   """List all projects."""
   query = BiteProject.all(keys_only=True)
   keys = [result.name() for result in query]
-  return simplejson.dumps(keys)
+  return json.dumps(keys)
 
 
 def DeleteProject(name):
@@ -134,7 +134,7 @@ def UpdateProject(name, data):
   project = _LookupProject(name)
 
   if data:
-    data_obj = simplejson.loads(data)
+    data_obj = json.loads(data)
     model_helper.Update(project, data_obj, exclude=['name'])
     project.put()
 

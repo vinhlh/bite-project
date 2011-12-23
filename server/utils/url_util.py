@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -23,9 +23,10 @@ import logging
 import re
 import sha
 
+from third_party import urlnorm
 from urlparse import urlparse
 from urlparse import urlunparse
-from third_party import urlnorm
+from utils import encoding_util
 
 
 class InvalidUrlError(Exception):
@@ -62,24 +63,6 @@ def GetBaseUrl(url):
     raise InvalidUrlError(url)
 
 
-def EncodeToAscii(string):
-  """Needed to encode unicode into a datastore supported encoding.
-
-  Args:
-    string: String to encode.
-
-  Returns:
-    An utf-8 encoded string.
-  """
-  try:
-    result = string.encode('ascii', 'ignore')
-  except UnicodeDecodeError:
-    logging.debug('String contains unicode characters, normalizing')
-    new_str = unicode(string, encoding='utf-8', errors='ignore')
-    result = new_str.encode('ascii', 'ignore')
-  return result
-
-
 class NormalizedUrlResult(object):
   """Normalized URL result object.
 
@@ -94,9 +77,9 @@ class NormalizedUrlResult(object):
 
   def __init__(self, url='', hostname='', path=''):
     """Initializes NormalizeUrlResult object."""
-    self.url = EncodeToAscii(url).lower()
-    self.hostname = EncodeToAscii(hostname).lower()
-    self.path = EncodeToAscii(path).lower()
+    self.url = encoding_util.EncodeToAscii(url).lower()
+    self.hostname = encoding_util.EncodeToAscii(hostname).lower()
+    self.path = encoding_util.EncodeToAscii(path).lower()
 
 
 def _GetNormalizationTuple(url):
@@ -111,7 +94,7 @@ def _GetNormalizationTuple(url):
   Returns:
     A 6-tuple: (scheme, netloc, path, params, query, fragment).
   """
-  url = EncodeToAscii(url)
+  url = encoding_util.EncodeToAscii(url)
   up = urlparse(url, 'http')
   authority = up[1]
   path = up[2]

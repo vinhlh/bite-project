@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -22,49 +22,14 @@ homepage (eg. via the browser).
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import os
 import sys
+import webapp2
 
 from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 
-# NOTE: We have to import these functions directly because a bug
-# in the AppEngine environment prevents us from importing the name
-# "login_handler".
-from handlers.login_handler import GetLoginUrl
-from handlers.login_handler import GetLogoutUrl
 from handlers import base
 from models import counter
-from models.compat import admins
-from models.compat import tester
-
-
-class GetLatestHandler(base.BaseHandler):
-  """Gets the latest BITE lite extension version."""
-
-  # TODO(ralphj): Add a parameter for the type of channel being requested,
-  # such as /get_latest_extension?channel=beta. Then pass this into the
-  # thanks.html template and have it direct to the appropriate page.
-
-  # Disable 'Invalid method name' lint error.
-  # pylint: disable-msg=C6409
-  def get(self):
-    user = users.get_current_user()
-    if user and (tester.IsActive(user.email()) or
-                 admins.IsAdmin(user.email()) or
-                 users.is_current_user_admin()):
-      counter.Increment('downloads')
-      self.RenderTemplate('thanks.html', {})
-    else:
-      self.redirect('/request_compat_access')
 
 
 class HomeRequestHandler(base.BaseHandler):
@@ -81,32 +46,19 @@ class HomeRequestHandler(base.BaseHandler):
     if user:
       return {'isSigned': True,
               'email': user.email(),
-              'signOut': GetLogoutUrl()}
+              'signOut': ''}
     else:
       return {'isSigned': False,
-              'signIn': GetLoginUrl()}
+              'signIn': ''}
 
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
   def get(self):
     """Handles the GET request for the home page."""
     env = os.environ
-    is_trusted = (env.has_key('TRUSTED_IP_REQUEST')
-                  and env['TRUSTED_IP_REQUEST'] == '1')
     self.RenderTemplate('landing.html',
-                        {'user': self.GetUserInfo(),
-                         'is_trusted': is_trusted})
+                        {'user': self.GetUserInfo()})
 
-
-application = webapp.WSGIApplication(
-    [('/', HomeRequestHandler),
-     ('/get_latest_extension', GetLatestHandler)],
+app = webapp2.WSGIApplication(
+    [('/', HomeRequestHandler)],
     debug=True)
-
-
-def main(unused_argv):
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main(sys.argv)

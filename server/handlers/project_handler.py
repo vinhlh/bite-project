@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -19,22 +19,11 @@
 __author__ = 'phu@google.com (Po Hu)'
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
-#Import not at top
-#pylint: disable-msg=C6204
-#Statement before imports
-#pylint: disable-msg=C6205
-#Invalid method name
-#pylint: disable-msg=C6409
-try:
-  import auto_import_fixer
-except ImportError:
-  pass
 
-import simplejson
+import json
 import urllib
+import webapp2
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 from handlers import base
 from models import bite_project
 from models import model_helper
@@ -117,7 +106,7 @@ class ListProjectHandler(base.BaseHandler):
     self.response.out.write(bite_project.ListProjects())
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/project/add', AddProjectHandler),
      ('/project/update', UpdateProjectHandler),
      ('/project/delete', DeleteProjectHandler),
@@ -125,12 +114,4 @@ application = webapp.WSGIApplication(
      ('/project/get_default', GetDefaultProjectHandler),
      ('/project/list', ListProjectHandler)],
     debug=True)
-
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()
 

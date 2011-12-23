@@ -20,205 +20,197 @@
 # This version number forces folks to deploy with:
 #     appcfg.py -V <desired_app_version> /path/to/bundle
 
-application: flux-ite
+application: bite
 version: invalid-do-not-change-see-comments
-runtime: python
+runtime: python27
+threadsafe: yes
 api_version: 1
 
 builtins:
-- remote_api: on
-- datastore_admin: on
 - appstats: on
+- datastore_admin: on
 - deferred: on
+- remote_api: on
 
 handlers:
 
-# Client API URLs.
-- url: /get_bugs_for_url
-  script: handlers/get_bugs.py
-  secure: always
-- url: /get_my_compat_test
-  script: handlers/site_compat.py
-  secure: always
-- url: /bugs/get
-  script: handlers/get_bugs.py
+# Test cycles.
+- url: /cycles
+  script: handlers.test_cycles.app
   login: required
-  secure: always
+
+- url: /cycles/all
+  script: handlers.test_cycles.app
+  login: required
+
+# Testers.
+- url: /testers
+  script: handlers.testers.app
+  login: required
+
+- url: /testers/all
+  script: handlers.testers.app
+  login: required
+
+- url: /cycle/(\w+)/testers
+  script: handlers.testers.app
+  login: admin
+
+- url: /cycle/(\w+)/testers/all
+  script: handlers.testers.app
+  login: required
+
+  
+# Screenshots URLs.
+- url: /screenshots/upload
+  script: handlers.screenshots.app
+  login: required
+
+  - url: /screenshots/fetch
+  script: handlers.screenshots.app
+  login: required
+
+  - url: /screenshots/search
+  script: handlers.screenshots.app
+  login: required
+
+  
+# User facing pages.
+- url: /
+  script: handlers.home.app
+  login: required
 
 # Login utility urls.
 - url: /check_login_status
-  script: handlers/login_handler.py
-  secure: always
+  script: handlers.login_handler.app
 - url: /check_gdata_login_status
-  script: handlers/login_handler.py
+  script: handlers.login_handler.app
   login: required
-  secure: always
 - url: /gdata_session_token_saver
-  script: handlers/login_handler.py
+  script: handlers.login_handler.app
+  login: required
+
+# Bug admin.
+- url: /admin/bugs
+  script: handlers.bugs_admin.app
+  login: admin
+
+# Bug fetching.
+- url: /get_bugs_for_url
+  script: handlers.get_bugs.app
   login: required
   secure: always
 
-# Screenshots URLs.
-- url: /screenshots/upload
-  script: handlers/screenshots.py
-  login: required
-  secure: always
-- url: /screenshots/fetch
-  script: handlers/screenshots.py
-  login: required
-  secure: always
-- url: /screenshots/search
-  script: handlers/screenshots.py
-  login: required
-  secure: always
+- url: /provider/(\w+)/project/(\w+)/bugs/(\w+)
+  script: handlers.get_bugs.app
+  login: admin
 
-# User facing pages.
-- url: /
-  script: handlers/home.py
-  login: required
-  secure: always
 - url: /automateRpf
-  script: handlers/home_handler.py
-  login: required
-  secure: always
-- url: /get_latest_extension
-  script: handlers/home.py
-  login: required
-  secure: always
-- url: /request_compat_access
-  script: handlers/request_access.py
-  login: required
-  secure: always
-
-# Site Compatibility handlers.
-- url: /compat.*
-  script: handlers/site_compat.py
+  script: handlers.home_handler.app
   login: required
   secure: always
 
 # Bug reporting.
 - url: /bugs/new
-  script: handlers/report_bug.py
-  login: required
-  secure: always
+  script: handlers.report_bug.app
+  login: admin
+
 - url: /bugs/update
-  script: handlers/report_bug.py
+  script: handlers.report_bug.app
   login: required
-  secure: always
+
 - url: /bugs/update_status
-  script: handlers/report_bug.py
+  script: handlers.report_bug.app
   login: required
-  secure: always
+
 - url: /bugs/update_binding
-  script: handlers/report_bug.py
+  script: handlers.report_bug.app
   login: required
-  secure: always
+
 - url: /bugs/update_recording
-  script: handlers/report_bug.py
+  script: handlers.report_bug.app
   login: required
-  secure: always
 
 # Projects handlers
 - url: /project/.*
-  script: handlers/project_handler.py
+  script: handlers.project_handler.app
   login: required
-  secure: always
 
 # Test Suite, Run, Results handlers
 - url: /suite/.*
-  script: handlers/suite_handler.py
-  secure: always
+  script: handlers.suite_handler.app
 
 - url: /run/.*
-  script: handlers/run_handler.py
-  secure: always
+  script: handlers.run_handler.app
 
 - url: /result/.*
-  script: handlers/result_handler.py
-  secure: always
+  script: handlers.result_handler.app
 
 - url: /tests/.*
-  script: handlers/test_handler.py
-  secure: always
+  script: handlers.test_handler.app
 
 - url: /testing/.*
-  script: handlers/testing_handler.py
-  secure: always
+  script: handlers.testing_handler.app
 
 - url: /event/.*
-  script: handlers/event_handler.py
-  secure: always
+  script: handlers.event_handler.app
 
 - url: /home.*
-  script: handlers/home_handler.py
-  secure: always
+  script: handlers.home_handler.app
 
 # Bug Template handlers
 - url: /get_templates
-  script: handlers/template_handler.py
+  script: handlers.template_handler.app
   login: required
-  secure: always
+
 - url: /new_template
-  script: handlers/template_handler.py
+  script: handlers.template_handler.app
   login: required
-  secure: always
+  
 
 # Static content.
 - url: /favicon.ico
   static_files: images/favicon.ico
   upload: images/favicon.ico
-  secure: always
+
 - url: /extjs
   static_dir: third_party/extjs
-  secure: always
+
 - url: /hud/scripts
   static_dir: hud/scripts
-  secure: always
+
 - url: /bin
   static_dir: bin
-  secure: always
+
 - url: /imgs
   static_dir: images
-  secure: always
+
 - url: /scripts
   static_dir: scripts
-  secure: always
+
 - url: /static
   static_dir: static
-  secure: always
+
 - url: /images
   static_dir: images
-  secure: always
+
 - url: /styles
   static_dir: styles
-  secure: always
 
 # Crawler tasks URLs.
 - url: /tasks/crawl/issuetracker/.*
-  script: crawlers/issuetracker_crawler.py
+  script: crawlers.issuetracker_crawler.app
   login: admin
-
-# UrlToBugMap dump handlers.
-- url: /dump_url_to_bug_map
-  script: handlers/dump_url_to_bug_map.py
-  login: required
-  secure: always
-
-# Remote API for Upload/Download
-- url: /remote_api
-  script: remote_handler.py
-  login: admin
-  secure: always
 
 # eReporter.
 - url: /_ereporter.*
-  script: report_generator.py
+  script: google.appengine.ext.ereporter.report_generator.application
   login: admin
   secure: always
 
 # Storage handlers
 - url: /storage.*
-  script: handlers/storage_handler.py
+  script: handlers.storage_handler.app
   secure: always
 
 

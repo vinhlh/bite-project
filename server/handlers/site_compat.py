@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -18,22 +18,13 @@
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
+import json
 import re
 import sys
-
-import simplejson
+import webapp2
 
 from google.appengine.api import memcache
 from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 
 from handlers import base
 from models.compat import admins
@@ -119,12 +110,6 @@ class SiteCompatHandler(base.BaseHandler):
         webkit_version=browser_info['webkit_version'],
         chrome_version=browser_info['chrome_version'],
         locale=browser_info['locale'])
-
-  def ConfirmUserIsAnActiveTester(self):
-    """Check if the current user is an active tester."""
-    if not self.IsCurrentUserAnActiveTester():
-      self.redirect('/request_compat_access')
-
 
 # Disable 'Invalid method name' lint error.
 # pylint: disable-msg=C6409
@@ -316,7 +301,6 @@ class ResultsHandler(SiteCompatHandler):
   """Handler used to view the Results submitted by a given user."""
 
   def get(self):
-    self.ConfirmUserIsAnActiveTester()
     self.RenderTemplate('site_compat.html',
                         {'view': 'my_results',
                          'user': self.GetUserInfo()})
@@ -354,7 +338,6 @@ class TesterTestsHandler(SiteCompatHandler):
 
   def get(self):
     """Gets the test assignment view."""
-    self.ConfirmUserIsAnActiveTester()
     user = users.get_current_user()
     version = self.GetBrowserVersion()
     assign = assignment.GetOrAssignTest(
@@ -405,8 +388,8 @@ class TesterTestsHandler(SiteCompatHandler):
     self.get()
 
 
-_NO_USER_RESPONSE = simplejson.dumps({'user': None,
-                                      'test': None})
+_NO_USER_RESPONSE = json.dumps({'user': None,
+                                'test': None})
 
 
 # Disable 'Invalid method name' lint error.
@@ -427,7 +410,7 @@ class MyTestsHandler(SiteCompatHandler):
         test_data = {'test_id': assign.key().name(),
                      'test_url': test.start_url,
                      'verification_steps': test.steps}
-      response = simplejson.dumps(
+      response = json.dumps(
           {'user': user.email(),
            'test': test_data})
 
@@ -442,7 +425,6 @@ class AllResultsHandler(SiteCompatHandler):
 
   def get(self):
     """Show the all results summary page."""
-    self.ConfirmUserIsAnActiveTester()
     self.RenderTemplate('site_compat.html',
                         {'view': 'all_results',
                          'user': self.GetUserInfo()})
@@ -471,7 +453,7 @@ class StatsHandler(SiteCompatHandler):
         result = self.GetTopLevelStats()
         memcache.set(stats_key, result, 1800)  # Cache for 30 mins.
     self.response.headers['Content-Type'] = JSON_CONTENT_TYPE
-    self.response.out.write(simplejson.dumps(result))
+    self.response.out.write(json.dumps(result))
 
   def GetPersonalStats(self):
     """Gets a list of results submitted by the current user.
@@ -551,7 +533,6 @@ class ListHandler(SiteCompatHandler):
 
   def get(self):
     """Gets data for the list specified by the "type" parameter."""
-    self.ConfirmUserIsAnActiveTester()
     requested_list = self.GetRequiredParameter('type')
     response = None
     if requested_list == 'suites':
@@ -597,7 +578,7 @@ class ListHandler(SiteCompatHandler):
                   for r in available_runs]
 
     self.response.headers['Content-Type'] = JSON_CONTENT_TYPE
-    self.response.out.write(simplejson.dumps(response))
+    self.response.out.write(json.dumps(response))
 
 
 # Disable 'Invalid method name' lint error.
@@ -642,7 +623,7 @@ class TestersHandler(SiteCompatHandler):
       tester.AddOrUpdate(email, False)
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/get_my_compat_test', MyTestsHandler),
      ('/compat/test', TesterTestsHandler),
      ('/compat/subscriptions', TesterMapHandler),
@@ -662,10 +643,3 @@ application = webapp.WSGIApplication(
      ('/compat/tester', TestersHandler)],
     debug=True)
 
-
-def main(unused_argv):
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main(sys.argv)

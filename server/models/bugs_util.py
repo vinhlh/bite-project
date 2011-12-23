@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -20,6 +20,8 @@ __author__ = 'alexto@google.com (Alexis O. Torres)'
 
 import logging
 
+from utils import encoding_util
+
 
 # Allowed bug states.
 ACTIVE = 'active'
@@ -29,7 +31,9 @@ UNKNOWN = 'unknown'
 
 
 # Bug providers.
-ISSUETRACKER = 'issuetracker'
+class Provider(object):
+  ISSUETRACKER = 'issuetracker'
+  LOCAL = 'local'
 
 
 class InvalidProvider(Exception):
@@ -56,15 +60,31 @@ ISSUETRACKER_STATE_STATUS_MAP = {
     'unknown': UNKNOWN
 }
 
+LOCAL_STATE_STATUS_MAP = {
+    'unconfirmed': ACTIVE,
+    'approved': CLOSED,
+    'rejected': CLOSED,
+    'unknown': UNKNOWN
+}
+
 
 def StateFromStatus(status, provider):
   """Maps status to a state of active, resolved, closed, or unknown."""
+  if not status:
+    return UNKNOWN
+  
   lowered = status.lower()
-  if cmp(provider, ISSUETRACKER) == 0:
+  if cmp(provider, Provider.ISSUETRACKER) == 0:
     if lowered in ISSUETRACKER_STATE_STATUS_MAP:
       return ISSUETRACKER_STATE_STATUS_MAP[lowered]
     else:
       logging.error('Unrecognized IssueTracker status: %s', lowered)
+      return UNKNOWN
+  if cmp(provider, Provider.LOCAL) == 0:
+    if lowered in LOCAL_STATE_STATUS_MAP:
+      return LOCAL_STATE_STATUS_MAP[lowered]
+    else:
+      logging.error('Unrecognized Local status: %s', lowered)
       return UNKNOWN
   else:
     raise InvalidProvider('Unrecognized provider: %s' % provider)
@@ -80,5 +100,9 @@ def GetUserLink(provider, email):
     Str of the url to the profile of the user.
   """
   # Using else as a catch-all to default to issue tracker.
-  user_link = 'http://code.google.com/u/' + email.split('@')[0]
-  return unicode(user_link).encode('utf-8', 'ignore')
+  if not provider or not email:
+    return ''
+  user_link = ''
+  if Provider.ISSUETRACKER
+    user_link = 'http://code.google.com/u/' + email.split('@')[0]
+  return encoding_util.EncodeToAscii(user_link)

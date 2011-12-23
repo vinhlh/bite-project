@@ -20,18 +20,8 @@
 #   alexto@google.com (Alexis O. Torres)
 
 cron:
-# Crawls incoming issues.
-#- description: Crawls for recent updates.
-#  url: /tasks/crawl/issuetracker/crawl_recent_updates?project_name=chromium&max_results=1000
-#  schedule: every 12 hours
-
-
-#- description: check for scheduled jobs
-#  url: /run/check_scheduled_jobs
-#  schedule: every 1 minutes
 
 # eReporter:
-# The sender must be an app admin.
-#- description: Daily exception report
-#  url: /_ereporter?sender=noreply@google.com
-#  schedule: every day 8:00
+- description: Daily exception report
+  url: /_ereporter?sender=you@yourdomain.com  # The sender must be an app admin.
+  schedule: every day 00:00

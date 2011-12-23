@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -21,11 +21,14 @@ Bug is a model for crawled bug information stored in AppEngine's Datastore.
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
-import simplejson
-
+import json
+import logging
 from google.appengine.ext import db
 
 from models import bugs_util
+from models import test_cycle
+from utils import encoding_util
+from utils import url_util
 
 
 class InvalidProvider(Exception):
@@ -62,17 +65,17 @@ class Bug(db.Model):
          is associated with.
     screenshot: Url to an associated screenshot.
     has_screenshot: Whether a screenshot is attached.
-    url: The url of the page the bug is referring to.
     has_recording: True, if the bug has recorded script attached.
     recording_link: Link to recorded script.
   """
-  bug_id = db.StringProperty(required=True)
+  bug_id = db.StringProperty(required=False)
   title = db.StringProperty(required=True)
   summary = db.TextProperty(required=False)
-  priority = db.StringProperty(required=False)
+  priority = db.StringProperty(required=False, default='2')
   project = db.StringProperty(required=True)
   provider = db.StringProperty(required=False)
   author = db.StringProperty(required=False)
+  author_id = db.StringProperty(required=False)
   author_url = db.StringProperty(required=False, default='')
   status = db.StringProperty(required=True)
   state = db.StringProperty(required=True,
@@ -80,25 +83,30 @@ class Bug(db.Model):
                                      bugs_util.RESOLVED,
                                      bugs_util.CLOSED,
                                      bugs_util.UNKNOWN))
-  details_link = db.LinkProperty(required=True)
+  details_link = db.StringProperty(required=False)
   reported_on = db.StringProperty(required=False)
   last_update = db.StringProperty(required=True)
   last_updater = db.StringProperty(required=False)
   last_updater_url = db.StringProperty(required=False, default='')
   has_target_element = db.BooleanProperty(required=False, default=False)
-  target_element = db.TextProperty(required=False, default='')
+  target_element = db.TextProperty(required=False)
   has_screenshot = db.BooleanProperty(required=False, default=False)
   screenshot = db.StringProperty(required=False, default='')
-  url = db.StringProperty(required=False, multiline=True, default='')
   has_recording = db.BooleanProperty(required=False, default=False)
   recording_link = db.TextProperty(required=False, default='')
 
   # Tracks when an entry is added and modified.
   added = db.DateTimeProperty(required=False, auto_now_add=True)
   modified = db.DateTimeProperty(required=False, auto_now=True)
+  
+  # Test cycle is the differentiates various test runs.
+  test_cycle = db.ReferenceProperty(reference_class=test_cycle.TestCycle,
+                                    collection_name='testcycle_bugs')
+  expected = db.TextProperty(required=False)
+  result = db.TextProperty(required=False)
 
 
-class BugEncoder(simplejson.JSONEncoder):
+class BugEncoder(json.JSONEncoder):
   """Encoder that knows how to encode Bugs objects."""
 
   # Disable 'Invalid method name' lint error.
@@ -113,7 +121,8 @@ class BugEncoder(simplejson.JSONEncoder):
       A serializable representation of the Object.
     """
     if isinstance(obj, Bug):
-      return {'id': obj.bug_id,
+      return {'key': obj.key().id(),
+              'id': obj.bug_id,
               'title': obj.title,
               'summary': obj.summary,
               'priority': obj.priority,
@@ -128,7 +137,6 @@ class BugEncoder(simplejson.JSONEncoder):
               'last_update': obj.last_update,
               'last_updater': obj.last_updater,
               'last_updater_url': obj.last_updater_url,
-              'url': obj.url,
               'target_element': obj.target_element,
               'has_target_element': obj.has_target_element,
               'screenshot': obj.screenshot,
@@ -136,12 +144,13 @@ class BugEncoder(simplejson.JSONEncoder):
               'has_recording': obj.has_recording,
               'recording_link': obj.recording_link}
     else:
-      return simplejson.JSONEncoder.default(self, obj)
+      return json.JSONEncoder.default(self, obj)
 
 
-def Store(bug_id, title, summary, priority, project, provider, status, author,
+def Store(bug_id, title, summary, priority, project, provider, status, author, author_id,
           details_link, reported_on, last_update, last_updater,
-          target_element='', screenshot='', url='', recording_link=''):
+          target_element='', screenshot='', recording_link='',
+          cycle=None, expected=None, result=None):
 
   """Creates or updates a bug into the Datastore.
 
@@ -167,17 +176,26 @@ def Store(bug_id, title, summary, priority, project, provider, status, author,
     target_element: Optional str describing a specific element on the page
         the bug is associated with.
     screenshot: Optional str url to an associated screenshot.
-    url: The url of the page the is referring to.
     recording_link: Optional link to recorded steps.
 
   Returns:
     The newly created entry.
   """
-  key_name = GenerateKeyName(bug_id, project, provider)
-  bug = Bug.get_by_key_name(key_name)
+  logging.info('Status: %s', status)
   status = status.lower()
   state = bugs_util.StateFromStatus(status, provider)
   last_updater_url = bugs_util.GetUserLink(provider, last_updater)
+  bug = None
+
+  if bug_id:
+    # Check if bug is already in the cache, in which case, we just update it.
+    bug = GetBug(bug_id, project, provider)
+
+  title = encoding_util.EncodeToAscii(title)
+  summary = encoding_util.EncodeToAscii(summary)
+  expected = encoding_util.EncodeToAscii(expected)
+  result = encoding_util.EncodeToAscii(result)
+  author = encoding_util.EncodeToAscii(author)
   if bug:
     bug.title = title
     bug.summary = summary
@@ -187,15 +205,16 @@ def Store(bug_id, title, summary, priority, project, provider, status, author,
     bug.details_link = details_link
     bug.last_update = last_update
     bug.last_updater = last_updater
-    bug.last_updater_url = last_updater_url,
+    bug.last_updater_url = last_updater_url
     bug.target_element = target_element
     bug.has_target_element = bool(target_element)
     bug.screenshot = screenshot
     bug.has_screenshot = bool(screenshot)
-    bug.url = url
+    bug.test_cycle = cycle
+    bug.expected = expected
+    bug.result = result
   else:
-    bug = Bug(key_name=key_name,
-              bug_id=bug_id,
+    bug = Bug(bug_id=bug_id,
               title=title,
               summary=summary,
               priority=priority,
@@ -203,36 +222,25 @@ def Store(bug_id, title, summary, priority, project, provider, status, author,
               provider=provider,
               status=status,
               author=author,
-              author_url=bugs_util.GetUserLink(
-                  provider, author),
+              author_id=author_id,
+              author_url=bugs_util.GetUserLink(provider, author),
               state=state,
               details_link=details_link,
               reported_on=reported_on,
               last_update=last_update,
               last_updater=last_updater,
-              last_updater_url= last_updater_url,
+              last_updater_url=last_updater_url,
               target_element=target_element,
               has_target_element=bool(target_element),
               screenshot=screenshot,
               has_screenshot=bool(screenshot),
-              url=url,
               recording_link=recording_link,
-              has_recording=bool(recording_link))
+              has_recording=bool(recording_link),
+              test_cycle=cycle,
+              expected=expected,
+              result=result)
   bug.put()
   return bug
-
-
-def GenerateKeyName(bug_id, project, provider):
-  """Generates a unique key for a bug on a project.
-
-  Args:
-    bug_id: The ID of the bug in the source (original) bug database.
-    project: Name of the project this bug is associated with.
-    provider: Source provider of the bug information.
-  Returns:
-    Str that can be used as the key_name of a bug stored in the Datastore.
-  """
-  return '%s_%s_%s' % (provider, project, bug_id)
 
 
 def GetBugsById(bug_id, project=None, provider=None,
@@ -258,19 +266,21 @@ def GetBugsById(bug_id, project=None, provider=None,
   return query.fetch(limit=limit)
 
 
-def GetBug(bug_id, project, provider):
+def GetBug(bug_id, project, provider, keys_only=False):
   """Retrieves a bug from either memcache or the Datastore.
 
   Args:
     bug_id: Id of bug to retrieve.
     project: Project of bug in question.
     provider: Source provider of the bug information.
+    keys_only: Whether the query should return full entities or just keys.
 
   Returns:
     Bug object if one exists with the specified id and project
     combination or None.
   """
-  return GetBugByKey(GenerateKeyName(bug_id, project, provider))
+  query = Bugs.all(keys_only=keys_only).filter('bug_id =', bug_id)
+  return query.filter('project =', project).provider('provider =', provider).get()
 
 
 def GetBugByKey(key_name):
@@ -282,7 +292,7 @@ def GetBugByKey(key_name):
   Returns:
     Bug object with the given key_name or None.
   """
-  return Bug.get_by_key_name(key_name)
+  return Bug.get_by_id(int(key_name))
 
 
 def UpdateTargetElement(key_name, target_element):
@@ -296,7 +306,7 @@ def UpdateTargetElement(key_name, target_element):
   Returns:
     Bug object with the updated target_element information.
   """
-  bug = Bug.get_by_key_name(key_name)
+  bug = GetBugByKey(key_name)
   bug.target_element = target_element
   bug.has_target_element = bool(target_element)
   bug.put()
@@ -313,7 +323,7 @@ def UpdateRecording(key_name, recording_link):
   Returns:
     Bug object with the updated recording link.
   """
-  bug = Bug.get_by_key_name(key_name)
+  bug = GetBugByKey(key_name)
   bug.recording_link = recording_link
   bug.has_recording = bool(recording_link)
   bug.put()
@@ -330,7 +340,7 @@ def UpdateStatus(key_name, status):
   Returns:
     Bug object with the updated target_element information.
   """
-  bug = Bug.get_by_key_name(key_name)
+  bug = GetBugByKey(key_name)
   bug.status = status
   bug.state = bugs_util.StateFromStatus(status, bug.provider)
   bug.put()
@@ -346,4 +356,4 @@ def JsonEncode(bugs):
   Returns:
     JSON encoded str representation of the list.
   """
-  return simplejson.dumps(bugs, cls=BugEncoder)
+  return json.dumps(bugs, cls=BugEncoder)

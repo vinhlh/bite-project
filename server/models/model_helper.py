@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -22,7 +22,7 @@ perform convenience functions.
 
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
-import simplejson
+import json
 
 
 def Compare(obj, data):
@@ -51,7 +51,7 @@ def ToDict(obj):
 
 def ToJson(obj):
   """Convert the dictionary version of the model to a json string."""
-  return simplejson.dumps(ToDict(obj))
+  return json.dumps(ToDict(obj))
 
 
 def Update(obj, data, exclude=None):

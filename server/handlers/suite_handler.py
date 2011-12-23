@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -18,25 +18,12 @@
 
 __author__ = 'phu@google.com (Po Hu)'
 
-# Import not at top
-# pylint: disable-msg=C6204
-# Statement before imports
-# pylint: disable-msg=C6205
-# Invalid method name
-# pylint: disable-msg=C6409
-# Use default membership test instead of 'has_key'
-# pylint: disable-msg=C6401
-try:
-  import auto_import_fixer
-except ImportError:
-  pass
-
 import datetime
 import logging
+import webapp2
 
 from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
+
 from handlers import base
 from handlers import deferred_util
 from models import bite_suite
@@ -326,7 +313,7 @@ class AddSuiteHandler(base.BaseHandler):
           str(suite.key()), test_info_list)
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/suite/add', AddSuiteHandler),
      ('/suite/load', LoadSuiteHandler),
      ('/suite/load_project', LoadAllSuitesInProjectHandler),
@@ -334,11 +321,3 @@ application = webapp.WSGIApplication(
      ('/suite/show_all', ShowSuitesHandler),
      ('/suite/detail', ShowSuiteDetail)],
     debug=True)
-
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

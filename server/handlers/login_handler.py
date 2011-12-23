@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
@@ -18,13 +18,6 @@
 
 __author__ = 'michaelwill@google.com (Michael Williamson)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 # For these gdata imports to work on AppEngine, each has to be imported
 # individually...e.g. below you need both atom and atom.url.
 # Be careful when changing.
@@ -33,12 +26,13 @@ import atom.url
 import gdata
 import gdata.client
 import gdata.gauth
-import simplejson
+import json
+import webapp2
 
 from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
+
 from config import settings
+from handlers import base
 
 SCOPES = [
     'http://docs.google.com/feeds/',
@@ -57,7 +51,7 @@ def GetLogoutUrl():
   return users.create_logout_url('/')
 
 
-class SessionTokenSaver(webapp.RequestHandler):
+class SessionTokenSaver(base.BaseHandler):
   def get(self):
     # Here the user_email is required because it's assumed we set the
     # parameter earlier in the process we use for checking gdata access.
@@ -72,7 +66,7 @@ class SessionTokenSaver(webapp.RequestHandler):
     self.redirect('/')
 
 
-class CheckGdataLoginStatus(webapp.RequestHandler):
+class CheckGdataLoginStatus(base.BaseHandler):
   """Checks that the user has granted gdata access to this app."""
 
   def GetAuthSubUrl(self, user_email):
@@ -114,7 +108,7 @@ class CheckGdataLoginStatus(webapp.RequestHandler):
       self.redirect('/')
 
 
-class CheckLoginStatus(webapp.RequestHandler):
+class CheckLoginStatus(base.BaseHandler):
   """Checks the login status of a user."""
 
   def get(self):
@@ -131,19 +125,11 @@ class CheckLoginStatus(webapp.RequestHandler):
           'url': GetLoginUrl()
           }
     self.response.headers['Content-Type'] = 'application/json'
-    self.response.out.write(simplejson.dumps(response))
+    self.response.out.write(json.dumps(response))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/check_login_status', CheckLoginStatus),
      ('/check_gdata_login_status', CheckGdataLoginStatus),
      ('/gdata_session_token_saver', SessionTokenSaver),
     ])
-
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

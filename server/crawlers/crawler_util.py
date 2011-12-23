@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -32,8 +32,12 @@ from google.appengine.runtime import DeadlineExceededError
 
 from models import bugs
 from models import bugs_util
+from models import screenshots
+from models import test_cycle
+from models import test_cycle_user
 from models import url_bug_map
 from utils import target_element_util
+from utils import screenshots_util
 from utils import url_util
 
 
@@ -68,7 +72,7 @@ def SpawnDetailsCrawlersIssueTracker(recent_issues, project_name,
         bug_id = bug_id[0:end]
 
       bug = bugs.GetBug(bug_id=bug_id, project=project_name,
-                        provider=bugs_util.ISSUETRACKER)
+                        provider=bugs_util.Provider.ISSUETRACKER)
       if bug:
         if  not skip_recent_check and bug.last_update == issue['updated']:
           logging.info('Bug %s is up-to-date.', bug.key().id_or_name())
@@ -107,8 +111,7 @@ def ExtractDetailsCrawlerIssueTracker(project_name, bug_id):
 
         # Nuke cache data for private bugs.
         url_bug_map.DeleteBugAndMappings(
-            bugs.GenerateKeyName(bug_id, project_name,
-                                 bugs_util.ISSUETRACKER))
+            bug_id, project_name, bugs_util.Provider.ISSUETRACKER)
         return
       else:
         raise BugCrawlerError(
@@ -144,7 +147,6 @@ def ExtractDetailsCrawlerIssueTracker(project_name, bug_id):
     logging.info('Nothing to do, no URLs found for bug %s in project %s.',
                  bug_id, project_name)
     return
-
   logging.debug('URLs found: %s', str(urls))
 
   target = (target_element_util.ExtractTargetElement(comments_text) or
@@ -162,7 +164,7 @@ def ExtractDetailsCrawlerIssueTracker(project_name, bug_id):
                 summary=entry.content.text[:SUMMARY_LIMIT],
                 priority=FindPriority(entry),
                 project_name=project_name,
-                provider=bugs_util.ISSUETRACKER,
+                provider=bugs_util.Provider.ISSUETRACKER,
                 # Special case status since it can be None.
                 status=status,
                 author=FindAuthor(entry),
@@ -255,7 +257,9 @@ def FindAuthor(bug_entry):
 def QueueStoreBug(bug_id, title, summary, priority,
                   project_name, provider, status, author,
                   details_link, reported_on, last_update,
-                  last_updater, target_element, urls):
+                  last_updater, target_element, urls, recording_link='',
+                  cycle_id=None, expected=None, result=None, author_id='',
+                  screenshot=None):
   """Adds a task to updates or create a Bug."""
   deferred.defer(StoreBug,
                  bug_id=bug_id,
@@ -266,68 +270,92 @@ def QueueStoreBug(bug_id, title, summary, priority,
                  provider=provider,
                  status=status,
                  author=author,
+                 author_id=author_id,
                  details_link=details_link,
                  reported_on=reported_on,
                  last_update=last_update,
                  last_updater=last_updater,
                  target_element=target_element,
                  urls=urls,
-                 recording_link='',
+                 recording_link=recording_link,
+                 cycle_id=cycle_id,
+                 expected=expected,
+                 result=result,
+                 screenshot=screenshot,
                  _queue='store-bug-queue')
 
 
-def StoreBug(bug_id, title, summary, priority,
-             project_name, provider, status, author,
-             details_link, reported_on, last_update,
-             last_updater, target_element='', screenshot='', urls=None,
-             recording_link=''):
-  """Updates or create a Bug."""
-  urls = urls or [['']]  # Set default url list to have only one empty string
-  bug = bugs.Store(bug_id=str(bug_id),
-                   title=title,
-                   summary=summary,
-                   priority=priority,
-                   project=project_name,
-                   provider=provider,
-                   status=status,
-                   author=author,
-                   details_link=details_link,
-                   reported_on=reported_on,
-                   last_update=last_update,
-                   last_updater=last_updater,
-                   target_element=target_element,
-                   screenshot=screenshot,
-                   url=urls[0][0],
-                   recording_link=recording_link)
+def  StoreBug(bug_id,  title, summary,  priority,  project_name,  provider,
+  status,  author,  details_link, reported_on,  last_update, last_updater,
+  target_element='',  screenshot=None, urls=None,  recording_link='',
+  cycle_id=None, expected=None,  result=None, author_id=''):
+  """Updates  or create  a Bug."""
+  screenshot_link = ''
+  if screenshot:
+    # Store the screenshot data and get the link.
+    new_screenshot = screenshots.Add(
+        data=screenshots_util.DecodeBase64PNG(screenshot),
+        source=provider, project=project)
+    screenshot_link = screenshots_util.RetrievalUrl(
+        self.request.url, new_screenshot.key().id())
+
+  if cycle_id:
+    cycle = test_cycle.AddTestCycle(provider, project_name, cycle_id)
+
+  if not  urls:
+    urls  = [(u, url_bug_map.UrlPosition.TITLE) for  u in url_util.ExtractUrls(title)]
+    expected =  expected or ''
+    result = result or ''
+    text = summary + ' ' + expected + ' ' + result
+    urls.extend([(u, url_bug_map.UrlPosition.TITLE)
+      for u in url_util.ExtractUrls(text)])
+  logging.info(urls)
+  urls = urls or [] # Set  default url list to have only one empty string
+  bug = bugs.Store(
+    bug_id=str(bug_id),
+    title=title,
+    summary=summary,
+    priority=priority,
+    project=project_name,
+    provider=provider,
+    status=status,
+    author=author,
+    author_id=author_id,
+    details_link=details_link,
+    reported_on=reported_on,
+    last_update=last_update,
+    last_updater=last_updater,
+    target_element=target_element,
+    screenshot=screenshot_link,
+    recording_link=recording_link,
+    cycle=cycle,
+    expected=expected,
+    result=result)
+
+  if cycle:
+    test_cycle_user.AddTestCycleUser(author, cycle)
 
   # TODO(alexto): Do the deletion first in a separate queue, then
   # add the bug-URL mappings to avoid timeouts. For now, this works
   # since the timeout causes the task to re-execute.
   logging.debug('Deleting all existing bug mappings')
-  bug_key = bug.key()
-  deleted = url_bug_map.DeleteAllMappingsForBug(bug_key.name())
+  deleted = url_bug_map.DeleteAllMappingsForBug(bug)
   logging.debug('Mappings deleted: %d', deleted)
 
-  if len(urls) > 1:
+  if len(urls) > 0:
     # NOTE: This is an optimization,
     # list comprehension loop is faster than a FOR loop.
     # pylint: disable-msg=W0104
     # pylint: disable-msg=W0106
     [deferred.defer(UpdateUrlBugMappings,
-                    bug_key=bug_key,
+                    bug_key=bug.key().id(),
                     url=url,
                     position=position,
                     _queue='urls-map-queue')
      for (url, position) in urls]
-  else:
-    (url, position) = urls[0]
-    UpdateUrlBugMappings(bug_key=bug_key,
-                         url=url,
-                         position=position)
-
 
 def UpdateUrlBugMappings(bug_key, url, position):
   """Updates or creates a Bug-URL mapping."""
   url_bug_map.StoreUrlBugMapping(target_url=url,
-                                 bug=bugs.GetBugByKey(bug_key.name()),
+                                 bug=bugs.GetBugByKey(bug_key),
                                  position=position)
