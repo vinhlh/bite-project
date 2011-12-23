@@ -24,6 +24,7 @@ import webapp2
 from handlers import base
 from models import test_cycle_user
 
+
 class TestersHandler(base.BaseHandler):
   """Handles requrest to get known testers."""
 
@@ -32,6 +33,7 @@ class TestersHandler(base.BaseHandler):
     self.response.headers['Content-Type'] = 'application/json'
     self.response.out.write(test_cycle_user.JsonEncode(testers))
 
+
 class TestersCycleHandler(base.BaseHandler):
   """Handles requests to get testers in a given cycle."""
   
@@ -39,7 +41,6 @@ class TestersCycleHandler(base.BaseHandler):
     testers = test_cycle_user.FetchTestersForCycle(cycle_key)
     self.response.headers['Content-Type'] = 'application/json'
     self.response.out.write(test_cycle_user.JsonEncode(testers))
-    
     
     
 app = webapp2.WSGIApplication(

@@ -302,8 +302,8 @@ def  StoreBug(bug_id,  title, summary,  priority,  project_name,  provider,
   if cycle_id:
     cycle = test_cycle.AddTestCycle(provider, project_name, cycle_id)
 
-  if not  urls:
-    urls  = [(u, url_bug_map.UrlPosition.TITLE) for  u in url_util.ExtractUrls(title)]
+  if not urls:
+    urls  = [(u, url_bug_map.UrlPosition.TITLE) for u in url_util.ExtractUrls(title)]
     expected =  expected or ''
     result = result or ''
     text = summary + ' ' + expected + ' ' + result

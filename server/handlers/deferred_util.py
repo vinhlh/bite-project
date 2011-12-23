@@ -26,6 +26,7 @@ import random
 
 from google.appengine.ext import db
 from google.appengine.ext import deferred
+
 from models import bite_result
 from models import bite_run
 from models import bite_suite
