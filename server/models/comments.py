@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,3 +36,4 @@ def AddComment(bug_key, message):
   comment = Comment(message=message, bug=bug)
   comment.put()
   return comment
+

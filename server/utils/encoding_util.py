@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,3 +35,4 @@ def EncodeToAscii(value):
     new_str = unicode(value, encoding='utf-8', errors='ignore')
     result = new_str.encode('ascii', 'ignore')
   return result
+

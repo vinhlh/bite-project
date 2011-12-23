@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -133,3 +131,4 @@ app = webapp2.WSGIApplication(
      ('/check_gdata_login_status', CheckGdataLoginStatus),
      ('/gdata_session_token_saver', SessionTokenSaver),
     ])
+

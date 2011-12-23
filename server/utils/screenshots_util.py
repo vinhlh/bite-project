@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -38,3 +36,4 @@ def DecodeBase64PNG(data):
   prefix = 'data:image/png;base64,'
   content = data[len(prefix):]
   return base64.b64decode(content)
+

@@ -92,3 +92,4 @@ def JsonEncode(testers):
     JSON encoded str representation of the list.
   """
   return json.dumps(testers, cls=TestCycleUserEncoder)
+

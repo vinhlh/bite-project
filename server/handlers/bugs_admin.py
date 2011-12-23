@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,3 +73,4 @@ class ImportBug(base.BaseHandler):
 
 app = webapp2.WSGIApplication([('/admin/bugs', ImportBug)],
                               debug=True)
+

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -189,3 +187,4 @@ def GetAllTestInfo(suite_key_str, user=None):
   suite = bite_suite.BiteSuite.get(db.Key(suite_key_str))
   # Assume the saved query overrides the stored tests.
   return suite_test_map.GetAllTestInfoOfSuite(suite_key_str)
+
