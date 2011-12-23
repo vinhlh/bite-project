@@ -777,7 +777,7 @@ bite.client.Content.prototype.loadTestsConsole = function() {
 
 /**
  * Handles request sent via chrome.extension.sendRequest().
- * @param {!Object.<string, string, Object>} request Object Data sent in
+ * @param {!Object.<string, string|Object>} request Object Data sent in
  *     the request.
  * @param {MessageSender} sender An object containing information about the
  *     script context that sent the request.
@@ -796,7 +796,7 @@ bite.client.Content.prototype.onRequest = function(request, sender, callback) {
 
 /**
  * Handles the script related commands.
- * @param {!Object.<string, string, Object>} request Object Data sent in
+ * @param {!Object.<string, string|Object>} request Object Data sent in
  *     the request.
  * @param {MessageSender} sender An object containing information about the
  *     script context that sent the request.
