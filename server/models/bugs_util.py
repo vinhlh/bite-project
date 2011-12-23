@@ -78,7 +78,7 @@ def StateFromStatus(status, provider):
     else:
       logging.error('Unrecognized IssueTracker status: %s', lowered)
       return UNKNOWN
-  if cmp(provider, Provider.LOCAL) == 0:
+  elif cmp(provider, Provider.LOCAL) == 0:
     if lowered in LOCAL_STATE_STATUS_MAP:
       return LOCAL_STATE_STATUS_MAP[lowered]
     else:

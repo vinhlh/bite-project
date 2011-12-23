@@ -60,8 +60,9 @@ class BugsForUrlHandler(base.BaseHandler):
     if current_user:
       user_email = current_user.email()
 
-    if users.is_current_user_admin() and self.GetOptionalParameter('user', None):
-      user_email = self.GetOptionalParameter('user')
+    if users.is_current_user_admin():
+      # If current user is an admin allow the overriding of the user_email.
+      user_email = self.GetOptionalParameter('user', user_email)
 
     target_url = self.GetRequiredParameter('target_url')
     state = self.GetOptionalParameter('state', None)

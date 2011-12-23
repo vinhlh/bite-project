@@ -51,6 +51,7 @@ class Bug(db.Model):
     project: Name of the project this bug is associated with.
     provider: Source provider of the bug information.
     author: The user who first reported tihs bug.
+    author_id: Identifies the user in the provider backend.
     author_url: URL to the profile of the bug's author
     status: Status of the bug (eg. active, fixed, closed) when it
         was crawled.

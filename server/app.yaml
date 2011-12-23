@@ -18,7 +18,7 @@
 #     http://code.google.com/appengine/docs/python/config/appconfig.html
 #
 # This version number forces folks to deploy with:
-#     appcfg.py -V <desired_app_version> -A <desired_app_name> /path/to/bundle
+#     appcfg.py -A <desired_app_id> -V <desired_app_version> /path/to/bundle
 
 application: invalid-do-not-change-see-comments
 version: invalid-do-not-change-see-comments
@@ -78,12 +78,11 @@ handlers:
 
 - url: /cycle/\w+/testers
   script: handlers.testers.app
-  login: admin
+  login: required
 
 - url: /cycle/\w+/testers/all
   script: handlers.testers.app
   login: required
-
   
 # Screenshots URLs.
 - url: /screenshots/upload
@@ -108,9 +107,11 @@ handlers:
 - url: /check_login_status
   script: handlers.login_handler.app
   login: required
+
 - url: /check_gdata_login_status
   script: handlers.login_handler.app
   login: required
+
 - url: /gdata_session_token_saver
   script: handlers.login_handler.app
   login: required
@@ -124,21 +125,19 @@ handlers:
 - url: /get_bugs_for_url
   script: handlers.get_bugs.app
   login: required
-  secure: always
 
 - url: /provider/\w+/project/\w+/bugs/\w+
   script: handlers.get_bugs.app
-  login: admin
+  login: required
 
 - url: /automateRpf
   script: handlers.home_handler.app
   login: required
-  secure: always
 
 # Bug reporting.
 - url: /bugs/new
   script: handlers.report_bug.app
-  login: admin
+  login: required
 
 - url: /bugs/update
   script: handlers.report_bug.app
@@ -222,6 +221,11 @@ handlers:
 - url: /styles
   static_dir: styles
 
+# Storage handlers
+- url: /storage.*
+  script: handlers.storage_handler.app
+
+
 # Crawler tasks URLs.
 - url: /tasks/crawl/issuetracker/.*
   script: crawlers.issuetracker_crawler.app
@@ -231,13 +235,6 @@ handlers:
 - url: /_ereporter.*
   script: google.appengine.ext.ereporter.report_generator.application
   login: admin
-  secure: always
-
-# Storage handlers
-- url: /storage.*
-  script: handlers.storage_handler.app
-  secure: always
-
 
 skip_files:
 - ^(.*/)?app\.yaml

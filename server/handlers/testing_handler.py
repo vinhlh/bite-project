@@ -56,7 +56,7 @@ class TestAddTestsHandler(base.BaseHandler):
     self.RenderTemplate('add_tests.html', {})
 
 
-app = webappw.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/testing/suite_test', TestSuiteHandler),
      ('/testing/add_tests', TestAddTestsHandler)],
     debug=True)
