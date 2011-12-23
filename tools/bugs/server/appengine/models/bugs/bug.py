@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -311,3 +309,4 @@ def Update(id, data):
     logging.error('bug.Update: Exception while updating bug (%s): %s.  Given '
                   'data of %s' % (id, e, tempdata))
     raise UpdateError
+

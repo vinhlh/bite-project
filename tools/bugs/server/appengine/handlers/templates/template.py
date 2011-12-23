@@ -113,15 +113,8 @@ class NewTemplateHandler(base.BaseHandler):
                         {'alert': 'Bug Template succesfully created.'})
 
 
-application = webapp.WSGIApplication(
+app = webapp.WSGIApplication(
     [('/get_templates', GetTemplatesHandler),
      ('/new_template', NewTemplateHandler)],
     debug=True)
 
-
-def main(unused_argv):
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main(sys.argv)

@@ -1,5 +1,3 @@
-#!/usr/bin/python2.7
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -79,3 +77,4 @@ routes = [
                 methods=['POST'], schemes=['https'])
 ]
 app = webapp2.WSGIApplication(routes, debug=True)
+

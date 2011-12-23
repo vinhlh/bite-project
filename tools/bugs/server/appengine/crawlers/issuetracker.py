@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -205,17 +203,10 @@ def GetUpdatesUrl(project_name, max_results=1000):
           (project_name, max_results))
 
 
-application = webapp.WSGIApplication(
+app = webapp.WSGIApplication(
     [('/tasks/crawl/issuetracker/crawl_recent_updates',
       CrawlRecentUpdatesWorker),
      ('/tasks/crawl/issuetracker/recrawl_project',
       RecrawlProjectWorker)],
     debug=True)
 
-
-def main(unused_argv):
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main(sys.argv)

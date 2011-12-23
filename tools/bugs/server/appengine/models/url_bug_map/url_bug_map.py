@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -322,3 +320,4 @@ def DeleteBugAndMappings(key_name):
   if bug:
     bug.delete()
   return mappings_deleted
+

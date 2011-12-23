@@ -1,5 +1,3 @@
-#!/usr/bin/python2.7
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,11 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""New bug creation functionality."""
+"""Retrieve bugs based on url from mapping functionality.
+
+The retrieval returns the following data
+
+    [[url, [bug*]]+]
+
+url associated with a set of bugs.  The url can be a full url, domain, domain +
+path, etc.
+bug is the entire details of a given bug.
+
+The data returned will be a list containing all the given urls and
+componentized versions of those urls.  Each url will be broken into the
+following:
+
+    full url, url_domain + url_path, url_domain
+
+Each component will contain all the bugs that contain those components.
+"""
 
 
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
+
 
 # Disable 'Import not at top of file' lint error.
 # pylint: disable-msg=C6204
@@ -38,3 +54,4 @@ class Error(Exception):
 
 def Urls(data):
   pass
+

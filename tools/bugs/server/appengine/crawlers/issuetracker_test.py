@@ -1,4 +1,4 @@
-#!/usr/bin/python2.4
+#!/usr/bin/python
 #
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
@@ -41,3 +41,4 @@ def main(unused_):
 
 if __name__ == '__main__':
   app.run()
+
