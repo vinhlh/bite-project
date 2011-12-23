@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -48,3 +46,4 @@ class ShowEventsHandler(base.BaseHandler):
 app = webapp2.WSGIApplication(
     [('/event/show_all', ShowEventsHandler)],
     debug=True)
+

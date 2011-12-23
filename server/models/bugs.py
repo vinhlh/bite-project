@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -358,3 +356,4 @@ def JsonEncode(bugs):
     JSON encoded str representation of the list.
   """
   return json.dumps(bugs, cls=BugEncoder)
+

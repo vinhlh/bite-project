@@ -151,3 +151,4 @@ def StoreBugTemplate(template_id, name, urls, project, backend_project,
     template.display_order = display_order
   template.put()
   return template
+

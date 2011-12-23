@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -61,3 +59,4 @@ def GetEventData(event):
           'props': [{'label': 'action', 'value': action},
                     {'label': 'by', 'value': email},
                     {'label': 'around', 'value': str(event.created_time)}]}
+

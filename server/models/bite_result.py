@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -187,3 +185,4 @@ def GetResultsOfRun(run_key_str, number):
   """Gets a number of results of the specified run."""
   return (BiteResult.all().filter('run =', db.Key(run_key_str)).
           order('-finished_time').fetch(number))
+

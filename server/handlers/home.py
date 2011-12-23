@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,3 +60,4 @@ class HomeRequestHandler(base.BaseHandler):
 app = webapp2.WSGIApplication(
     [('/', HomeRequestHandler)],
     debug=True)
+

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,3 +47,4 @@ app = webapp2.WSGIApplication(
      ('/cycle/(\w+)/testers', TestersCycleHandler),
      ('/cycle/(\w+)/testers/all', TestersCycleHandler)],
     debug=True)
+

@@ -1,6 +1,4 @@
-#!/usr/bin/python
-#
-# Copyright 2011 Google Inc. All Rights Reserved.
+# Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -76,3 +74,4 @@ class ImportBug(base.BaseHandler):
 
 app = webapp2.WSGIApplication([('/admin/bugs', ImportBug)],
                               debug=True)
+

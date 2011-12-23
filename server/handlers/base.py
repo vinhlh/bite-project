@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -160,3 +158,4 @@ class BaseHandler(webapp2.RequestHandler):
     """
     path = os.path.join(os.path.dirname(__file__), path, name)
     self.response.out.write(template.render(path, template_args))
+

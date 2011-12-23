@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -62,3 +60,4 @@ app = webapp2.WSGIApplication(
     [('/testing/suite_test', TestSuiteHandler),
      ('/testing/add_tests', TestAddTestsHandler)],
     debug=True)
+

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -280,3 +278,4 @@ def AddPreexisting(project, test_name, resource_url, resource_id,
 def GetUniqueId():
   """Returns a unique 128 bit identifier as a string."""
   return str(uuid.uuid4())
+

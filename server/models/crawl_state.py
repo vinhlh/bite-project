@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -118,3 +116,4 @@ def StoreCrawlResults(provider, project_name, start_index, end_index,
     return last_crawl
 
   return _db.run_in_transaction(txn)
+

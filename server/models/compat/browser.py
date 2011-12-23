@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -185,3 +183,4 @@ def GetBrowserVersions(order_by='chrome_version', reverse=False):
       ordering = '-%s' % order_by
     q.order(ordering)
   return _FetchAll(q)
+

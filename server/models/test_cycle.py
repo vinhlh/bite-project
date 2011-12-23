@@ -78,3 +78,4 @@ def JsonEncode(cycles):
     JSON encoded str representation of the list.
   """
   return json.dumps(cycles, cls=TestCycleEncoder)
+

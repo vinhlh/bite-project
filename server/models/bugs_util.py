@@ -1,5 +1,3 @@
-#!/usr/bin/python
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -106,3 +104,4 @@ def GetUserLink(provider, email):
   if Provider.ISSUETRACKER
     user_link = 'http://code.google.com/u/' + email.split('@')[0]
   return encoding_util.EncodeToAscii(user_link)
+
