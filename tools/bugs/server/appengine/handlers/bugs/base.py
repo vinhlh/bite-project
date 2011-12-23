@@ -24,8 +24,7 @@ try:
 except ImportError:
   pass  # This will fail on unittest, ok to pass.
 
-#from handlers import base
-from bugs import tempbase as base
+from handlers import base
 
 
 class Error(base.Error):
