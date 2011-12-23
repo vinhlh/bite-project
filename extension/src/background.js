@@ -99,14 +99,11 @@ bite.client.Background.PREVIOUS_USE_KEY = 'bite-client-background-previous-use';
 
 
 /**
-
-/**
- * URL path for the "get bugs for URL" API.
+ * Path for retrieving bugs based on url(s).
  * @type {string}
  * @private
  */
-bite.client.Background.prototype.fetchBugsApiPath_ =
-    '/get_bugs_for_url';
+bite.client.Background.BUGS_URLS_ = '/urls';
 
 
 /**
@@ -164,15 +161,14 @@ bite.client.Background.FetchEventType = {
  * @private
  */
 bite.client.Background.prototype.getFetchBugsUrl_ = function(targetUrl) {
-  var queryData = goog.Uri.QueryData.createFromMap(
-      {'target_url': targetUrl});
+  var queryData = goog.Uri.QueryData.createFromMap({'target_url': targetUrl});
 
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var result = goog.Uri.parse(server);
-  result.setPath(this.fetchBugsApiPath_);
-  result.setQueryData(queryData);
+  var url = goog.Uri.parse(server);
+  url.setPath(bite.client.Background.BUGS_URLS_);
+  url.setQueryData(queryData);
 
-  return result.toString();
+  return url.toString();
 };
 
 
