@@ -99,7 +99,6 @@ def GetUserLink(provider, email):
   """
   # Using else as a catch-all to default to issue tracker.
   user_link = ''
-  if email and provider == Provider.ISSUETRACKER
+  if email and provider == Provider.ISSUETRACKER:
     user_link = 'http://code.google.com/u/' + email.split('@')[0]
   return encoding_util.EncodeToAscii(user_link)
-

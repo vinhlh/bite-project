@@ -56,7 +56,7 @@ def AddTestCycle(provider, project, cycle_id):
   query = TestCycle.all(keys_only=True).filter('provider = ', provider)
   query = query.filter('provider =', provider).filter('cycle_id =', cycle_id)
   cycle = query.get()
-  if not cycle
+  if not cycle:
     cycle = TestCycle(provider=provider,
                       project=project,
                       cycle_id=cycle_id)
