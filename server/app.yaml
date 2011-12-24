@@ -201,7 +201,6 @@ handlers:
 - url: /storage.*
   script: handlers.storage_handler.app
 
-
 # Crawler tasks URLs.
 - url: /tasks/crawl/issuetracker/.*
   script: crawlers.issuetracker_crawler.app
