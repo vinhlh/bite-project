@@ -552,11 +552,11 @@ bite.client.console.NewBug.prototype.submitHandler_ = function() {
 
   // Construct new bug data and send a post to the server.
   var data = {
+    'title': title,
+    'url': this.url_,
+    'summary': notes,
     'provider': provider,
     'project': project,
-    'title': title,
-    'repro': notes,
-    'url': this.url_,
     'target_element': descriptor,
     'recording_link': this.recordingLink_,
     'version': goog.userAgent.VERSION

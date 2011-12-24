@@ -667,8 +667,8 @@ bite.client.Background.prototype.onRequest =
       break;
     case Bite.Constants.HUD_ACTION.CREATE_BUG:
       if (request['details'] &&
-          request['details']['repro'] && request['details']['title']) {
-        request['details']['repro'] +=
+          request['details']['summary'] && request['details']['title']) {
+        request['details']['summary'] +=
             this.getNewScriptUrl_('bugs', request['details']['title']);
       }
       bugs.api.create(request['details'], callback);
