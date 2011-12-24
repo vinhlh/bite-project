@@ -64,12 +64,12 @@ class CreateHandler(base.BugsHandler):
         raise InvalidJson
 
     try:
-      id = create.Create(data)
+      key = create.Create(data)
     except create.Error:
       raise CreationError('Failed to create a new bug.')
 
     self.response.code = 200
-    self.response.out.write(json.dumps({'id': id}))
+    self.response.out.write(json.dumps({'key': key}))
 
 
 routes = [

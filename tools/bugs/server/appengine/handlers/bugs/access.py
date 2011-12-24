@@ -30,9 +30,9 @@ from bugs.models.bugs import update
 class BadBugError(base.Error):
   """Raised if an error occurs converting a bug object to a json string."""
 
-  def __init__(self, id):
+  def __init__(self, key):
     msg = ('Get bug (%s) failed due to failure to convert bug object to JSON '
-           'string.' % id)
+           'string.' % key)
     base.Error.__init__(self, msg=msg)
 
 
@@ -46,8 +46,8 @@ class GetError(base.Error):
 class InvalidJson(base.Error):
   """Raised if an error occurs processing input data."""
 
-  def __init__(self, id):
-    msg = 'Updating bug (%s) failed due to invalid json data.' % id
+  def __init__(self, key):
+    msg = 'Updating bug (%s) failed due to invalid json data.' % key
     base.Error.__init__(self, msg=msg)
 
 
@@ -63,8 +63,8 @@ class AccessHandler(base.BugsHandler):
 
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
-  def put(self, id):
-    """Update a bug entry with the given data using the given id."""
+  def put(self, key):
+    """Update a bug entry with the given data using the given key."""
     data_json_str = self.GetRequiredParameter('data_json_str')
     if not data_json_str:
       data = {}
@@ -72,51 +72,52 @@ class AccessHandler(base.BugsHandler):
       try:
         data = json.loads(data_json_str)
       except (ValueError, TypeError, OverflowError):
-        raise InvalidJson(id)
+        raise InvalidJson(key)
 
-    id = int(id)
+    key = int(key)
     try:
-      update.Update(id, data)
-    except update.InvalidIdError:
-      raise UpdateError('Id (%s) did not match any stored bugs.' % id)
+      update.Update(key, data)
+    except update.InvalidKeyError:
+      raise UpdateError('Key (%s) did not match any stored bugs.' % key)
     except update.UpdateError:
-      raise UpdateError('An error occurred trying to update bug (id=%s).' % id)
+      raise UpdateError('An error occurred trying to update bug (key=%s).' %
+                        key)
 
     self.response.code = 200
-    self.response.out.write(json.dumps({'id': id}))
+    self.response.out.write(json.dumps({'key': key}))
 
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
-  def get(self, id):
-    """Get a bug entry using the given id.
+  def get(self, key):
+    """Get a bug entry using the given key.
 
     Args:
-      id: The id of the bug to retrieve. (integer)
+      key: The key of the bug to retrieve. (integer)
 
     Raises:
-      GetError: No bug for the given id was found.
+      GetError: No bug for the given key was found.
       BadBugError: Unable to convert bug details to a JSON string.
     """
-    id = int(id)
-    logging.info('access.get: id = %s' % id)
+    key = int(key)
+    logging.info('access.get: key = %s' % key)
     try:
-      data = get.Get(id)
+      data = get.Get(key)
       logging.info('Got bug')
     except get.Error:
-      raise GetError('Failed to find bug for the given id (%s).' % id)
+      raise GetError('Failed to find bug for the given key (%s).' % key)
 
     try:
       data_str = json.dumps(data)
       logging.info('json string for bug: %s' % data_str)
     except (ValueError, TypeError, OverflowError):
-      raise BadBugError(id)
+      raise BadBugError(key)
 
     self.response.code = 200
     self.response.out.write(json.dumps({'data_json_str': data_str}))
 
 
 routes = [
-  webapp2.Route(r'/bugs/<id:\d+>', handler=AccessHandler, name='bugs_access',
+  webapp2.Route(r'/bugs/<key:\d+>', handler=AccessHandler, name='bugs_access',
                 methods=['GET', 'PUT'], schemes=['https'])
 ]
 app = webapp2.WSGIApplication(routes, debug=True)

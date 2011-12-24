@@ -45,7 +45,7 @@ class CreateError(Exception):
   pass
 
 
-class InvalidIdError(Exception):
+class InvalidKeyError(Exception):
   """Raised if the given key does not match a stored model."""
   pass
 
@@ -138,7 +138,8 @@ class Bug(db.Model):
             'url': self.url,
             'summary': self.summary,
             'provider': self.provider,
-            'bug_id': self.bug_id,
+            # TODO (jason.stredwick): Id for historical reasons; update.
+            'id': self.bug_id,
             'author': self.author,
             'author_id': self.author_id,
             'reported_on': self.reported_on,
@@ -192,8 +193,9 @@ class Bug(db.Model):
     # Provide details
     if 'provider' in obj:
       self.provider = obj['provider']
-    if 'bug_id' in obj:
-      self.bug_id = obj['bug_id']
+    # TODO (jason.stredwick): Id for historical reasons; update.
+    if 'id' in obj:
+      self.bug_id = obj['id']
     if 'author' in obj:
       self.author = obj['author']
     if 'author_id' in obj:
@@ -250,7 +252,7 @@ def Create(data):
     data: An object used to create a new model. (dict)
 
   Returns:
-    Return the id for the new model. (integer)
+    Return the key for the new model. (integer)
 
   Raises:
     CreateError: Raised if something goes wrong while creating a new bug.
@@ -258,56 +260,61 @@ def Create(data):
   try:
     bug = Bug()
     bug.Patch(data)
-    id = bug.put().id()
+    key = bug.put().id()
+
+    if bug.provider == Provider.DATASTORE:
+      bug.bug_id = key
+      bug.put()
   except (TypeError, db.Error), e:
     logging.error('bug.Create: Exception while creating bug: %s' % e)
     raise CreateError
-  return id
+  return key
 
 
-def Get(id):
-  """Returns the bug details for the given id.
+def Get(key):
+  """Returns the bug details for the given key.
 
   Args:
-    id: The id of the bug to retrieve. (integer)
+    key: The key of the bug to retrieve. (integer)
 
   Returns:
     Returns the bug details as an object. (dict)
 
   Raises:
-    InvalidIdError: Raised if the id does not match a stored bug.
+    InvalidKeyError: Raised if the key does not match a stored bug.
   """
   try:
-    bug = Bug.get_by_id(id)
+    bug = Bug.get_by_id(key)
     if not bug:
-      raise InvalidIdError
-  except (db.Error, InvalidIdError), e:
-    logging.error('bug.Get: Exception while retrieving bug (%s): %s' % (id, e))
-    raise InvalidIdError
+      raise InvalidKeyError
+  except (db.Error, InvalidKeyError), e:
+    logging.error('bug.Get: Exception while retrieving bug (%s): %s' %
+                  (key, e))
+    raise InvalidKeyError
   return bug.ToDict()
 
 
-def Update(id, data):
-  """Update the bug specified by the given id with the given data.
+def Update(key, data):
+  """Update the bug specified by the given key with the given data.
 
   Args:
-    id: The id of the bug to update. (integer)
+    key: The key of the bug to update. (integer)
     data: An object used to update the model details. (dict)
 
   Returns:
-    Return the id of the bug updated.
+    Return the key of the bug updated.
 
   Raises:
-    InvalidIdError: Raised if the id does match a stored bug.
+    InvalidKeyError: Raised if the key does match a stored bug.
     UpdateError: Raised if there was an error updating the bug.
   """
   try:
-    bug = Bug.get_by_id(id)
+    bug = Bug.get_by_id(key)
     if not bug:
-      raise InvalidIdError
-  except (db.Error, InvalidIdError), e:
-    logging.error('bug.Update: Invalid id (%s): %s' % (id, e))
-    raise InvalidIdError
+      raise InvalidKeyError
+  except (db.Error, InvalidKeyError), e:
+    logging.error('bug.Update: Invalid key (%s): %s' % (key, e))
+    raise InvalidKeyError
 
   try:
     bug.Patch(data)
@@ -317,6 +324,6 @@ def Update(id, data):
     if 'screenshot' in tempdata:
       del tempdata['screenshot']
     logging.error('bug.Update: Exception while updating bug (%s): %s.  Given '
-                  'data of %s' % (id, e, tempdata))
+                  'data of %s' % (key, e, tempdata))
     raise UpdateError
 
