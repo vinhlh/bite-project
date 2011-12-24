@@ -178,8 +178,9 @@ class SaveZipFile(base.BaseHandler):
     """Given a set of files as a json string and saves to db.
 
     Raises:
-      json.JSONDecodeError: Raised if there was an error parsing the json
-        string.
+      TypeError: Unsupported key type; json.
+      OverflowError: Circular reference; json.
+      ValueError: Invalid value, out of range; json.
       zip_util.BadInput: Raised for bad inputs supplied to zip_util functions.
     """
     json_string = self.GetRequiredParameter('json')
@@ -242,7 +243,7 @@ class GetProject(base.BaseHandler):
 
     try:
       self.response.out.write(json.dumps(data))
-    except json.JSONDecodeError:
+    except (TypeError, OverflowError, ValueError):
       self.error(400)
 
 
@@ -256,7 +257,7 @@ class SaveProject(base.BaseHandler):
 
     try:
       data = json.loads(data_string)
-    except json.JSONDecodeError:
+    except (TypeError, OverflowError, ValueError):
       # TODO(jasonstredwick): Change from error codes to an error response.
       self.error(400)
       return
@@ -297,4 +298,3 @@ app = webapp2.WSGIApplication(
      ('/storage/saveproject', SaveProject),
      ('/storage/getprojectnames', GetProjectNames)
     ])
-

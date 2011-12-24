@@ -548,10 +548,10 @@ bite.client.console.NewBug.prototype.getNewScriptUrl_ = function(
 
 /**
  * Finishes the submission of a new bug after receiving the server url.
- * @param {string} url The server url.
+ * @param {string} serverUrl The server url.
  * @private
  */
-bite.client.console.NewBug.prototype.submitHandlerSend_ = function(url) {
+bite.client.console.NewBug.prototype.submitHandlerSend_ = function(serverUrl) {
   // Extract data for the new bug.
   var selectedIndex = this.templatesList_.selectedIndex;
   var selectedTemplate = this.templatesList_.options[selectedIndex].value;
@@ -565,9 +565,8 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(url) {
   var project = details.backendProject;
   var provider = details.backendProvider;
   var notes = this.notesTextArea_.value;
-  var server = url;
-  var postUrl = new goog.Uri(server);
-  postUrl.setPath('/bugs/new');
+  var url = new goog.Uri(serverUrl);
+  url.setPath('/bugs');
 
   notes += this.getNewScriptUrl_(server, 'bugs', title);
 
@@ -601,22 +600,32 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(url) {
   if (screenshot) {
     data['screenshot'] = screenshot;
   }
+  var dataStr = '{}';
+  try {
+    dataStr = goog.json.serialize(data);
+  } catch (error) {
+    console.error('Failed to convert object to a JSON string while filing a ' +
+                  'new bug.');
+  }
 
   // TODO(jasonstredwick): Change how new bugs are submitted so the dialog
   // remains open but uneditable until the result of the save is resolved.
   // Then once resolved correctly, close the popup.  Otherwise, post an error
   // message, handle the situation, and allow them the chance to submit again.
-  var responseHandler = function(success, url) {
-    if (success) {
-      goog.global.window.open(url);
-    }
+  console.log('server url: ' + serverUrl);
+  var responseHandler = function(success, id) {
+    console.log('new bug id: ' + id);
+    //if (success) {
+    //  goog.global.window.open(url);
+    //}
   };
+  data = {'data_json_str': dataStr};
   var parameters = goog.Uri.QueryData.createFromMap(data).toString();
-  bite.common.net.xhr.async.post(postUrl.toString(), parameters,
-                                 responseHandler);
+  bite.common.net.xhr.async.post(url.toString(), parameters, responseHandler);
 
   // Inform the other bug related consoles that they need to update.
-  chrome.extension.sendRequest({action: Bite.Constants.HUD_ACTION.UPDATE_DATA});
+  var action = {action: Bite.Constants.HUD_ACTION.UPDATE_DATA};
+  chrome.extension.sendRequest(action);
 
   // Record success and clean up console.
   label = 'SUCCESS: New Bug submitted to project ' + project + '.';

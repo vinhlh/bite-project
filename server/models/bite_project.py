@@ -18,8 +18,8 @@ Bite Project model is used to differ projects, which is created by
 a lead.
 """
 
-__author__ = 'phu@google.com (Po Hu)'
-__author__ = 'jasonstredwick@google.com (Jason Stredwick)'
+__author__ = ('phu@google.com (Po Hu)'
+              'jasonstredwick@google.com (Jason Stredwick)')
 
 import json
 

@@ -356,4 +356,3 @@ def JsonEncode(bugs):
     JSON encoded str representation of the list.
   """
   return json.dumps(bugs, cls=BugEncoder)
-

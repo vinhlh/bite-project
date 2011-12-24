@@ -95,12 +95,12 @@ bite.client.TemplateManager.FETCH_TEMPLATE_PATH_ = '/get_templates';
  */
 bite.client.TemplateManager.DEFAULT_TEMPLATE_ = {
   id: 'bite_default_bug',
-  name: 'Other',
+  name: 'Datastore Default',
   urls: [],
-  project: 'Other',
-  backendProject: '',
-  backendProvider: Bite.Constants.Providers.ISSUETRACKER,
-  selectorText: 'Other',
+  project: 'datastore-default',
+  backendProject: 'datastore-default',
+  backendProvider: Bite.Constants.Providers.DATASTORE,
+  selectorText: 'Datastore Default',
   displayOrder: 0,
   noteText: 'Describe your problem: '
 };

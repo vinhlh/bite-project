@@ -278,4 +278,3 @@ def AddPreexisting(project, test_name, resource_url, resource_id,
 def GetUniqueId():
   """Returns a unique 128 bit identifier as a string."""
   return str(uuid.uuid4())
-

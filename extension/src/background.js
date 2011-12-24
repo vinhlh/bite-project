@@ -99,23 +99,20 @@ bite.client.Background.PREVIOUS_USE_KEY = 'bite-client-background-previous-use';
 
 
 /**
-
-/**
- * URL path for the "get bugs for URL" API.
+ * Path for retrieving bugs based on url(s).
  * @type {string}
  * @private
  */
-bite.client.Background.prototype.fetchBugsApiPath_ =
-    '/get_bugs_for_url';
+bite.client.Background.BUGS_URLS_ = '/urls';
 
 
 /**
- * URL path for the get bugs API.
+ * First part of the retrieve bug handler.  Appending an id is required to
+ * complete the path.
  * @type {string}
  * @private
  */
-bite.client.Background.prototype.getBugApiPath_ =
-    '/bugs/get';
+bite.client.Background.BUGS_GET_ = '/bugs/';
 
 
 /**
@@ -123,26 +120,7 @@ bite.client.Background.prototype.getBugApiPath_ =
  * @type {string}
  * @private
  */
-bite.client.Background.prototype.bugsUpdateStatusApiPath_ =
-    '/bugs/update_status';
-
-
-/**
- * URL path for the "update bug binding" API.
- * @type {string}
- * @private
- */
-bite.client.Background.prototype.bugsUpdateBindingApiPath_ =
-    '/bugs/update_binding';
-
-
-/**
- * URL path for the "update bug recording" API.
- * @type {string}
- * @private
- */
-bite.client.Background.prototype.bugsUpdateRecordingApiPath_ =
-    '/bugs/update_recording';
+bite.client.Background.BUGS_UPDATE_ = '/bugs/';
 
 
 /**
@@ -183,15 +161,14 @@ bite.client.Background.FetchEventType = {
  * @private
  */
 bite.client.Background.prototype.getFetchBugsUrl_ = function(targetUrl) {
-  var queryData = goog.Uri.QueryData.createFromMap(
-      {'target_url': targetUrl});
+  var queryData = goog.Uri.QueryData.createFromMap({'target_url': targetUrl});
 
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var result = goog.Uri.parse(server);
-  result.setPath(this.fetchBugsApiPath_);
-  result.setQueryData(queryData);
+  var url = goog.Uri.parse(server);
+  url.setPath(bite.client.Background.BUGS_URLS_);
+  url.setQueryData(queryData);
 
-  return result.toString();
+  return url.toString();
 };
 
 
@@ -450,20 +427,29 @@ bite.client.Background.prototype.sendRequestToTab_ =
  *     The callback function to call when done updating.
  * @private
  */
-bite.client.Background.prototype.updateBugStatus_ = function(
-    request, callback) {
-  var queryParams = {'project': request['project'],
-                     'provider': request['provider'],
-                     'id': request['id'],
-                     'comment': request['comment'],
-                     'status': (request['status'] || '')};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
+bite.client.Background.prototype.updateBugStatus_ = function(request,
+                                                             callback) {
+  var msg = 'Update bug status failed; not enough information.'
+  if (!request || !('id' in request)) {
+    console.error(msg);
+    callback && callback({'success': false, 'error': msg});
+    return;
+  } else if(!('status' in request)) {
+    console.log('Update bug status ignored; no status value provided.');
+    // The values passed in here were derived from the report_bugs.py handler
+    // for updating the status (the original).
+    // TODO (jason.stredwick): Fix the strange nature of the return.
+    callback && callback({'success': true, 'error': true});
+    return;
+  }
 
+  var queryParams = {'status': request['status']};
+  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
-  url.setPath(this.bugsUpdateStatusApiPath_);
+  url.setPath(bite.client.Background.BUGS_UPDATE_ + request['id']);
 
-  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
+  bite.common.net.xhr.async.put(url.toString(), queryData.toString(),
       goog.bind(this.updateBugCallback_, this, callback));
 };
 
@@ -475,20 +461,29 @@ bite.client.Background.prototype.updateBugStatus_ = function(
  *     The callback function to call when done updating.
  * @private
  */
-bite.client.Background.prototype.updateBugBinding_ = function(
-    request, callback) {
-  var queryParams = {'project': request['project'],
-                     'provider': request['provider'],
-                     'id': request['id'],
-                     'action': request['update_action'],
-                     'target_element': (request['target_element'] || '')};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
+bite.client.Background.prototype.updateBugBinding_ = function(request,
+                                                              callback) {
+  var msg = 'Update bug binding failed; not enough information.'
+  if (!request || !('id' in request)) {
+    console.error(msg);
+    callback && callback({'success': false, 'error': msg});
+    return;
+  } else if(!('target_element' in request)) {
+    console.log('Update bug binding ignored; no binding value provided.');
+    // The values passed in here were derived from the report_bugs.py handler
+    // for updating the status (the original).
+    // TODO (jason.stredwick): Fix the strange nature of the return.
+    callback && callback({'success': true, 'error': true});
+    return;
+  }
 
+  var queryParams = {'target_element': request['target_element']};
+  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
-  url.setPath(this.bugsUpdateBindingApiPath_);
+  url.setPath(bite.client.Background.BUGS_UPDATE_ + request['id']);
 
-  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
+  bite.common.net.xhr.async.put(url.toString(), queryData.toString(),
       goog.bind(this.updateBugCallback_, this, callback));
 };
 
@@ -500,20 +495,29 @@ bite.client.Background.prototype.updateBugBinding_ = function(
  *     The callback function to call when done updating.
  * @private
  */
-bite.client.Background.prototype.updateBugRecording_ = function(
-    request, callback) {
-  var queryParams = {'project': request['project'],
-                     'provider': request['provider'],
-                     'id': request['id'],
-                     'action': request['update_action'],
-                     'recording_link': (request['recording_link'] || '')};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
+bite.client.Background.prototype.updateBugRecording_ = function(request,
+                                                                callback) {
+  var msg = 'Update bug recording failed; not enough information.'
+  if (!request || !('id' in request)) {
+    console.error(msg);
+    callback && callback({'success': false, 'error': msg});
+    return;
+  } else if(!('recording_link' in request)) {
+    console.log('Update bug recording ignored; no recording value provided.');
+    // The values passed in here were derived from the report_bugs.py handler
+    // for updating the status (the original).
+    // TODO (jason.stredwick): Fix the strange nature of the return.
+    callback && callback({'success': true, 'error': true});
+    return;
+  }
 
+  var queryParams = {'recording_link': request['recording_link']};
+  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
-  url.setPath(this.bugsUpdateRecordingApiPath_);
+  url.setPath(bite.client.Background.BUGS_UPDATE_ + request['id']);
 
-  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
+  bite.common.net.xhr.async.put(url.toString(), queryData.toString(),
       goog.bind(this.updateBugCallback_, this, callback));
 };
 
@@ -545,15 +549,12 @@ bite.client.Background.prototype.updateBugCallback_ =
  * @param {function(!{success: boolean, data: Object}): void} callback
  * @private
  */
-bite.client.Background.prototype.getBugData_ = function(
-    request, callback) {
+bite.client.Background.prototype.getBugData_ = function(request, callback) {
+  var getCallback = goog.bind(this.getBugDataCallback_, this, callback);
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
-  url.setPath(this.getBugApiPath_);
-  url.setParameterValue('id', request['id']);
-  url.setParameterValue('provider', request['provider']);
-  bite.common.net.xhr.async.get(url.toString(),
-      goog.bind(this.getBugDataCallback_, this, callback));
+  url.setPath(bite.client.Background.BUGS_GET_ + request['id']);
+  bite.common.net.xhr.async.get(url.toString(), getCallback);
 };
 
 
@@ -564,12 +565,10 @@ bite.client.Background.prototype.getBugData_ = function(
  * @param {Object} data List of dictionaries containing bug data.
  * @private
  */
-bite.client.Background.prototype.getBugDataCallback_ =
-    function(callback, success, data) {
-  // "data" will be a list of bugs found, typically only one issue should
-  // be returned, but in the case of multiple bugs with the same ID simply
-  // return the first.
-  callback({'success': success, 'data': goog.json.parse(data)[0]});
+bite.client.Background.prototype.getBugDataCallback_ = function(callback,
+                                                                success,
+                                                                data) {
+  callback({'success': success, 'data': goog.json.parse(data)});
 };
 
 

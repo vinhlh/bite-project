@@ -39,12 +39,10 @@ def JsonStringToZip(data):
 
   Raises:
     BadInput: Raised by ObjToZip.
-    json.JSONDecodeError: An error that occurs while converting the data
-      into an object.
   """
   try:
     obj = json.loads(data)
-  except TypeError:
+  except (ValueError, OverflowError, TypeError):
     raise BadInput('Invalid data received.')
 
   return ObjToZip(obj)
@@ -98,4 +96,3 @@ def ObjToZip(data):
   zip_file.close()
 
   return (title, output.getvalue())
-

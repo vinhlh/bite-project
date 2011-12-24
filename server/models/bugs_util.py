@@ -101,4 +101,3 @@ def GetUserLink(provider, email):
   if email and provider == Provider.ISSUETRACKER:
     user_link = 'http://code.google.com/u/' + email.split('@')[0]
   return encoding_util.EncodeToAscii(user_link)
-

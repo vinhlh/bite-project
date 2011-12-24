@@ -85,7 +85,7 @@ def GetProjectJson(name):
 
   try:
     return json.dumps(obj)
-  except json.JSONDecodeError:
+  except (TypeError, OverflowError, ValueError):
     return None
 
 
@@ -191,4 +191,3 @@ def DeleteFiles(project):
   js_files = project.jsfile_set.get()
   if js_files:
     db.delete(js_files)
-

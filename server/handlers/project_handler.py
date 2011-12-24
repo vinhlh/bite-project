@@ -14,8 +14,8 @@
 
 """Bite project handler."""
 
-__author__ = 'phu@google.com (Po Hu)'
-__author__ = 'jasonstredwick@google.com (Jason Stredwick)'
+__author__ = ('phu@google.com (Po Hu)'
+              'jasonstredwick@google.com (Jason Stredwick)')
 
 
 import json
@@ -112,4 +112,3 @@ app = webapp2.WSGIApplication(
      ('/project/get_default', GetDefaultProjectHandler),
      ('/project/list', ListProjectHandler)],
     debug=True)
-

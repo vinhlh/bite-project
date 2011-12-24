@@ -157,4 +157,3 @@ app = webapp2.WSGIApplication(
      ('/bugs/update_recording', UpdateRecordingHandler),
      ('/bugs/update_status', UpdateStatusHandler)],
     debug=True)
-

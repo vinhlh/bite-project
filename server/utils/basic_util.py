@@ -125,4 +125,3 @@ def SetMainNav(main_nav, name):
       nav['selected'] = True
       break
   main_nav['name'] = name
-

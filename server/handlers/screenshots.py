@@ -96,4 +96,3 @@ app = webapp2.WSGIApplication(
      ('/screenshots/fetch', GetHandler),
      ('/screenshots/search', SearchHandler)
     ], debug=True)
-

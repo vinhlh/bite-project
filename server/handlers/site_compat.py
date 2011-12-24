@@ -386,8 +386,7 @@ class TesterTestsHandler(SiteCompatHandler):
     self.get()
 
 
-_NO_USER_RESPONSE = json.dumps({'user': None,
-                                'test': None})
+_NO_USER_RESPONSE = json.dumps({'user': None, 'test': None})
 
 
 # Disable 'Invalid method name' lint error.
@@ -640,4 +639,3 @@ app = webapp2.WSGIApplication(
      ('/compat/admins', AdminsHandler),
      ('/compat/tester', TestersHandler)],
     debug=True)
-

@@ -131,4 +131,3 @@ app = webapp2.WSGIApplication(
      ('/check_gdata_login_status', CheckGdataLoginStatus),
      ('/gdata_session_token_saver', SessionTokenSaver),
     ])
-

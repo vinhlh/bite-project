@@ -82,4 +82,3 @@ class BugsForUrlHandler(base.BaseHandler):
 app = webapp2.WSGIApplication(
     [('/get_bugs_for_url', BugsForUrlHandler)],
     debug=True)
-
