@@ -55,7 +55,8 @@ if (typeof(chrome) == 'undefined') {
   };
 }
 
-var mockIssueTrackerBugData = {id: '12345',
+var mockIssueTrackerBugData = {key: 98,
+                               id: '12345',
                                title: 'Unit Test Issue Tracker Bug',
                                status: 'Testing',
                                state: 'active',
@@ -501,23 +502,21 @@ function testCreateBugCommandListeners() {
  */
 function testPostBugUpdate() {
   var expectedQueryParams = {};
+  var details = {'key': 98, 'comment': 'Unit Test Comment'};
   var testComment = goog.dom.createDom(goog.dom.TagName.DIV,
                         {'id': 'bug-popup-comment',
                          'innerHTML': 'Unit Test Comment'});
-  goog.dom.appendChild(goog.global.document.body, testComment);
+  goog.dom.appendChild(goog.dom.getDocument().body, testComment);
   stubs_.set(chrome.extension, 'sendRequest',
              goog.bind(this.mockCaller.sendRequest, this.mockCaller));
 
   // Mock out the disableSubmitPopup_ here, as that's tested elsewhere.
   this.popupClient.disableSubmitPopup_ = emptyFunction;
   this.popupClient.postBugUpdate_(mockIssueTrackerBugData,
-                                  goog.global.document.body);
+                                  goog.dom.getDocument().body);
 
   expectedQueryParams = {action: Bite.Constants.HUD_ACTION.UPDATE_BUG_STATUS,
-                         project: mockIssueTrackerBugData['project'],
-                         provider: mockIssueTrackerBugData['provider'],
-                         id: mockIssueTrackerBugData['id'],
-                         comment: 'Unit Test Comment'};
+                         details: details};
 
   // Verify the expected call and query parameters were sent.
   assertEquals('Verify sendRequest was called as expected.',
@@ -530,18 +529,15 @@ function testPostBugUpdate() {
   assertEquals('Verify a status update wasn\'t sent',
                undefined, this.mockCaller.lastParameters[0]['status']);
 
+  details.status = 'Resolved';
   var testStatus = goog.dom.createDom(goog.dom.TagName.SELECT,
                        {'id': 'bug-update-status',
                         'innerHTML': '<OPTION>Resolved</OPTION>'});
-  goog.dom.appendChild(goog.global.document.body, testStatus);
+  goog.dom.appendChild(goog.dom.getDocument().body, testStatus);
   expectedQueryParams = {action: Bite.Constants.HUD_ACTION.UPDATE_BUG_STATUS,
-                         project: mockIssueTrackerBugData['project'],
-                         provider: mockIssueTrackerBugData['provider'],
-                         id: mockIssueTrackerBugData['id'],
-                         comment: 'Unit Test Comment',
-                         status: 'Resolved'};
+                         details: details};
   this.popupClient.postBugUpdate_(mockIssueTrackerBugData,
-                                  goog.global.document.body);
+                                  goog.dom.getDocument().body);
 
   // Verify the expected call and query parameters were sent.
   assertEquals('Verify sendRequest was called as expected.',

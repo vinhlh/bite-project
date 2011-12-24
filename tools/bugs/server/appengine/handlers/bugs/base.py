@@ -35,10 +35,6 @@ class Error(base.Error):
 
 
 class BugsHandler(base.BaseHandler):
-  """Base handler class for all bugs handlers.
-
-  TODO (jason.stredwick): Once the rest of the server is updated to webapp2
-  change the inherited request handler to base.BaseHandler.
-  """
+  """Base handler class for all bugs handlers."""
   pass
 

@@ -18,13 +18,6 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import json
 import logging
 import webapp2

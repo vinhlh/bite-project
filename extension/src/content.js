@@ -747,13 +747,10 @@ bite.client.Content.prototype.loadBugsConsole = function() {
  */
 bite.client.Content.prototype.submitBugRecording_ = function(
     bugData, recording_link) {
-  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG_RECORDING,
+  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
                      'project': bugData['project'],
-                     'provider': (bugData['provider'] ||
-                                  Bite.Constants.Providers.ISSUETRACKER),
-                     'id': bugData['id'],
-                     'update_action': Bite.Constants.BugRecordingActions.UPDATE,
-                     'recording_link': recording_link};
+                     'details': {'key': bugData['key'],
+                                 'recording_link': recording_link}};
 
   chrome.extension.sendRequest(requestData);
 };

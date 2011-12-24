@@ -35,27 +35,32 @@ builtins:
 handlers:
 
 # Bugs
-#   Bugs API
+#   Bugs API - "secure: always" is set for now until the client/server has been
+#       adapted back to using either.
 #   [POST]; create a new bug
 - url: /bugs
   script: bugs.handlers.bugs.create.app
   secure: always
   login: required
+  secure: always
 #   [GET, PUT]; get/update a bug by id
 - url: /bugs/\d+
   script: bugs.handlers.bugs.access.app
   secure: always
   login: required
+  secure: always
 #   [GET]; retrieve a list of bugs
 - url: /bugs/all
   script: bugs.handlers.bugs.all.app
   secure: always
   login: required
+  secure: always
 #   [GET]: retrieve a list of bugs by url
 - url: /bugs/url
   script: bugs.handlers.bugs.url.app
   secure: always
   login: required
+  secure: always
 
 # Test cycles.
 - url: /cycles
@@ -75,11 +80,11 @@ handlers:
   script: handlers.testers.app
   login: required
 
-- url: /cycle/\w+/testers
+- url: /cycle/(\w+)/testers
   script: handlers.testers.app
   login: required
 
-- url: /cycle/\w+/testers/all
+- url: /cycle/(\w+)/testers/all
   script: handlers.testers.app
   login: required
   
@@ -125,7 +130,7 @@ handlers:
   script: handlers.get_bugs.app
   login: required
 
-- url: /provider/\w+/project/\w+/bugs/\w+
+- url: /provider/(\w+)/project/(\w+)/bugs/(\w+)
   script: handlers.get_bugs.app
   login: required
 

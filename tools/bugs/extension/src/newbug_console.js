@@ -29,13 +29,12 @@ goog.require('bite.client.Container');
 goog.require('bite.client.TemplateManager');
 goog.require('bite.client.Templates');
 goog.require('bite.client.console.NewBugTemplate');
-goog.require('bite.common.net.xhr.async');
 goog.require('bite.console.Helper');
+goog.require('bugs.type');
 goog.require('common.client.ElementDescriptor');
 goog.require('common.client.RecordModeManager');
 goog.require('goog.Timer');
 goog.require('goog.Uri');
-goog.require('goog.Uri.QueryData');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.classes');
@@ -498,17 +497,6 @@ bite.client.console.NewBug.prototype.cleanUp_ = function() {
 
 
 /**
- * Submits the New Bug Form.  The first step is to retrieve the server url.
- * @private
- */
-bite.client.console.NewBug.prototype.submitHandler_ = function() {
-  var request = {action: Bite.Constants.HUD_ACTION.GET_SERVER_CHANNEL};
-  chrome.extension.sendRequest(request,
-                               goog.bind(this.submitHandlerSend_, this));
-};
-
-
-/**
  * Saves the script to server.
  * @private
  */
@@ -529,29 +517,12 @@ bite.client.console.NewBug.prototype.saveScriptToServer_ = function() {
 
 
 /**
- * Returns the new script url.
- * @param {string} server The server url.
- * @param {string} project The project name.
- * @param {string} script The script name.
+ * Submits the New Bug Form.  The first step is to retrieve the server url.
  * @private
  */
-bite.client.console.NewBug.prototype.getNewScriptUrl_ = function(
-    server, project, script) {
-  var url = new goog.Uri(server);
-  url.setPath('automateRpf');
-  url.setParameterValue('projectName', project);
-  url.setParameterValue('scriptName', script);
-  url.setParameterValue('location', 'web');
-  return url.toString();
-};
+bite.client.console.NewBug.prototype.submitHandler_ = function() {
+  this.saveScriptToServer_();
 
-
-/**
- * Finishes the submission of a new bug after receiving the server url.
- * @param {string} serverUrl The server url.
- * @private
- */
-bite.client.console.NewBug.prototype.submitHandlerSend_ = function(serverUrl) {
   // Extract data for the new bug.
   var selectedIndex = this.templatesList_.selectedIndex;
   var selectedTemplate = this.templatesList_.options[selectedIndex].value;
@@ -564,17 +535,12 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(serverUrl) {
   var details = this.templates_[selectedTemplate];
   var project = details.backendProject;
   var provider = details.backendProvider;
-  var notes = this.notesTextArea_.value;
-  var url = new goog.Uri(serverUrl);
-  url.setPath('/bugs');
-
-  notes += this.getNewScriptUrl_(server, 'bugs', title);
-
+  var notes = this.notesTextArea_.value || '';
   var descriptor =
       common.client.ElementDescriptor.generateElementDescriptorNAncestors(
           this.selectedElement_, 3);
-
   var label = '';
+
   var screenshot = null;
   if (this.screenshotCheckbox_.checked) {
     screenshot = this.screenshot_;
@@ -583,8 +549,6 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(serverUrl) {
     label = 'NOT_SELECTED';
   }
   bite.client.console.NewBug.logEvent_('SubmitNewBugScreenshot', label);
-
-  this.saveScriptToServer_();
 
   // Construct new bug data and send a post to the server.
   var data = {
@@ -600,28 +564,38 @@ bite.client.console.NewBug.prototype.submitHandlerSend_ = function(serverUrl) {
   if (screenshot) {
     data['screenshot'] = screenshot;
   }
-  var dataStr = '{}';
-  try {
-    dataStr = goog.json.serialize(data);
-  } catch (error) {
-    console.error('Failed to convert object to a JSON string while filing a ' +
-                  'new bug.');
-  }
 
-  // TODO(jasonstredwick): Change how new bugs are submitted so the dialog
-  // remains open but uneditable until the result of the save is resolved.
-  // Then once resolved correctly, close the popup.  Otherwise, post an error
-  // message, handle the situation, and allow them the chance to submit again.
-  console.log('server url: ' + serverUrl);
-  var responseHandler = function(success, id) {
-    console.log('new bug id: ' + id);
-    //if (success) {
-    //  goog.global.window.open(url);
-    //}
-  };
-  data = {'data_json_str': dataStr};
-  var parameters = goog.Uri.QueryData.createFromMap(data).toString();
-  bite.common.net.xhr.async.post(url.toString(), parameters, responseHandler);
+  var requestData = {'action': Bite.Constants.HUD_ACTION.CREATE_BUG,
+                     'details': data};
+  chrome.extension.sendRequest(requestData,
+                               goog.bind(this.onSubmitComplete_, this));
+};
+
+
+/**
+ * Handles the response from the server after filing a new bug.
+ * @param {!{success: boolean, error: string, key: number}} result The object
+ *     containing the results of the create new bug request.
+ * @private
+ */
+bite.client.console.NewBug.prototype.onSubmitComplete_ = function(result) {
+  // TODO (jason.stredwick): Remove log after testing of handlers is
+  // complete.
+  console.log('new bug id: ' + id);
+  // TODO (jason.stredwick): Revisit the opening of the bug in a new window
+  // after filing.  Disabled for now.
+  //if (success) {
+  //  goog.global.window.open(url);
+  //}
+
+  // TODO (jason.stredwick): Test out failing to create a bug.
+  // TODO (jason.stredwick): Figure out alternative to alert.  Using alert
+  // because it is used elsewhere in this interface.  Find a non-blocking
+  // alternative.
+  if (!result['success']) {
+    alert(result['error']);
+    return;
+  }
 
   // Inform the other bug related consoles that they need to update.
   var action = {action: Bite.Constants.HUD_ACTION.UPDATE_DATA};

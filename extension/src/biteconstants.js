@@ -222,12 +222,12 @@ Bite.Constants.BITE_CONSOLE_LOCK = 'biteConsoleLock';
  */
 Bite.Constants.HUD_ACTION = {
   CHANGE_RECORD_TAB: 'changeRecordTab',
+  CREATE_BUG: 'createBug',
   CREATE_RPF_WINDOW: 'createRpfWindow',
   ENSURE_CONTENT_SCRIPT_LOADED: 'ensureContentScriptLoaded',
   FETCH_BUGS: 'fetchBugs',
   FETCH_TEST_DATA: 'fetchTestData',
   FETCH_BUGS_DATA: 'fetchBugsData',
-  GET_BUG: 'getBug',
   GET_CURRENT_USER: 'getCurrentUser',
   GET_LOCAL_STORAGE: 'getLocalStorage',
   GET_RECORDING_LINK: 'getRecordingLink',
@@ -245,9 +245,7 @@ Bite.Constants.HUD_ACTION = {
   START_NEW_BUG: 'startNewBug',
   TOGGLE_BUGS: 'toggleBugs',
   TOGGLE_TESTS: 'toggleTests',
-  UPDATE_BUG_STATUS: 'updateBugStatus',
-  UPDATE_BUG_BINDING: 'updateBugBinding',
-  UPDATE_BUG_RECORDING: 'updateBugRecording',
+  UPDATE_BUG: 'updateBug',
   UPDATE_DATA: 'updateData'
 };
 

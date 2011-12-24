@@ -26,15 +26,18 @@ from google.appengine.ext import db
 from models import bugs_util
 
 
-# Allowed bug states.
-ACTIVE = 'active'
-RESOLVED = 'resolved'
-CLOSED = 'closed'
-UNKNOWN = 'unknown'
-
 # Bug providers.
-DATASTORE = 'datastore'
-ISSUETRACKER = 'issuetracker'
+class Provider(object):
+  DATASTORE = 'datastore'
+  ISSUETRACKER = 'issuetracker'
+
+
+# Allowed bug states.
+class State(object):
+  ACTIVE = 'active'
+  CLOSED = 'closed'
+  RESOLVED = 'resolved'
+  UNKNOWN = 'unknown'
 
 
 class CreateError(Exception):
@@ -71,6 +74,7 @@ class Bug(db.Model):
     provider: Source provider of the bug information.
     bug_id: The ID of the bug within the provider's bug database.
     author: The user who first reported this bug; from provider.
+    author_id: Identifies the user in the provider backend.
     reported_on: The date the bug was first opened; from provider.
     last_update: Date the bug was last updated; from provider.
     last_updater: The last user to update the bug; from provider.
@@ -88,24 +92,27 @@ class Bug(db.Model):
   # Bug Details
   title = db.StringProperty(required=False)
   status = db.StringProperty(required=False)
-  state = db.StringProperty(required=False, default=UNKNOWN,
-                            choices=(ACTIVE, RESOLVED, CLOSED, UNKNOWN))
+  state = db.StringProperty(required=False, default=State.UNKNOWN,
+                            choices=(State.ACTIVE, State.RESOLVED,
+                                     State.CLOSED, State.UNKNOWN))
   url = db.StringProperty(required=False, multiline=True, default='')
   summary = db.TextProperty(required=False)
   added = db.DateTimeProperty(required=False, auto_now_add=True)
   modified = db.DateTimeProperty(required=False, auto_now=True)
 
   # Provider Related Details
-  provider = db.StringProperty(required=False, default=DATASTORE,
-                               choices=(DATASTORE, ISSUETRACKER))
+  provider = db.StringProperty(required=False, default=Provider.DATASTORE,
+                               choices=(Provider.DATASTORE,
+                                        Provider.ISSUETRACKER))
   bug_id = db.StringProperty(required=False)
   author = db.StringProperty(required=False)
+  author_id = db.StringProperty(require=False)
   reported_on = db.StringProperty(required=False)
   last_update = db.StringProperty(required=False)
   last_updater = db.StringProperty(required=False)
   project = db.StringProperty(required=False)
   priority = db.StringProperty(required=False)
-  details_link = db.LinkProperty(required=False)
+  details_link = db.StringProperty(required=False)
 
   # Attachments
   has_target_element = db.BooleanProperty(required=False, default=False)
@@ -124,7 +131,7 @@ class Bug(db.Model):
     Returns:
       The bug details as an object. (dict)
     """
-    return {'id': self.key().id(),
+    return {'key': self.key().id(),
             'title': self.title,
             'status': self.status,
             'state': self.state,
@@ -133,6 +140,7 @@ class Bug(db.Model):
             'provider': self.provider,
             'bug_id': self.bug_id,
             'author': self.author,
+            'author_id': self.author_id,
             'reported_on': self.reported_on,
             'last_update': self.last_update,
             'last_updater': self.last_updater,
@@ -188,6 +196,8 @@ class Bug(db.Model):
       self.bug_id = obj['bug_id']
     if 'author' in obj:
       self.author = obj['author']
+    if 'author_id' in obj:
+      self.author_id = obj['author_id']
     if 'reported_on' in obj:
       self.reported_on = obj['reported_on']
     if 'last_update' in obj:

@@ -30,6 +30,7 @@ goog.require('bite.client.TemplateManager');
 goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
+goog.require('bugs.api');
 goog.require('goog.Timer');
 goog.require('goog.Uri');
 goog.require('goog.json');
@@ -99,31 +100,6 @@ bite.client.Background.PREVIOUS_USE_KEY = 'bite-client-background-previous-use';
 
 
 /**
- * Path for retrieving bugs based on url(s).
- * @type {string}
- * @private
- */
-bite.client.Background.BUGS_URLS_ = '/urls';
-
-
-/**
- * First part of the retrieve bug handler.  Appending an id is required to
- * complete the path.
- * @type {string}
- * @private
- */
-bite.client.Background.BUGS_GET_ = '/bugs/';
-
-
-/**
- * URL path for the "update bug status" API.
- * @type {string}
- * @private
- */
-bite.client.Background.BUGS_UPDATE_ = '/bugs/';
-
-
-/**
  * URL path for the "get test assigned to me" API.
  * @type {string}
  * @private
@@ -152,6 +128,22 @@ bite.client.Background.FetchEventType = {
 };
 
 
+/**
+ * Returns the new script url.
+ * @param {string} project The project name.
+ * @param {string} script The script name.
+ * @private
+ */
+bite.client.Background.prototype.getNewScriptUrl_ = function(project, script) {
+  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
+  var url = new goog.Uri(server);
+  url.setPath('automateRpf');
+  url.setParameterValue('projectName', project);
+  url.setParameterValue('scriptName', script);
+  url.setParameterValue('location', 'web');
+  return url.toString();
+};
+
 
 /**
  * Gets the fetch bugs URL.
@@ -165,7 +157,7 @@ bite.client.Background.prototype.getFetchBugsUrl_ = function(targetUrl) {
 
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
-  url.setPath(bite.client.Background.BUGS_URLS_);
+  url.setPath(bugs.api.Handler_.URLS);
   url.setQueryData(queryData);
 
   return url.toString();
@@ -421,158 +413,6 @@ bite.client.Background.prototype.sendRequestToTab_ =
 
 
 /**
- * Updates a Bug's status.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @private
- */
-bite.client.Background.prototype.updateBugStatus_ = function(request,
-                                                             callback) {
-  var msg = 'Update bug status failed; not enough information.'
-  if (!request || !('id' in request)) {
-    console.error(msg);
-    callback && callback({'success': false, 'error': msg});
-    return;
-  } else if(!('status' in request)) {
-    console.log('Update bug status ignored; no status value provided.');
-    // The values passed in here were derived from the report_bugs.py handler
-    // for updating the status (the original).
-    // TODO (jason.stredwick): Fix the strange nature of the return.
-    callback && callback({'success': true, 'error': true});
-    return;
-  }
-
-  var queryParams = {'status': request['status']};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(bite.client.Background.BUGS_UPDATE_ + request['id']);
-
-  bite.common.net.xhr.async.put(url.toString(), queryData.toString(),
-      goog.bind(this.updateBugCallback_, this, callback));
-};
-
-
-/**
- * Updates a Bug's bindings.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @private
- */
-bite.client.Background.prototype.updateBugBinding_ = function(request,
-                                                              callback) {
-  var msg = 'Update bug binding failed; not enough information.'
-  if (!request || !('id' in request)) {
-    console.error(msg);
-    callback && callback({'success': false, 'error': msg});
-    return;
-  } else if(!('target_element' in request)) {
-    console.log('Update bug binding ignored; no binding value provided.');
-    // The values passed in here were derived from the report_bugs.py handler
-    // for updating the status (the original).
-    // TODO (jason.stredwick): Fix the strange nature of the return.
-    callback && callback({'success': true, 'error': true});
-    return;
-  }
-
-  var queryParams = {'target_element': request['target_element']};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(bite.client.Background.BUGS_UPDATE_ + request['id']);
-
-  bite.common.net.xhr.async.put(url.toString(), queryData.toString(),
-      goog.bind(this.updateBugCallback_, this, callback));
-};
-
-
-/**
- * Updates a Bug's recording.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @private
- */
-bite.client.Background.prototype.updateBugRecording_ = function(request,
-                                                                callback) {
-  var msg = 'Update bug recording failed; not enough information.'
-  if (!request || !('id' in request)) {
-    console.error(msg);
-    callback && callback({'success': false, 'error': msg});
-    return;
-  } else if(!('recording_link' in request)) {
-    console.log('Update bug recording ignored; no recording value provided.');
-    // The values passed in here were derived from the report_bugs.py handler
-    // for updating the status (the original).
-    // TODO (jason.stredwick): Fix the strange nature of the return.
-    callback && callback({'success': true, 'error': true});
-    return;
-  }
-
-  var queryParams = {'recording_link': request['recording_link']};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(bite.client.Background.BUGS_UPDATE_ + request['id']);
-
-  bite.common.net.xhr.async.put(url.toString(), queryData.toString(),
-      goog.bind(this.updateBugCallback_, this, callback));
-};
-
-
-/**
- * Handles update Bug's status server callback.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @param {boolean} success Whether or not the request was successful.
- * @param {string} data The data returned by the request or an error string.
- * @private
- */
-bite.client.Background.prototype.updateBugCallback_ =
-    function(callback, success, data) {
-  if (success) {
-    var response = goog.json.parse(data);
-    callback({'success': response['success'],
-              'error': response['error'] || ''});
-  } else {
-    console.error('Updating bug request encountered: ' + data);
-    callback({'success': false, 'error': data});
-  }
-};
-
-
-/**
- * Get's bug data for a specific ID.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, data: Object}): void} callback
- * @private
- */
-bite.client.Background.prototype.getBugData_ = function(request, callback) {
-  var getCallback = goog.bind(this.getBugDataCallback_, this, callback);
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(bite.client.Background.BUGS_GET_ + request['id']);
-  bite.common.net.xhr.async.get(url.toString(), getCallback);
-};
-
-
-/**
- * Handles get bug data server callback.
- * @param {function(!{success: boolean, data: Object}): void} callback
- * @param {boolean} success Whether or not the request was successful.
- * @param {Object} data List of dictionaries containing bug data.
- * @private
- */
-bite.client.Background.prototype.getBugDataCallback_ = function(callback,
-                                                                success,
-                                                                data) {
-  callback({'success': success, 'data': goog.json.parse(data)});
-};
-
-
-/**
  * Gets a list of templates from the server. If the request contains a
  * url, gets the templates for that url. If no url is given, returns all
  * templates.
@@ -807,23 +647,32 @@ bite.client.Background.prototype.onRequest =
     case Bite.Constants.HUD_ACTION.HIDE_ALL_CONSOLES:
       this.hideAllConsoles_();
       break;
-    case Bite.Constants.HUD_ACTION.UPDATE_BUG_STATUS:
-      this.updateBugStatus_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.GET_BUG:
-      this.getBugData_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.UPDATE_BUG_BINDING:
-      this.updateBugBinding_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.UPDATE_BUG_RECORDING:
-      this.updateBugRecording_(request, callback);
-      break;
     // UPDATE_DATA updates the data (such as bugs and tests) on the current
     // tab.
     case Bite.Constants.HUD_ACTION.UPDATE_DATA:
       chrome.tabs.getSelected(null, goog.bind(this.updateData_, this));
       break;
+
+    // Bug templates
+    case Bite.Constants.HUD_ACTION.GET_TEMPLATES:
+      this.getTemplates_(request, callback);
+      break;
+
+    // Bug information handling.
+    case Bite.Constants.HUD_ACTION.START_NEW_BUG:
+      chrome.tabs.getSelected(null, goog.bind(this.startNewBug_, this));
+      break;
+    case Bite.Constants.HUD_ACTION.UPDATE_BUG:
+      bugs.api.update(request['details'], callback);
+      break;
+    case Bite.Constants.HUD_ACTION.CREATE_BUG:
+      if (request['details'] &&
+          request['details']['repro'] && request['details']['title']) {
+        request['details']['repro'] +=
+            this.getNewScriptUrl_('bugs', request['details']['title']);
+      bugs.api.create(request['details'], callback);
+      break;
+
     case Bite.Constants.HUD_ACTION.GET_LOCAL_STORAGE:
       this.getLocalStorage_(request['key'], callback);
       break;
@@ -832,12 +681,6 @@ bite.client.Background.prototype.onRequest =
       break;
     case Bite.Constants.HUD_ACTION.REMOVE_LOCAL_STORAGE:
       this.removeLocalStorage_(request['key'], callback);
-      break;
-    case Bite.Constants.HUD_ACTION.GET_TEMPLATES:
-      this.getTemplates_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.START_NEW_BUG:
-      chrome.tabs.getSelected(null, goog.bind(this.startNewBug_, this));
       break;
     case Bite.Constants.HUD_ACTION.ENSURE_CONTENT_SCRIPT_LOADED:
       chrome.tabs.getSelected(

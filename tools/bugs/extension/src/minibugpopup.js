@@ -267,13 +267,9 @@ bite.client.MiniBugPopup.prototype.submitBugBinding_ = function(
        'event_action': 'SubmitBugBinding',
        'label': 'SUBMIT: Bug ' + bugData['id']});
 
-  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG_BINDING,
-                     'project': bugData['project'],
-                     'provider': (bugData['provider'] ||
-                                  Bite.Constants.Providers.ISSUETRACKER),
-                     'id': bugData['id'],
-                     'update_action': Bite.Constants.BugBindingActions.UPDATE,
-                     'target_element': descriptor};
+  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
+                     'details': {'key': bugData['key'],
+                                 'target_element': descriptor}};
 
   chrome.extension.sendRequest(requestData,
       goog.bind(this.refreshLocalBugData_, this,

@@ -399,12 +399,8 @@ bite.client.BugDetailsPopup.prototype.showBoundLabelMenu_ = function(
  */
 bite.client.BugDetailsPopup.prototype.submitRemoveBugBinding_ = function(
     bugData, callback) {
-  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG_BINDING,
-                     'project': bugData['project'],
-                     'provider': (bugData['provider'] ||
-                                  Bite.Constants.Providers.ISSUETRACKER),
-                     'id': bugData['id'],
-                     'update_action': Bite.Constants.BugBindingActions.CLEAR};
+  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
+                     'details': {'key': bugData['key'], 'target_element': ''}};
   chrome.extension.sendRequest(requestData,
       goog.bind(this.refreshLocalBugData_, this, callback));
 };
@@ -494,25 +490,26 @@ bite.client.BugDetailsPopup.prototype.postBugUpdate_ = function(
   // Disable the appearance of the popup while waiting for a response.
   this.disableSubmitPopup_();
 
-  var updateComment = goog.dom.getElement('bug-popup-comment').innerHTML;
-  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG_STATUS,
-                     'project': bugData['project'],
-                     'provider': bugData['provider'] ||
-                                 Bite.Constants.Providers.ISSUETRACKER,
-                     'id': bugData['id'],
-                     'comment': updateComment};
-
-
-  // Add a status change if one was specified, otherwise just send the comment.
-  if (goog.dom.getElement('bug-update-status')) {
-    var updatedObj = goog.dom.getElement('bug-update-status');
-    var updatedStatus = updatedObj[updatedObj.selectedIndex].innerHTML;
-    requestData['status'] = updatedStatus;
+  var details = {'key': bugData['key']};
+  var commentElem = goog.dom.getElement('bug-popup-comment');
+  if (commentElem) {
+    details['comment'] = contentElement.innerHTML;
+  }
+  var statusElem = goog.dom.getElement('bug-update-status');
+  var status = undefined;
+  if (statusElem) {
+    status = statusElem.innerHTML;
+    details['status'] = status;
   }
 
+  // TODO (jason.stredwick): I notice that the status in the bug data is not
+  // updated here and perhaps not elsewhere.  Look into this.
+  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
+                     'details': details};
+
   chrome.extension.sendRequest(requestData,
-       goog.bind(this.postBugUpdateHandler_, this, updatedStatus,
-                 bugData, container));
+       goog.bind(this.postBugUpdateHandler_, this, status, bugData,
+                 container));
 };
 
 
@@ -557,7 +554,8 @@ bite.client.BugDetailsPopup.prototype.postBugUpdateHandler_ = function(
 
 /**
  * Draws a popup Element that confirms the update to the bug.
- * @param {string} status The new status of the bug.
+ * @param {string=} status The new status of the bug, can be undefined if no
+ *     status value was updated.
  * @param {Object} bugData A dictionary of the Bug data elements.
  * @param {Node} container The container HTML element to draw in.
  * @param {string} result A JSON with the result.
