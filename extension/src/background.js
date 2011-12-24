@@ -670,6 +670,7 @@ bite.client.Background.prototype.onRequest =
           request['details']['repro'] && request['details']['title']) {
         request['details']['repro'] +=
             this.getNewScriptUrl_('bugs', request['details']['title']);
+      }
       bugs.api.create(request['details'], callback);
       break;
 
