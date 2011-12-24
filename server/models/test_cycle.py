@@ -53,7 +53,7 @@ class TestCycleEncoder(json.JSONEncoder):
 
 def AddTestCycle(provider, project, cycle_id):
   """Records a new test cycle if one doesn't exist."""
-  query = TestCycle.all(keys_only=True).filter('provider = ', provider)
+  query = TestCycle.all().filter('provider = ', provider)
   query = query.filter('provider =', provider).filter('cycle_id =', cycle_id)
   cycle = query.get()
   if not cycle:

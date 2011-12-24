@@ -19,7 +19,9 @@
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
+
 from google.appengine.ext.appstats import recording
+
 
 def webapp_add_wsgi_middleware(app):
   """Adds support for Appstats, the appengine RPC instrumentation service."""

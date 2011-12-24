@@ -53,13 +53,14 @@ class TestCycleUser(db.Model):
 
 def AddTestCycleUser(user, cycle):
   """Adds a new test cycle user mapping if one doesn't exists."""
-  query = TestCycleUser.all(keys_only=True).filter('user =', user)
-  user = query.filter('cycle =', cycle).get()
-  if not user:
-    user = TestCycleUser.get_or_insert(user=user,
-                                       cycle_id=cycle.cycle_id,
-                                       cycle=cycle)
-  return user
+  query = TestCycleUser.all().filter('user =', user)
+  cycle_user = query.filter('cycle =', cycle).get()
+  if not cycle_user:
+    cycle_user = TestCycleUser(user=user,
+                               cycle_id=cycle.cycle_id,
+                               cycle=cycle)
+    cycle_user.put()
+  return cycle_user
 
 
 def GetTesters(limit=10000):
