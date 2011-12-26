@@ -72,6 +72,11 @@ DEPS = {
     ROOT: os.path.join(DEPS_ROOT, 'closure', 'closure-library'),
     URL: 'http://closure-library.googlecode.com/svn/trunk/',
     CHECKOUT_COMMAND: 'svn checkout %s %s'
+  },
+  'urlnorm': {
+    ROOT: os.path.join(DEPS_ROOT, 'urlnorm'),
+    URL: 'git://gist.github.com/246089.git',
+    CHECKOUT_COMMAND: 'git clone %s %s'
   }
 }
 
@@ -378,6 +383,10 @@ def main():
 
   atom_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'atom')
   shutil.copytree(atom_src, os.path.join(SERVER_DST, 'atom'))
+
+  urlnorm_src = os.path.join(DEPS['urlnorm'][ROOT], 'urlnorm.py')
+  shutil.copy(urlnorm_src, os.path.join(SERVER_DST, 'third_party'))
+
 
 if __name__ == '__main__':
   main()
