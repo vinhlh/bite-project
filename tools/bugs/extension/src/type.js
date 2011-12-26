@@ -50,6 +50,19 @@ bugs.type.UrlBugMap;
 /**
  * Callback used by create and update handlers.
  *
+ * Called upon completion of the get request.  The object passed to the
+ * callback will return the success of the request.  Depending on the success
+ * the object will contain either an error property describing what went wrong
+ * or an object containing the data for the requested bug.
+ *
+ * @typedef{function(!{success: boolean, error: string, bug: bugs.type.Bug})}
+ */
+bugs.type.callbackReturnBug;
+
+
+/**
+ * Callback used by create and update handlers.
+ *
  * Called upon completion of the create or update request.  The object passed
  * to the callback will return the success of the request.  Depending on the
  * success the object will contain either an error property describing what
@@ -61,13 +74,14 @@ bugs.type.callbackReturnKey;
 
 
 /**
- * Callback used by create and update handlers.
+ * Callback used by the urls handlers.
  *
- * Called upon completion of the get request.  The object passed to the
+ * Called upon completion of the urls request.  The object passed to the
  * callback will return the success of the request.  Depending on the success
  * the object will contain either an error property describing what went wrong
  * or an object containing the data for the requested bug.
  *
- * @typedef{function(!{success: boolean, error: string, bug: bugs.type.Bug})}
+ * @typedef{function(!{success: boolean, error: string,
+ *                     bugMap: bugs.type.UrlBugMap})}
  */
-bugs.type.callbackReturnBug;
+bugs.type.callbackReturnUrlBugMap;

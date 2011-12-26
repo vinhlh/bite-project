@@ -146,51 +146,6 @@ bite.client.Background.prototype.getNewScriptUrl_ = function(project, script) {
 
 
 /**
- * Gets the fetch bugs URL.
- * @param {string} targetUrl URL to fetch bugs for.
- * @return {string} URL to the HUD API containing the targetUrl
- *     as an encoded parameter.
- * @private
- */
-bite.client.Background.prototype.getFetchBugsUrl_ = function(targetUrl) {
-  var queryData = goog.Uri.QueryData.createFromMap({'target_url': targetUrl});
-
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(bugs.api.Handler_.URLS);
-  url.setQueryData(queryData);
-
-  return url.toString();
-};
-
-
-/**
- * Updates the extension's badge.
- * @param {Tab} tab Tab requesting the bugs list.
- * @param {Object} request Object data sent in the request.
- * @private
- */
-bite.client.Background.prototype.updateBadge_ = function(tab, request) {
-  var text = null;
-  switch (request['action']) {
-    case bite.client.Background.FetchEventType.FETCH_BEGIN:
-      text = '...';
-      break;
-    case bite.client.Background.FetchEventType.FETCH_END:
-      var count = request['count'];
-      text = count.toString();
-      break;
-    default:
-      throw new Error('The specified action is not valid: ' +
-                      request['action']);
-  }
-
-  chrome.browserAction.setBadgeText({'text': text,
-                                     'tabId': tab.id});
-};
-
-
-/**
  * Gets tests for a given web page.
  * @param {Tab} tab Tab requesting the tests list.
  * @param {function(!*): void} callback Function to call with the list of tests.
@@ -237,15 +192,17 @@ bite.client.Background.prototype.fetchTestsDataCallback_ =
 /**
  * Gets bugs for a given webpage.
  * @param {Tab} tab Tab requesting the bugs list.
- * @param {function(!*): void} callback Function to call with the list of bugs.
+ * @param {function({bugs: Object, filters: Object})} callback
+ *     The callback fired with the set of bugs retrieved by url and bug
+ *     filters.
  * @private
  */
 bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
   this.updateBadge_(
       tab, {'action': bite.client.Background.FetchEventType.FETCH_BEGIN});
 
-  bite.common.net.xhr.async.get(this.getFetchBugsUrl_(tab.url),
-      goog.bind(this.fetchBugsDataCallback_, this, tab, callback));
+  bite.api.urls([tab.url],
+                goog.bind(this.fetchBugsDataCallback_, this, tab, callback));
 };
 
 
@@ -253,51 +210,80 @@ bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
  * Handles the response from the server to fetch bugs data.
  * @param {Tab} tab Tab requesting the bugs list.
  * @param {function({bugs: Object, filters: Object})} callback
- *     Callback function.
- * @param {boolean} success Whether the request was successful.
- * @param {string} data The data received by the request or an error string.
+ *     The callback fired with the set of bugs retrieved by url and bug
+ *     filters.
+ * @param {!{success: boolean, error: string,
+ *           bugMap: bugs.type.UrlBugMap}} result The results of the request.
  * @private
  */
-bite.client.Background.prototype.fetchBugsDataCallback_ =
-    function(tab, callback, success, data) {
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  if (!success) {
-    console.error('Failed to connect to server ' + server + ': ' + data);
-  }
-
-  var bugs = [];
-  try {
-    /**
-     * Bugs is an array of arrays in the format:
-     * [[urlPart, [bugs]], [urlPart, [bugs]]]
-     * Where URL part is either the full URL, Hostname + Path, or Hostname,
-     * of the target URL, and bugs is a list of bugs associated with the
-     * given urlPart. For example:
-     * [["www.google.com",
-     *   [{"status": "duplicate", "project": "chromium",..}, ...]]]
-     */
-    bugs = goog.json.parse(data);
-  } catch (error) {
-    // One possible reason is the user hasn't logged in SSO yet.
-    console.warn('The xmlhttp request failed because: ' + error);
-    callback({'bugs': null, 'filters': null});
+bite.client.Background.prototype.fetchBugsDataCallback_ = function(tab,
+                                                                   callback,
+                                                                   result) {
+  if (!request.success) {
+    console.error('Failed to retrieve bugs for url; ' + request.error);
     return;
   }
 
-  var length = 0;
-  for (var i = 0; i < bugs.length; ++i) {
+  /**
+   * Bugs is an array of arrays in the format:
+   * [[urlPart, [bugs]], [urlPart, [bugs]]]
+   * Where URL part is either the full URL, Hostname + Path, or Hostname,
+   * of the target URL, and bugs is a list of bugs associated with the
+   * given urlPart. For example:
+   * [["www.google.com",
+   *   [{"status": "duplicate", "project": "chromium",..}, ...]]]
+   */
+  var bugs = [];
+  var urlBugMap = request.bugMap;
+  var totalBugs = 0;
+  // Translate the urlBugMap into the bugs structure expected by the rest of
+  // the extension.
+  // TODO (jason.stredwick): Remvoe translation and update client to use new
+  // url to bug mapping.
+  for (var i = 0; i < urlBugMap.length; ++i) {
+    var url = urlBugMap[i]['url'];
+    var bugData = urlBugMap[i]['bugs'];
+
     // In order to count the number of bugs returned; for each result in the
-    // format [urlPart, [bugs]] we need to agregate the bugs count, which
-    // is the 2nd field in for each urlPart (index 1).
-    length += bugs[i][1].length;
+    // format [urlPart, [bugs]] we need to agregate the bugs count.
+    totalBugs += bugData.length;
+
+    // Create entry in translate bug structure.
+    bugs.push([url, bugData]);
   }
 
   this.updateBadge_(
       tab, {'action': bite.client.Background.FetchEventType.FETCH_END,
-            'count': length});
+            'count': totalBugs});
 
   callback({'filters': bite.options.data.getCurrentConfiguration(),
             'bugs': bugs});
+};
+
+
+/**
+ * Updates the extension's badge.
+ * @param {Tab} tab Tab requesting the bugs list.
+ * @param {Object} request Object data sent in the request.
+ * @private
+ */
+bite.client.Background.prototype.updateBadge_ = function(tab, request) {
+  var text = null;
+  switch (request['action']) {
+    case bite.client.Background.FetchEventType.FETCH_BEGIN:
+      text = '...';
+      break;
+    case bite.client.Background.FetchEventType.FETCH_END:
+      var count = request['count'];
+      text = count.toString();
+      break;
+    default:
+      throw new Error('The specified action is not valid: ' +
+                      request['action']);
+  }
+
+  chrome.browserAction.setBadgeText({'text': text,
+                                     'tabId': tab.id});
 };
 
 
