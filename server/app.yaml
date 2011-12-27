@@ -42,25 +42,21 @@ handlers:
   script: bugs.handlers.bugs.create.app
   secure: always
   login: required
-  secure: always
 #   [GET, PUT]; get/update a bug by id
 - url: /bugs/\d+
   script: bugs.handlers.bugs.access.app
   secure: always
   login: required
-  secure: always
 #   [GET]; retrieve a list of bugs
 - url: /bugs/all
   script: bugs.handlers.bugs.all.app
   secure: always
   login: required
-  secure: always
-#   [GET]: retrieve a list of bugs by url
-- url: /bugs/url
-  script: bugs.handlers.bugs.url.app
+#   [POST]: retrieve a list of bugs by url
+- url: /bugs/urls
+  script: bugs.handlers.bugs.urls.app
   secure: always
   login: required
-  secure: always
 
 # Test cycles.
 - url: /cycles

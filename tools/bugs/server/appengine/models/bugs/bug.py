@@ -106,7 +106,7 @@ class Bug(db.Model):
                                         Provider.ISSUETRACKER))
   bug_id = db.StringProperty(required=False)
   author = db.StringProperty(required=False)
-  author_id = db.StringProperty(require=False)
+  author_id = db.StringProperty(required=False)
   reported_on = db.StringProperty(required=False)
   last_update = db.StringProperty(required=False)
   last_updater = db.StringProperty(required=False)
@@ -263,8 +263,8 @@ def Create(data):
     key = bug.put().id()
 
     if bug.provider == Provider.DATASTORE:
-      bug.bug_id = key
-      bug.put()
+      bug.bug_id = str(key)
+      key = bug.put().id()
   except (TypeError, db.Error), e:
     logging.error('bug.Create: Exception while creating bug: %s' % e)
     raise CreateError
@@ -302,7 +302,7 @@ def Update(key, data):
     data: An object used to update the model details. (dict)
 
   Returns:
-    Return the key of the bug updated.
+    Return the key of the bug updated. (integer)
 
   Raises:
     InvalidKeyError: Raised if the key does match a stored bug.

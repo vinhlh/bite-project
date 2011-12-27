@@ -12,28 +12,40 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""New bug creation functionality."""
+"""New url bug mapping creation functionality."""
 
 
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
+from google.appengine.ext import db
 
 from bugs.models.bugs import bug
+from bugs.models.url_bug_map import url_bug_map
 
 
 class Error(Exception):
-  """Raised if an exception occurs while retrieving all bugs by url."""
+  """Raised if an exception occurs while creating the new mappings."""
   pass
 
 
-def Urls(data):
-  pass
+def Create(bug_key):
+  """Create a new url to bug mapping.
 
+  Args:
+    bug_key: The key for the bug to create a mapping for. (integer)
+
+  Returns:
+    The key of the newly created mapping or None if no mapping is possible.
+    (integer or None)
+
+  Raises:
+    Error: Raised if an error occurs while creating the mapping.
+  """
+  try:
+    bug_entity = bug.Bug.get_by_id(bug_key)
+    if not bug_entity:
+      raise Error
+    return url_bug_map.Create(bug_entity)
+  except (Error, url_bug_map.CreateError):
+    raise Error

@@ -579,15 +579,6 @@ bite.client.console.NewBug.prototype.submitHandler_ = function() {
  * @private
  */
 bite.client.console.NewBug.prototype.onSubmitComplete_ = function(result) {
-  // TODO (jason.stredwick): Remove log after testing of handlers is
-  // complete.
-  console.log('new bug id: ' + id);
-  // TODO (jason.stredwick): Revisit the opening of the bug in a new window
-  // after filing.  Disabled for now.
-  //if (success) {
-  //  goog.global.window.open(url);
-  //}
-
   // TODO (jason.stredwick): Test out failing to create a bug.
   // TODO (jason.stredwick): Figure out alternative to alert.  Using alert
   // because it is used elsewhere in this interface.  Find a non-blocking
@@ -597,12 +588,22 @@ bite.client.console.NewBug.prototype.onSubmitComplete_ = function(result) {
     return;
   }
 
+  // TODO (jason.stredwick): Remove log after testing of handlers is
+  // complete.
+  console.log('new bug with key: ' + result['key']);
+  // TODO (jason.stredwick): Revisit the opening of the bug in a new window
+  // after filing.  Disabled for now.
+  //if (success) {
+  //  goog.global.window.open(url);
+  //}
+
   // Inform the other bug related consoles that they need to update.
   var action = {action: Bite.Constants.HUD_ACTION.UPDATE_DATA};
   chrome.extension.sendRequest(action);
 
   // Record success and clean up console.
-  label = 'SUCCESS: New Bug submitted to project ' + project + '.';
+  var label = 'SUCCESS: New Bug submitted.';
+  //            'to project ' + result['project'] + '.';
   bite.client.console.NewBug.logEvent_('SubmitNewBug', label);
 
   this.destroyrootElement_();

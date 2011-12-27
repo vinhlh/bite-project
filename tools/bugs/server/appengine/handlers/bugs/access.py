@@ -108,12 +108,11 @@ class AccessHandler(base.BugsHandler):
 
     try:
       data_str = json.dumps(data)
-      logging.info('json string for bug: %s' % data_str)
     except (ValueError, TypeError, OverflowError):
       raise BadBugError(key)
 
     self.response.code = 200
-    self.response.out.write(json.dumps({'data_json_str': data_str}))
+    self.response.out.write(data_str)
 
 
 routes = [

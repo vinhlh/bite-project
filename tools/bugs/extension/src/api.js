@@ -25,6 +25,7 @@ goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
 goog.require('bugs.type');
+goog.require('goog.Uri.QueryData');
 
 
 /**
@@ -36,7 +37,7 @@ bugs.api.Handler_ = {
   CREATE: 'bugs',  // Handler: /bugs
   GET: 'bugs/',    // Handler: /bugs/\d+
   UPDATE: 'bugs/', // Handler: /bugs/\d+
-  URLS: 'urls'     // Handler: /urls
+  URLS: 'bugs/urls'     // Handler: /urls
 };
 
 
@@ -49,8 +50,9 @@ bugs.api.Handler_ = {
  */
 bugs.api.create = function(bug, opt_callback) {
   try {
-    var url = bite.api.constructUrl_(bugs.api.Handler_.CREATE);
-    var parameters = '{"data_json_str":' + JSON.stringify(bug) + '}';
+    var url = bugs.api.constructUrl_(bugs.api.Handler_.CREATE);
+    var data = {'data_json_str': JSON.stringify(bug)};
+    var parameters = goog.Uri.QueryData.createFromMap(data).toString();
     var callback = goog.partial(bugs.api.wrapperForKey_, opt_callback);
     bite.common.net.xhr.async.post(url, parameters, callback);
   } catch (error) {
@@ -68,7 +70,7 @@ bugs.api.create = function(bug, opt_callback) {
  */
 bugs.api.get = function(bug, opt_callback) {
   try {
-    var url = bite.api.constructUrl_(bugs.api.Handler_.GET + key);
+    var url = bugs.api.constructUrl_(bugs.api.Handler_.GET + key);
     var callback = goog.partial(bugs.api.wrapperForBug_, opt_callback);
     bite.common.net.xhr.async.get(url, callback);
   } catch (error) {
@@ -88,8 +90,9 @@ bugs.api.get = function(bug, opt_callback) {
  */
 bugs.api.update = function(bug, opt_callback) {
   try {
-    var url = bite.api.constructUrl_(bugs.api.Handler_.UPDATE + bug['key']);
-    var parameters = '{"data_json_str":' + JSON.stringify(bug) + '}';
+    var url = bugs.api.constructUrl_(bugs.api.Handler_.UPDATE + bug['key']);
+    var data = {'data_json_str': JSON.stringify(bug)};
+    var parameters = goog.Uri.QueryData.createFromMap(data).toString();
     var callback = goog.partial(bugs.api.wrapperForKey_, opt_callback);
     bite.common.net.xhr.async.put(url, parameters, callback);
   } catch (error) {
@@ -105,10 +108,11 @@ bugs.api.update = function(bug, opt_callback) {
  * @param {bugs.type.callbackReturnUrlBugMap=} opt_callback See details for the
  *     callbackReturnUrlBugMap type.
  */
-bugs.api.urls = function(target_url, opt_callback) {
+bugs.api.urls = function(target_urls, opt_callback) {
   try{
-    var url = bite.api.constructUrl_(bugs.api.Handler_.URLS);
-    var parameters = '{"data_json_str":' + JSON.stringify(target_url) + '}';
+    var url = bugs.api.constructUrl_(bugs.api.Handler_.URLS);
+    var data = {'data_json_str': JSON.stringify(target_urls)};
+    var parameters = goog.Uri.QueryData.createFromMap(data).toString();
     var callback = goog.partial(bugs.api.wrapperForUrlBugMap_, opt_callback);
     bite.common.net.xhr.async.post(url, parameters, callback);
   } catch (error) {
@@ -124,10 +128,9 @@ bugs.api.urls = function(target_url, opt_callback) {
  * @returns {string} The server url including the path to the handler.
  * @private
  */
-bite.api.constructUrl_ = function(path) {
-  return bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL) +
-         (url[url.length - 1] == '/' ? '' : '/') +
-         path;
+bugs.api.constructUrl_ = function(path) {
+  var url = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
+  return url + (url[url.length - 1] == '/' ? '' : '/') + path;
 };
 
 

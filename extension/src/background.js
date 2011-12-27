@@ -201,7 +201,7 @@ bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
   this.updateBadge_(
       tab, {'action': bite.client.Background.FetchEventType.FETCH_BEGIN});
 
-  bite.api.urls([tab.url],
+  bugs.api.urls([tab.url],
                 goog.bind(this.fetchBugsDataCallback_, this, tab, callback));
 };
 
@@ -219,8 +219,8 @@ bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
 bite.client.Background.prototype.fetchBugsDataCallback_ = function(tab,
                                                                    callback,
                                                                    result) {
-  if (!request.success) {
-    console.error('Failed to retrieve bugs for url; ' + request.error);
+  if (!result.success) {
+    console.error('Failed to retrieve bugs for url; ' + result.error);
     return;
   }
 
@@ -234,7 +234,7 @@ bite.client.Background.prototype.fetchBugsDataCallback_ = function(tab,
    *   [{"status": "duplicate", "project": "chromium",..}, ...]]]
    */
   var bugs = [];
-  var urlBugMap = request.bugMap;
+  var urlBugMap = result.bugMap;
   var totalBugs = 0;
   // Translate the urlBugMap into the bugs structure expected by the rest of
   // the extension.

@@ -36,15 +36,7 @@ __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
-
-from bugs.models.bugs import bug
+from bugs.models.url_bug_map import url_bug_map
 
 
 class Error(Exception):
@@ -52,6 +44,42 @@ class Error(Exception):
   pass
 
 
-def Urls(data):
-  pass
+def DeleteAllMappingsForBug(key_name):
+  """Deletes all mappings for the specified bug.
 
+  Args:
+    key_name: The key name of the bug.
+
+  Returns:
+    The total amount of mappings deleted.
+  """
+  total_deleted = 0
+  bug = bugs.GetBugByKey(key_name)
+  query = UrlBugMap.all(keys_only=True).filter('bug = ', bug)
+  mappings = query.fetch(_MAX_RESULTS_CAP)
+  while mappings:
+    total_deleted += len(mappings)
+    db.delete(mappings)
+    mappings = query.fetch(_MAX_RESULTS_CAP)
+
+  logging.info(
+      'DeleteAllMappingsForBug: total mappings deleted for bug %s: %d.',
+      key_name, total_deleted)
+  return total_deleted
+
+
+def DeleteBugAndMappings(key_name):
+  """Delete bug and all mappings assiciated with that bug.
+
+  Args:
+    key_name: The key name of the bug.
+
+  Returns:
+    The total amount of mappings deleted.
+  """
+  mappings_deleted = DeleteAllMappingsForBug(key_name)
+
+  bug = bugs.GetBugByKey(key_name)
+  if bug:
+    bug.delete()
+  return mappings_deleted

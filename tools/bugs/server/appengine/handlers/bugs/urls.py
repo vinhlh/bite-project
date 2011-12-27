@@ -12,17 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Get a set of bugs based on url."""
+"""Get a set of bugs based on url.
+
+Handler output is defined by the function:
+
+    get_bugs.GetBugsByUrls
+"""
 
 
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
 import json
+import logging
 import webapp2
 
 from bugs.handlers.bugs import base
-from bugs.models.bugs import urls
+from bugs.models.url_bug_map import get_bugs
 
 
 class BadBugError(base.Error):
@@ -54,7 +60,7 @@ class UrlsHandler(base.BugsHandler):
 
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
-  def get(self):
+  def post(self):
     """Get bugs."""
     data_json_str = self.GetRequiredParameter('data_json_str')
     if not data_json_str:
@@ -66,9 +72,9 @@ class UrlsHandler(base.BugsHandler):
         raise InvalidJson
 
     try:
-      data = urls.Urls(data)
-    except urls.Error, e:
-      raise UrlsError('')
+      data = get_bugs.GetBugs(data)
+    except get_bugs.Error, e:
+      raise UrlsError('Failed to retrieve bugs for the given urls: %s' % e)
 
     try:
       data_str = json.dumps(data)
@@ -76,12 +82,12 @@ class UrlsHandler(base.BugsHandler):
       raise BadBugError
 
     self.response.code = 200
-    self.response.out.write(json.dumps({'data_json_str': data_str}))
+    self.response.out.write(data_str)
 
 
 routes = [
   webapp2.Route(r'/bugs/urls', handler=UrlsHandler, name='bugs_urls',
-                methods=['GET'], schemes=['https'])
+                methods=['POST'], schemes=['https'])
 ]
 app = webapp2.WSGIApplication(routes, debug=True)
 

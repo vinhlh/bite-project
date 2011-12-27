@@ -18,18 +18,14 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
 
 import json
+import logging
 import webapp2
 
 from bugs.handlers.bugs import base
 from bugs.models.bugs import create
+from bugs.models.url_bug_map import create as url_bug_map_create
 
 
 class InvalidJson(base.Error):
@@ -61,10 +57,12 @@ class CreateHandler(base.BugsHandler):
       try:
         data = json.loads(data_json_str)
       except (ValueError, TypeError, OverflowError):
+        logging.info('json string: %s' % data_json_str)
         raise InvalidJson
 
     try:
       key = create.Create(data)
+      mapping_key = url_bug_map_create.Create(key)
     except create.Error:
       raise CreationError('Failed to create a new bug.')
 
