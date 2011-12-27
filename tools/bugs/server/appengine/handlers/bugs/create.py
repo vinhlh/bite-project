@@ -63,6 +63,10 @@ class CreateHandler(base.BugsHandler):
     try:
       key = create.Create(data)
       mapping_key = url_bug_map_create.Create(key)
+      # TODO (jason.stredwick): Code to push bug to provider goes here. Adding
+      # to the datastore should also be part of this process.  When it is
+      # remove code in bugs.models.bugs.bug.Create to set the datastore
+      # bug id to the key, and let this process do it instead.
     except create.Error:
       raise CreationError('Failed to create a new bug.')
 
