@@ -77,6 +77,8 @@ class AccessHandler(base.BugsHandler):
     key = int(key)
     try:
       update.Update(key, data)
+      # TODO (jason.stredwick): Add in deletion of UrlBugMaps and add in new
+      # ones.
     except update.InvalidKeyError:
       raise UpdateError('Key (%s) did not match any stored bugs.' % key)
     except update.UpdateError:
