@@ -47,11 +47,6 @@ handlers:
   script: bugs.handlers.bugs.access.app
   secure: always
   login: required
-#   [GET]; retrieve a list of bugs
-- url: /bugs/all
-  script: bugs.handlers.bugs.all.app
-  secure: always
-  login: required
 #   [POST]: retrieve a list of bugs by url
 - url: /bugs/urls
   script: bugs.handlers.bugs.urls.app
