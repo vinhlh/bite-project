@@ -90,9 +90,7 @@ def GetBugs(urls):
           for mapping in mappings:
             bug_key = mapping.bug.key()
             id = bug_key.id()
-            logging.debug('Id: %s', id)
             if id in results_dict:
-              logging.debug('Key already seen, skipping.')
               continue
             results_dict[id] = True
             keys.append(bug_key)

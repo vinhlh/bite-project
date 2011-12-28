@@ -19,21 +19,11 @@ __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
 
-import json
-import logging
 import webapp2
 
 from bugs.handlers.bugs import base
 from bugs.models.bugs import create
 from bugs.models.url_bug_map import create as url_bug_map_create
-
-
-class InvalidJson(base.Error):
-  """Raised if an error occurs processing input data."""
-
-  def __init__(self):
-    msg = 'Creating new bug failed due to invalid json data.'
-    base.Error.__init__(self, msg=msg)
 
 
 class CreationError(base.Error):
@@ -49,16 +39,14 @@ class CreateHandler(base.BugsHandler):
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
   def post(self):
-    """Create a new bug entry with the given data."""
-    data_json_str = self.GetRequiredParameter('data_json_str')
-    if not data_json_str:
-      data = {}
-    else:
-      try:
-        data = json.loads(data_json_str)
-      except (ValueError, TypeError, OverflowError):
-        logging.info('json string: %s' % data_json_str)
-        raise InvalidJson
+    """Create a new bug entry with the given data.
+
+    Raises:
+      CreationError: Raised if creation fails.
+      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
+      base.MissingDataError: Raised if data is not present.
+    """
+    data = self.GetData()
 
     try:
       key = create.Create(data)
@@ -70,8 +58,7 @@ class CreateHandler(base.BugsHandler):
     except create.Error:
       raise CreationError('Failed to create a new bug.')
 
-    self.response.code = 200
-    self.response.out.write(json.dumps({'key': key}))
+    self.WriteResponse({'key': key})
 
 
 routes = [

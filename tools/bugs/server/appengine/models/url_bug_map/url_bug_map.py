@@ -64,7 +64,8 @@ class UrlBugMap(db.Model):
   path = db.StringProperty(required=False)
 
   # Non-indexed information.
-  bug = db.ReferenceProperty(required=False, reference_class=bug.Bug)
+  bug = db.ReferenceProperty(required=False, reference_class=bug.Bug,
+                             collection_name='bug_urls')
   position = db.IntegerProperty(required=False, default=UrlPosition.OTHER,
                                 choices=(UrlPosition.TITLE,
                                          UrlPosition.MAIN,

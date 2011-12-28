@@ -23,29 +23,10 @@ Handler output is defined by the function:
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-import json
-import logging
 import webapp2
 
 from bugs.handlers.bugs import base
 from bugs.models.url_bug_map import get_bugs
-
-
-class BadBugError(base.Error):
-  """Raised if an error occurs converting a bug object to a json string."""
-
-  def __init__(self):
-    msg = ('Get all bugs based on url failed due to failure to convert bug '
-           'object to JSON string while processing set of bugs.')
-    base.Error.__init__(self, msg=msg)
-
-
-class InvalidJson(base.Error):
-  """Raised if an error occurs processing input data."""
-
-  def __init__(self):
-    msg = 'Getting all bugs based on url failed due to invalid json data.'
-    base.Error.__init__(self, msg=msg)
 
 
 class UrlsError(base.Error):
@@ -61,28 +42,24 @@ class UrlsHandler(base.BugsHandler):
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
   def post(self):
-    """Get bugs."""
-    data_json_str = self.GetRequiredParameter('data_json_str')
-    if not data_json_str:
-      data = {}
-    else:
-      try:
-        data = json.loads(data_json_str)
-      except (ValueError, TypeError, OverflowError):
-        raise InvalidJson
+    """Get bugs.
+
+    Returns:
+      Data to send to the caller. (dict)
+
+    Raises:
+      UrlsError
+      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
+      base.MissingDataError: Raised if data is not present.
+    """
+    data = self.GetData()
 
     try:
       data = get_bugs.GetBugs(data)
     except get_bugs.Error, e:
       raise UrlsError('Failed to retrieve bugs for the given urls: %s' % e)
 
-    try:
-      data_str = json.dumps(data)
-    except (ValueError, TypeError, OverflowError):
-      raise BadBugError
-
-    self.response.code = 200
-    self.response.out.write(data_str)
+    self.WriteResponse(data)
 
 
 routes = [

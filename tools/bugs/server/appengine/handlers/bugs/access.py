@@ -18,8 +18,6 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-import json
-import logging
 import webapp2
 
 from bugs.handlers.bugs import base
@@ -27,27 +25,10 @@ from bugs.models.bugs import get
 from bugs.models.bugs import update
 
 
-class BadBugError(base.Error):
-  """Raised if an error occurs converting a bug object to a json string."""
-
-  def __init__(self, key):
-    msg = ('Get bug (%s) failed due to failure to convert bug object to JSON '
-           'string.' % key)
-    base.Error.__init__(self, msg=msg)
-
-
 class GetError(base.Error):
   """Raised if an error occurs getting a bug."""
 
   def __init__(self, msg):
-    base.Error.__init__(self, msg=msg)
-
-
-class InvalidJson(base.Error):
-  """Raised if an error occurs processing input data."""
-
-  def __init__(self, key):
-    msg = 'Updating bug (%s) failed due to invalid json data.' % key
     base.Error.__init__(self, msg=msg)
 
 
@@ -64,17 +45,19 @@ class AccessHandler(base.BugsHandler):
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
   def put(self, key):
-    """Update a bug entry with the given data using the given key."""
-    data_json_str = self.GetRequiredParameter('data_json_str')
-    if not data_json_str:
-      data = {}
-    else:
-      try:
-        data = json.loads(data_json_str)
-      except (ValueError, TypeError, OverflowError):
-        raise InvalidJson(key)
+    """Update a bug entry with the given data using the given key.
 
+    Args:
+      key: The key for the bug to retrieve. (integer)
+
+    Raises:
+      UpdateError: Failed to update the bug.
+      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
+      base.MissingDataError: Raised if data is not present.
+    """
     key = int(key)
+    data = self.GetData()
+
     try:
       update.Update(key, data)
       # TODO (jason.stredwick): Add in deletion of UrlBugMaps and add in new
@@ -85,8 +68,7 @@ class AccessHandler(base.BugsHandler):
       raise UpdateError('An error occurred trying to update bug (key=%s).' %
                         key)
 
-    self.response.code = 200
-    self.response.out.write(json.dumps({'key': key}))
+    self.WriteResponse({'key': key})
 
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
@@ -94,27 +76,21 @@ class AccessHandler(base.BugsHandler):
     """Get a bug entry using the given key.
 
     Args:
-      key: The key of the bug to retrieve. (integer)
+      key: The key for the bug to retrieve. (integer)
 
     Raises:
       GetError: No bug for the given key was found.
       BadBugError: Unable to convert bug details to a JSON string.
+      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
     """
     key = int(key)
-    logging.info('access.get: key = %s' % key)
+
     try:
       data = get.Get(key)
-      logging.info('Got bug')
     except get.Error:
       raise GetError('Failed to find bug for the given key (%s).' % key)
 
-    try:
-      data_str = json.dumps(data)
-    except (ValueError, TypeError, OverflowError):
-      raise BadBugError(key)
-
-    self.response.code = 200
-    self.response.out.write(data_str)
+    self.WriteResponse(data)
 
 
 routes = [

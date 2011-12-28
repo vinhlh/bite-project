@@ -95,7 +95,10 @@ bite.common.net.xhr.async.post = function(url, data, opt_callback) {
  */
 bite.common.net.xhr.async.put = function(url, data, opt_callback) {
   var callback = opt_callback || null;
-  bite.common.net.xhr.async.send_(url, callback, 'PUT', data);
+  var headers = {};
+  headers[goog.net.XhrIo.CONTENT_TYPE_HEADER] =
+      goog.net.XhrIo.FORM_CONTENT_TYPE;
+  bite.common.net.xhr.async.send_(url, callback, 'PUT', data, headers);
 };
 
 
@@ -236,9 +239,11 @@ bite.common.net.xhr.async.requestComplete_ = function(event, callback) {
  *     the request is complete.  Can be null if no callback was supplied.
  * @param {string} method The method used to send the request.
  * @param {string?} data The data to send or null if no data is supplied.
+ * @param {!Object=} opt_headers Optional request headers.
  * @private
  */
-bite.common.net.xhr.async.send_ = function(url, callback, method, data) {
+bite.common.net.xhr.async.send_ = function(url, callback, method, data,
+                                           opt_headers) {
   if (!url) {
     callback && callback(false, bite.common.net.xhr.ErrorMessage_.MISSING_URL);
     return;
@@ -249,8 +254,8 @@ bite.common.net.xhr.async.send_ = function(url, callback, method, data) {
   };
 
   try {
-    if (method == 'POST') {
-      goog.net.XhrIo.send(url, localCallback, method, data);
+    if (method == 'POST' || method == 'PUT') {
+      goog.net.XhrIo.send(url, localCallback, method, data, opt_headers);
     } else {
       goog.net.XhrIo.send(url, localCallback, method);
     }

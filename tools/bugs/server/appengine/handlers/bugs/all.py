@@ -18,14 +18,7 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
 
-import json
 import webapp2
 
 from bugs.handlers.bugs import base
@@ -39,34 +32,17 @@ class AllError(base.Error):
     base.Error.__init__(self, msg=msg)
 
 
-class BadBugError(base.Error):
-  """Raised if an error occurs converting a bug object to a json string."""
-
-  def __init__(self):
-    msg = ('Get all bugs failed due to failure to convert bug object to JSON '
-           'string while processing set of bugs.')
-    base.Error.__init__(self, msg=msg)
-
-
 class AllHandler(base.BugsHandler):
   """Retrieves all bugs."""
 
-  # Disable 'Invalid method name' lint error.
-  # pylint: disable-msg=C6409
-  def get(self):
+  def Get(self):
     """Retrieve the details for all bug entries."""
     try:
       data = all.All()
     except all.Error:
       raise AllError('')
 
-    try:
-      data_str = json.dumps(data)
-    except (ValueError, TypeError, OverflowError):
-      raise BadBugError
-
-    self.response.code = 200
-    self.response.out.write(json.dumps({'data_json_str': data_str}))
+    self.WriteResponse(data)
 
 
 routes = [
