@@ -87,7 +87,7 @@ class AccessHandler(base.BugsHandler):
 
     try:
       data = get.Get(key)
-    except get.Error:
+    except get.InvalidKeyError:
       raise GetError('Failed to find bug for the given key (%s).' % key)
 
     self.WriteResponse(data)

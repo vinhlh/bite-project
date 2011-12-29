@@ -23,7 +23,7 @@ import webapp2
 
 from bugs.handlers.bugs import base
 from bugs.models.bugs import create
-from bugs.models.url_bug_map import create as url_bug_map_create
+from bugs.providers import services
 
 
 class CreationError(base.Error):
@@ -48,15 +48,18 @@ class CreateHandler(base.BugsHandler):
     """
     data = self.GetData()
 
+    # TODO (jason.stredwick): Figure out the correct failure strategy if a new
+    # bug is created but either the url/bug mapping or pusher fails.
     try:
       key = create.Create(data)
-      mapping_key = url_bug_map_create.Create(key)
-      # TODO (jason.stredwick): Code to push bug to provider goes here. Adding
-      # to the datastore should also be part of this process.  When it is
-      # remove code in bugs.models.bugs.bug.Create to set the datastore
-      # bug id to the key, and let this process do it instead.
+      services.Index(key)
+      services.Push(key)
     except create.Error:
       raise CreationError('Failed to create a new bug.')
+    except services.PushError:
+      raise CreationError('Failed to push the new bug.')
+    except services.IndexError:
+      raise CreationError('Failed to create index for the new bug.')
 
     self.WriteResponse({'key': key})
 

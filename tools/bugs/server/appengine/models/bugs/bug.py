@@ -137,6 +137,8 @@ class Bug(db.Model):
             'state': self.state,
             'url': self.url,
             'summary': self.summary,
+            'added': str(self.added),
+            'modified': str(self.modified),
             'provider': self.provider,
             # TODO (jason.stredwick): Id for historical reasons; update.
             'id': self.bug_id,
@@ -185,10 +187,6 @@ class Bug(db.Model):
       self.url = obj['url']
     if 'summary' in obj:
       self.summary = obj['summary']
-    if 'added' in obj:
-      self.added = obj['added']
-    if 'modified' in obj:
-      self.modified = obj['modified']
 
     # Provide details
     if 'provider' in obj:
@@ -261,10 +259,6 @@ def Create(data):
     bug = Bug()
     bug.Patch(data)
     key = bug.put().id()
-
-    if bug.provider == Provider.DATASTORE:
-      bug.bug_id = str(key)
-      key = bug.put().id()
   except (TypeError, db.Error), e:
     logging.error('bug.Create: Exception while creating bug: %s' % e)
     raise CreateError

@@ -18,13 +18,6 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 
 from bugs.models.bugs import bug
 
@@ -41,7 +34,7 @@ def Create(data):
     data: The data used to create a new bug. (dict)
 
   Returns:
-    The id of the new bug. (integer)
+    The key of the new bug. (integer)
 
   Raises:
     Error: Raised if creation of a new model fails.

@@ -18,19 +18,12 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 
 from bugs.models.bugs import bug
 
 
-class InvalidIdError(Exception):
-  """Raised if the id did not correlate with a stored bug."""
+class InvalidKeyError(Exception):
+  """Raised if the key did not correlate with a stored bug."""
   pass
 
 
@@ -39,23 +32,23 @@ class UpdateError(Exception):
   pass
 
 
-def Update(id, data):
+def Update(key, data):
   """Update a bug.
 
   Args:
-    id: The id of the bug to retrieve. (integer)
+    key: The key of the bug to retrieve. (integer)
     data: The data used to create a new bug. (dict)
 
   Returns:
-    The id of the bug that was updated. (integer)
+    The key of the bug that was updated. (integer)
 
   Raises:
     Error: Raised if creation of a new model fails.
   """
   try:
-    return bug.Update(id, data)
-  except bug.InvalidIdError:
-    raise InvalidIdError
+    return bug.Update(key, data)
+  except bug.InvalidKeyError:
+    raise InvalidKeyError
   except bug.UpdateError:
     raise UpdateError
 

@@ -18,36 +18,29 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 
 from bugs.models.bugs import bug
 
 
-class Error(Exception):
-  """Raised if an exception occurs while getting a bug."""
+class InvalidKeyError(Exception):
+  """Raised if the key did not correlate with a stored bug."""
   pass
 
 
-def Get(id):
+def Get(key):
   """Get bug details.
 
   Args:
-    id: The id of the bug to retrieve. (integer)
+    key: The key of the bug to retrieve. (integer)
 
   Returns:
     The object containing the bug details. (dict)
 
   Raises:
-    Error: Raised if a bug was not found for the given id.
+    InvalidKeyError: Raised if a bug was not found for the given key.
   """
   try:
-    return bug.Get(id)
-  except bug.InvalidIdError:
-    raise Error
+    return bug.Get(key)
+  except bug.InvalidKeyError:
+    raise InvalidKeyError
 
