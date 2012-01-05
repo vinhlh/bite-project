@@ -140,9 +140,8 @@ bite.client.BugsConsole.prototype.isConsoleVisible = function() {
 bite.client.BugsConsole.prototype.updateData = function(bugs, user, server) {
   this.bugs_ = bugs;
   if (this.container_) {
-    console.log('update data; render');
     this.renderBugList_(user, server);
-  } else { console.log('update data; no render'); }
+  }
 };
 
 
