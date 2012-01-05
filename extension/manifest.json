@@ -1,7 +1,7 @@
 {
-  "name": "BITE-Playground-Dev",
-  "version": "2.0.0.3",
-  "description": "Open source version of BITE (Dev).",
+  "name": "BITE-Playground",
+  "version": "2.0.0.0",
+  "description": "Open source version of BITE.",
   "options_page": "options.html",
   "browser_action": {
     "default_icon": "imgs/bite_logo_19.png",
