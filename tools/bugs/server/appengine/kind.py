@@ -12,28 +12,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-"""Base class for Crawler objects."""
+"""Define the kinds of data returned from the bugs tool."""
 
 __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
-
-class Error(Exception):
-  pass
+from common.util import class_attr
 
 
-class CrawlerBase(object):
-  """Crawler base class
+class Kind(object):
+  """Define kind keywords for the bugs tool."""
+  BUG = 'bugs#bug'
+  ID = 'bugs#id'
+  URL_BUG_MAP = 'bugs#url-bug-map'
+  URLS = 'bugs#urls'
 
-  Crawlers are responsible for retrieving relevant bug data from a specific
-  provider database.
 
-  Attributes:
-    max_retries: The maximum number of attempts a crawl.
+# List of valid kinds.
+_ALL_KINDS = class_attr.GetPODAttrsValue(Kind)
+
+
+def IsValid(value):
+  """Determine if the given value is a valid kind.
+
+  Args:
+    value: The value to test. (string)
+
+  Returns:
+    Whether or not the value is a kind. (boolean)
   """
-
-  def __init__(self, max_retries=3):
-    self.max_retries = max_retries
-
-  def Crawl(self):
-    raise NotImplementedError
+  return value in _ALL_KINDS

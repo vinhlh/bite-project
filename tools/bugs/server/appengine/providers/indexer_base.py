@@ -15,16 +15,15 @@
 
 """Base class for Indexer objects.
 
-The choice to add the key to the function rather than to the object was that
-the indexer may be run on many keys/items/etc so I didn't want the object to
-become dependent on the key it was manipulating.
+The choice to add the bug to the function rather than to the object was that
+the indexer may be run on many bugs/items/etc so I didn't want the object to
+become dependent on the bug it was manipulating.
 """
 
 __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 
 class Error(Exception):
-  """General exception."""
   pass
 
 
@@ -38,5 +37,5 @@ class IndexerBase(object):
   def __init__(self):
     pass
 
-  def Index(self, key):
+  def Index(self, bug):
     raise NotImplementedError

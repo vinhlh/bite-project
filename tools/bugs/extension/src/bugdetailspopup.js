@@ -400,7 +400,8 @@ bite.client.BugDetailsPopup.prototype.showBoundLabelMenu_ = function(
 bite.client.BugDetailsPopup.prototype.submitRemoveBugBinding_ = function(
     bugData, callback) {
   var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
-                     'details': {'key': bugData['key'], 'target_element': ''}};
+                     'details': {'kind': bugData['kind'], 'id': bugData['id'],
+                     'target_element': ''}};
   chrome.extension.sendRequest(requestData,
       goog.bind(this.refreshLocalBugData_, this, callback));
 };
@@ -490,10 +491,10 @@ bite.client.BugDetailsPopup.prototype.postBugUpdate_ = function(
   // Disable the appearance of the popup while waiting for a response.
   this.disableSubmitPopup_();
 
-  var details = {'key': bugData['key']};
+  var details = {'kind': bugData['kind'], 'id': bugData['id']};
   var commentElem = goog.dom.getElement('bug-popup-comment');
   if (commentElem) {
-    details['comment'] = contentElement.innerHTML;
+    details['comment'] = commentElem.innerHTML;
   }
   var statusElem = goog.dom.getElement('bug-update-status');
   var status = undefined;

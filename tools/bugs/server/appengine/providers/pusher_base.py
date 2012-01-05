@@ -17,9 +17,7 @@
 
 __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
-
 class Error(Exception):
-  """General exception."""
   pass
 
 
@@ -29,12 +27,12 @@ class PusherBase(object):
   Pushers are responsible for pushing bugs to a specific provider database.
 
   Attributes:
-    key: The key object to push. (integer)
+    bug: The bug object to push. (bugs.models.bug.Bug)
     max_retries: The maximum number of attempts to push a bug. (integer)
   """
 
-  def __init__(self, key, max_retries=3):
-    self.key = key
+  def __init__(self, bug, max_retries=3):
+    self.bug = bug
     self.max_retries = max_retries
 
   def Push(self):

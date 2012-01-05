@@ -21,7 +21,6 @@ from bugs.providers import crawler_base
 
 
 class Error(crawler_base.Error):
-  """General exception."""
   pass
 
 

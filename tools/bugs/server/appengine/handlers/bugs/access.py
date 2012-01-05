@@ -14,29 +14,20 @@
 
 """Access a bug entry; get/update."""
 
+__author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
-__author__ = ('alexto@google.com (Alexis O. Torres)',
-              'jason.stredwick@gmail.com (Jason Stredwick)')
-
+import logging
 import webapp2
 
+from bugs import kind
 from bugs.handlers.bugs import base
 from bugs.models.bugs import get
 from bugs.models.bugs import update
+from util import model_to_dict
 
 
-class GetError(base.Error):
-  """Raised if an error occurs getting a bug."""
-
-  def __init__(self, msg):
-    base.Error.__init__(self, msg=msg)
-
-
-class UpdateError(base.Error):
-  """Raised if an error occurs updating a bug."""
-
-  def __init__(self, msg):
-    base.Error.__init__(self, msg=msg)
+class Error(base.Error):
+  pass
 
 
 class AccessHandler(base.BugsHandler):
@@ -44,58 +35,57 @@ class AccessHandler(base.BugsHandler):
 
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
-  def put(self, key):
-    """Update a bug entry with the given data using the given key.
+  def put(self, id):
+    """Update a bug entry with the given data using the given id.
 
     Args:
-      key: The key for the bug to retrieve. (integer)
-
+      id: The id for the bug to retrieve. (integer)
     Raises:
-      UpdateError: Failed to update the bug.
-      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
-      base.MissingDataError: Raised if data is not present.
+      Error: Something went wrong processing the request/response or performing
+          the update.
     """
-    key = int(key)
-    data = self.GetData()
+    id = int(id)
 
     try:
-      update.Update(key, data)
+      data = self.GetData(kind.Kind.BUG)
+      bug = get.Get(id)
+      update.Update(bug, data)
       # TODO (jason.stredwick): Add in deletion of UrlBugMaps and add in new
       # ones.
-    except update.InvalidKeyError:
-      raise UpdateError('Key (%s) did not match any stored bugs.' % key)
-    except update.UpdateError:
-      raise UpdateError('An error occurred trying to update bug (key=%s).' %
-                        key)
-
-    self.WriteResponse({'key': key})
+    except get.InvalidIdError:
+      raise Error('Failed to find bug [id=%s].' % id, code=400)
+    except update.UpdateError, e:
+      raise Error('Update bug [id=%s] failed. Exception: %s' % (id, e),
+                  code=400)
+    except base.Error, e:
+      raise Error(e)
 
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
-  def get(self, key):
-    """Get a bug entry using the given key.
+  def get(self, id):
+    """Get a bug entry using the given id.
 
     Args:
-      key: The key for the bug to retrieve. (integer)
-
+      id: The id for the bug to retrieve. (integer)
     Raises:
-      GetError: No bug for the given key was found.
-      BadBugError: Unable to convert bug details to a JSON string.
-      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
+      Error: The id did not match a stored bug.
     """
-    key = int(key)
+    id = int(id)
 
     try:
-      data = get.Get(key)
-    except get.InvalidKeyError:
-      raise GetError('Failed to find bug for the given key (%s).' % key)
-
-    self.WriteResponse(data)
+      data = get.Get(id)
+      response = model_to_dict.ModelToDict(data)
+      response['kind'] = kind.Kind.BUG
+      self.WriteResponse(data)
+    except get.InvalidIdError:
+      raise Error('Failed to find bug [id=%s].' % id, code=400)
+    except base.Error, e:
+      raise Error(e)
 
 
 routes = [
-  webapp2.Route(r'/bugs/<key:\d+>', handler=AccessHandler, name='bugs_access',
-                methods=['GET', 'PUT'], schemes=['https'])
+  webapp2.Route(r'/bugs/<id:\d+>', handler=AccessHandler, name='bugs_access',
+                methods=['GET', 'PUT'])
 ]
 app = webapp2.WSGIApplication(routes, debug=True)
 

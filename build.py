@@ -77,6 +77,11 @@ DEPS = {
     ROOT: os.path.join(DEPS_ROOT, 'urlnorm'),
     URL: 'git://gist.github.com/246089.git',
     CHECKOUT_COMMAND: 'git clone %s %s'
+  },
+  'mrtaskman': {
+    ROOT: os.path.join(DEPS_ROOT, 'mrtaskman'),
+    URL: 'http://code.google.com/p/mrtaskman',
+    CHECKOUT_COMMAND: 'git clone %s %s'
   }
 }
 
@@ -358,6 +363,7 @@ def main():
   for target in js_targets:
     shutil.copy(os.path.join(GENFILES_ROOT, ('%s_script.js' % target)),
                 EXTENSION_DST)
+  shutil.copy(os.path.join('extension', 'src', 'analytics.js'), EXTENSION_DST)
 
   #   Changes the name from page_script.js to options_script.js.
   shutil.move(os.path.join(EXTENSION_DST, 'page_script.js'),
@@ -378,6 +384,9 @@ def main():
   bugs_src = os.path.join('tools', 'bugs', 'server', 'appengine')
   shutil.copytree(bugs_src, os.path.join(SERVER_DST, 'bugs'))
 
+  common_src = os.path.join('common', 'server', 'appengine')
+  shutil.copytree(common_src, os.path.join(SERVER_DST, 'common'))
+
   gdata_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'gdata')
   shutil.copytree(gdata_src, os.path.join(SERVER_DST, 'gdata'))
 
@@ -386,6 +395,11 @@ def main():
 
   urlnorm_src = os.path.join(DEPS['urlnorm'][ROOT], 'urlnorm.py')
   shutil.copy(urlnorm_src, os.path.join(SERVER_DST, 'third_party'))
+
+  mrtaskman_root = DEPS['mrtaskman'][ROOT]
+  mrtaskman_src = os.path.join(mrtaskman_root, 'server', 'util')
+  mrtaskman_dst = os.path.join(SERVER_DST, 'util')
+  shutil.copytree(mrtaskman_src, mrtaskman_dst)
 
 
 if __name__ == '__main__':

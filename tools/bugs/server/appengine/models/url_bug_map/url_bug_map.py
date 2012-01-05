@@ -30,6 +30,12 @@ from utils import url_util
 
 
 class UrlPosition(object):
+  """Used to prioritize a bugs returned from the UrlBugMap.
+
+  Used tp determine the origin of the url from within a bug retrieved by the
+  crawler.  The origin/position determines the priority of the bug relative to
+  the other positions.
+  """
   TITLE = 1
   MAIN = 2
   COMMENTS = 3
@@ -37,36 +43,53 @@ class UrlPosition(object):
 
 
 class CreateError(Exception):
-  """Raised if the given key does not match a stored model."""
   pass
 
 
-class InvalidKeyError(Exception):
-  """Raised if the given key does not match a stored model."""
+class InvalidIdError(Exception):
   pass
 
 
 class UpdateError(Exception):
-  """Raised if the given key does not match a stored model."""
   pass
 
 
 class UrlBugMap(db.Model):
   """Represents a relationship between a URL and a Bug.
 
-   There are 3 fields a typical query will try to search on:
-   url, hostname, path, and status. These properties are stored as
-   indexed properties to speed up searches.
+  There are 3 fields a typical query will try to search on:
+  url, hostname, path, and status. These properties are stored as
+  indexed properties to speed up searches.
+
+  Attributes:
+    url: The url associated with the bug, truncated for a string property for
+        indexing purposes.
+    hostname: The hostname of the url, truncated for a string property for
+        indexing purposes.
+    path: The path of the url, truncated for a string property for indexing
+        purposes.
+    state: The bug state, replicated here to enable query sorting.
+    bug: Reference to the bug associated with the url.
+    position: The position within the provider's bug's details and provides
+        relevance information for quering.
+    added: When the model was first created.
   """
   # Indices:
-  url = db.StringProperty(required=False)
-  hostname = db.StringProperty(required=False)
-  path = db.StringProperty(required=False)
+  url = db.StringProperty(required=True)
+  hostname = db.StringProperty(required=False, default='')
+  path = db.StringProperty(required=False, default='')
+
+  state = db.StringProperty(required=True,
+                            choices=(bug.State.ACTIVE,
+                                     bug.State.RESOLVED,
+                                     bug.State.CLOSED,
+                                     bug.State.UNKNOWN))
+  last_update = db.StringProperty(required=False)
 
   # Non-indexed information.
-  bug = db.ReferenceProperty(required=False, reference_class=bug.Bug,
+  bug = db.ReferenceProperty(required=True, reference_class=bug.Bug,
                              collection_name='bug_urls')
-  position = db.IntegerProperty(required=False, default=UrlPosition.OTHER,
+  position = db.IntegerProperty(required=True,
                                 choices=(UrlPosition.TITLE,
                                          UrlPosition.MAIN,
                                          UrlPosition.COMMENTS,
@@ -74,140 +97,112 @@ class UrlBugMap(db.Model):
 
   # Tracks when an entry is added and modified.
   added = db.DateTimeProperty(required=False, auto_now_add=True)
-  modified = db.DateTimeProperty(required=False, auto_now=True)
-
-  def Patch(self, bug):
-    """Update the mapping's data to the given bug.
-
-    Args:
-      bug: A bug.Bug model object. (bug.Bug)
-
-    Returns:
-      Whether or not the given bug has a mapping available. (boolean)
-    """
-    if not bug.url:
-      return False
-
-    url = bug.url
-    # Successful NormalizeUrl already encodes each entry to ascii.
-    # TODO (jason.stredwick): Determine the necessity of EncodeToAscii and
-    # the potential of defaulting to not encoding and encoding upon
-    # exception as was done prior.
-    urlnorm = url_util.NormalizeUrl(url)
-    # 500 character restriction; StringProperty limit.
-    if urlnorm:
-      self.url = urlnorm.url[:500]
-      self.hostname = urlnorm.hostname[:500]
-      self.path = urlnorm.path[:500]
-    else:
-      logging.exception('URL normalization failed, converting to ASCII: %s',
-                        url)
-      self.url = encoding_util.EncodeToAscii(url)[:500]
-      self.hostname = ''
-      self.path = ''
-    self.bug = bug
-
-    logging.info('Adding mapping for bug: %s', bug.key().id())
-    logging.info('URL: %s', self.url)
-    logging.info('Hostname: %s', self.hostname)
-    logging.info('Path %s', self.path)
-
-    return True
 
 
-def Create(bug):
+def Create(bug, position=UrlPosition.OTHER):
   """Stores a new URL to bug mapping into the Datastore.
 
   Args:
-    bug: A bug.Bug model object. (bug.Bug)
-
+    bug: The bug to index. (bug.Bug)
+    position: The position the url was found with the bug details from the
+        provider. (UrlPosition)
   Returns:
-    The key to the newly created mapping or None if no mapping exists.
-    (integrer or None)
-
+    The newly created mapping or None if no mapping exists. (UrlBugMap or None)
   Raises:
     CreateError: Raised if something goes wrong while creating a new bug.
   """
+  bug_id = 'no-id'
   try:
-    mapping = UrlBugMap()
-    if not mapping.Patch(bug):
+    bug_id = bug.key().id()
+
+    url = bug.url
+    if not url:
       return None
-    key = mapping.put().id()
-  except (TypeError, db.Error), e:
-    logging.error('url_bug_map.Create: Exception while creating mapping with '
-                  'bug id %s: %s' % (bug.key().id(), e))
-    raise CreateError
-  return key
+
+    url_components = PrepareUrl(url)
+    mapping = UrlBugMap(bug=bug,
+                        url=url_components['url'],
+                        hostname=url_components['hostname'],
+                        path=url_components['path'],
+                        position=position,
+                        state=bug.state)
+    if bug.last_update:
+      mapping.last_update = bug.last_update
+
+    logging.info('Adding mapping for bug: %s', bug_id)
+    logging.info('URL: %s', url_components['url'])
+    logging.info('Hostname: %s', url_components['hostname'])
+    logging.info('Path: %s', url_components['path'])
+
+    mapping.put()
+  except Exception, e:
+    logging.error('url_bug_map.Create: Exception while creating mapping for '
+                  'bug [id=%s]: %s' % (bug_id, e))
+    raise CreateError('Failed to create mapping for bug [id=%s].\n' % bug_id)
+
+  return mapping
 
 
-def Delete(key):
-  """Deletes the mapping specified by the given key.
+def Delete(id):
+  """Deletes the mapping specified by the given id.
 
   Args:
-    key: The key of the mapping to retrieve. (integer)
+    id: The id of the mapping to retrieve. (integer)
   """
-  mapping = UrlBugMap.get_by_id(key)
+  mapping = UrlBugMap.get_by_id(id)
   if mapping:
     mapping.delete()
 
 
-def Get(key):
-  """Returns the mapping specified by the given key.
+def Get(id):
+  """Returns the mapping specified by the given id.
 
   Args:
-    key: The key of the mapping to retrieve. (integer)
-
+    id: The id of the mapping to retrieve. (integer)
   Returns:
     Returns the UrlBugMap model object. (UrlBugMap)
-
   Raises:
-    InvalidKeyError: Raised if the key does not match a stored mapping.
+    InvalidIdError: Raised if the id does not match a stored mapping.
   """
   try:
-    mapping = UrlBugMap.get_by_id(key)
+    mapping = UrlBugMap.get_by_id(id)
     if not mapping:
-      raise InvalidKeyError
-  except (db.Error, InvalidKeyError), e:
-    logging.error('url_bug_map.Get: Exception while retrieving mapping (%s): '
-                  '%s' % (key, e))
-    raise InvalidKeyError
+      raise InvalidIdError
+  except (db.Error, InvalidIdError), e:
+    logging.error('url_bug_map.Get: Exception while retrieving mapping [id=%s]'
+                  ': %s' % (id, e))
+    raise InvalidIdError
   return mapping
 
 
-# TODO (jason.stredwick): I don't think update should be a valid options,
-# reconsider and delete if necessary.
-def Update(key, bug):
-  """Update the mapping specified by the given key with the given data.
+def PrepareUrl(url):
+  """Return the processed full url and its hostname and path.
+
+  The url is processed to extract its hostname and path.  Then all three are
+  ASCII encoded and truncated to 500 characters to fit within a
+  db.StringProperty; for indexing purposes TextProperty is not indexable.  The
+  function returns a dictionary of three processed values.
 
   Args:
-    key: The key of the bug to update. (integer)
-    bug: A bug.Bug model object. (bug.Bug)
-
+    url: The url to process. (string)
   Returns:
-    Return the key of the mapping updated or None if a mapping no longer
-    exists. (integer or None)
-
-  Raises:
-    InvalidKeyError: Raised if the key does match a stored mapping.
-    UpdateError: Raised if there was an error updating the mapping.
+    A dictionary containing values for processed url, hostname, and path.  If
+    the url doesn't contain one of the components it will be assigned the
+    empty string. ({url: string, hostname: string, path: string})
   """
-  try:
-    mapping = UrlBugMap.get_by_id(key)
-    if not mapping:
-      raise InvalidKeyError
-  except (db.Error, InvalidKeyError), e:
-    logging.error('url_bug_map.Update: Invalid key (%s): %s' % (key, e))
-    raise InvalidKeyError
-
-  try:
-    if not mapping.Patch(bug):
-      Delete(key)
-      return None
-    mapping.put()
-  except (TypeError, db.Error), e:
-    logging.error('url_bug_map.Update: Exception while updating mapping (%s) '
-                  'to new bug with key (%s): (%s): %s.' %
-                  (key, bug.key().id(), e))
-    raise UpdateError
-
-  return key
+  # Successful NormalizeUrl already encodes each entry to ascii.
+  # TODO (jason.stredwick): Determine the necessity of EncodeToAscii and
+  # the potential of defaulting to not encoding and encoding upon
+  # exception as was done prior.
+  urlnorm = url_util.NormalizeUrl(url)
+  # 500 character restriction; StringProperty limit.
+  if urlnorm:
+    return {'url': urlnorm.url[:500],
+            'hostname': urlnorm.hostname[:500] or '',
+            'path': urlnorm.path[:500] or ''}
+  else:
+    logging.exception('URL normalization failed, converting to ASCII: %s',
+                      url)
+    return {'url': encoding_util.EncodeToAscii(url)[:500],
+            'hostname': '',
+            'path': ''}

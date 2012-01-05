@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Model for bug data.
-
-Bug is a model of BITE bug data."""
+"""Model for BITE bug data."""
 
 __author__ = ('alexto@google.com (Alexis O. Torres)'
               'jason.stredwick@gmail.com (Jason Stredwick)')
@@ -23,13 +21,9 @@ import logging
 
 from google.appengine.ext import db
 
-from models import bugs_util
-
-
-# Bug providers.
-class Provider(object):
-  DATASTORE = 'datastore'
-  ISSUETRACKER = 'issuetracker'
+from bugs import kind
+from bugs.providers.provider import Provider
+from common.util import class_attr
 
 
 # Allowed bug states.
@@ -41,17 +35,14 @@ class State(object):
 
 
 class CreateError(Exception):
-  """Raised if the given key does not match a stored model."""
   pass
 
 
-class InvalidKeyError(Exception):
-  """Raised if the given key does not match a stored model."""
+class InvalidIdError(Exception):
   pass
 
 
 class UpdateError(Exception):
-  """Raised if the given key does not match a stored model."""
   pass
 
 
@@ -63,8 +54,6 @@ class Bug(db.Model):
 
   Attributes:
     title: The bug's title.
-    status: Status of the bug (eg. active, fixed, closed) when it
-        was crawled.
     state: The current state of the bug; i.e. resolved, closed, or active.
     url: The url of the page the bug was filed against.
     summary: The bug's summary.
@@ -73,6 +62,8 @@ class Bug(db.Model):
         datastore.
     provider: Source provider of the bug information.
     bug_id: The ID of the bug within the provider's bug database.
+    status: Status of the bug (eg. active, fixed, closed) when it
+        was crawled.
     author: The user who first reported this bug; from provider.
     author_id: Identifies the user in the provider backend.
     reported_on: The date the bug was first opened; from provider.
@@ -91,7 +82,6 @@ class Bug(db.Model):
   """
   # Bug Details
   title = db.StringProperty(required=False)
-  status = db.StringProperty(required=False)
   state = db.StringProperty(required=False, default=State.UNKNOWN,
                             choices=(State.ACTIVE, State.RESOLVED,
                                      State.CLOSED, State.UNKNOWN))
@@ -101,10 +91,12 @@ class Bug(db.Model):
   modified = db.DateTimeProperty(required=False, auto_now=True)
 
   # Provider Related Details
-  provider = db.StringProperty(required=False, default=Provider.DATASTORE,
+  provider = db.StringProperty(required=False,
+                               default=Provider.DATASTORE,
                                choices=(Provider.DATASTORE,
                                         Provider.ISSUETRACKER))
   bug_id = db.StringProperty(required=False)
+  status = db.StringProperty(required=False)
   author = db.StringProperty(required=False)
   author_id = db.StringProperty(required=False)
   reported_on = db.StringProperty(required=False)
@@ -122,41 +114,6 @@ class Bug(db.Model):
   has_recording = db.BooleanProperty(required=False, default=False)
   recording_link = db.TextProperty(required=False, default='')
 
-  def ToDict(self):
-    """Returns the object form of this model plus its id.
-
-    Ignores the following properties:
-      added, modified
-
-    Returns:
-      The bug details as an object. (dict)
-    """
-    return {'key': self.key().id(),
-            'title': self.title,
-            'status': self.status,
-            'state': self.state,
-            'url': self.url,
-            'summary': self.summary,
-            'added': str(self.added),
-            'modified': str(self.modified),
-            'provider': self.provider,
-            # TODO (jason.stredwick): Id for historical reasons; update.
-            'id': self.bug_id,
-            'author': self.author,
-            'author_id': self.author_id,
-            'reported_on': self.reported_on,
-            'last_update': self.last_update,
-            'last_updater': self.last_updater,
-            'project': self.project,
-            'priority': self.priority,
-            'details_link': self.details_link,
-            'has_target_element': self.has_target_element,
-            'target_element': self.target_element,
-            'has_screenshot': self.has_screenshot,
-            'screenshot': self.screenshot,
-            'has_recording': self.has_recording,
-            'recording_link': self.recording_link}
-
   def Patch(self, obj):
     """Patch/update the model with data from the given object.
 
@@ -170,47 +127,24 @@ class Bug(db.Model):
 
     Args:
       obj: The data to use to patch the model. (dict)
-
     Raise:
       db.Error: Raised if there is an error assigning the value from the given
           data to model.
       TypeError: Raised if the given object is not an object.
     """
-    # Bug details
-    if 'title' in obj:
-      self.title = obj['title']
-    if 'status' in obj:
-      self.status = obj['status']
-    if 'state' in obj:
-      self.state = obj['state']
-    if 'url' in obj:
-      self.url = obj['url']
-    if 'summary' in obj:
-      self.summary = obj['summary']
+    # TODO (jason.stredwick): Change to
+    # auto_update_attr = class_attr.GetPODAttrs(Bug)
+    # once the special cases have been resolved.
+    special_props = ['target_element', 'has_target_element',
+                     'screenshot', 'has_screenshot',
+                     'recording_link', 'has_recording',
+                     'added', 'modified']
+    props = self.properties().keys()
+    for key, value in obj.iteritems():
+      if key in props and key not in special_props:
+        setattr(self, key, value)
 
-    # Provide details
-    if 'provider' in obj:
-      self.provider = obj['provider']
-    # TODO (jason.stredwick): Id for historical reasons; update.
-    if 'id' in obj:
-      self.bug_id = obj['id']
-    if 'author' in obj:
-      self.author = obj['author']
-    if 'author_id' in obj:
-      self.author_id = obj['author_id']
-    if 'reported_on' in obj:
-      self.reported_on = obj['reported_on']
-    if 'last_update' in obj:
-      self.last_update = obj['last_update']
-    if 'last_updater' in obj:
-      self.last_updater = obj['last_updater']
-    if 'project' in obj:
-      self.project = obj['project']
-    if 'priority' in obj:
-      self.priority = obj['priority']
-    if 'details_link' in obj:
-      self.details_link = obj['details_link']
-
+    # Handle special case properties.
     # Attachments
     if 'target_element' in obj:
       self.target_element = obj['target_element']
@@ -240,7 +174,7 @@ class Bug(db.Model):
       db.Error: Raised if any bug property is invalid.
     """
     if not self.title:
-      raise db.Error
+      raise db.Error('Missing title; required.')
 
 
 def Create(data):
@@ -248,76 +182,62 @@ def Create(data):
 
   Args:
     data: An object used to create a new model. (dict)
-
   Returns:
-    Return the key for the new model. (integer)
-
+    Return the newly created bug.
   Raises:
     CreateError: Raised if something goes wrong while creating a new bug.
   """
   try:
     bug = Bug()
     bug.Patch(data)
-    key = bug.put().id()
-  except (TypeError, db.Error), e:
-    logging.error('bug.Create: Exception while creating bug: %s' % e)
-    raise CreateError
-  return key
+    bug.put()
+  except (TypeError, db.Error, AssertionError), e:
+    logging.error('bug.Create: Exception while creating bug: %s', e)
+    raise CreateError('Failed to create a new bug.\n%s\n' % e)
+  return bug
 
 
-def Get(key):
-  """Returns the bug details for the given key.
+def Get(id):
+  """Returns the bug model for the given id.
 
   Args:
-    key: The key of the bug to retrieve. (integer)
-
+    id: The id of the bug to retrieve. (integer)
   Returns:
-    Returns the bug details as an object. (dict)
-
+    Returns the bug model. (Bug)
   Raises:
-    InvalidKeyError: Raised if the key does not match a stored bug.
+    InvalidIdError: Raised if the id does not match a stored bug.
   """
   try:
-    bug = Bug.get_by_id(key)
+    bug = Bug.get_by_id(id)
     if not bug:
-      raise InvalidKeyError
-  except (db.Error, InvalidKeyError), e:
-    logging.error('bug.Get: Exception while retrieving bug (%s): %s' %
-                  (key, e))
-    raise InvalidKeyError
-  return bug.ToDict()
+      raise InvalidIdError
+  except (db.Error, InvalidIdError), e:
+    logging.error('bug.Get: Exception while retrieving bug (%s): %s', id, e)
+    raise InvalidIdError('Bug not found [id=%s].%s' % (id, e))
+  return bug
 
 
-def Update(key, data):
-  """Update the bug specified by the given key with the given data.
+def Update(bug, data):
+  """Update the bug specified by the given id with the given data.
 
   Args:
-    key: The key of the bug to update. (integer)
+    bug: The bug to update. (Bug)
     data: An object used to update the model details. (dict)
-
-  Returns:
-    Return the key of the bug updated. (integer)
-
   Raises:
-    InvalidKeyError: Raised if the key does match a stored bug.
     UpdateError: Raised if there was an error updating the bug.
   """
-  try:
-    bug = Bug.get_by_id(key)
-    if not bug:
-      raise InvalidKeyError
-  except (db.Error, InvalidKeyError), e:
-    logging.error('bug.Update: Invalid key (%s): %s' % (key, e))
-    raise InvalidKeyError
-
   try:
     bug.Patch(data)
     bug.put()
   except (TypeError, db.Error), e:
+    # tempdate is used to output the data into the log, but strip out the
+    # screenshot information due to size.
+    # TODO (jason.stredwick): Resolve how to store and access screenshots and
+    # remove tempdate once the screenshot data is no longer directly stored.
     tempdata = data
     if 'screenshot' in tempdata:
       del tempdata['screenshot']
     logging.error('bug.Update: Exception while updating bug (%s): %s.  Given '
-                  'data of %s' % (key, e, tempdata))
-    raise UpdateError
+                  'data of %s', id, e, tempdata)
+    raise UpdateError('bug [id=%s] failed to update.\n%s\n' % (id, e))
 

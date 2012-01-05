@@ -19,13 +19,13 @@ __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 from google.appengine.api import users
 
+from bugs import kind
 from bugs.models.bugs import get
 from bugs.models.bugs import update
 from bugs.providers import pusher_base
 
 
 class Error(pusher_base.Error):
-  """General exception."""
   pass
 
 
@@ -37,8 +37,8 @@ class Pusher(pusher_base.PusherBase):
   the BITE bug details into data useful for the provider.
   """
 
-  def __init__(self, key, max_retries=3):
-    pusher_base.PusherBase.__init__(self, key, max_retries)
+  def __init__(self, bug, max_retries=3):
+    pusher_base.PusherBase.__init__(self, bug, max_retries)
 
   def Push(self):
     """Updates the bug model with values set by providers such as bug_id.
@@ -52,21 +52,21 @@ class Pusher(pusher_base.PusherBase):
       if current_user:
         user_email = current_user.email()
 
-      bug = get.Get(self.key)
-
       provider_data = {
-        'key': self.key,
-        'id': str(self.key), # bug_id
+        'kind': kind.Kind.BUG,
+        'id': self.bug.key().id(),
+        'bug_id': str(self.bug.key().id()), # bug_id
         'author': user_email,
         'author_id': user_email,
-        'reported_on': bug['added'],
-        'last_update': bug['modified'],
+        'reported_on': str(self.bug.added),
+        'last_update': str(self.bug.modified),
         'last_updater': user_email,
+        'status': self.bug.state,
         'project': 'none',
         'priority': 'none',
         'details_link': ''
       }
 
-      update.Update(self.key, provider_data)
-    except (get.InvalidKeyError, update.InvalidKeyError, update.UpdateError):
-      raise Error
+      update.Update(self.bug, provider_data)
+    except (get.InvalidIdError, update.UpdateError), e:
+      raise Error(e)

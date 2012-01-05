@@ -268,7 +268,8 @@ bite.client.MiniBugPopup.prototype.submitBugBinding_ = function(
        'label': 'SUBMIT: Bug ' + bugData['id']});
 
   var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
-                     'details': {'key': bugData['key'],
+                     'details': {'kind': bugData['kind'],
+                                 'id': bugData['id'],
                                  'target_element': descriptor}};
 
   chrome.extension.sendRequest(requestData,

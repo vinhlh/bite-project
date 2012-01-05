@@ -74,9 +74,14 @@ class StorageMetadata(db.Model):
     result = ''
     try:
       gateway = GetSingletonDocsGateway()
-      result = gateway.GetFileContentAsText(self.docs_resource_url)
+      if not gateway:
+        logging.info('Test failed to be loaded from GoogleDocs.  Gateway was '
+                     'not available.')
+        result = self._GetActiveTestVersion()
+      else:
+        result = gateway.GetFileContentAsText(self.docs_resource_url)
     except Exception, e:
-      logging.error('Test failed to be loaded from GoogleDoc. ERROR: %s',
+      logging.error('Test failed to be loaded from GoogleDocs. ERROR: %s',
                     str(e))
       result = self._GetActiveTestVersion()
 
@@ -94,7 +99,11 @@ class StorageMetadata(db.Model):
     """Updates the metadata and Google Docs using a transaction."""
     try:
       gateway = GetSingletonDocsGateway()
-      gateway.UpdateDocument(self.docs_resource_id, new_name, new_contents)
+      if not gateway:
+        logging.info('Test failed to be updated in GoogleDocs. Gateway was '
+                     'not available.')
+      else:
+        gateway.UpdateDocument(self.docs_resource_id, new_name, new_contents)
     except Exception, e:
       logging.error('Test failed to be updated in GoogleDoc. ERROR: %s',
                     str(e))
@@ -138,10 +147,14 @@ def LoadZipByKeyStr(key_str):
 
 def GetSingletonDocsGateway():
   """Returns the singleton docs gateway object."""
-  global DOCS_GATEWAY
-  if not DOCS_GATEWAY:
-    DOCS_GATEWAY = docs_gateway.GatewayForAppEngine(
-        settings.STORAGE_GMAIL_ACCOUNT)
+  try:
+    global DOCS_GATEWAY
+    if not DOCS_GATEWAY:
+      DOCS_GATEWAY = docs_gateway.GatewayForAppEngine(
+          settings.STORAGE_GMAIL_ACCOUNT)
+  except Exception, e:
+    logging.info('Failed to create DocsGateway: %s' % e)
+    DOCS_GATEWAY = None
 
   return DOCS_GATEWAY
 
@@ -171,9 +184,13 @@ def _SaveTransaction(gateway, project, new_test_name, contents):
   src_url = ''
   resource_id = ''
   try:
-    docs_entry = gateway.CreateNewDoc(new_test_name, contents)
-    src_url = docs_entry.src_url
-    resource_id = docs_entry.resource_id
+    if not gateway:
+      logging.info('Failed to save test to GoogleDocs. Gateway was not '
+                   'available.')
+    else:
+      docs_entry = gateway.CreateNewDoc(new_test_name, contents)
+      src_url = docs_entry.src_url
+      resource_id = docs_entry.resource_id
   except Exception, e:
     logging.error('Test failed to be saved in GoogleDoc. ERROR: %s',
                   str(e))

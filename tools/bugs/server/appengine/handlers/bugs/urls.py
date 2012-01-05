@@ -12,28 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Get a set of bugs based on url.
+"""Get a set of bugs based on url."""
 
-Handler output is defined by the function:
-
-    get_bugs.GetBugsByUrls
-"""
-
-
-__author__ = ('alexto@google.com (Alexis O. Torres)',
-              'jason.stredwick@gmail.com (Jason Stredwick)')
+__author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 import webapp2
 
+from bugs import kind
 from bugs.handlers.bugs import base
 from bugs.models.url_bug_map import get_bugs
 
 
-class UrlsError(base.Error):
-  """Raised if an error occurs getting all bugs based on url."""
-
-  def __init__(self, msg):
-    base.Error.__init__(self, msg=msg)
+class Error(base.Error):
+  pass
 
 
 class UrlsHandler(base.BugsHandler):
@@ -42,29 +33,25 @@ class UrlsHandler(base.BugsHandler):
   # Disable 'Invalid method name' lint error.
   # pylint: disable-msg=C6409
   def post(self):
-    """Get bugs.
-
-    Returns:
-      Data to send to the caller. (dict)
+    """Get bugs for the given urls.
 
     Raises:
-      UrlsError
-      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
-      base.MissingDataError: Raised if data is not present.
+      Error: Raised upon failure.
     """
-    data = self.GetData()
-
     try:
-      data = get_bugs.GetBugs(data)
+      data = self.GetData(kind.Kind.URLS)
+      mappings = get_bugs.GetBugs(data['urls'])
+      self.WriteResponse({'kind': kind.Kind.URL_BUG_MAP, 'mappings': mappings})
     except get_bugs.Error, e:
-      raise UrlsError('Failed to retrieve bugs for the given urls: %s' % e)
-
-    self.WriteResponse(data)
+      raise Error('Failed to retrieve bugs for Url to Bug map: %s\n' % e,
+                  code=400)
+    except base.Error, e:
+      raise Error(e)
 
 
 routes = [
   webapp2.Route(r'/bugs/urls', handler=UrlsHandler, name='bugs_urls',
-                methods=['POST'], schemes=['https'])
+                methods=['POST'])
 ]
 app = webapp2.WSGIApplication(routes, debug=True)
 

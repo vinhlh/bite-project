@@ -14,23 +14,18 @@
 
 """Create a new bug entry."""
 
-
-__author__ = ('alexto@google.com (Alexis O. Torres)',
-              'jason.stredwick@gmail.com (Jason Stredwick)')
-
+__author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 import webapp2
 
+from bugs import kind
 from bugs.handlers.bugs import base
 from bugs.models.bugs import create
 from bugs.providers import services
 
 
-class CreationError(base.Error):
-  """Raised if an error occurs creating a new bug."""
-
-  def __init__(self, msg):
-    base.Error.__init__(self, msg=msg)
+class Error(base.Error):
+  pass
 
 
 class CreateHandler(base.BugsHandler):
@@ -42,31 +37,32 @@ class CreateHandler(base.BugsHandler):
     """Create a new bug entry with the given data.
 
     Raises:
-      CreationError: Raised if creation fails.
-      base.InvalidJson: Raised if the data fails to be JSON parsed/stringified.
-      base.MissingDataError: Raised if data is not present.
+      Error: Raised if the data fails to be JSON parsed/stringified or is not
+          present.
     """
-    data = self.GetData()
-
     # TODO (jason.stredwick): Figure out the correct failure strategy if a new
     # bug is created but either the url/bug mapping or pusher fails.
     try:
-      key = create.Create(data)
-      services.Index(key)
-      services.Push(key)
-    except create.Error:
-      raise CreationError('Failed to create a new bug.')
+      data = self.GetData(kind.Kind.BUG)
+      bug = create.Create(data)
+      id = bug.key().id()
+      services.Index(id)
+      services.Push(id)
+      self.WriteResponse({'kind': kind.Kind.ID, 'id': id})
+    except create.CreateError, e:
+      raise Error('Failed to create a new bug.\n%s\n' % e, code=400)
     except services.PushError:
-      raise CreationError('Failed to push the new bug.')
+      raise Error('Failed to push new bug [id=%s].\n' % id, code=400)
     except services.IndexError:
-      raise CreationError('Failed to create index for the new bug.')
-
-    self.WriteResponse({'key': key})
+      raise Error('Failed to create index for new bug [id=%s].\n' % id,
+                  code=400)
+    except base.Error, e:
+      raise Error(e)
 
 
 routes = [
   webapp2.Route(r'/bugs', handler=CreateHandler, name='bugs_create',
-                methods=['POST'], schemes=['https'])
+                methods=['POST'])
 ]
 app = webapp2.WSGIApplication(routes, debug=True)
 

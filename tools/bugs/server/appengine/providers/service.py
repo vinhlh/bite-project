@@ -12,28 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
-"""Base class for Crawler objects."""
+"""Defines the available services."""
 
 __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 
-class Error(Exception):
-  pass
-
-
-class CrawlerBase(object):
-  """Crawler base class
-
-  Crawlers are responsible for retrieving relevant bug data from a specific
-  provider database.
-
-  Attributes:
-    max_retries: The maximum number of attempts a crawl.
-  """
-
-  def __init__(self, max_retries=3):
-    self.max_retries = max_retries
-
-  def Crawl(self):
-    raise NotImplementedError
+class Service(object):
+  """Define services providers must support."""
+  CRAWL = 'crawl'
+  INDEX = 'index'
+  PUSH = 'push'

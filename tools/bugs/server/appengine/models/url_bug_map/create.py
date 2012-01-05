@@ -14,38 +14,31 @@
 
 """New url bug mapping creation functionality."""
 
-
-__author__ = ('alexto@google.com (Alexis O. Torres)',
-              'jason.stredwick@gmail.com (Jason Stredwick)')
+__author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 from google.appengine.ext import db
 
-from bugs.models.bugs import bug
 from bugs.models.url_bug_map import url_bug_map
 
 
 class Error(Exception):
-  """Raised if an exception occurs while creating the new mappings."""
   pass
 
 
-def Create(bug_key):
-  """Create a new url to bug mapping.
+def Create(bug, position=url_bug_map.UrlPosition.OTHER):
+  """Create a new url to bug mapping for the given bug.
 
   Args:
-    bug_key: The key for the bug to create a mapping for. (integer)
-
+    bug: The bug to create a mapping for. (bugs.models.bugs.bug.Bug)
+    position: The location where the bug was found in the provider's
+        database. (url_bug_map.UrlPosition)
   Returns:
-    The key of the newly created mapping or None if no mapping is possible.
+    The id of the newly created mapping or None if no mapping is possible.
     (integer or None)
-
   Raises:
     Error: Raised if an error occurs while creating the mapping.
   """
   try:
-    bug_entity = bug.Bug.get_by_id(bug_key)
-    if not bug_entity:
-      raise Error
-    return url_bug_map.Create(bug_entity)
-  except (Error, url_bug_map.CreateError):
-    raise Error
+    return url_bug_map.Create(bug, position)
+  except url_bug_map.CreateError, e:
+    raise Error(e)

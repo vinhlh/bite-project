@@ -749,7 +749,8 @@ bite.client.Content.prototype.submitBugRecording_ = function(
     bugData, recording_link) {
   var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
                      'project': bugData['project'],
-                     'details': {'key': bugData['key'],
+                     'details': {'id': bugData['kind'],
+                                 'kind': bugData['id'],
                                  'recording_link': recording_link}};
 
   chrome.extension.sendRequest(requestData);

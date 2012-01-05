@@ -14,33 +14,27 @@
 
 """Get bug functionality."""
 
-
-__author__ = ('alexto@google.com (Alexis O. Torres)',
-              'jason.stredwick@gmail.com (Jason Stredwick)')
-
+__author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 from bugs.models.bugs import bug
 
 
-class InvalidKeyError(Exception):
-  """Raised if the key did not correlate with a stored bug."""
+class InvalidIdError(bug.InvalidIdError):
   pass
 
 
-def Get(key):
-  """Get bug details.
+def Get(id):
+  """Get bug model.
 
   Args:
-    key: The key of the bug to retrieve. (integer)
-
+    id: The id of the bug to retrieve. (integer)
   Returns:
-    The object containing the bug details. (dict)
-
+    The object containing the bug details. (bug.Bug)
   Raises:
-    InvalidKeyError: Raised if a bug was not found for the given key.
+    InvalidIdError: Raised if a bug was not found for the given id.
   """
   try:
-    return bug.Get(key)
-  except bug.InvalidKeyError:
-    raise InvalidKeyError
+    return bug.Get(id)
+  except bug.InvalidIdError, e:
+    raise InvalidIdError(e)
 

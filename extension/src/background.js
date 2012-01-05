@@ -234,7 +234,7 @@ bite.client.Background.prototype.fetchBugsDataCallback_ = function(tab,
    *   [{"status": "duplicate", "project": "chromium",..}, ...]]]
    */
   var bugs = [];
-  var urlBugMap = result.bugMap;
+  var urlBugMap = result.bugMap['mappings'];
   var totalBugs = 0;
   // Translate the urlBugMap into the bugs structure expected by the rest of
   // the extension.

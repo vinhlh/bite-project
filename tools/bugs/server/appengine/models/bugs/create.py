@@ -14,16 +14,12 @@
 
 """New bug creation functionality."""
 
-
-__author__ = ('alexto@google.com (Alexis O. Torres)',
-              'jason.stredwick@gmail.com (Jason Stredwick)')
-
+__author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 from bugs.models.bugs import bug
 
 
-class Error(Exception):
-  """Raised if an exception occurs while creating a new bug."""
+class CreateError(bug.CreateError):
   pass
 
 
@@ -32,15 +28,12 @@ def Create(data):
 
   Args:
     data: The data used to create a new bug. (dict)
-
   Returns:
-    The key of the new bug. (integer)
-
+    The newly created bug. (bug.Bug)
   Raises:
-    Error: Raised if creation of a new model fails.
+    CreateError: Raised if creation of a new model fails.
   """
   try:
     return bug.Create(data)
-  except bug.CreateError:
-    raise Error
-
+  except bug.CreateError, e:
+    raise CreateError(e)

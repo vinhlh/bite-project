@@ -502,7 +502,7 @@ function testCreateBugCommandListeners() {
  */
 function testPostBugUpdate() {
   var expectedQueryParams = {};
-  var details = {'key': 98, 'comment': 'Unit Test Comment'};
+  var details = {'kind': 'bugs#bug', 'id': 98, 'comment': 'Unit Test Comment'};
   var testComment = goog.dom.createDom(goog.dom.TagName.DIV,
                         {'id': 'bug-popup-comment',
                          'innerHTML': 'Unit Test Comment'});
@@ -515,7 +515,7 @@ function testPostBugUpdate() {
   this.popupClient.postBugUpdate_(mockIssueTrackerBugData,
                                   goog.dom.getDocument().body);
 
-  expectedQueryParams = {action: Bite.Constants.HUD_ACTION.UPDATE_BUG_STATUS,
+  expectedQueryParams = {action: Bite.Constants.HUD_ACTION.UPDATE_BUG,
                          details: details};
 
   // Verify the expected call and query parameters were sent.
@@ -534,7 +534,7 @@ function testPostBugUpdate() {
                        {'id': 'bug-update-status',
                         'innerHTML': '<OPTION>Resolved</OPTION>'});
   goog.dom.appendChild(goog.dom.getDocument().body, testStatus);
-  expectedQueryParams = {action: Bite.Constants.HUD_ACTION.UPDATE_BUG_STATUS,
+  expectedQueryParams = {action: Bite.Constants.HUD_ACTION.UPDATE_BUG,
                          details: details};
   this.popupClient.postBugUpdate_(mockIssueTrackerBugData,
                                   goog.dom.getDocument().body);

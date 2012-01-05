@@ -14,41 +14,27 @@
 
 """Update bug functionality."""
 
-
-__author__ = ('alexto@google.com (Alexis O. Torres)',
-              'jason.stredwick@gmail.com (Jason Stredwick)')
-
+__author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
 from bugs.models.bugs import bug
 
 
-class InvalidKeyError(Exception):
-  """Raised if the key did not correlate with a stored bug."""
-  pass
-
-
-class UpdateError(Exception):
+class UpdateError(bug.UpdateError):
   """Raised if an exception occurs while updating a bug."""
   pass
 
 
-def Update(key, data):
+def Update(bug_model, data):
   """Update a bug.
 
   Args:
-    key: The key of the bug to retrieve. (integer)
+    bug_model: The bug to update. (bug.Bug)
     data: The data used to create a new bug. (dict)
-
-  Returns:
-    The key of the bug that was updated. (integer)
-
   Raises:
-    Error: Raised if creation of a new model fails.
+    UpdateError: Raised the update action fails.
   """
   try:
-    return bug.Update(key, data)
-  except bug.InvalidKeyError:
-    raise InvalidKeyError
-  except bug.UpdateError:
-    raise UpdateError
+    bug.Update(bug_model, data)
+  except bug.UpdateError, e:
+    raise UpdateError(e)
 

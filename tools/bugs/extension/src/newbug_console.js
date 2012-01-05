@@ -30,7 +30,6 @@ goog.require('bite.client.TemplateManager');
 goog.require('bite.client.Templates');
 goog.require('bite.client.console.NewBugTemplate');
 goog.require('bite.console.Helper');
-goog.require('bugs.type');
 goog.require('common.client.ElementDescriptor');
 goog.require('common.client.RecordModeManager');
 goog.require('goog.Timer');
@@ -521,8 +520,6 @@ bite.client.console.NewBug.prototype.saveScriptToServer_ = function() {
  * @private
  */
 bite.client.console.NewBug.prototype.submitHandler_ = function() {
-  this.saveScriptToServer_();
-
   // Extract data for the new bug.
   var selectedIndex = this.templatesList_.selectedIndex;
   var selectedTemplate = this.templatesList_.options[selectedIndex].value;
@@ -555,6 +552,7 @@ bite.client.console.NewBug.prototype.submitHandler_ = function() {
     'title': title,
     'url': this.url_,
     'summary': notes,
+    'state': 'active',
     'provider': provider,
     'project': project,
     'target_element': descriptor,
@@ -596,6 +594,11 @@ bite.client.console.NewBug.prototype.onSubmitComplete_ = function(result) {
   //if (success) {
   //  goog.global.window.open(url);
   //}
+
+  // TODO (jason.stredwick): Redo how attachments are specified for bugs and
+  // then how to attach rpf scripts.
+  // Once the bug has been filed, save the auto rpf script.
+  this.saveScriptToServer_();
 
   // Inform the other bug related consoles that they need to update.
   var action = {action: Bite.Constants.HUD_ACTION.UPDATE_DATA};

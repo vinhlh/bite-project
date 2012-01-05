@@ -20,8 +20,8 @@ validation of request parameters.
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
+import logging
 import os
-import urllib2
 import webapp2
 
 from google.appengine.ext import ereporter
@@ -31,12 +31,22 @@ from google.appengine.ext.webapp import template
 ereporter.register_logger()
 
 
-class Error(urllib2.HTTPError):
+class Error(webapp2.HTTPException):
   """Base class for all exceptions defined in this module."""
 
-  def __init__(self, msg, code=400, url='', hdrs='', fp=None):
-    urllib2.HTTPError.__init__(
-        self, msg=msg, code=code, url=url, hdrs=hdrs, fp=fp)
+  # TODO (jason.stredwick): Discover what the removed params were used for;
+  # url and fp.
+  def __init__(self, msg=None, code=400, hdrs=None):
+    """Base Error class for the BITE server.
+
+    Args:
+      msg: The message to send to the user. (string or None)
+      code: The status code for the user. (integer)
+      hdrs: A map of header information to user. (dict or None)
+    """
+    self.msg = msg
+    self.code = code
+    self.hdrs = hdrs
 
 
 class MissingRequiredParameterError(Error):
@@ -84,6 +94,24 @@ class BaseHandler(webapp2.RequestHandler):
     # Note that 10 is just an optional default value.
     value = self.GetOptionalIntParameter('int_parameter_name', 10)
   """
+
+  def handle_exception(self, exception, debug):
+    # Log the error.
+    logging.exception(exception)
+
+    # If the exception is a HTTPException, use its error code.
+    # Otherwise use a generic 500 error code.
+    if isinstance(exception, webapp2.HTTPException):
+      if exception.hdrs is not None and exception.hdrs:
+        for (k, v) in exception.hdrs.items():
+          self.response.headers[k] = v
+      self.response.set_status(exception.code)
+      if exception.msg is not None:
+        logging.exception(exception.msg)
+        self.response.write(exception.msg)
+    else:
+      self.response.set_status(500)
+      self.response.write('Unmanaged exception')
 
   def GetRequiredParameter(self, parameter_name):
     """Retrieves the value of a required request parameter.

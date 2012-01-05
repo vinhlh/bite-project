@@ -12,25 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Retrieve bugs based on url from mapping functionality.
-
-The retrieval returns the following data
-
-    [[url, [bug*]]+]
-
-url associated with a set of bugs.  The url can be a full url, domain, domain +
-path, etc.
-bug is the entire details of a given bug.
-
-The data returned will be a list containing all the given urls and
-componentized versions of those urls.  Each url will be broken into the
-following:
-
-    full url, url_domain + url_path, url_domain
-
-Each component will contain all the bugs that contain those components.
-"""
-
+"""Remove all mappings for a bug."""
 
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
@@ -40,7 +22,6 @@ from bugs.models.url_bug_map import url_bug_map
 
 
 class Error(Exception):
-  """Raised if an exception occurs while retrieving all bugs by url."""
   pass
 
 
@@ -49,7 +30,6 @@ def DeleteAllMappingsForBug(key_name):
 
   Args:
     key_name: The key name of the bug.
-
   Returns:
     The total amount of mappings deleted.
   """
@@ -66,20 +46,3 @@ def DeleteAllMappingsForBug(key_name):
       'DeleteAllMappingsForBug: total mappings deleted for bug %s: %d.',
       key_name, total_deleted)
   return total_deleted
-
-
-def DeleteBugAndMappings(key_name):
-  """Delete bug and all mappings assiciated with that bug.
-
-  Args:
-    key_name: The key name of the bug.
-
-  Returns:
-    The total amount of mappings deleted.
-  """
-  mappings_deleted = DeleteAllMappingsForBug(key_name)
-
-  bug = bugs.GetBugByKey(key_name)
-  if bug:
-    bug.delete()
-  return mappings_deleted

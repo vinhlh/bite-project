@@ -150,21 +150,21 @@ class SaveTest(base.BaseHandler):
   """Saves a new test object to the storage backend."""
 
   def post(self):
-    json = self.GetRequiredParameter('json')
+    json_str = self.GetRequiredParameter('json')
     project = self.GetRequiredParameter('project')
     js_files = self.GetOptionalParameter('jsFiles')
 
     if js_files:
       js_files = json.loads(js_files)
 
-    json_obj = json.loads(json)
+    json_obj = json.loads(json_str)
     new_test_name = json_obj['name']
 
     if storage.FetchByProjectAndTestName(project, new_test_name):
       raise DuplicatedNameError('The name exists, please provide a new name.')
 
     storage_project.UpdateProject(project, {'js_files': js_files})
-    storage_instance = storage.Save(project, new_test_name, json)
+    storage_instance = storage.Save(project, new_test_name, json_str)
 
     # TODO(michaelwill): This weird id string is left over from the
     # legacy WTF system.  Change to a proper json response.

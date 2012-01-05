@@ -35,76 +35,91 @@ Attributes:
       results a clients can request.
 """
 
-
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-
 import logging
 import re
+import json
 
 from google.appengine.ext import db
 
+from bugs import kind
 from bugs.models.url_bug_map import url_bug_map
-from bugs.models.url_bug_map.url_bug_map import UrlBugMap
 from bugs.models.bugs import bug
-from utils import encoding_util
-from utils import url_util
+from util import model_to_dict
 
 
 _MAX_RESULTS_CAP = 500
 
 
 class Error(Exception):
-  """Raised if an exception occurs while retrieving all bugs by url."""
   pass
 
 
-def GetBugs(urls):
+def GetBugs(urls, limit=_MAX_RESULTS_CAP):
   """Returns a list of objects containing the mapping of url to bugs.
 
+  TODO (jason.stredwick): Change the URL_BUG_MAP kind to isolate the break
+  down of the url into components into a single result for a given url.
+
   Args:
-    urls: A list or urls used to retrieve bugs. (list of string)
-
+    urls: A list or urls used to retrieve bugs. ([string])
+    limit: The max number of results to fetch. (integer)
   Returns:
-    A list of objects {'url': string, 'bugs': list bugs.models.bugs.bug.Bug}.
-    (list of objects)
+    An object. ([{url: string, [kind.Kind.BUG]}])
+  Raises:
+    Error: Raised if an error occurs accessing bug references.
   """
-  limit = _MAX_RESULTS_CAP
+  if limit > _MAX_RESULTS_CAP:
+    limit = _MAX_RESULTS_CAP
+
   results = []
+  # For each url create a relevance mapping to related bugs.
   for url in urls:
-    urlnorm = url_util.NormalizeUrl(url)
-    if not urlnorm:
-      logging.error('Unable to normalize URL.')
-      urlnorm = {url: encoding_util.EncodeToAscii(url), hostname: '', path: ''}
+    url_components = url_bug_map.PrepareUrl(url)
 
-    results_dict = {}
-    queries = GetQueriesForUrl(urlnorm)
+    results_dict = {} # Track which bugs have already been added.
+    queries = GetQueriesForUrl(url_components)
     for (key, query) in queries:
+      if not query:
+        results.append({'url': key, 'bugs': []})
+        continue
+
+      mappings = query.fetch(limit)
+      if not mappings:
+        results.append({'url': key, 'bugs': []})
+        continue
+
       result = []
+      keys = []
+      for mapping in mappings:
+        try:
+          bug_key = mapping.bug.key()
+          id = bug_key.id()
+        except Exception, e:
+          raise Error(e)
 
-      if query:
-        mappings = query.fetch(limit)
-        if mappings:
-          keys = []
-          for mapping in mappings:
-            bug_key = mapping.bug.key()
-            id = bug_key.id()
-            if id in results_dict:
-              continue
-            results_dict[id] = True
-            keys.append(bug_key)
+        if id in results_dict:
+          continue
+        results_dict[id] = True
+        keys.append(bug_key)
 
-          if keys:
-            result = db.get(keys)
-            result = [r.ToDict() for r in result if r]
+      if keys:
+        try:
+          result = db.get(keys)
+        except Exception, e:
+          raise Error(e)
+        result = [model_to_dict.ModelToDict(r) for r in result if r]
+        for r in result:
+          r['kind'] = kind.Kind.BUG
 
       results.append({'url': key, 'bugs': result})
 
   return results
 
 
-def GetQueriesForUrl(urlnorm): #, state, status):
+def GetQueriesForUrl(url_components):
   """Retrieves a list of queries to try for a given URL.
 
   Each query represents a possible way to find matches, each one has different
@@ -114,26 +129,23 @@ def GetQueriesForUrl(urlnorm): #, state, status):
      query[2] = Does a hostname match (considered the least relevant).
 
   Args:
-    urlnorm: NormalizUrlResult object.
-    state: State to filter on. If set to None,
-        bugs will not be filtered based on state.
-    status: Status to filter on. If set to None,
-        bugs will not be filtered based on status.
-
+    url_components: NormalizUrlResult object.
   Returns:
     A list containing Query objects.
   """
-  url = urlnorm.url[:500]
-  hostname = urlnorm.hostname[:500]
-  path = urlnorm.path[:500]
+  url = url_components['url']
+  hostname = url_components['hostname']
+  path = url_components['path']
 
   url_no_schema = re.sub('^https?://', '', url)
   hostname_path = hostname + path
 
-  url_query = (url, UrlBugMap.all().filter('url = ', url))
-  hostname_path_query = (hostname_path, UrlBugMap.all().filter(
-      'hostname = ', hostname).filter('path = ', path))
-  hostname_query = (hostname, UrlBugMap.all().filter('hostname = ', hostname))
+  url_query = (url, url_bug_map.UrlBugMap.all().filter('url = ', url))
+  hostname_path_query = (hostname + path, url_bug_map.UrlBugMap.all()
+                                          .filter('hostname = ', hostname)
+                                          .filter('path = ', path))
+  hostname_query = (hostname, url_bug_map.UrlBugMap.all()
+                              .filter('hostname = ', hostname))
 
   queries = []
   # This does not make sense to me.  What if the url is only a schemeless
@@ -153,12 +165,10 @@ def GetQueriesForUrl(urlnorm): #, state, status):
     queries.append(hostname_path_query)
     queries.append(hostname_query)
 
-  # TODO (jason.stredwick): Reinstate these if sorting/filtering after query
-  # is not sufficient.
-  #queries = [(k, q.order('-last_update')) for (k, q) in queries]
+  queries = [(k, q.order('-last_update')) for (k, q) in queries if q]
+  # TODO (jason.stredwick): Add back in state filtering later.  It requires the
+  # passing of filter data with the request.
   # If states is specified, filter results to query bug matching it's value.
-  #if state:
-  #  queries = [(k, q.filter('state = ', state.lower())) for (k, q) in queries]
-  #if status:
-  #  queries = [(k, q.filter('status = ', status.lower())) for (k, q) in queries]
+  #queries = [(k, q.filter('state = ', state.lower()))
+  #           for (k, q) in queries if q]
   return queries

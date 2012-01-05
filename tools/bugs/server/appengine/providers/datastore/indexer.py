@@ -22,7 +22,6 @@ from bugs.providers import indexer_base
 
 
 class Error(indexer_base.Error):
-  """General exception."""
   pass
 
 
@@ -36,16 +35,17 @@ class Indexer(indexer_base.IndexerBase):
   def __init__(self):
     pass
 
-  def Index(self, key):
-    """Creates search indices for the bug specified by the given key.
+  def Index(self, bug):
+    """Creates search indices for the bug specified by the given bug.
 
     Args:
-      key: The bug key. (integer)
-
+      bug: The bug. (bugs.models.bug.Bug)
+    Returns:
+      The id for the newly created UrlBugMap. (integer)
     Raises:
       Error: Raised if there was an error creating an index.
     """
     try:
-      mapping_key = create.Create(key)
-    except create.Error:
-      raise Error
+      return create.Create(bug)
+    except create.Error, e:
+      raise Error(e)

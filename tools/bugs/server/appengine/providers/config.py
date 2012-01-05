@@ -18,26 +18,14 @@
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-
+from bugs.providers.service import Service
+from bugs.providers.provider import Provider
 from bugs.providers.datastore import crawler as datastore_crawler
 from bugs.providers.datastore import indexer as datastore_indexer
 from bugs.providers.datastore import pusher as datastore_pusher
 from bugs.providers.issuetracker import crawler as issuetracker_crawler
 from bugs.providers.issuetracker import indexer as issuetracker_indexer
 from bugs.providers.issuetracker import pusher as issuetracker_pusher
-
-
-class Service(object):
-  """Define services providers must support."""
-  CRAWL = 'crawl'
-  INDEX = 'index'
-  PUSH = 'push'
-
-
-class Provider(object):
-  """Define available providers."""
-  DATASTORE = 'datastore'
-  ISSUETRACKER = 'issuetracker'
 
 
 PROVIDER_MAP = {

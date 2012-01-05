@@ -21,7 +21,6 @@ from bugs.providers import pusher_base
 
 
 class Error(pusher_base.Error):
-  """General exception."""
   pass
 
 

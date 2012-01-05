@@ -13,38 +13,75 @@
 // limitations under the License.
 
 /**
- * @fileoverview Defines type information related to the Bugs API.
+ * @fileoverview Defines kind information related to the Bugs API.
  *
  * @author jason.stredwick@gmail.com (Jason Stredwick)
  */
 
 
-goog.provide('bugs.type');
+goog.provide('bugs.kind');
 
 
 /**
- * Defines the bug details retrieved from the server.
- * @typedef {{key: number,        // Required aftr bug is filed.
+ * @enum {string}
+ */
+bugs.kind.Kind = {
+  BUG: 'bugs#bug',
+  ID: 'bugs#id',
+  URL_BUG_MAP: 'bugs#url-bug-map',
+  URLS: 'bugs#urls'
+};
+
+
+/**
+ * @typedef {{kind: bugs.kind.Kind, // BUG
+ *            id: number,           // Required aftr bug is filed.
  *            title: string,
  *            status: string,
  *            state: string,
  *            url: string,
  *            summary: string,
+ *            added: string,
+ *            modified: string,
  *            provider: string,
  *            bug_id: string,
  *            author: string,
+ *            author_id: string,
+ *            reported_on: string,
+ *            last_update: string,
+ *            last_updater: string,
  *            project: string,
  *            priority: string,
- *            details_link: string}}
+ *            details_link: string,
+ *            has_target_element: boolean,
+ *            target_element: string,
+ *            has_screenshot: boolean,
+ *            screenshot: string,
+ *            has_recording: boolean,
+ *            recording: string}}
  */
-bugs.type.Bug;
+bugs.kind.Bug;
 
 
 /**
- * Defines the data returned when requesting bugs by url.
- * @typedef {Array.<{url: string, bugs: !Array.<bugs.type.Bug>}>}
+ * @typedef {{kind: bugs.kind.Kind, // ID
+ *            id: number}}
  */
-bugs.type.UrlBugMap;
+bugs.kind.Id;
+
+
+/**
+ * @typedef {{kind: bugs.kind.Kind, // URL_BUG_MAP
+ *            mappings: !Array.<{url: string, bugs: !Array.<bugs.kind.Bug>}>}}
+ */
+bugs.kind.UrlBugMap;
+
+
+/**
+ * @typedef {{kind: bugs.kind.Kind, // URLS
+ *            urls: !Array.<string>}}
+ */
+bugs.kind.Urls;
 
 
 /**
@@ -55,9 +92,9 @@ bugs.type.UrlBugMap;
  * the object will contain either an error property describing what went wrong
  * or an object containing the data for the requested bug.
  *
- * @typedef{function(!{success: boolean, error: string, bug: bugs.type.Bug})}
+ * @typedef{function(!{success: boolean, error: string, bug: bugs.kind.Bug})}
  */
-bugs.type.callbackReturnBug;
+bugs.kind.callbackReturnBug;
 
 
 /**
@@ -66,11 +103,11 @@ bugs.type.callbackReturnBug;
  * Called upon completion of the create or update request.  The object passed
  * to the callback will return the success of the request.  Depending on the
  * success the object will contain either an error property describing what
- * went wrong or a number representing the key of the bug created or updated.
+ * went wrong or a number representing the id of the bug created or updated.
  *
- * @typedef{function(!{success: boolean, error: string, key: number})}
+ * @typedef{function(!{success: boolean, error: string, id: number})}
  */
-bugs.type.callbackReturnKey;
+bugs.kind.callbackReturnId;
 
 
 /**
@@ -82,6 +119,6 @@ bugs.type.callbackReturnKey;
  * or an object containing the data for the requested bug.
  *
  * @typedef{function(!{success: boolean, error: string,
- *                     bugMap: bugs.type.UrlBugMap})}
+ *                     bugMap: bugs.kind.UrlBugMap})}
  */
-bugs.type.callbackReturnUrlBugMap;
+bugs.kind.callbackReturnUrlBugMap;
