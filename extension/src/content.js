@@ -691,6 +691,23 @@ bite.client.Content.prototype.parseCoordinates_ = function(coordinates) {
  * @param {Object} result Bug data known for the page.
  */
 bite.client.Content.prototype.updateBugsData = function(result) {
+  if (!this.user_) {
+    // Try getting the current user one more time.
+    var callback = goog.bind(this.updateBugsData_, this, result);
+    chrome.extension.sendRequest(
+        {'action': Bite.Constants.HUD_ACTION.GET_CURRENT_USER},
+        goog.bind(this.getCurrentUser_, this, callback));
+    return;
+  }
+  this.updateBugsData_(result);
+};
+
+
+/**
+ * Updates the bugs data.
+ * @param {Object} result Bug data known for the page.
+ */
+bite.client.Content.prototype.updateBugsData_ = function(result) {
   this.bugs_ = result['bugs'];
   this.bugFilters_ = result['filters'];
   bite.bugs.filter(this.bugs_, this.bugFilters_);
@@ -702,6 +719,7 @@ bite.client.Content.prototype.updateBugsData = function(result) {
     this.bugOverlay_.updateData(result['bugs']);
   }
 };
+
 
 /**
  * Updates the tests data.

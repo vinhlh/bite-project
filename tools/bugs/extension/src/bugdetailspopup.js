@@ -497,10 +497,19 @@ bite.client.BugDetailsPopup.prototype.postBugUpdate_ = function(
     details['comment'] = commentElem.innerHTML;
   }
   var statusElem = goog.dom.getElement('bug-update-status');
-  var status = undefined;
+  var status = null;
   if (statusElem) {
-    status = statusElem.innerHTML;
+    status = statusElem.value.toLowerCase();
     details['status'] = status;
+    // TODO (jason.stredwick): Move logic to server.
+    if (status == 'resolved' || status == 'fixed') {
+      details['state'] = 'resolved';
+    } else if (status == 'available' || status == 'assigned' ||
+               status == 'untriaged') {
+      details['state'] = 'active';
+    } else {
+      details['state'] = 'closed';
+    }
   }
 
   // TODO (jason.stredwick): I notice that the status in the bug data is not
@@ -538,7 +547,7 @@ bite.client.BugDetailsPopup.prototype.disableSubmitPopup_ = function() {
 
 /**
  * Handles the response for updating a bug server side.
- * @param {string} status The new status of the bug.
+ * @param {?string} status The new status of the bug.
  * @param {Object} bugData A dictionary of the Bug data elements.
  * @param {Node} container The container HTML element to draw in.
  * @param {string} result A JSON with the result of the update.
@@ -555,7 +564,7 @@ bite.client.BugDetailsPopup.prototype.postBugUpdateHandler_ = function(
 
 /**
  * Draws a popup Element that confirms the update to the bug.
- * @param {string=} status The new status of the bug, can be undefined if no
+ * @param {?string} status The new status of the bug, can be undefined if no
  *     status value was updated.
  * @param {Object} bugData A dictionary of the Bug data elements.
  * @param {Node} container The container HTML element to draw in.
@@ -570,7 +579,7 @@ bite.client.BugDetailsPopup.prototype.drawConfirmationPopup_ = function(
   goog.dom.removeChildren(container);
 
   if (result['success'] == true) {
-    if (status == undefined) {
+    if (status == null) {
       resultMsg = 'Your comment has been successfully posted.';
     } else {
       resultMsg = 'This issue has been marked as <b>' + status + '</b>';
