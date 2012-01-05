@@ -17,7 +17,7 @@
 
 __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
-from bugs.models.url_bug_map import create
+from bugs.models.url_bug_map import url_bug_map
 from bugs.providers import indexer_base
 
 
@@ -46,6 +46,6 @@ class Indexer(indexer_base.IndexerBase):
       Error: Raised if there was an error creating an index.
     """
     try:
-      return create.Create(bug)
-    except create.Error, e:
+      return url_bug_map.Create(bug)
+    except url_bug_map.CreateError, e:
       raise Error(e)

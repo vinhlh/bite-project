@@ -16,11 +16,12 @@
 
 __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
+import logging
 import webapp2
 
 from bugs import kind
 from bugs.handlers.bugs import base
-from bugs.models.bugs import create
+from bugs.models.bugs import bug
 from bugs.providers import services
 
 
@@ -40,16 +41,18 @@ class CreateHandler(base.BugsHandler):
       Error: Raised if the data fails to be JSON parsed/stringified or is not
           present.
     """
+    logging.info('New bug handler; bugs.handlers.bugs.create.CreateHandler')
+
     # TODO (jason.stredwick): Figure out the correct failure strategy if a new
     # bug is created but either the url/bug mapping or pusher fails.
     try:
       data = self.GetData(kind.Kind.BUG)
-      bug = create.Create(data)
-      id = bug.key().id()
+      bug_model = bug.Create(data)
+      id = bug_model.key().id()
       services.Index(id)
       services.Push(id)
       self.WriteResponse({'kind': kind.Kind.ID, 'id': id})
-    except create.CreateError, e:
+    except bug.CreateError, e:
       raise Error('Failed to create a new bug.\n%s\n' % e, code=400)
     except services.PushError:
       raise Error('Failed to push new bug [id=%s].\n' % id, code=400)

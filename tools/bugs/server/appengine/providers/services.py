@@ -26,7 +26,7 @@ Three main functions:
 __author__ = ('alexto@google.com (Alexis O. Torres)',
               'jason.stredwick@gmail.com (Jason Stredwick)')
 
-from bugs.models.bugs import get
+from bugs.models.bugs import bug
 from bugs.providers import config
 from bugs.providers import crawler_base
 from bugs.providers import indexer_base
@@ -85,17 +85,17 @@ def Index(id):
     ProviderNotSupported: The given provider is not supported.
   """
   try:
-    bug = get.Get(id)
-  except get.Error, e:
+    bug_model = bug.Get(id)
+  except bug.InvalidIdError, e:
     raise InvalidIdError(e)
 
-  provider = bug.provider
+  provider = bug_model.provider
   if not provider or provider not in config.PROVIDER_MAP:
     raise ProviderNotSupported('Invalid provider; %s' % provider)
   indexer = config.PROVIDER_MAP[provider][Service.INDEX]()
 
   try:
-    indexer.Index(bug)
+    indexer.Index(bug_model)
   except indexer_base.Error, e:
     raise InvalidIdError(e)
 
@@ -111,12 +111,12 @@ def Push(id):
     ProviderNotSupported: The given provider is not supported.
   """
   try:
-    bug = get.Get(id)
-  except get.Error, e:
+    bug_model = bug.Get(id)
+  except bug.InvalidIdError, e:
     raise InvalidIdError(e)
 
-  provider = bug.provider
+  provider = bug_model.provider
   if not provider or provider not in config.PROVIDER_MAP:
     raise ProviderNotSupported('Invalid provider; %s' % provider)
-  pusher = config.PROVIDER_MAP[provider][Service.PUSH](bug)
+  pusher = config.PROVIDER_MAP[provider][Service.PUSH](bug_model)
   pusher.Push()

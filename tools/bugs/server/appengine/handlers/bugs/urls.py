@@ -16,6 +16,7 @@
 
 __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 
+import logging
 import webapp2
 
 from bugs import kind
@@ -38,6 +39,8 @@ class UrlsHandler(base.BugsHandler):
     Raises:
       Error: Raised upon failure.
     """
+    logging.info('UrlBugMap handler; bugs.handlers.bugs.urls.UrlsHandler')
+
     try:
       data = self.GetData(kind.Kind.URLS)
       mappings = get_bugs.GetBugs(data['urls'])

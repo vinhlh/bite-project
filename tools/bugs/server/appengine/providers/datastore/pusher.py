@@ -20,8 +20,7 @@ __author__ = 'jason.stredwick@gmail.com (Jason Stredwick)'
 from google.appengine.api import users
 
 from bugs import kind
-from bugs.models.bugs import get
-from bugs.models.bugs import update
+from bugs.models.bugs import bug
 from bugs.providers import pusher_base
 
 
@@ -67,6 +66,6 @@ class Pusher(pusher_base.PusherBase):
         'details_link': ''
       }
 
-      update.Update(self.bug, provider_data)
-    except (get.InvalidIdError, update.UpdateError), e:
+      bug.Update(self.bug, provider_data)
+    except (bug.InvalidIdError, bug.UpdateError), e:
       raise Error(e)

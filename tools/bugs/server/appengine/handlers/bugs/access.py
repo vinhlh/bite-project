@@ -21,8 +21,7 @@ import webapp2
 
 from bugs import kind
 from bugs.handlers.bugs import base
-from bugs.models.bugs import get
-from bugs.models.bugs import update
+from bugs.models.bugs import bug
 from util import model_to_dict
 
 
@@ -44,17 +43,19 @@ class AccessHandler(base.BugsHandler):
       Error: Something went wrong processing the request/response or performing
           the update.
     """
+    logging.info('Update bug handler; bugs.handlers.access.AccessHandler')
+
     id = int(id)
 
     try:
       data = self.GetData(kind.Kind.BUG)
-      bug = get.Get(id)
-      update.Update(bug, data)
+      bug_model = bug.Get(id)
+      bug.Update(bug_model, data)
       # TODO (jason.stredwick): Add in deletion of UrlBugMaps and add in new
       # ones.
-    except get.InvalidIdError:
+    except bug.InvalidIdError:
       raise Error('Failed to find bug [id=%s].' % id, code=400)
-    except update.UpdateError, e:
+    except bug.UpdateError, e:
       raise Error('Update bug [id=%s] failed. Exception: %s' % (id, e),
                   code=400)
     except base.Error, e:
@@ -70,14 +71,16 @@ class AccessHandler(base.BugsHandler):
     Raises:
       Error: The id did not match a stored bug.
     """
+    logging.info('Update bug handler; bugs.handlers.access.AccessHandler')
+
     id = int(id)
 
     try:
-      data = get.Get(id)
-      response = model_to_dict.ModelToDict(data)
+      bug_model = bug.Get(id)
+      response = model_to_dict.ModelToDict(bug_model)
       response['kind'] = kind.Kind.BUG
-      self.WriteResponse(data)
-    except get.InvalidIdError:
+      self.WriteResponse(bug_model)
+    except bug.InvalidIdError:
       raise Error('Failed to find bug [id=%s].' % id, code=400)
     except base.Error, e:
       raise Error(e)
