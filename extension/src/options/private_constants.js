@@ -77,7 +77,7 @@ bite.options.private_constants.Default = {
   'screenshot': bite.options.constants.ThreeWayOption.ALL,
   'state': bite.options.constants.StateOption.ALL,
   'uiBinding': bite.options.constants.ThreeWayOption.ALL,
-  'serverChannel': bite.options.constants.ServerChannelOption.RELEASE,
+  'serverChannel': bite.options.constants.ServerChannelOption.DEV,
   'autoRecord': 'false',
   'featuresBugs': 'true',
   'featuresRpf': 'true',
