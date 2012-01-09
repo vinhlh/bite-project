@@ -16,6 +16,10 @@
  * @fileoverview Handles the Bugs console, which displays information about bugs
  * that have already been filed on the domain being explored.
  *
+ * TODO (jason.stredwick): Remove user and server from this file.  They are
+ * only used to determine if the user is logged in.  Instead just check if the
+ * user is logged in or some alternative.
+ *
  * @author ralphj@google.com (Julie Ralph)
  */
 
@@ -220,8 +224,7 @@ bite.client.BugsConsole.prototype.renderBugList_ = function(user, server) {
 
   // Add a login url if there is no user currently logged in.
   if (!user) {
-    contentCanvas.innerHTML = '<a href="' + server +
-        '">Please login</a> to view available bugs.</b>';
+    contentCanvas.innerHTML = '<b>Please login to view available bugs.</b>';
     return;
   }
 
