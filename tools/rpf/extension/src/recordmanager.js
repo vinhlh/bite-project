@@ -283,7 +283,7 @@ rpf.RecordManager.prototype.stopRecording = function() {
  */
 rpf.RecordManager.prototype.recordingIconOn_ = function() {
   var iconDetails = {
-      'path': 'imgs/bite_logo_recording_19.png',
+      'path': 'imgs/logo-recording-19x19.png',
       'tabId': this.testTabId_};
   chrome.browserAction.setIcon(iconDetails);
   var tooltipDetails = {
@@ -299,7 +299,7 @@ rpf.RecordManager.prototype.recordingIconOn_ = function() {
  */
 rpf.RecordManager.prototype.recordingIconOff_ = function() {
   var iconDetails = {
-      'path': 'imgs/bite_logo_19.png',
+      'path': 'imgs/bite-logo-19x19.png',
       'tabId': this.testTabId_};
   chrome.browserAction.setIcon(iconDetails);
   var tooltipDetails = {

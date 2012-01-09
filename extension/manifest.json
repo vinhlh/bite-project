@@ -4,13 +4,13 @@
   "description": "Open source version of BITE. (Dev)",
   "options_page": "options.html",
   "browser_action": {
-    "default_icon": "imgs/bite_logo_19.png",
+    "default_icon": "imgs/logo-19x19.png",
     "default_title": "BITE",
     "popup": "popup.html"
   },
   "icons": {
-    "48": "imgs/bite-logo_100x100.png",
-    "128": "imgs/bite-logo_100x100.png"
+    "48": "imgs/logo-48x48.png",
+    "128": "imgs/logo-128x128.png"
   },
   "background_page": "background.html",
   "content_scripts": [
