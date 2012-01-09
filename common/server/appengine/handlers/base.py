@@ -30,7 +30,7 @@ from google.appengine.api import users
 from google.appengine.ext import ereporter
 from google.appengine.ext.webapp import template
 
-from common import root
+import root
 
 
 ereporter.register_logger()
