@@ -21,14 +21,14 @@ import sys
 
 try:
   from google.appengine.api import users
-  from handlers import base
+  from common.handlers import base
   import webapp2
 except ImportError:
   file_dir = os.path.dirname(__file__)
   project_dir = os.path.join(file_dir, '..')
   sys.path.append(project_dir)
   from google.appengine.api import users
-  from handlers import base
+  from common.handlers import base
   import webapp2
 
 

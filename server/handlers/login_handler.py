@@ -30,7 +30,7 @@ import webapp2
 from google.appengine.api import users
 
 from config import settings
-from handlers import base
+from common.handlers import base
 
 SCOPES = [
     'http://docs.google.com/feeds/',

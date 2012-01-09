@@ -22,7 +22,7 @@ import sys
 import webapp2
 
 from google.appengine.api import users
-from handlers import base
+from common.handlers import base
 
 
 class Error(Exception):

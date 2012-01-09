@@ -22,7 +22,7 @@ import json
 import urllib
 import webapp2
 
-from handlers import base
+from common.handlers import base
 from models import bite_project
 from models import model_helper
 

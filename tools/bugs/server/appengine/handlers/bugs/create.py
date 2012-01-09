@@ -20,16 +20,16 @@ import logging
 import webapp2
 
 from bugs import kind
-from bugs.handlers.bugs import base
 from bugs.models.bugs import bug
 from bugs.providers import services
+from common.handlers import base
 
 
 class Error(base.Error):
   pass
 
 
-class CreateHandler(base.BugsHandler):
+class CreateHandler(base.BaseHandler):
   """Create a new bug entry."""
 
   # Disable 'Invalid method name' lint error.

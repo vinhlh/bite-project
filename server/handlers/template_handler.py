@@ -23,7 +23,7 @@ import webapp2
 
 from google.appengine.api import users
 
-from handlers import base
+from common.handlers import base
 from models import bug_template
 
 

@@ -20,22 +20,13 @@ the BITE server, or to add a template to the BITE server.
 
 __author__ = 'ralphj@google.com (Julie Ralph)'
 
-# Disable 'Import not at top of file' and 'Statement before imports' lint
-# errors.
-# pylint: disable-msg=C6204
-# pylint: disable-msg=C6205
-try:
-  import auto_import_fixer  #pylint: disable-msg=W0611
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import sys
 
 from google.appengine.api import users
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
 
-from handlers import base
+from common.handlers import base
 from models import bug_template
 
 

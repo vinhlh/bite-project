@@ -263,6 +263,9 @@ def main():
   parser.add_option('--expunge', dest='build_expunge',
                     action='store_true', default=False,
                     help='Clean the build directories and deps.')
+  parser.add_option('--deps', dest='build_deps',
+                    action='store_true', default=False,
+                    help='Download deps.')
   (options, _) = parser.parse_args()
 
   # Exit if only want to clean.
@@ -284,6 +287,9 @@ def main():
     SetupDep(dep_name)
   SetupClosureCompiler()
   SetupSoyCompiler()
+
+  if options.build_deps:
+    exit()
 
   # Compile the closure scripts.
   # Soy

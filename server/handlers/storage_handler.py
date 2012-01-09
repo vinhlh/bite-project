@@ -27,7 +27,7 @@ import logging
 import json
 import webapp2
 
-from handlers import base
+from common.handlers import base
 from models import storage
 from models import storage_project
 from utils import zip_util

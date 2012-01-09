@@ -22,7 +22,7 @@ import webapp2
 
 from google.appengine.api import users
 
-from handlers import base
+from common.handlers import base
 from handlers import deferred_util
 from models import bite_suite
 from models import suite_test_map

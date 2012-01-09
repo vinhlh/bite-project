@@ -23,7 +23,7 @@ import urllib
 import webapp2
 
 from crawlers import crawler_util
-from handlers import base
+from common.handlers import base
 from models import bugs
 from models import bugs_util
 from models import screenshots

@@ -42,7 +42,7 @@ from google.appengine.api.labs import taskqueue
 from google.appengine.ext import deferred
 
 from crawlers import crawler_util
-from handlers import base
+from common.handlers import base
 from models import bugs_util
 from models import crawl_state
 

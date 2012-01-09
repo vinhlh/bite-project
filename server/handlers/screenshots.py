@@ -19,7 +19,7 @@ __author__ = 'alexto@google.com (Alexis O. Torres)'
 import json
 import webapp2
 
-from handlers import base
+from common.handlers import base
 from models import screenshots
 from utils import screenshots_util
 

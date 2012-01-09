@@ -19,7 +19,7 @@ __author__ = 'alexis.torres@gmail.com (Alexis O. Torres)'
 import logging
 import webapp2
 
-from handlers import base
+from common.handlers import base
 from models import test_cycle
 
 class TestCyclesHandler(base.BaseHandler):

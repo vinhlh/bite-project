@@ -20,15 +20,15 @@ import logging
 import webapp2
 
 from bugs import kind
-from bugs.handlers.bugs import base
 from bugs.models.url_bug_map import get_bugs
+from common.handlers import base
 
 
 class Error(base.Error):
   pass
 
 
-class UrlsHandler(base.BugsHandler):
+class UrlsHandler(base.BaseHandler):
   """Get bug entries based on url."""
 
   # Disable 'Invalid method name' lint error.

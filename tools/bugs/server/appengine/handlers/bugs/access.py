@@ -20,8 +20,8 @@ import logging
 import webapp2
 
 from bugs import kind
-from bugs.handlers.bugs import base
 from bugs.models.bugs import bug
+from common.handlers import base
 from util import model_to_dict
 
 
@@ -29,7 +29,7 @@ class Error(base.Error):
   pass
 
 
-class AccessHandler(base.BugsHandler):
+class AccessHandler(base.BaseHandler):
   """Access a bug entry."""
 
   # Disable 'Invalid method name' lint error.

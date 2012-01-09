@@ -19,7 +19,7 @@ __author__ = 'phu@google.com (Po Hu)'
 import logging
 import webapp2
 
-from handlers import base
+from common.handlers import base
 from models import bite_result
 from models import bite_run
 from utils import basic_util

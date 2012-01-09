@@ -25,7 +25,7 @@ import webapp2
 
 from google.appengine.api import users
 
-from handlers import base
+from common.handlers import base
 from models import bugs
 from models import url_bug_map
 from utils import url_util

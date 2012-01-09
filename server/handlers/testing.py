@@ -25,7 +25,7 @@ import webapp2
 
 from google.appengine.api import memcache
 
-from handlers import base
+from common.handlers import base
 
 
 class FlushCacheHandler(base.BaseHandler):

@@ -24,7 +24,7 @@ import webapp2
 from google.appengine.api import memcache
 from google.appengine.api import users
 
-from handlers import base
+from common.handlers import base
 from models.compat import admins
 from models.compat import assignment
 from models.compat import browser as compat_browser

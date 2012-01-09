@@ -18,7 +18,7 @@ __author__ = 'phu@google.com (Po Hu)'
 
 import webapp2
 
-from handlers import base
+from common.handlers import base
 from handlers import common_util
 from models import bite_event
 from utils import basic_util
