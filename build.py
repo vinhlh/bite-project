@@ -114,6 +114,23 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
   '--input=%(input)s',
   '--output_mode=compiled',
   '--output_file=%(output)s',
+  '--compiler_flags=--jscomp_error=accessControls',
+  '--compiler_flags=--jscomp_error=checkRegExp',
+  '--compiler_flags=--jscomp_error=checkVars',
+  '--compiler_flags=--jscomp_error=deprecated',
+  '--compiler_flags=--jscomp_error=fileoverviewTags',
+  '--compiler_flags=--jscomp_error=invalidCasts',
+  '--compiler_flags=--jscomp_error=nonStandardJsDocs',
+  '--compiler_flags=--jscomp_error=strictModuleDepCheck',
+  '--compiler_flags=--jscomp_error=undefinedVars',
+  '--compiler_flags=--jscomp_error=unknownDefines',
+  '--compiler_flags=--jscomp_error=visibility',
+  ('--compiler_flags=--externs=%s' % os.path.join(
+      'common', 'extension', 'externs', 'chrome_extensions.js')),
+  ('--compiler_flags=--externs=%s' % os.path.join(
+      'common', 'extension', 'externs', 'rpf_externs.js')),
+  ('--compiler_flags=--externs=%s' % os.path.join(
+      'common', 'extension', 'externs', 'ace_externs.js')),
   ('--compiler_jar=%s' % CLOSURE_COMPILER_JAR)])
 
 SOY_COMPILER_COMMAND = ' '.join([('java -jar %s' % SOY_COMPILER_JAR),

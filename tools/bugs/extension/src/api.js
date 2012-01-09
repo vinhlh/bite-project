@@ -69,7 +69,7 @@ bugs.api.create = function(bug, opt_callback) {
  * @param {bugs.kind.callbackReturnBug=} opt_callback See details for the
  *     callbackReturnBug.
  */
-bugs.api.get = function(bug, opt_callback) {
+bugs.api.get = function(id, opt_callback) {
   try {
     var url = bugs.api.constructUrl_(bugs.api.Handler_.GET + id);
     var callback = goog.partial(bugs.api.wrapperForBug_, opt_callback);
