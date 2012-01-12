@@ -34,6 +34,8 @@ bugs.kind.Kind = {
 
 
 /**
+ * kind: bugs.kind.Kind // BUG
+ * id: number // Required aftr bug is filed.
  * @typedef {{kind: bugs.kind.Kind,
  *            id: number,
  *            title: string,
@@ -64,6 +66,7 @@ bugs.kind.Bug;
 
 
 /**
+ * kind: bugs.kind.Kind // ID
  * @typedef {{kind: bugs.kind.Kind,
  *            id: number}}
  */
@@ -71,6 +74,7 @@ bugs.kind.Id;
 
 
 /**
+ * kind: bugs.kind.Kind // URL_BUG_MAP
  * @typedef {{kind: bugs.kind.Kind,
  *            mappings: !Array.<{url: string, bugs: !Array.<bugs.kind.Bug>}>}}
  */
@@ -78,6 +82,7 @@ bugs.kind.UrlBugMap;
 
 
 /**
+ * kind: bugs.kind.Kind // URLS
  * @typedef {{kind: bugs.kind.Kind,
  *            urls: !Array.<string>}}
  */
