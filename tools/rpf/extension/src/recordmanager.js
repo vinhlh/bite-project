@@ -352,7 +352,7 @@ rpf.RecordManager.prototype.setStatusBeforeRecording_ = function(
 
 /**
  * Brings the tab under record foreground.
- * @param {(function ((Tab|null)): undefined|undefined)} opt_callback
+ * @param {(function ((Tab|null)): undefined|undefined)=} opt_callback
  *     An optional callback function.
  * @export
  */

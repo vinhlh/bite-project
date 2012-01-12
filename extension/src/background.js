@@ -213,7 +213,7 @@ bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
  *     The callback fired with the set of bugs retrieved by url and bug
  *     filters.
  * @param {!{success: boolean, error: string,
- *           bugMap: bugs.type.UrlBugMap}} result The results of the request.
+ *           bugMap: bugs.kind.UrlBugMap}} result The results of the request.
  * @private
  */
 bite.client.Background.prototype.fetchBugsDataCallback_ = function(tab,

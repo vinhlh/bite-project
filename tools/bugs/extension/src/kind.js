@@ -34,8 +34,8 @@ bugs.kind.Kind = {
 
 
 /**
- * @typedef {{kind: bugs.kind.Kind, // BUG
- *            id: number,           // Required aftr bug is filed.
+ * @typedef {{kind: bugs.kind.Kind,
+ *            id: number,
  *            title: string,
  *            status: string,
  *            state: string,
@@ -64,21 +64,21 @@ bugs.kind.Bug;
 
 
 /**
- * @typedef {{kind: bugs.kind.Kind, // ID
+ * @typedef {{kind: bugs.kind.Kind,
  *            id: number}}
  */
 bugs.kind.Id;
 
 
 /**
- * @typedef {{kind: bugs.kind.Kind, // URL_BUG_MAP
+ * @typedef {{kind: bugs.kind.Kind,
  *            mappings: !Array.<{url: string, bugs: !Array.<bugs.kind.Bug>}>}}
  */
 bugs.kind.UrlBugMap;
 
 
 /**
- * @typedef {{kind: bugs.kind.Kind, // URLS
+ * @typedef {{kind: bugs.kind.Kind,
  *            urls: !Array.<string>}}
  */
 bugs.kind.Urls;
@@ -92,7 +92,7 @@ bugs.kind.Urls;
  * the object will contain either an error property describing what went wrong
  * or an object containing the data for the requested bug.
  *
- * @typedef{function(!{success: boolean, error: string, bug: bugs.kind.Bug})}
+ * @typedef{function(!{success: boolean, error: *, bug: *})}
  */
 bugs.kind.callbackReturnBug;
 
@@ -105,7 +105,7 @@ bugs.kind.callbackReturnBug;
  * success the object will contain either an error property describing what
  * went wrong or a number representing the id of the bug created or updated.
  *
- * @typedef{function(!{success: boolean, error: string, id: number})}
+ * @typedef{function(!{success: boolean, error: *, id: *})}
  */
 bugs.kind.callbackReturnId;
 
@@ -118,7 +118,7 @@ bugs.kind.callbackReturnId;
  * the object will contain either an error property describing what went wrong
  * or an object containing the data for the requested bug.
  *
- * @typedef{function(!{success: boolean, error: string,
- *                     bugMap: bugs.kind.UrlBugMap})}
+ * @typedef{function(!{success: boolean, error: *,
+ *                     bugMap: *})}
  */
 bugs.kind.callbackReturnUrlBugMap;

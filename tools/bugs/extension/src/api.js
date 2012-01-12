@@ -86,7 +86,7 @@ bugs.api.get = function(id, opt_callback) {
  * Assumption: bug is a valid object containing a property 'id' with either a
  * a numeric value or a string convertable into a numeric value.
  * @param {!bugs.kind.Bug} bug The bug details to update.
- * @param {bugs.kind.callbackWithId=} opt_callback See details for the
+ * @param {bugs.kind.callbackReturnId=} opt_callback See details for the
  *     callbackReturnId type.
  */
 bugs.api.update = function(bug, opt_callback) {

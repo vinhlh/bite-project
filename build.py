@@ -115,6 +115,8 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
   '--output_mode=compiled',
   '--output_file=%(output)s',
   '--compiler_flags=--generate_exports',
+  '--compiler_flags=--js=%s' % os.path.join(
+      DEPS['closure-library'][ROOT], 'closure', 'goog', 'deps.js'),
   '--compiler_flags=--jscomp_error=accessControls',
   '--compiler_flags=--jscomp_error=ambiguousFunctionDecl',
   '--compiler_flags=--jscomp_error=checkRegExp',
@@ -125,7 +127,7 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
   '--compiler_flags=--jscomp_error=fileoverviewTags',
   '--compiler_flags=--jscomp_error=globalThis',
   '--compiler_flags=--jscomp_error=invalidCasts',
-  '--compiler_flags=--jscomp_warning=missingProperties',
+  '--compiler_flags=--jscomp_error=missingProperties',
   '--compiler_flags=--jscomp_error=nonStandardJsDocs',
   '--compiler_flags=--jscomp_error=strictModuleDepCheck',
   '--compiler_flags=--jscomp_error=undefinedVars',
@@ -141,6 +143,7 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
 
 SOY_COMPILER_COMMAND = ' '.join([('java -jar %s' % SOY_COMPILER_JAR),
                                  '--shouldProvideRequireSoyNamespaces',
+                                 '--shouldGenerateJsdoc',
                                  '--outputPathFormat %(output)s',
                                  '%(input)s'])
 
