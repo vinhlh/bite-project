@@ -202,6 +202,7 @@ bite.Popup.prototype.init = function(opt_initCallback) {
  */
 bite.Popup.prototype.initData_ = function(callback) {
   var url = chrome.extension.getURL('manifest.json');
+  console.log('initData_: url='+url);
   bite.common.net.xhr.async.get(url,
       goog.bind(this.initDataComplete_, this, callback));
 };
@@ -224,8 +225,9 @@ bite.Popup.prototype.initDataComplete_ = function(callback, success, data) {
     var manifest = goog.json.parse(data);
     this.browserVersion_ = manifest['version'];
   } catch (error) {
-    this.onFailure_(error, callback);
-    return;
+    this.browserVersion_ = '';
+    console.error('Popup [initDataComplete_]: Failed retrieval of version; ' +
+                  'setting to "unknown" and continuing.');
   }
 
   this.initLogin_(callback);
@@ -255,48 +257,53 @@ bite.Popup.prototype.initLogin_ = function(callback) {
  * @private
  */
 bite.Popup.prototype.initLoginComplete_ = function(callback, responseObj) {
-  if (!responseObj['success']) {
-    this.onFailure_('Error checking login status.', callback);
-    return;
+  // Should only occur if LoginManager fails.
+  if (!responseObj) {
+    console.error('Popup [initLoginComplete_]: LoginManager failed to ' +
+                  'provide a valid response.');
+    responseObj = {'success': false, 'username': '', 'url': ''};
   }
 
-  // Flatten the object into an array.
   var consoleOptions = [];
-  // Alias for bite.options.data namespace
-  var data = bite.options.data;
-  for (var key in bite.Popup.CONSOLE_OPTIONS_) {
-    var display = false;
-    switch (key) {
-      case 'BUGS':
-        if (data.get(bite.options.constants.Id.FEATURES_BUGS) == 'true') {
+  // Only display console options if logged in.
+  if (responseObj['success']) {
+    // Flatten the object into an array.
+    // Alias for bite.options.data namespace
+    var data = bite.options.data;
+    for (var key in bite.Popup.CONSOLE_OPTIONS_) {
+      var display = false;
+      switch (key) {
+        case 'BUGS':
+          if (data.get(bite.options.constants.Id.FEATURES_BUGS) == 'true') {
+            display = true;
+          }
+          break;
+        case 'FLUX':
+          if (data.get(bite.options.constants.Id.FEATURES_RPF) == 'true') {
+            display = true;
+          }
+          break;
+        case 'TESTS':
+          if (data.get(bite.options.constants.Id.FEATURES_TESTS) == 'true') {
+            display = true;
+          }
+          break;
+        case 'REPORT_BUG':
+          if (data.get(bite.options.constants.Id.FEATURES_REPORT) == 'true') {
+            display = true;
+          }
+          break;
+        case 'CLOSE':
+          if (data.get(bite.options.constants.Id.FEATURES_CLOSE) == 'true') {
+            display = true;
+          }
+          break;
+        default:
           display = true;
-        }
-        break;
-      case 'FLUX':
-        if (data.get(bite.options.constants.Id.FEATURES_RPF) == 'true') {
-          display = true;
-        }
-        break;
-      case 'TESTS':
-        if (data.get(bite.options.constants.Id.FEATURES_TESTS) == 'true') {
-          display = true;
-        }
-        break;
-      case 'REPORT_BUG':
-        if (data.get(bite.options.constants.Id.FEATURES_REPORT) == 'true') {
-          display = true;
-        }
-        break;
-      case 'CLOSE':
-        if (data.get(bite.options.constants.Id.FEATURES_CLOSE) == 'true') {
-          display = true;
-        }
-        break;
-      default:
-        display = true;
-    }
-    if (display) {
-      consoleOptions.push(bite.Popup.CONSOLE_OPTIONS_[key]);
+      }
+      if (display) {
+        consoleOptions.push(bite.Popup.CONSOLE_OPTIONS_[key]);
+      }
     }
   }
 
@@ -309,7 +316,10 @@ bite.Popup.prototype.initLoginComplete_ = function(callback, responseObj) {
   });
   this.installEventHandlers_();
   this.initComplete_ = true;
-  this.userId_ = responseObj['username'];
+  // TODO (jaosn.stredwick): Remove cast to 'unknown user'.  It is legacy
+  // for RPF code.  Instead RPF should be converted to get the user itself
+  // directly rather than from the popup.
+  this.userId_ = responseObj['username'] || 'unknown user';
   callback();
 };
 
@@ -359,25 +369,5 @@ bite.Popup.prototype.onClickCallback_ = function(optionName) {
       throw Error('Not a valid popup option: ' + optionName);
   }
   goog.global.close();
-};
-
-
-/**
- * Handles failure during initialization.
- * @param {string} error The error reported.
- * @param {function()} callback The callback to invoke when initialization is
- *     complete, even failure.
- * @private
- */
-bite.Popup.prototype.onFailure_ = function(error, callback) {
-  this.lastError_ = error;
-
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var body = goog.dom.getDocument().body;
-  soy.renderElement(
-      body, bite.client.Templates.popup.error,
-      {'message': CALL_MSG_POPUP_LOGIN_ERROR(server)});
-
-  callback();
 };
 
