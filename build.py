@@ -26,6 +26,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import urllib
 import zipfile
 
@@ -120,7 +121,7 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
   '--compiler_flags=--jscomp_error=accessControls',
   '--compiler_flags=--jscomp_error=ambiguousFunctionDecl',
   '--compiler_flags=--jscomp_error=checkRegExp',
-  '--compiler_flags=--jscomp_warning=checkTypes',
+  '--compiler_flags=--jscomp_error=checkTypes',
   '--compiler_flags=--jscomp_error=checkVars',
   '--compiler_flags=--jscomp_error=constantProperty',
   '--compiler_flags=--jscomp_error=deprecated',
@@ -177,8 +178,8 @@ def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
     suffix_out: The suffix to add to the basename for output. (string)
     command: The compile command to use.
 
-  Raises:
-    ClosureError: If closure fails to compile the given input file.
+  Returns:
+    The process which actually is executing the command.
   """
   input = os.path.join(filepath, ('%s%s' % (filename_base, suffix_in)))
   output = os.path.join(GENFILES_ROOT, ('%s%s' % (filename_base, suffix_out)))
@@ -189,28 +190,29 @@ def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
 
   data = {'input': input,
           'output': output}
-  result = ExecuteCommand(command % data)
-  if result or not os.path.exists(output):
-    raise ClosureError('Failed while compiling %s.' % input)
+  result = ExecuteCommand(command % data, True)
+  return result
 
 
-def ExecuteCommand(command):
+def ExecuteCommand(command, no_wait=False):
   """Execute the given command and return the output.
 
   Args:
     command: A string representing the command to execute.
+    no_wait: Whether not to wait for finished.
 
   Returns:
-    The return code of the process.
+    The process.
   """
   print 'Running command: %s' % command
   process = subprocess.Popen(command.split(' '),
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
-  results = process.communicate()
-  if process.returncode:
-    logging.error(results[1])
-  return process.returncode
+  if not no_wait:
+    results = process.communicate()
+    if process.returncode:
+      logging.error(results[1])
+  return process
 
 
 def SetupClosureCompiler():
@@ -280,6 +282,16 @@ def SetupSoyCompiler():
       raise ClosureError('Could not fine soydata.js')
 
 
+def WaitUntilSubprocessesFinished(ps):
+  """Waits until the given sub processes are all finished."""
+  while True:
+    status = [p.poll() for p in ps if p != None]
+    if all([x is not None for x in status]):
+      return
+    else:
+      time.sleep(0.2)
+
+
 def main():
   usage = 'usage: %prog [options]'
   parser = optparse.OptionParser(usage)
@@ -333,11 +345,17 @@ def main():
     'settings': os.path.join('extension', 'src', 'project', 'templates')
   }
 
+  ps = []
+
+  current_time = time.time()
+
   for soy_filename in soy_files:
     soy_filepath = soy_files[soy_filename]
-    CompileScript(soy_filename, soy_filepath, '.soy', '.soy.js',
-                  SOY_COMPILER_COMMAND)
+    ps.append(CompileScript(soy_filename, soy_filepath, '.soy', '.soy.js',
+        SOY_COMPILER_COMMAND))
+  WaitUntilSubprocessesFinished(ps)
 
+  ps = []
   # JavaScript
   js_targets = {
     'background': os.path.join('extension', 'src'),
@@ -351,8 +369,11 @@ def main():
 
   for target in js_targets:
     target_filepath = js_targets[target]
-    CompileScript(target, target_filepath, '.js', '_script.js',
-                  COMPILE_CLOSURE_COMMAND)
+    ps.append(CompileScript(target, target_filepath, '.js', '_script.js',
+        COMPILE_CLOSURE_COMMAND))
+  WaitUntilSubprocessesFinished(ps)
+
+  print 'Totally %s (s) passed!' % (time.time() - current_time)
 
   # Remove the outputs, so they will be created again.
   if os.path.exists(OUTPUT_ROOT):
