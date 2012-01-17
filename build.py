@@ -287,6 +287,9 @@ def WaitUntilSubprocessesFinished(ps):
   while True:
     status = [p.poll() for p in ps if p != None]
     if all([x is not None for x in status]):
+      for p in ps:
+        if p != None and p.returncode != 0:
+          print p.stderr.read()
       return
     else:
       time.sleep(0.2)
