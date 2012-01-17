@@ -69,24 +69,18 @@ function initStep() {
   var mockGetJsonFromWTF_ =
     mockControl_.createFunctionMock('getJsonFromWTF');
   mockGetJsonFromWTF_(undefined, 'console').$returns();
-  var mockGetCommonLibs =
-      mockControl_.createFunctionMock('fetchCommonLibs');
-  mockGetCommonLibs(goog.testing.mockmatchers.isFunction).$returns();
   mockGetBackgroundPage().$returns(
       {'logger': {},
-       'fetchCommonLibs': mockGetCommonLibs,
        'saveLoadMgr': {'getTestNamesLocally': mockGetTestNamesLocally_,
                        'getAllFromWeb': mockGetAllFromWeb_,
                        'getJsonFromWTF': mockGetJsonFromWTF_}});
   mockGetBackgroundPage().$returns(
       {'logger': {},
-       'fetchCommonLibs': mockGetCommonLibs,
        'saveLoadMgr': {'getTestNamesLocally': mockGetTestNamesLocally_,
                        'getAllFromWeb': mockGetAllFromWeb_,
                        'getJsonFromWTF': mockGetJsonFromWTF_}});
   mockGetBackgroundPage().$returns(
       {'logger': {},
-       'fetchCommonLibs': mockGetCommonLibs,
        'saveLoadMgr': {'getTestNamesLocally': mockGetTestNamesLocally_,
                        'getAllFromWeb': mockGetAllFromWeb_,
                        'getJsonFromWTF': mockGetJsonFromWTF_}});

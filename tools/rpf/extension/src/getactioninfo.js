@@ -40,11 +40,10 @@ goog.require('goog.style');
 
 /**
  * The helper class for recording.
- * @param {boolean=} opt_noConsole Whether no rpf Console UI is constructed.
  * @constructor
  * @export
  */
-rpf.ContentScript.RecordHelper = function(opt_noConsole) {
+rpf.ContentScript.RecordHelper = function() {
   /**
    * The current element under cursor.
    * @type {Element}
@@ -99,13 +98,6 @@ rpf.ContentScript.RecordHelper = function(opt_noConsole) {
    * @type {Object}
    */
   this.currentElemCursorPos = {'x': 0, 'y': 0};
-
-  /**
-   * Whether operation is done without rpf Console UI (true) or not (false).
-   * @type {boolean}
-   * @private
-   */
-  this.noConsole_ = !!opt_noConsole;
 
   /**
    * The element descriptor instance.
@@ -669,8 +661,7 @@ rpf.ContentScript.RecordHelper.prototype.mouseOverHandler_ = function(e) {
   this.elemUnderCursor_ = /** @type {Element} */ (e.target);
   this.outlineOfCurrentElem_ = this.elemUnderCursor_.style.outline;
   // Outline elements on mouse over, if rpf Console UI is constructed.
-  if (!this.noConsole_ &&
-      this.checkInRecordingArea_(this.elemUnderCursor_)) {
+  if (this.checkInRecordingArea_(this.elemUnderCursor_)) {
     this.showLocatorMethods_();
     this.highlightOutline_(this.elemUnderCursor_);
   }
@@ -720,7 +711,7 @@ rpf.ContentScript.RecordHelper.prototype.onRequest = function(
     case Bite.Constants.RECORD_ACTION.START_RECORDING:
       this.rootArr_ = request['params']['rootArr'];
       this.xpathFinderOn_ = request['params']['xpathFinderOn'];
-      this.startRecording(request['params']['noConsole']);
+      this.startRecording();
       break;
     case Bite.Constants.RECORD_ACTION.STOP_RECORDING:
       this.rootArr_ = [];
@@ -772,24 +763,19 @@ rpf.ContentScript.RecordHelper.prototype.stopRecording = function() {
                        'mouseup',
                        this.onMouseUpHandler_,
                        true);
-  if (!this.noConsole_) {
-    goog.global.document.oncontextmenu = this.originalContextMenu_;
-    if (this.finderConsole_) {
-      this.hideFinderConsole_();
-    }
+  goog.global.document.oncontextmenu = this.originalContextMenu_;
+  if (this.finderConsole_) {
+    this.hideFinderConsole_();
   }
 };
 
 
 /**
  * Starts recording mode experiment.
- * @param {boolean=} opt_noConsole Whether recording is with console or not.
  * @export
  */
-rpf.ContentScript.RecordHelper.prototype.startRecording = function(
-    opt_noConsole) {
+rpf.ContentScript.RecordHelper.prototype.startRecording = function() {
   this.recordingMode_ = 'rpf';
-  this.noConsole_ = !!opt_noConsole;
   this.stopRecording();
   goog.events.listen(goog.global.document,
                      'mousedown',
@@ -823,13 +809,11 @@ rpf.ContentScript.RecordHelper.prototype.startRecording = function(
                      'mouseup',
                      this.onMouseUpHandler_,
                      true);
-  if (!this.noConsole_) {
-    this.originalContextMenu_ = goog.global.document.oncontextmenu;
-    goog.global.document.oncontextmenu = goog.bind(this.getContextMenu_, this);
-    this.addListenersToContentEditables_();
-    if (window == window.parent && this.xpathFinderOn_) {
-      this.openLocatorDialog_();
-    }
+  this.originalContextMenu_ = goog.global.document.oncontextmenu;
+  goog.global.document.oncontextmenu = goog.bind(this.getContextMenu_, this);
+  this.addListenersToContentEditables_();
+  if (window == window.parent && this.xpathFinderOn_) {
+    this.openLocatorDialog_();
   }
 };
 
@@ -943,9 +927,6 @@ rpf.ContentScript.RecordHelper.prototype.sendActionBack_ = function(
   var elemVarName = opt_elemVarName || '';
   var xpaths = opt_xpaths || [];
   console.log('Caught event: ' + action);
-  if (this.noConsole_ && action == 'rightclick') {
-    return;
-  }
   var iframeInfo = null;
   // Assign the iframeInfo only if it's in an iframe window.
   if (window != window.parent) {
@@ -981,7 +962,6 @@ rpf.ContentScript.RecordHelper.prototype.sendActionBack_ = function(
                                 'elemVarName': elemVarName,
                                 'iframeInfo': iframeInfo,
                                 'position': position,
-                                'noConsole': this.noConsole_,
                                 'mode': this.recordingMode_,
                                 'xpaths': xpaths,
                                 'className': className});
@@ -1251,9 +1231,13 @@ if (window == window.parent) {
     rpf.ContentScript.RecordHelper.automateRpf_(parameters);
   } else if (href.indexOf('.com/automateRpf') != -1) {
     parameters = rpf.ContentScript.RecordHelper.getParamsFromUrl_(href);
-    parameters['command'] =
-        Bite.Constants.RPF_AUTOMATION.PLAYBACK_MULTIPLE;
     if (parameters['projectName'] && parameters['location']) {
+      parameters['command'] =
+          Bite.Constants.RPF_AUTOMATION.PLAYBACK_MULTIPLE;
+      if (parameters['scriptName']) {
+        parameters['command'] =
+            Bite.Constants.RPF_AUTOMATION.AUTOMATE_SINGLE_SCRIPT;
+      }
       rpf.ContentScript.RecordHelper.automateRpf_(parameters);
     }
   }

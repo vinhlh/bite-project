@@ -1,5 +1,3 @@
-# Copyright 2011 Google Inc. All Rights Reserved.
-#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -20,22 +18,12 @@ the BITE server, or to add a template to the BITE server.
 
 __author__ = 'ralphj@google.com (Julie Ralph)'
 
-# Disable 'Import not at top of file' and 'Statement before imports' lint
-# errors.
-# pylint: disable-msg=C6204
-# pylint: disable-msg=C6205
-try:
-  import auto_import_fixer  #pylint: disable-msg=W0611
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import sys
+import webapp2
 
 from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
 
-from handlers import base
+from common.handlers import base
 from models import bug_template
 
 
@@ -113,15 +101,8 @@ class NewTemplateHandler(base.BaseHandler):
                         {'alert': 'Bug Template succesfully created.'})
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/get_templates', GetTemplatesHandler),
      ('/new_template', NewTemplateHandler)],
     debug=True)
 
-
-def main(unused_argv):
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main(sys.argv)

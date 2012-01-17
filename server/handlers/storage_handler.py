@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,19 +23,11 @@ explicit.
 
 __author__ = 'michaelwill@google.com (Michael Williamson)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
-
 import logging
-import simplejson
+import json
+import webapp2
 
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
-from handlers import base
+from common.handlers import base
 from models import storage
 from models import storage_project
 from utils import zip_util
@@ -93,7 +83,7 @@ class GetAllTestNamesAndIds(base.BaseHandler):
       }
       tests.append(test_data)
 
-    self.response.out.write(simplejson.dumps(tests))
+    self.response.out.write(json.dumps(tests))
 
 
 class GetTestAsJson(base.BaseHandler):
@@ -108,15 +98,15 @@ class GetTestAsJson(base.BaseHandler):
       return
 
     file_text = test_metadata.GetText()
-    json_obj = simplejson.loads(file_text)
+    json_obj = json.loads(file_text)
 
     response = []
     json_obj['projectname'] = test_metadata.project
 
     # TODO(michaelwill): This should really only be returning one item.
     # It returns a list because the WTF legacy API returned a list.
-    response.append({'id': test_id, 'json': simplejson.dumps(json_obj)})
-    self.response.out.write(simplejson.dumps(response))
+    response.append({'id': test_id, 'json': json.dumps(json_obj)})
+    self.response.out.write(json.dumps(response))
 
 
 class DeleteTest(base.BaseHandler):
@@ -127,7 +117,7 @@ class DeleteTest(base.BaseHandler):
 
   def post(self):
     test_ids = self.GetRequiredParameter('ids')
-    instances = storage.FetchByIds(simplejson.loads(test_ids))
+    instances = storage.FetchByIds(json.loads(test_ids))
     if instances:
       storage.DeleteMetadata(instances)
     self.response.out.write('delete successfully.')
@@ -143,14 +133,14 @@ class UpdateTest(base.BaseHandler):
     js_files = self.GetOptionalParameter('jsFiles')
 
     if js_files:
-      js_files = simplejson.loads(js_files)
+      js_files = json.loads(js_files)
 
     test_metadata = storage.FetchById(test_id)
     if not test_metadata:
       self.error(400)
       return
 
-    json_obj = simplejson.loads(json)
+    json_obj = json.loads(json)
     new_test_name = json_obj['name']
     storage_project.UpdateProject(project, {'js_files': js_files})
     test_metadata.Update(project, new_test_name, json)
@@ -160,21 +150,21 @@ class SaveTest(base.BaseHandler):
   """Saves a new test object to the storage backend."""
 
   def post(self):
-    json = self.GetRequiredParameter('json')
+    json_str = self.GetRequiredParameter('json')
     project = self.GetRequiredParameter('project')
     js_files = self.GetOptionalParameter('jsFiles')
 
     if js_files:
-      js_files = simplejson.loads(js_files)
+      js_files = json.loads(js_files)
 
-    json_obj = simplejson.loads(json)
+    json_obj = json.loads(json_str)
     new_test_name = json_obj['name']
 
     if storage.FetchByProjectAndTestName(project, new_test_name):
       raise DuplicatedNameError('The name exists, please provide a new name.')
 
     storage_project.UpdateProject(project, {'js_files': js_files})
-    storage_instance = storage.Save(project, new_test_name, json)
+    storage_instance = storage.Save(project, new_test_name, json_str)
 
     # TODO(michaelwill): This weird id string is left over from the
     # legacy WTF system.  Change to a proper json response.
@@ -188,8 +178,9 @@ class SaveZipFile(base.BaseHandler):
     """Given a set of files as a json string and saves to db.
 
     Raises:
-      simplejson.JSONDecodeError: Raised if there was an error parsing the json
-        string.
+      TypeError: Unsupported key type; json.
+      OverflowError: Circular reference; json.
+      ValueError: Invalid value, out of range; json.
       zip_util.BadInput: Raised for bad inputs supplied to zip_util functions.
     """
     json_string = self.GetRequiredParameter('json')
@@ -251,8 +242,8 @@ class GetProject(base.BaseHandler):
     }
 
     try:
-      self.response.out.write(simplejson.dumps(data))
-    except simplejson.JSONDecodeError:
+      self.response.out.write(json.dumps(data))
+    except (TypeError, OverflowError, ValueError):
       self.error(400)
 
 
@@ -265,8 +256,8 @@ class SaveProject(base.BaseHandler):
     data_string = self.GetRequiredParameter('data')
 
     try:
-      data = simplejson.loads(data_string)
-    except simplejson.JSONDecodeError:
+      data = json.loads(data_string)
+    except (TypeError, OverflowError, ValueError):
       # TODO(jasonstredwick): Change from error codes to an error response.
       self.error(400)
       return
@@ -291,10 +282,10 @@ class GetProjectNames(base.BaseHandler):
   def post(self):
     """Returns the project names."""
     names = storage_project.GetProjectNames()
-    self.response.out.write(simplejson.dumps(names))
+    self.response.out.write(json.dumps(names))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/storage/add_test_metadata', AddPreexistingDocsMetadata),
      ('/storage/getalltestsasjson', GetAllTestNamesAndIds),
      ('/storage/gettestasjson', GetTestAsJson),
@@ -307,11 +298,3 @@ application = webapp.WSGIApplication(
      ('/storage/saveproject', SaveProject),
      ('/storage/getprojectnames', GetProjectNames)
     ])
-
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

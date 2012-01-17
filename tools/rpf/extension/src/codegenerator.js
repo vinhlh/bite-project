@@ -704,8 +704,6 @@ rpf.CodeGenerator.getElemByIdCmd = function(id) {
  * @param {rpf.CodeGenerator.RecordActions} action The recorded action.
  * @param {string} descriptor The descriptive info object of the element.
  * @param {string} elemVarName The variable name for the data input.
- * @param {boolean=} opt_noConsole Whether or not the recording is started from
- * the rpf Console UI; can be started automatically from the background.
  * @param {Object=} opt_iframeInfo The iframe info that the element was from.
  * @param {Array=} opt_xpaths The xpath array.
  * @param {string=} opt_className The class name string.
@@ -714,7 +712,7 @@ rpf.CodeGenerator.getElemByIdCmd = function(id) {
  */
 rpf.CodeGenerator.prototype.generateScriptAndDataFileForCmd = function(
     selectors, content, nodeType, action, descriptor,
-    elemVarName, opt_noConsole, opt_iframeInfo, opt_xpaths,
+    elemVarName, opt_iframeInfo, opt_xpaths,
     opt_className) {
   var playbackCmd = '';
   var cmdMap = {};

@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -32,6 +30,9 @@ from google.appengine.ext import db
 
 from models import bugs
 from models import bugs_util
+from models import test_cycle
+from models import test_cycle_user
+from utils import encoding_util
 from utils import url_util
 
 
@@ -64,7 +65,8 @@ class UrlBugMap(db.Model):
                                      bugs_util.UNKNOWN))
   provider = db.StringProperty(required=False)
   # Non-indexed information.
-  bug = db.ReferenceProperty(reference_class=bugs.Bug)
+  bug = db.ReferenceProperty(reference_class=bugs.Bug,
+                            collection_name='bug_urls')
   last_update = db.StringProperty(required=True)
   position = db.IntegerProperty(required=False, default=UrlPosition.OTHER,
                                 choices=(UrlPosition.TITLE,
@@ -74,6 +76,12 @@ class UrlBugMap(db.Model):
   # Tracks when an entry is added and modified.
   added = db.DateTimeProperty(required=False, auto_now_add=True)
   modified = db.DateTimeProperty(required=False, auto_now=True)
+
+  # Test cycle is the differentiates various test runs.
+  test_cycle = db.ReferenceProperty(reference_class=test_cycle.TestCycle,
+                                    collection_name='testcycle_urls')
+  author = db.StringProperty(required=False)
+  author_id = db.StringProperty(required=False)
 
 
 def TruncateStr(text, max_len=500):
@@ -109,51 +117,33 @@ def StoreUrlBugMapping(target_url, bug, position=UrlPosition.OTHER):
   path = ''
   urlnorm = url_util.NormalizeUrl(target_url)
   if urlnorm:
-    logging.info('Using normalized URL.')
     url = urlnorm.url
     hostname = urlnorm.hostname
     path = urlnorm.path
   else:
     logging.exception('URL normalization failed, converting to ASCII: %s',
                       target_url)
-    url = url_util.EncodeToAscii(target_url)
-  logging.info('Adding mapping between bug: %s', bug.key().id_or_name())
-  logging.info('Hostname: %s', hostname)
-  logging.info('Path %s', path)
-  logging.info('URL: %s', url)
+    url = target_url
 
   lowered = bug.status.lower()
-  try:
-    url_bug = UrlBugMap(url=TruncateStr(url),
-                        hostname=TruncateStr(hostname),
-                        path=TruncateStr(path),
-                        status=lowered,
-                        state=bugs_util.StateFromStatus(
-                            lowered, bug.provider),
-                        provider=bug.provider,
-                        bug=bug,
-                        last_update=bug.last_update,
-                        position=position)
-    url_bug.put()
-  except UnicodeDecodeError, e:
-    logging.error('Failed to put bug, try encode to ascii first. Error: %s',
-                  e)
-    url = url_util.EncodeToAscii(url)
-    hostname = url_util.EncodeToAscii(hostname)
-    path = url_util.EncodeToAscii(path)
-    logging.debug('New values: hostname: %s, path: %s, url: %s',
-                  hostname, path, url)
-    url_bug = UrlBugMap(url=TruncateStr(url),
-                        hostname=TruncateStr(hostname),
-                        path=TruncateStr(path),
-                        status=lowered,
-                        state=bugs_util.StateFromStatus(
-                            lowered, bug.provider),
-                        provider=bug.provider,
-                        bug=bug,
-                        last_update=bug.last_update,
-                        position=position)
-    url_bug.put()
+  url = encoding_util.EncodeToAscii(url)
+  hostname = encoding_util.EncodeToAscii(hostname)
+  path = encoding_util.EncodeToAscii(path)
+
+  url_bug = UrlBugMap(url=TruncateStr(url),
+                      hostname=TruncateStr(hostname),
+                      path=TruncateStr(path),
+                      status=lowered,
+                      state=bugs_util.StateFromStatus(
+                          lowered, bug.provider),
+                      provider=bug.provider,
+                      bug=bug,
+                      last_update=bug.last_update,
+                      position=position,
+                      test_cycle=bug.test_cycle,
+                      author=bug.author,
+                      author_id=bug.author_id)
+  url_bug.put()
   return url_bug
 
 
@@ -176,8 +166,14 @@ def GetCacheKeys(urlnorm, state, status):
   return [(url, CacheKey(state, status, url_util.HashUrl(url))) for url in urls]
 
 
+def GetBugsForUrlUserIsAuthorized(
+    url, user, max_results, state, status):
+    GetBugsForUrl(url, user, max_results, state, status,
+                  enforce_cycle_scoping=True)
+
+
 def GetBugsForUrl(
-    url, max_results, state, status):
+    url, user, max_results, state, status, enforce_cycle_scoping=False):
   """Retrieves a list of bugs for a given URL up to the specified amount.
 
   Args:
@@ -192,7 +188,6 @@ def GetBugsForUrl(
   Returns:
     A list of known bugs for the specified URL.
   """
-  logging.debug('Get bugs for url: %s', url)
   urlnorm = url_util.NormalizeUrl(url)
   if not urlnorm:
     logging.error('Unable to normalize URL.')
@@ -202,7 +197,12 @@ def GetBugsForUrl(
   if max_results < limit:
     limit = max_results
 
-  queries = GetQueriesForUrl(urlnorm, state, status)
+  cycles = test_cycle_user.GetTestCyclesForUser(user)
+  if enforce_cycle_scoping and not cycles:
+    # Nothing to do, user is not authorized to see bugs.
+    return []
+
+  queries = GetQueriesForUrl(urlnorm, state, status, cycles)
   results = []
   results_dict = {}
   for (key, query) in queries:
@@ -211,10 +211,9 @@ def GetBugsForUrl(
       keys = []
       for curr in mappings:
         curr_key = UrlBugMap.bug.get_value_for_datastore(curr)
-        key_name = str(curr_key.name())
-        logging.debug('Key name: %s', key_name)
+        key_name = str(curr_key)
+        logging.info('Considering key: %s', key_name)
         if key_name in results_dict:
-          logging.debug('Key already seen, skipping.')
           continue
         results_dict[key_name] = True
         keys.append(curr_key)
@@ -227,7 +226,7 @@ def GetBugsForUrl(
   return results
 
 
-def GetQueriesForUrl(urlnorm, state, status):
+def GetQueriesForUrl(urlnorm, state, status, cycles=None):
   """Retrieves a list of queries to try for a given URL.
 
   Each query represents a possible way to find matches, each one has different
@@ -249,32 +248,38 @@ def GetQueriesForUrl(urlnorm, state, status):
   url_no_schema = re.sub('^https?://', '', urlnorm.url)
   hostname_path = urlnorm.hostname + urlnorm.path
 
-  url_query = (
-      urlnorm.url,
-      UrlBugMap.all().filter('url = ', TruncateStr(urlnorm.url)))
-  hostname_path_query = (
-      hostname_path,
-      UrlBugMap.all().filter(
-          'hostname = ', TruncateStr(urlnorm.hostname)).filter(
-              'path = ', TruncateStr(urlnorm.path)))
-  hostname_query = (
-      urlnorm.hostname,
-      UrlBugMap.all().filter('hostname = ', TruncateStr(urlnorm.hostname)))
+  url_query = UrlBugMap.all().filter('url = ', TruncateStr(urlnorm.url))
+  url_query_tuple = (urlnorm.url, url_query)
+
+  hostname_path_query =  UrlBugMap.all()
+  hostname_path_query = hostname_path_query.filter(
+    'hostname = ', TruncateStr(urlnorm.hostname))
+  hostname_path_query = hostname_path_query.filter(
+    'path = ', TruncateStr(urlnorm.path))
+  hostname_path_tuple = (hostname_path, hostname_path_query)
+
+  hostname_query = UrlBugMap.all().filter(
+    'hostname = ', TruncateStr(urlnorm.hostname))
+  hostname_tuple = (urlnorm.hostname, hostname_query)
 
   queries = []
   if url_no_schema == hostname_path:
     if urlnorm.path:
-      queries.append(hostname_path_query)
-    queries.append(hostname_query)
+      queries.append(hostname_path_tuple)
+    queries.append(hostname_tuple)
   elif hostname_path == urlnorm.hostname:
-    queries.append(url_query)
-    queries.append(hostname_query)
+    queries.append(url_tuple)
+    queries.append(hostname_tuple)
   else:
-    queries.append(url_query)
-    queries.append(hostname_path_query)
-    queries.append(hostname_query)
+    queries.append(url_tuple)
+    queries.append(hostname_path_tuple)
+    queries.append(hostname_tuple)
 
   queries = [(k, q.order('-last_update')) for (k, q) in queries]
+  
+  if cycles:
+    queries = [(k, q.filter('test_cycle in ', cycles)) for (k, q) in queries]
+
   # If states is specified, filter results to query bug matching it's value.
   if state:
     queries = [(k, q.filter('state = ', state.lower())) for (k, q) in queries]
@@ -283,31 +288,26 @@ def GetQueriesForUrl(urlnorm, state, status):
   return queries
 
 
-def DeleteAllMappingsForBug(key_name):
+def DeleteAllMappingsForBug(bug):
   """Deletes all mappings for the specified bug.
 
   Args:
-    key_name: The key name of the bug.
+    bug: The target bug to delete the bugs from.
 
   Returns:
     The total amount of mappings deleted.
   """
   total_deleted = 0
-  bug = bugs.GetBugByKey(key_name)
-  query = UrlBugMap.all(keys_only=True).filter('bug = ', bug)
+  query = bug.bug_urls
   mappings = query.fetch(_MAX_RESULTS_CAP)
   while mappings:
     total_deleted += len(mappings)
     db.delete(mappings)
     mappings = query.fetch(_MAX_RESULTS_CAP)
-
-  logging.info(
-      'DeleteAllMappingsForBug: total mappings deleted for bug %s: %d.',
-      key_name, total_deleted)
   return total_deleted
 
 
-def DeleteBugAndMappings(key_name):
+def DeleteBugAndMappings(bug_id, project, provider):
   """Delete bug and all mappings assiciated with that bug.
 
   Args:
@@ -316,9 +316,10 @@ def DeleteBugAndMappings(key_name):
   Returns:
     The total amount of mappings deleted.
   """
-  mappings_deleted = DeleteAllMappingsForBug(key_name)
-
-  bug = bugs.GetBugByKey(key_name)
+  mappings_deleted = 0
+  bug = bugs.GetBug(bug_id, project, provider)
   if bug:
+    mappings_deleted = DeleteAllMappingsForBug(bug)
     bug.delete()
   return mappings_deleted
+

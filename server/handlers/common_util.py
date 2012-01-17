@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,10 +17,6 @@
 __author__ = 'phu@google.com (Po Hu)'
 
 
-#Import not at top
-#pylint: disable-msg=C6204
-#Catch Exception or StandardError
-#pylint: disable-msg=W0703
 from models import bite_event
 from utils import bite_constants
 
@@ -65,3 +59,4 @@ def GetEventData(event):
           'props': [{'label': 'action', 'value': action},
                     {'label': 'by', 'value': email},
                     {'label': 'around', 'value': str(event.created_time)}]}
+

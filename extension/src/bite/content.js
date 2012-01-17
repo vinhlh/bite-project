@@ -399,14 +399,13 @@ bite.client.Content.prototype.startRecording_ = function() {
   this.isRecordingActions_ = true;
   chrome.extension.sendRequest(
       {'command': Bite.Constants.CONSOLE_CMDS.SET_TAB_AND_START_RECORDING,
-       'params': {'url': '',
-                  'noConsole': true}});
+       'params': {'url': ''}});
   bite.client.Content.logEvent_('StartedRecording', '');
 };
 
 
 /**
- * Stops recording user actions on a pagea and saves the test script on
+ * Stops recording user actions on a page and saves the test script on
  * the web.
  * @private
  */
@@ -417,20 +416,6 @@ bite.client.Content.prototype.stopRecording_ = function() {
   chrome.extension.sendRequest(
       {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
   bite.client.Content.logEvent_('StoppedRecording', '');
-  var datafile = bite.console.Helper.appendInfoMap(
-      this.recordingInfoMap_, this.recordingData_);
-  chrome.extension.sendRequest(
-      {'command': Bite.Constants.CONSOLE_CMDS.UPDATE_ON_WEB,
-       'params': {'testName': 'name',
-                  'startUrl': goog.global.location.href,
-                  'scripts': this.recordingScript_,
-                  'datafile': datafile,
-                  'userLib': '',
-                  'projectName': 'project',
-                  'screenshots': '',
-                  'needOverride': '',
-                  'noConsole': true}});
-  bite.client.Content.logEvent_('SavedRecording', '');
   this.isRecordingActions_ = false;
 };
 
@@ -706,6 +691,23 @@ bite.client.Content.prototype.parseCoordinates_ = function(coordinates) {
  * @param {Object} result Bug data known for the page.
  */
 bite.client.Content.prototype.updateBugsData = function(result) {
+  if (!this.user_) {
+    // Try getting the current user one more time.
+    var callback = goog.bind(this.updateBugsData_, this, result);
+    chrome.extension.sendRequest(
+        {'action': Bite.Constants.HUD_ACTION.GET_CURRENT_USER},
+        goog.bind(this.getCurrentUser_, this, callback));
+    return;
+  }
+  this.updateBugsData_(result);
+};
+
+
+/**
+ * Updates the bugs data.
+ * @param {Object} result Bug data known for the page.
+ */
+bite.client.Content.prototype.updateBugsData_ = function(result) {
   this.bugs_ = result['bugs'];
   this.bugFilters_ = result['filters'];
   bite.bugs.filter(this.bugs_, this.bugFilters_);
@@ -717,6 +719,7 @@ bite.client.Content.prototype.updateBugsData = function(result) {
     this.bugOverlay_.updateData(result['bugs']);
   }
 };
+
 
 /**
  * Updates the tests data.
@@ -762,13 +765,11 @@ bite.client.Content.prototype.loadBugsConsole = function() {
  */
 bite.client.Content.prototype.submitBugRecording_ = function(
     bugData, recording_link) {
-  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG_RECORDING,
+  var requestData = {'action': Bite.Constants.HUD_ACTION.UPDATE_BUG,
                      'project': bugData['project'],
-                     'provider': (bugData['provider'] ||
-                                  Bite.Constants.Providers.ISSUETRACKER),
-                     'id': bugData['id'],
-                     'update_action': Bite.Constants.BugRecordingActions.UPDATE,
-                     'recording_link': recording_link};
+                     'details': {'id': bugData['kind'],
+                                 'kind': bugData['id'],
+                                 'recording_link': recording_link}};
 
   chrome.extension.sendRequest(requestData);
 };
@@ -792,17 +793,68 @@ bite.client.Content.prototype.loadTestsConsole = function() {
 
 /**
  * Handles request sent via chrome.extension.sendRequest().
- * @param {!Object.<string, string, Object>} request Object Data sent in
-  *    the request.
+ * @param {!Object.<string, string|Object>} request Object Data sent in
+ *     the request.
  * @param {MessageSender} sender An object containing information about the
  *     script context that sent the request.
  * @param {function(!*): void} callback Function to call when the request
  *     completes.
  * @export
  */
-bite.client.Content.prototype.onRequest =
-    function(request, sender, callback) {
+bite.client.Content.prototype.onRequest = function(request, sender, callback) {
+  if (request['command']) {
+    this.handleScriptCommand_(request, sender, callback);
+  } else if (request['action']) {
+    this.handleBugCommand_(request, sender, callback);
+  }
+};
 
+
+/**
+ * Handles the script related commands.
+ * @param {!Object.<string, string|Object>} request Object Data sent in
+ *     the request.
+ * @param {MessageSender} sender An object containing information about the
+ *     script context that sent the request.
+ * @param {function(!*): void} callback Function to call when the request
+ *     completes.
+ * @private
+ */
+bite.client.Content.prototype.handleScriptCommand_ = function(
+    request, sender, callback) {
+  switch (request['command']) {
+    case Bite.Constants.UiCmds.ADD_SCREENSHOT:
+      this.screenshotMgr_.addScreenShot(
+          /** @type {string} */ (request['dataUrl']),
+          /** @type {string} */ (request['iconUrl']));
+      break;
+    case Bite.Constants.UiCmds.ADD_NEW_COMMAND:
+      var params = request['params'];
+      this.recordingScript_ += (params['pCmd'] + '\n\n');
+      this.recordingReadable_ += (params['readableCmd'] + '\n\n');
+      if (params['dCmd']) {
+        this.recordingData_ += (params['dCmd'] + '\n');
+      }
+      this.screenshotMgr_.addIndex(params['cmdMap']['id']);
+      bite.console.Helper.assignInfoMap(
+          this.recordingInfoMap_, params['cmdMap']);
+      break;
+  }
+};
+
+
+/**
+ * Handles the bug related commands.
+ * @param {!Object.<string, string, Object>} request Object Data sent in
+ *     the request.
+ * @param {MessageSender} sender An object containing information about the
+ *     script context that sent the request.
+ * @param {function(!*): void} callback Function to call when the request
+ *     completes.
+ * @private
+ */
+bite.client.Content.prototype.handleBugCommand_ = function(
+    request, sender, callback) {
   switch (request['action']) {
     case Bite.Constants.HUD_ACTION.GET_RECORDING_LINK:
       this.getRecordingLink_(request);
@@ -822,21 +874,6 @@ bite.client.Content.prototype.onRequest =
     case Bite.Constants.HUD_ACTION.UPDATE_DATA:
       bite.client.Content.fetchTestData();
       bite.client.Content.fetchBugsData();
-      break;
-    case Bite.Constants.UiCmds.ADD_NEW_COMMAND:
-      this.recordingScript_ += (request['pCmd'] + '\n\n');
-      this.recordingReadable_ += (request['readableCmd'] + '\n\n');
-      if (request['dCmd']) {
-        this.recordingData_ += (request['dCmd'] + '\n');
-      }
-      this.screenshotMgr_.addIndex(request['cmdMap']['id']);
-      bite.console.Helper.assignInfoMap(
-          this.recordingInfoMap_, request['cmdMap']);
-      break;
-    case Bite.Constants.UiCmds.ADD_SCREENSHOT:
-      this.screenshotMgr_.addScreenShot(
-          /** @type {string} */ (request['dataUrl']),
-          /** @type {string} */ (request['iconUrl']));
       break;
     case bite.options.constants.Message.UPDATE:
       var requestObj = goog.json.parse(request['data'] || '{}');

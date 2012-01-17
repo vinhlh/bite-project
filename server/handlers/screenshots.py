@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,20 +16,10 @@
 
 __author__ = 'alexto@google.com (Alexis O. Torres)'
 
-# Disable 'Import not at top of file' lint error.
-# pylint: disable-msg=C6204
-# Disable 'Statement before imports'
-# pylint: disable-msg=C6205
-try:
-  import auto_import_fixer
-except ImportError:
-  pass  # This will fail on unittest, ok to pass.
+import json
+import webapp2
 
-import simplejson
-
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
-from handlers import base
+from common.handlers import base
 from models import screenshots
 from utils import screenshots_util
 
@@ -53,7 +41,7 @@ class UploadHandler(base.BaseHandler):
     if labels:
       # If present, labels is a JSON encoded list of strings,
       # decode it.
-      labels = simplejson.loads(labels)
+      labels = json.loads(labels)
 
     screenshot = screenshots.Add(data=data, source=source, source_id=source_id,
                                  project=project, caption=caption,
@@ -63,7 +51,7 @@ class UploadHandler(base.BaseHandler):
     screenshot_url = screenshots_util.RetrievalUrl(
         self.request.url, screenshot_id)
     self.response.out.write(
-        simplejson.dumps({'id': screenshot_id, 'url': screenshot_url}))
+        json.dumps({'id': screenshot_id, 'url': screenshot_url}))
 
 
 class GetHandler(base.BaseHandler):
@@ -100,19 +88,11 @@ class SearchHandler(base.BaseHandler):
     request_url = self.request.url
     result = [screenshots_util.RetrievalUrl(request_url, curr.key().id())
               for curr in matches]
-    self.response.out.write(simplejson.dumps(result))
+    self.response.out.write(json.dumps(result))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/screenshots/upload', UploadHandler),
      ('/screenshots/fetch', GetHandler),
      ('/screenshots/search', SearchHandler)
     ], debug=True)
-
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

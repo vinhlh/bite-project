@@ -109,9 +109,7 @@ bite.options.constants.ThreeWayOption = {
  * @enum {string}
  */
 bite.options.constants.ServerChannelOption = {
-  DEV: 'https://bite-playground.appspot.com',
-  BETA: 'https://beta-dot-YOUR_SERVER',
-  EXTERNAL: 'https://bite-server.appspot.com',
+  DEV: 'https://bite-playground-dev.appspot.com',
   RELEASE: 'https://bite-playground.appspot.com'
 };
 

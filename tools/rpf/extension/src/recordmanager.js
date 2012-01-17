@@ -123,13 +123,6 @@ rpf.RecordManager = function(scriptMgr,
   this.isRecording_ = false;
 
   /**
-   * Whether operation is done without rpf Console UI (true) or not (false).
-   * @type {boolean}
-   * @private
-   */
-  this.noConsole_ = false;
-
-  /**
    * The recording mode.
    * @type {string}
    * @private
@@ -163,15 +156,19 @@ rpf.RecordManager.ELEMENT_HELPER = 'elementhelper_script.js';
 
 /**
  * Starts recording.
- * @param {boolean=} opt_noConsole Whether recording is started without from
- *     rpf Console UI.
  * @param {Object=} opt_info The optional recording config info.
- * @export
+ * @param {number=} opt_tabId The tab id.
+ * @param {number=} opt_windowId The window id.
+ * @return {boolean} Whether it successfully started recording.
  */
-rpf.RecordManager.prototype.startRecording = function(opt_noConsole, opt_info) {
+rpf.RecordManager.prototype.startRecording = function(
+    opt_info, opt_tabId, opt_windowId) {
   var info = opt_info || {};
-  var noConsole = !!opt_noConsole;
-  this.startRecording_(noConsole, info);
+  if (opt_tabId && opt_windowId) {
+    this.setRecordingTab(opt_tabId, opt_windowId);
+  }
+  this.startRecording_(info);
+  return true;
 };
 
 
@@ -218,23 +215,15 @@ rpf.RecordManager.prototype.checkTestTabExists = function(callback, tabs) {
 
 /**
  * Starts recording.
- * @param {boolean} noConsole Whether recording is started without from
- *     rpf Console UI.
  * @param {Object} info The recording config info.
  * @private
  */
-rpf.RecordManager.prototype.startRecording_ = function(noConsole, info) {
+rpf.RecordManager.prototype.startRecording_ = function(info) {
   this.recordingMode_ = 'rpf';
   this.recordingInfo_ = info;
-  this.noConsole_ = noConsole;
   this.initAllListeners_();
-  if (this.isRecording_) {
-    console.log('Warning: call to startRecording() when recording is ' +
-                'already enabled.');
-  }
   this.isRecording_ = true;
   this.recordingIconOn_();
-
   this.highlightRecordTab();
   this.executePageInit(goog.bind(this.startRecordingInPage, this));
 };
@@ -294,7 +283,7 @@ rpf.RecordManager.prototype.stopRecording = function() {
  */
 rpf.RecordManager.prototype.recordingIconOn_ = function() {
   var iconDetails = {
-      'path': 'imgs/bite_logo_recording_19.png',
+      'path': 'imgs/logo-recording-19x19.png',
       'tabId': this.testTabId_};
   chrome.browserAction.setIcon(iconDetails);
   var tooltipDetails = {
@@ -310,7 +299,7 @@ rpf.RecordManager.prototype.recordingIconOn_ = function() {
  */
 rpf.RecordManager.prototype.recordingIconOff_ = function() {
   var iconDetails = {
-      'path': 'imgs/bite_logo_19.png',
+      'path': 'imgs/bite-logo-19x19.png',
       'tabId': this.testTabId_};
   chrome.browserAction.setIcon(iconDetails);
   var tooltipDetails = {
@@ -363,7 +352,7 @@ rpf.RecordManager.prototype.setStatusBeforeRecording_ = function(
 
 /**
  * Brings the tab under record foreground.
- * @param {(function ((Tab|null)): undefined|undefined)} opt_callback
+ * @param {function(Tab)=} opt_callback
  *     An optional callback function.
  * @export
  */
@@ -487,8 +476,7 @@ rpf.RecordManager.prototype.startRecordingInPage = function() {
     chrome.tabs.sendRequest(
         this.testTabId_,
         {recordAction: Bite.Constants.RECORD_ACTION.START_RECORDING,
-         params: {'noConsole': this.noConsole_,
-                  'rootArr': roots,
+         params: {'rootArr': roots,
                   'xpathFinderOn': this.recordingInfo_['xpathFinderOn']}});
   }
 };

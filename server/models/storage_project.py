@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +21,7 @@ this should be easy to change in the future.
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import logging
-import simplejson
+import json
 
 from google.appengine.ext import db
 
@@ -86,8 +84,8 @@ def GetProjectJson(name):
     return None
 
   try:
-    return simplejson.dumps(obj)
-  except simplejson.JSONDecodeError:
+    return json.dumps(obj)
+  except (TypeError, OverflowError, ValueError):
     return None
 
 
@@ -193,4 +191,3 @@ def DeleteFiles(project):
   js_files = project.jsfile_set.get()
   if js_files:
     db.delete(js_files)
-

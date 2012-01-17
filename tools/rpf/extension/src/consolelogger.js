@@ -117,8 +117,8 @@ rpf.ConsoleLogger.prototype.getLogsAsString = function() {
 /**
  * Saves logs in both plain text and html formats.
  * @param {string} log The log string.
- * @param {rpf.ConsoleLogger.LogLevel} opt_level The level of this log.
- * @param {rpf.ConsoleLogger.Color} opt_color The color of the log.
+ * @param {rpf.ConsoleLogger.LogLevel=} opt_level The level of this log.
+ * @param {rpf.ConsoleLogger.Color=} opt_color The color of the log.
  * @export
  */
 rpf.ConsoleLogger.prototype.saveLogAndHtml = function(

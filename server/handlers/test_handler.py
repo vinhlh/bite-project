@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,22 +16,12 @@
 
 __author__ = 'phu@google.com (Po Hu)'
 
-#Import not at top
-#pylint: disable-msg=C6204
-#Statement before imports
-#pylint: disable-msg=C6205
-#Invalid method name
-#pylint: disable-msg=C6409
-try:
-  import auto_import_fixer
-except ImportError:
-  pass
 import logging
-from google.appengine.api import users
-from google.appengine.ext import webapp
-from google.appengine.ext.webapp.util import run_wsgi_app
+import webapp2
 
-from handlers import base
+from google.appengine.api import users
+
+from common.handlers import base
 from handlers import common_util
 from utils import basic_util
 
@@ -80,15 +68,8 @@ class LoadProjectsHandler(base.BaseHandler):
         basic_util.DumpJsonStr(project_info_list))
 
 
-application = webapp.WSGIApplication(
+app = webapp2.WSGIApplication(
     [('/tests/fetch', FetchTestsHandler),
      ('/tests/load_projects', LoadProjectsHandler)],
     debug=True)
 
-
-def main():
-  run_wsgi_app(application)
-
-
-if __name__ == '__main__':
-  main()

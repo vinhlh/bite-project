@@ -128,8 +128,6 @@ bite.options.Page.ElementName_ = {
  */
 bite.options.Page.MapValues_ = {
   'dev': bite.options.constants.ServerChannelOption.DEV,
-  'beta': bite.options.constants.ServerChannelOption.BETA,
-  'ext': bite.options.constants.ServerChannelOption.EXTERNAL,
   'rel': bite.options.constants.ServerChannelOption.RELEASE
 };
 
@@ -470,10 +468,6 @@ bite.options.Page.prototype.processOptionReverse_ = function(id, value) {
           return 'dev';
         case bite.options.constants.ServerChannelOption.RELEASE:
           return 'rel';
-        case bite.options.constants.ServerChannelOption.EXTERNAL:
-          return 'ext';
-        case bite.options.constants.ServerChannelOption.BETA:
-          return 'beta';
       }
       break;
   }

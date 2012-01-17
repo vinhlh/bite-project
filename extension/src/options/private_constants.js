@@ -72,14 +72,14 @@ bite.options.private_constants.DEFAULT_USERNAME = 'unknown';
  * @type {!Object}
  */
 bite.options.private_constants.Default = {
-  'project': bite.options.constants.ProjectOption.NOT_TRASH,
+  'project': bite.options.constants.ProjectOption.ALL,
   'recording': bite.options.constants.ThreeWayOption.ALL,
   'screenshot': bite.options.constants.ThreeWayOption.ALL,
   'state': bite.options.constants.StateOption.ALL,
   'uiBinding': bite.options.constants.ThreeWayOption.ALL,
   'serverChannel': bite.options.constants.ServerChannelOption.DEV,
   'autoRecord': 'false',
-  'featuresBugs': 'false',
+  'featuresBugs': 'true',
   'featuresRpf': 'true',
   'featuresTests': 'false',
   'featuresClose': 'false',

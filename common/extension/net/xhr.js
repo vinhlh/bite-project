@@ -25,7 +25,8 @@
  *   get(url, opt_callback) - Performs a get.
  *   getMultiple(array, getUrl, app, opt_complete) - Recursively gets a number
  *       of urls asynchronously.  *Looking to refactor.*
- *   post(url, data, opt_callback) - Performs a post.
+ *   post(url, data, opt_callback, opt_headers) - Performs a post.
+ *   put(url, data, opt_callback, opt_headers) - Performs a put.
  *
  * @author jasonstredwick@google.com (Jason Stredwick)
  */
@@ -61,7 +62,7 @@ bite.common.net.xhr.ErrorMessage_ = {
  */
 bite.common.net.xhr.async.get = function(url, opt_callback) {
   var callback = opt_callback || null;
-  bite.common.net.xhr.async.send_(url, callback, 'GET', null);
+  bite.common.net.xhr.async.send_(url, callback, 'GET', null, null);
 }
 
 
@@ -74,11 +75,36 @@ bite.common.net.xhr.async.get = function(url, opt_callback) {
  *     when the request is complete.  The boolean input is the success of the
  *     action.  If the action failed the string will be a simple error message.
  *     Decoding does not occur for the response string, and is up to the caller
- *     if necessary.
+ *     if necessary.  Please pass null if no callback is desired but the
+ *     optional headers are desired.
+ * @param {Object.<string>=} opt_headers Headers to be added to the request.
  */
-bite.common.net.xhr.async.post = function(url, data, opt_callback) {
+bite.common.net.xhr.async.post = function(url, data, opt_callback,
+                                          opt_headers) {
   var callback = opt_callback || null;
-  bite.common.net.xhr.async.send_(url, callback, 'POST', data);
+  var headers = opt_headers || null;
+  bite.common.net.xhr.async.send_(url, callback, 'POST', data, headers);
+};
+
+
+/**
+ * Puts data to the given url and returns the response.
+ * @param {string} url The url.
+ * @param {string} data The data to send; in string form.  Caller is
+ *     responsible for encoding the string if necessary.
+ * @param {function(boolean, string)=} opt_callback The callback that is fired
+ *     when the request is complete.  The boolean input is the success of the
+ *     action.  If the action failed the string will be a simple error message.
+ *     Decoding does not occur for the response string, and is up to the caller
+ *     if necessary.  Please pass null if no callback is desired but the
+ *     optional headers are desired.
+ * @param {Object.<string>=} opt_headers Headers to be added to the request.
+ */
+bite.common.net.xhr.async.put = function(url, data, opt_callback,
+                                         opt_headers) {
+  var callback = opt_callback || null;
+  var headers = opt_headers || null;
+  bite.common.net.xhr.async.send_(url, callback, 'PUT', data, headers);
 };
 
 
@@ -219,9 +245,12 @@ bite.common.net.xhr.async.requestComplete_ = function(event, callback) {
  *     the request is complete.  Can be null if no callback was supplied.
  * @param {string} method The method used to send the request.
  * @param {string?} data The data to send or null if no data is supplied.
+ * @param {Object.<string>} headers Optional request headers. Can be null if
+ *     no headers are supplied.
  * @private
  */
-bite.common.net.xhr.async.send_ = function(url, callback, method, data) {
+bite.common.net.xhr.async.send_ = function(url, callback, method, data,
+                                           headers) {
   if (!url) {
     callback && callback(false, bite.common.net.xhr.ErrorMessage_.MISSING_URL);
     return;
@@ -232,11 +261,7 @@ bite.common.net.xhr.async.send_ = function(url, callback, method, data) {
   };
 
   try {
-    if (method == 'POST') {
-      goog.net.XhrIo.send(url, localCallback, method, data);
-    } else {
-      goog.net.XhrIo.send(url, localCallback, method);
-    }
+    goog.net.XhrIo.send(url, localCallback, method, data, headers);
   } catch (error) {
     var messages = bite.common.net.xhr.ErrorMessage_;
     callback && callback(false, messages.EXCEPTION + error);
@@ -327,4 +352,3 @@ bite.common.net.xhr.async.sendMultiple_ = function(inputData,
                                                    complete) {
 };
 */
-

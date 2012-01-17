@@ -280,6 +280,9 @@ bite.webdriver.generateWaitInstance_ = function() {
  */
 bite.webdriver.generateWaitAndGetElement_ = function(num) {
   return bite.webdriver.addIndentations(num, [
+    '/**',
+    ' * Waits until the element is ready then returns it.',
+    ' */',
     'public Function<WebDriver, WebElement> waitAndGetElement' +
     '(final By locator) {',
     '  return new Function<WebDriver, WebElement>() {',
@@ -421,9 +424,6 @@ bite.webdriver.generateBaseClassVariables_ = function(num) {
     ' Logger.getLogger(BasePage.class.getName());',
     'protected final WebDriver driver;',
     'protected final WebDriverWait wait;',
-    'WebElement element;',
-    'String selector;',
-    'Sleeper sleeper;',
     ''
   ]).join('\n');
 };
@@ -478,18 +478,18 @@ bite.webdriver.generateWebElementBySelector_ = function(selector, action) {
   if (action != 'verifyNot') {
     if (bite.webdriver.codeParams_['waitVisible'] == undefined ||
         bite.webdriver.codeParams_['waitVisible']) {
-      return ['element = wait.until(',
+      return ['WebElement element = wait.until(',
               '        ExpectedConditions.visibilityOfElementLocated(' +
               'By.xpath(' + selector + ')));'].join('\n');
     } else {
-      return ['element = wait.until(',
+      return ['WebElement element = wait.until(',
               '        waitAndGetElement(By.xpath(' + selector +
               ')));'].join('\n');
     }
   }
   return ['Boolean isThrow = true;',
           '    try {',
-          '      element = wait.until(',
+          '      WebElement element = wait.until(',
           '          waitAndGetElement(By.xpath(' + selector + ')));',
           '    } catch (Exception e) {',
           '      isThrow = false;',
@@ -567,20 +567,14 @@ bite.webdriver.generateBasePage_ = function(project) {
   var constructor = bite.webdriver.generateConstructor_(2, 'BasePage');
   constructor += bite.webdriver.generateCommands_(4,
       ['this.driver = driver;',
-       'sleeper = new DefaultSleeper();',
-       'wait = new WebDriverWait(driver, 6);',
-       'selector = "";',
-       'element = null;']);
+       'wait = new WebDriverWait(driver, 6);']);
   constructor += ['', bite.webdriver.generateClosing_(2)].join('\n');
   var waitElementFunc = bite.webdriver.generateWaitAndGetElement_(2);
-  var verifyTextEquals = bite.webdriver.addIndentations(2, [
-      'public void verifyTextEquals(WebElement elem, String text) {',
-      '  if (!elem.getText().equals(text)) {',
-      '    throw new CustomException("Can not match the text.");',
-      '  }',
-      '}']).join('\n');
   var selectOption = bite.webdriver.addIndentations(2, [
-      'public void selectOption(WebElement elem, String value) {',
+      '/**',
+      ' * Selects a given option which equals to the given value.',
+      ' */',
+      'private void selectOption(WebElement elem, String value) {',
       '  List<WebElement> options = elem.findElements(By.tagName("option"));',
       '  for (WebElement option : options) {',
       '    if (value.equals(option.getAttribute("value"))) {',
@@ -590,14 +584,21 @@ bite.webdriver.generateBasePage_ = function(project) {
       '  }',
       '}']).join('\n');
   var sleep = bite.webdriver.addIndentations(2, [
+      '/**',
+      ' * Sleeps for the given time.',
+      ' */',
       'public void sleep(Integer time) {',
       '  try {',
+      '    Sleeper sleeper = new DefaultSleeper();',
       '    sleeper.sleep(time, TimeUnit.MILLISECONDS);',
       '  } catch (Exception e) {',
       '    throw new CustomException("Sleep error:" + e.toString());',
       '  }',
       '}']).join('\n');
   var debugLog = bite.webdriver.addIndentations(2, [
+      '/**',
+      ' * Logs the debug info, which will be used to locate the failed step.',
+      ' */',
       'public void logDebugInfo(String stepId) {',
       '  StackTraceElement[] stacktrace =',
       '      Thread.currentThread().getStackTrace();',
@@ -612,6 +613,9 @@ bite.webdriver.generateBasePage_ = function(project) {
       '}'
   ]).join('\n');
   var verify = bite.webdriver.addIndentations(2, [
+     '/**',
+     ' * Verifies the element with the given attributes map.',
+     ' */',
      'public void verifyElement(WebElement elem,' +
      ' HashMap<String, String> data) {',
      '  for (String key : data.keySet()) {',
@@ -652,7 +656,9 @@ bite.webdriver.generateBasePage_ = function(project) {
      '  }',
      '}']).join('\n');
   var executeJavascript = bite.webdriver.addIndentations(2, [
-     '',
+     '/**',
+     ' * Executes the custom JS function.',
+     ' */',
      'public void executeJavascript(String code) {',
      '  ((JavascriptExecutor) driver).executeScript(code);',
      '}']).join('\n');
@@ -663,7 +669,7 @@ bite.webdriver.generateBasePage_ = function(project) {
   }
   var classEnd = bite.webdriver.generateClosing_(0);
   return [header, '', imports, '', classDoc, classSig, classProperties,
-          constructor, '', waitElementFunc, '', verifyTextEquals, '',
+          constructor, '', waitElementFunc, '',
           selectOption, '', sleep, '',
           debugLog, '', verify, '', executeJavascript, '',
           actions, '', classEnd].join('\n');

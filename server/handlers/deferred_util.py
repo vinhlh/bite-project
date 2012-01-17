@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,27 +22,14 @@ import logging
 import math
 import random
 
-#Import not at top
-#pylint: disable-msg=C6204
-#Catch Exception or StandardError
-#pylint: disable-msg=W0703
-try:
-  from google.appengine.ext import db
-  from google.appengine.ext import deferred
-  from models import bite_result
-  from models import bite_run
-  from models import bite_suite
-  from models import suite_test_map
-  from utils import basic_util
-except ImportError:
-  from google.appengine.ext import db
-  from google.appengine.ext import deferred
-  from models import bite_result
-  from models import bite_run
-  from models import bite_suite
-  from models import suite_test_map
-  from utils import basic_util
-  from utils import bite_constants
+from google.appengine.ext import db
+from google.appengine.ext import deferred
+
+from models import bite_result
+from models import bite_run
+from models import bite_suite
+from models import suite_test_map
+from utils import basic_util
 
 
 DEFAULT_PUT_DELETE_MAX = 500
@@ -203,3 +188,4 @@ def GetAllTestInfo(suite_key_str, user=None):
   suite = bite_suite.BiteSuite.get(db.Key(suite_key_str))
   # Assume the saved query overrides the stored tests.
   return suite_test_map.GetAllTestInfoOfSuite(suite_key_str)
+

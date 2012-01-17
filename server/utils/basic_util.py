@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,14 +20,22 @@ Bite basic util lib contains a bunch of common useful functions.
 __author__ = 'phu@google.com (Po Hu)'
 
 import datetime
+import json
 import logging
 import urllib2
-#Import not at top
-#pylint: disable-msg=C6204
-#Unused argument
-#pylint: disable-msg=W0613
-import simplejson as json
-from bite_exceptions import basic_exception
+
+
+class Error(Exception):
+  pass
+
+
+class ParsingJsonError(Error):
+  """Exception encountered while parsing a Json string."""
+
+
+class DumpingJsonError(Error):
+  """Exception encountered while dumping a Json object."""
+
 
 def ParseJsonStr(json_str):
   """Parses a Json string."""
@@ -39,7 +45,7 @@ def ParseJsonStr(json_str):
     return json.loads(json_str)
   except ValueError:
     logging.error('The json string is: ' + json_str)
-    raise basic_exception.ParsingJsonError()
+    raise ParsingJsonError()
 
 
 def DumpJsonStr(json_obj):
@@ -49,7 +55,7 @@ def DumpJsonStr(json_obj):
   try:
     return json.dumps(json_obj)
   except ValueError:
-    raise basic_exception.DumpingJsonError()
+    raise DumpingJsonError()
 
 
 def GetPercentStr(first, second, digits=0):

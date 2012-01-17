@@ -345,13 +345,6 @@ BiteRpfAction.elemInfo = {};
 
 
 /**
- * Whether it's currently working without rpf Console UI.
- * @type {boolean}
- */
-BiteRpfAction.noConsole = false;
-
-
-/**
  * Whether it's an async call.
  * @type {boolean}
  */
@@ -450,8 +443,9 @@ function onRequestCallback(request, sender, sendResponse) {
       }
       var resultStr = 'Error: ' + errorMessage;
       chrome.extension.sendRequest(
-          {command: 'cmdDone', result: resultStr, index: BiteRpfAction.cmdIndex,
-           noConsole: BiteRpfAction.noConsole});
+          {command: 'cmdDone',
+           result: resultStr,
+           index: BiteRpfAction.cmdIndex});
     } finally {
       // The sendResponse is called to close the request.
       // TODO(phu): Use it to send back the results.
@@ -473,8 +467,7 @@ function sendResultToBackground(passed, log) {
   chrome.extension.sendRequest(
       {command: 'cmdDone', result: result,
        index: BiteRpfAction.cmdIndex,
-       realTimeMap: goog.json.serialize(BiteRpfAction.contentMap),
-       noConsole: BiteRpfAction.noConsole});
+       realTimeMap: goog.json.serialize(BiteRpfAction.contentMap)});
 }
 
 
@@ -497,12 +490,9 @@ function getElem(stepId) {
 
 /**
  * Starts to listen to requests.
- * @param {boolean=} opt_noConsole Whether it's currently working without rpf
- *     Console UI.
  * @export
  */
-function startListener(opt_noConsole) {
-  BiteRpfAction.noConsole = !!opt_noConsole;
+function startListener() {
   chrome.extension.onRequest.removeListener(onRequestCallback);
   chrome.extension.onRequest.addListener(onRequestCallback);
   chrome.extension.sendRequest({command: 'initReady', result: true});
@@ -511,12 +501,9 @@ function startListener(opt_noConsole) {
 
 /**
  * Stops listening to requests.
- * @param {boolean=} opt_noConsole Whether it's currently working without rpf
- *     Console UI.
  * @export
  */
-function removeListener(opt_noConsole) {
-  BiteRpfAction.noConsole = !!opt_noConsole;
+function removeListener() {
   chrome.extension.onRequest.removeListener(onRequestCallback);
 }
 

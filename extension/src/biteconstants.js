@@ -131,7 +131,6 @@ Bite.Constants.CONSOLE_CMDS = {
   FINISH_CURRENT_RUN: 'finishCurrentRun',
   GENERATE_NEW_COMMAND: 'generateNewCommand',
   GET_ALL_FROM_WEB: 'getAllFromWeb',
-  GET_COMMON_LIBS: 'getCommonLibs',
   GET_HELPER_NAMES: 'getHelperNames',
   GET_LAST_MATCH_HTML: 'getLastMatchHtml',
   GET_LOCAL_PROJECT: 'getLocalProject',
@@ -157,7 +156,6 @@ Bite.Constants.CONSOLE_CMDS = {
   SAVE_PROJECT_METADATA_LOCALLY: 'saveProjectMetadataLocally',
   SAVE_ZIP: 'saveZip',
   SET_ACTION_CALLBACK: 'setActionCallback',
-  SET_COMMON_LIB: 'setCommonLib',
   SET_CONSOLE_TAB_ID: 'setConsoleTabId',
   SET_DEFAULT_TIMEOUT: 'setDefaultTimeout',
   SET_INFO_MAP_IN_PLAYBACK: 'setInfoMapInPlayback',
@@ -224,12 +222,12 @@ Bite.Constants.BITE_CONSOLE_LOCK = 'biteConsoleLock';
  */
 Bite.Constants.HUD_ACTION = {
   CHANGE_RECORD_TAB: 'changeRecordTab',
+  CREATE_BUG: 'createBug',
   CREATE_RPF_WINDOW: 'createRpfWindow',
   ENSURE_CONTENT_SCRIPT_LOADED: 'ensureContentScriptLoaded',
   FETCH_BUGS: 'fetchBugs',
   FETCH_TEST_DATA: 'fetchTestData',
   FETCH_BUGS_DATA: 'fetchBugsData',
-  GET_BUG: 'getBug',
   GET_CURRENT_USER: 'getCurrentUser',
   GET_LOCAL_STORAGE: 'getLocalStorage',
   GET_RECORDING_LINK: 'getRecordingLink',
@@ -247,9 +245,7 @@ Bite.Constants.HUD_ACTION = {
   START_NEW_BUG: 'startNewBug',
   TOGGLE_BUGS: 'toggleBugs',
   TOGGLE_TESTS: 'toggleTests',
-  UPDATE_BUG_STATUS: 'updateBugStatus',
-  UPDATE_BUG_BINDING: 'updateBugBinding',
-  UPDATE_BUG_RECORDING: 'updateBugRecording',
+  UPDATE_BUG: 'updateBug',
   UPDATE_DATA: 'updateData'
 };
 
@@ -314,6 +310,7 @@ Bite.Constants.TestResult = {
  * @enum {string}
  */
 Bite.Constants.Providers = {
+  DATASTORE: 'datastore',
   ISSUETRACKER: 'issuetracker'
 };
 
@@ -509,6 +506,7 @@ Bite.Constants.RECORD_ACTION = {
  * @enum {string}
  */
 Bite.Constants.RPF_AUTOMATION = {
+  AUTOMATE_SINGLE_SCRIPT: 'automateSingleScript',
   LOAD_AND_RUN_FROM_LOCAL: 'loadAndRunFromLocal',
   PLAYBACK_MULTIPLE: 'playbackMultiple'
 };

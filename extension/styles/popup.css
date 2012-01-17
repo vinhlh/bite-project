@@ -67,7 +67,7 @@ div.popup {
 }
 
 div.popup-error {
-  width: 300px;
+  font-size: .65em;
   color: red;
 }
 

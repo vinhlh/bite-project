@@ -26,6 +26,7 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 import urllib
 import zipfile
 
@@ -36,7 +37,7 @@ OUTPUT_ROOT = 'output'
 DEPS_ROOT = 'deps'
 
 # Common roots
-BUG_ROOT = os.path.join('tools', 'bug', 'extension')
+BUG_ROOT = os.path.join('tools', 'bugs', 'extension')
 RPF_ROOT = os.path.join('tools', 'rpf', 'extension')
 
 # Output paths
@@ -72,6 +73,16 @@ DEPS = {
     ROOT: os.path.join(DEPS_ROOT, 'closure', 'closure-library'),
     URL: 'http://closure-library.googlecode.com/svn/trunk/',
     CHECKOUT_COMMAND: 'svn checkout %s %s'
+  },
+  'urlnorm': {
+    ROOT: os.path.join(DEPS_ROOT, 'urlnorm'),
+    URL: 'git://gist.github.com/246089.git',
+    CHECKOUT_COMMAND: 'git clone %s %s'
+  },
+  'mrtaskman': {
+    ROOT: os.path.join(DEPS_ROOT, 'mrtaskman'),
+    URL: 'http://code.google.com/p/mrtaskman',
+    CHECKOUT_COMMAND: 'git clone %s %s'
   }
 }
 
@@ -104,10 +115,36 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
   '--input=%(input)s',
   '--output_mode=compiled',
   '--output_file=%(output)s',
+  '--compiler_flags=--generate_exports',
+  '--compiler_flags=--js=%s' % os.path.join(
+      DEPS['closure-library'][ROOT], 'closure', 'goog', 'deps.js'),
+  '--compiler_flags=--jscomp_error=accessControls',
+  '--compiler_flags=--jscomp_error=ambiguousFunctionDecl',
+  '--compiler_flags=--jscomp_error=checkRegExp',
+  '--compiler_flags=--jscomp_error=checkTypes',
+  '--compiler_flags=--jscomp_error=checkVars',
+  '--compiler_flags=--jscomp_error=constantProperty',
+  '--compiler_flags=--jscomp_error=deprecated',
+  '--compiler_flags=--jscomp_error=fileoverviewTags',
+  '--compiler_flags=--jscomp_error=globalThis',
+  '--compiler_flags=--jscomp_error=invalidCasts',
+  '--compiler_flags=--jscomp_error=missingProperties',
+  '--compiler_flags=--jscomp_error=nonStandardJsDocs',
+  '--compiler_flags=--jscomp_error=strictModuleDepCheck',
+  '--compiler_flags=--jscomp_error=undefinedVars',
+  '--compiler_flags=--jscomp_error=unknownDefines',
+  '--compiler_flags=--jscomp_error=visibility',
+  ('--compiler_flags=--externs=%s' % os.path.join(
+      'common', 'extension', 'externs', 'chrome_extensions.js')),
+  ('--compiler_flags=--externs=%s' % os.path.join(
+      'common', 'extension', 'externs', 'rpf_externs.js')),
+  ('--compiler_flags=--externs=%s' % os.path.join(
+      'common', 'extension', 'externs', 'ace_externs.js')),
   ('--compiler_jar=%s' % CLOSURE_COMPILER_JAR)])
 
 SOY_COMPILER_COMMAND = ' '.join([('java -jar %s' % SOY_COMPILER_JAR),
                                  '--shouldProvideRequireSoyNamespaces',
+                                 '--shouldGenerateJsdoc',
                                  '--outputPathFormat %(output)s',
                                  '%(input)s'])
 
@@ -141,8 +178,8 @@ def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
     suffix_out: The suffix to add to the basename for output. (string)
     command: The compile command to use.
 
-  Raises:
-    ClosureError: If closure fails to compile the given input file.
+  Returns:
+    The process which actually is executing the command.
   """
   input = os.path.join(filepath, ('%s%s' % (filename_base, suffix_in)))
   output = os.path.join(GENFILES_ROOT, ('%s%s' % (filename_base, suffix_out)))
@@ -153,28 +190,29 @@ def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
 
   data = {'input': input,
           'output': output}
-  result = ExecuteCommand(command % data)
-  if result or not os.path.exists(output):
-    raise ClosureError('Failed while compiling %s.' % input)
+  result = ExecuteCommand(command % data, True)
+  return result
 
 
-def ExecuteCommand(command):
+def ExecuteCommand(command, no_wait=False):
   """Execute the given command and return the output.
 
   Args:
     command: A string representing the command to execute.
+    no_wait: Whether not to wait for finished.
 
   Returns:
-    The return code of the process.
+    The process.
   """
   print 'Running command: %s' % command
   process = subprocess.Popen(command.split(' '),
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
-  results = process.communicate()
-  if process.returncode:
-    logging.error(results[1])
-  return process.returncode
+  if not no_wait:
+    results = process.communicate()
+    if process.returncode:
+      logging.error(results[1])
+  return process
 
 
 def SetupClosureCompiler():
@@ -244,6 +282,16 @@ def SetupSoyCompiler():
       raise ClosureError('Could not fine soydata.js')
 
 
+def WaitUntilSubprocessesFinished(ps):
+  """Waits until the given sub processes are all finished."""
+  while True:
+    status = [p.poll() for p in ps if p != None]
+    if all([x is not None for x in status]):
+      return
+    else:
+      time.sleep(0.2)
+
+
 def main():
   usage = 'usage: %prog [options]'
   parser = optparse.OptionParser(usage)
@@ -253,6 +301,9 @@ def main():
   parser.add_option('--expunge', dest='build_expunge',
                     action='store_true', default=False,
                     help='Clean the build directories and deps.')
+  parser.add_option('--deps', dest='build_deps',
+                    action='store_true', default=False,
+                    help='Download deps.')
   (options, _) = parser.parse_args()
 
   # Exit if only want to clean.
@@ -275,6 +326,9 @@ def main():
   SetupClosureCompiler()
   SetupSoyCompiler()
 
+  if options.build_deps:
+    exit()
+
   # Compile the closure scripts.
   # Soy
   soy_files = {
@@ -291,11 +345,17 @@ def main():
     'settings': os.path.join('extension', 'src', 'project', 'templates')
   }
 
+  ps = []
+
+  current_time = time.time()
+
   for soy_filename in soy_files:
     soy_filepath = soy_files[soy_filename]
-    CompileScript(soy_filename, soy_filepath, '.soy', '.soy.js',
-                  SOY_COMPILER_COMMAND)
+    ps.append(CompileScript(soy_filename, soy_filepath, '.soy', '.soy.js',
+        SOY_COMPILER_COMMAND))
+  WaitUntilSubprocessesFinished(ps)
 
+  ps = []
   # JavaScript
   js_targets = {
     'background': os.path.join('extension', 'src', 'bite'),
@@ -309,8 +369,11 @@ def main():
 
   for target in js_targets:
     target_filepath = js_targets[target]
-    CompileScript(target, target_filepath, '.js', '_script.js',
-                  COMPILE_CLOSURE_COMMAND)
+    ps.append(CompileScript(target, target_filepath, '.js', '_script.js',
+        COMPILE_CLOSURE_COMMAND))
+  WaitUntilSubprocessesFinished(ps)
+
+  print 'Totally %s (s) passed!' % (time.time() - current_time)
 
   # Remove the outputs, so they will be created again.
   if os.path.exists(OUTPUT_ROOT):
@@ -353,6 +416,11 @@ def main():
   for target in js_targets:
     shutil.copy(os.path.join(GENFILES_ROOT, ('%s_script.js' % target)),
                 EXTENSION_DST)
+  shutil.copy(os.path.join('extension', 'src', 'analytics.js'), EXTENSION_DST)
+
+  #   Changes the name from page_script.js to options_script.js.
+  shutil.move(os.path.join(EXTENSION_DST, 'page_script.js'),
+              os.path.join(EXTENSION_DST, 'options_script.js'))
 
   #   Copy the required ACE files.
   ace_dst = os.path.join(EXTENSION_DST, 'ace')
@@ -366,11 +434,26 @@ def main():
   server_src = 'server'
   shutil.copytree(server_src, SERVER_DST)
 
+  bugs_src = os.path.join('tools', 'bugs', 'server', 'appengine')
+  shutil.copytree(bugs_src, os.path.join(SERVER_DST, 'bugs'))
+
+  common_src = os.path.join('common', 'server', 'appengine')
+  shutil.copytree(common_src, os.path.join(SERVER_DST, 'common'))
+
   gdata_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'gdata')
   shutil.copytree(gdata_src, os.path.join(SERVER_DST, 'gdata'))
 
   atom_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'atom')
   shutil.copytree(atom_src, os.path.join(SERVER_DST, 'atom'))
+
+  urlnorm_src = os.path.join(DEPS['urlnorm'][ROOT], 'urlnorm.py')
+  shutil.copy(urlnorm_src, os.path.join(SERVER_DST, 'third_party'))
+
+  mrtaskman_root = DEPS['mrtaskman'][ROOT]
+  mrtaskman_src = os.path.join(mrtaskman_root, 'server', 'util')
+  mrtaskman_dst = os.path.join(SERVER_DST, 'util')
+  shutil.copytree(mrtaskman_src, mrtaskman_dst)
+
 
 if __name__ == '__main__':
   main()

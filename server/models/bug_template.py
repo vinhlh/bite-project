@@ -23,7 +23,7 @@ AppEngine's Datastore.
 
 __author__ = 'ralphj@google.com (Julie Ralph)'
 
-import simplejson
+import json
 
 from google.appengine.ext import db
 
@@ -62,7 +62,7 @@ class BugTemplate(db.Model):
   display_order = db.IntegerProperty(required=True, default=0)
 
 
-class BugTemplateEncoder(simplejson.JSONEncoder):
+class BugTemplateEncoder(json.JSONEncoder):
   """Encoder to properly encode Bug Template objects."""
 
   # Disable 'Invalid method name' lint error.
@@ -87,7 +87,7 @@ class BugTemplateEncoder(simplejson.JSONEncoder):
               'noteText': obj.note_text,
               'displayOrder': obj.display_order}
     else:
-      return simplejson.JSONEncoder.default(self, obj)
+      return json.JSONEncoder.default(self, obj)
 
 
 def JsonEncode(template):
@@ -99,7 +99,7 @@ def JsonEncode(template):
   Returns:
     A JSON-encoded string representation of the bug template list.
   """
-  return simplejson.dumps(template, cls=BugTemplateEncoder)
+  return json.dumps(template, cls=BugTemplateEncoder)
 
 
 def StoreBugTemplate(template_id, name, urls, project, backend_project,
@@ -151,3 +151,4 @@ def StoreBugTemplate(template_id, name, urls, project, backend_project,
     template.display_order = display_order
   template.put()
   return template
+

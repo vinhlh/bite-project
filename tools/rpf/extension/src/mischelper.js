@@ -116,7 +116,35 @@ rpf.MiscHelper.resizeImage = function(
     var canvas2 = document.createElement('canvas');
     // Convert the canvas to a data URL in PNG format
     callback(canvas.toDataURL('img/png'),
-             rpf.MiscHelper.sliceImage(dimension, canvas2, sourceImage));
+             rpf.MiscHelper.sliceImage(dimension, canvas2, sourceImage,
+                                       {'width': 9999, 'height': 9999}));
+  };
+  sourceImage.src = url;
+};
+
+
+/**
+ * Crops a screenshot captured.
+ * @param {Function} callback The callback function.
+ * @param {Object} dimension The new dimension object.
+ * @param {string} url The image data url.
+ * @export
+ */
+rpf.MiscHelper.cropImage = function(callback, dimension, url) {
+  var sourceImage = new Image();
+  sourceImage.onload = function() {
+    var canvas = document.createElement('canvas');
+
+    canvas.width = dimension['sWidth'];
+    canvas.height = dimension['sHeight'];
+    canvas.getContext('2d').drawImage(
+        sourceImage,
+        dimension['sX'], dimension['sY'],
+        dimension['sWidth'], dimension['sHeight'],
+        0, 0, dimension['sWidth'], dimension['sHeight']);
+
+    // Convert the canvas to a data URL in PNG format
+    callback(canvas.toDataURL('img/png'), '');
   };
   sourceImage.src = url;
 };
@@ -127,15 +155,17 @@ rpf.MiscHelper.resizeImage = function(
  * @param {Object} dimension The new dimension object.
  * @param {Object} canvas The canvas object.
  * @param {Object} sourceImage The sourceImage object.
+ * @param {!Object} maxDimension The max width and length in pixel.
  * @return {string} The data url string.
  * @export
  */
-rpf.MiscHelper.sliceImage = function(dimension, canvas, sourceImage) {
+rpf.MiscHelper.sliceImage = function(
+    dimension, canvas, sourceImage, maxDimension) {
   if (!dimension) {
     return '';
   }
-  var maxHeight = 100;
-  var maxWidth = 300;
+  var maxHeight = maxDimension['height'] || 100;
+  var maxWidth = maxDimension['width'] || 300;
   var newHeight = dimension['sHeight'];
   var newWidth = dimension['sWidth'];
   if (newHeight > maxHeight) {

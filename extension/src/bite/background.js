@@ -30,6 +30,7 @@ goog.require('bite.client.TemplateManager');
 goog.require('bite.common.net.xhr.async');
 goog.require('bite.options.constants');
 goog.require('bite.options.data');
+goog.require('bugs.api');
 goog.require('goog.Timer');
 goog.require('goog.Uri');
 goog.require('goog.json');
@@ -99,53 +100,6 @@ bite.client.Background.PREVIOUS_USE_KEY = 'bite-client-background-previous-use';
 
 
 /**
-
-/**
- * URL path for the "get bugs for URL" API.
- * @type {string}
- * @private
- */
-bite.client.Background.prototype.fetchBugsApiPath_ =
-    '/get_bugs_for_url';
-
-
-/**
- * URL path for the get bugs API.
- * @type {string}
- * @private
- */
-bite.client.Background.prototype.getBugApiPath_ =
-    '/bugs/get';
-
-
-/**
- * URL path for the "update bug status" API.
- * @type {string}
- * @private
- */
-bite.client.Background.prototype.bugsUpdateStatusApiPath_ =
-    '/bugs/update_status';
-
-
-/**
- * URL path for the "update bug binding" API.
- * @type {string}
- * @private
- */
-bite.client.Background.prototype.bugsUpdateBindingApiPath_ =
-    '/bugs/update_binding';
-
-
-/**
- * URL path for the "update bug recording" API.
- * @type {string}
- * @private
- */
-bite.client.Background.prototype.bugsUpdateRecordingApiPath_ =
-    '/bugs/update_recording';
-
-
-/**
  * URL path for the "get test assigned to me" API.
  * @type {string}
  * @private
@@ -174,50 +128,20 @@ bite.client.Background.FetchEventType = {
 };
 
 
-
 /**
- * Gets the fetch bugs URL.
- * @param {string} targetUrl URL to fetch bugs for.
- * @return {string} URL to the HUD API containing the targetUrl
- *     as an encoded parameter.
+ * Returns the new script url.
+ * @param {string} project The project name.
+ * @param {string} script The script name.
  * @private
  */
-bite.client.Background.prototype.getFetchBugsUrl_ = function(targetUrl) {
-  var queryData = goog.Uri.QueryData.createFromMap(
-      {'target_url': targetUrl});
-
+bite.client.Background.prototype.getNewScriptUrl_ = function(project, script) {
   var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var result = goog.Uri.parse(server);
-  result.setPath(this.fetchBugsApiPath_);
-  result.setQueryData(queryData);
-
-  return result.toString();
-};
-
-
-/**
- * Updates the extension's badge.
- * @param {Tab} tab Tab requesting the bugs list.
- * @param {Object} request Object data sent in the request.
- * @private
- */
-bite.client.Background.prototype.updateBadge_ = function(tab, request) {
-  var text = null;
-  switch (request['action']) {
-    case bite.client.Background.FetchEventType.FETCH_BEGIN:
-      text = '...';
-      break;
-    case bite.client.Background.FetchEventType.FETCH_END:
-      var count = request['count'];
-      text = count.toString();
-      break;
-    default:
-      throw new Error('The specified action is not valid: ' +
-                      request['action']);
-  }
-
-  chrome.browserAction.setBadgeText({'text': text,
-                                     'tabId': tab.id});
+  var url = new goog.Uri(server);
+  url.setPath('automateRpf');
+  url.setParameterValue('projectName', project);
+  url.setParameterValue('scriptName', script);
+  url.setParameterValue('location', 'web');
+  return url.toString();
 };
 
 
@@ -268,15 +192,17 @@ bite.client.Background.prototype.fetchTestsDataCallback_ =
 /**
  * Gets bugs for a given webpage.
  * @param {Tab} tab Tab requesting the bugs list.
- * @param {function(!*): void} callback Function to call with the list of bugs.
+ * @param {function({bugs: Object, filters: Object})} callback
+ *     The callback fired with the set of bugs retrieved by url and bug
+ *     filters.
  * @private
  */
 bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
   this.updateBadge_(
       tab, {'action': bite.client.Background.FetchEventType.FETCH_BEGIN});
 
-  bite.common.net.xhr.async.get(this.getFetchBugsUrl_(tab.url),
-      goog.bind(this.fetchBugsDataCallback_, this, tab, callback));
+  bugs.api.urls([tab.url],
+                goog.bind(this.fetchBugsDataCallback_, this, tab, callback));
 };
 
 
@@ -284,51 +210,80 @@ bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
  * Handles the response from the server to fetch bugs data.
  * @param {Tab} tab Tab requesting the bugs list.
  * @param {function({bugs: Object, filters: Object})} callback
- *     Callback function.
- * @param {boolean} success Whether the request was successful.
- * @param {string} data The data received by the request or an error string.
+ *     The callback fired with the set of bugs retrieved by url and bug
+ *     filters.
+ * @param {!{success: boolean, error: string,
+ *           bugMap: bugs.kind.UrlBugMap}} result The results of the request.
  * @private
  */
-bite.client.Background.prototype.fetchBugsDataCallback_ =
-    function(tab, callback, success, data) {
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  if (!success) {
-    console.error('Failed to connect to server ' + server + ': ' + data);
-  }
-
-  var bugs = [];
-  try {
-    /**
-     * Bugs is an array of arrays in the format:
-     * [[urlPart, [bugs]], [urlPart, [bugs]]]
-     * Where URL part is either the full URL, Hostname + Path, or Hostname,
-     * of the target URL, and bugs is a list of bugs associated with the
-     * given urlPart. For example:
-     * [["www.google.com",
-     *   [{"status": "duplicate", "project": "chromium",..}, ...]]]
-     */
-    bugs = goog.json.parse(data);
-  } catch (error) {
-    // One possible reason is the user hasn't logged in SSO yet.
-    console.warn('The xmlhttp request failed because: ' + error);
-    callback({'bugs': null, 'filters': null});
+bite.client.Background.prototype.fetchBugsDataCallback_ = function(tab,
+                                                                   callback,
+                                                                   result) {
+  if (!result.success) {
+    console.error('Failed to retrieve bugs for url; ' + result.error);
     return;
   }
 
-  var length = 0;
-  for (var i = 0; i < bugs.length; ++i) {
+  /**
+   * Bugs is an array of arrays in the format:
+   * [[urlPart, [bugs]], [urlPart, [bugs]]]
+   * Where URL part is either the full URL, Hostname + Path, or Hostname,
+   * of the target URL, and bugs is a list of bugs associated with the
+   * given urlPart. For example:
+   * [["www.google.com",
+   *   [{"status": "duplicate", "project": "chromium",..}, ...]]]
+   */
+  var bugs = [];
+  var urlBugMap = result.bugMap['mappings'];
+  var totalBugs = 0;
+  // Translate the urlBugMap into the bugs structure expected by the rest of
+  // the extension.
+  // TODO (jason.stredwick): Remvoe translation and update client to use new
+  // url to bug mapping.
+  for (var i = 0; i < urlBugMap.length; ++i) {
+    var url = urlBugMap[i]['url'];
+    var bugData = urlBugMap[i]['bugs'];
+
     // In order to count the number of bugs returned; for each result in the
-    // format [urlPart, [bugs]] we need to agregate the bugs count, which
-    // is the 2nd field in for each urlPart (index 1).
-    length += bugs[i][1].length;
+    // format [urlPart, [bugs]] we need to agregate the bugs count.
+    totalBugs += bugData.length;
+
+    // Create entry in translate bug structure.
+    bugs.push([url, bugData]);
   }
 
   this.updateBadge_(
       tab, {'action': bite.client.Background.FetchEventType.FETCH_END,
-            'count': length});
+            'count': totalBugs});
 
   callback({'filters': bite.options.data.getCurrentConfiguration(),
             'bugs': bugs});
+};
+
+
+/**
+ * Updates the extension's badge.
+ * @param {Tab} tab Tab requesting the bugs list.
+ * @param {Object} request Object data sent in the request.
+ * @private
+ */
+bite.client.Background.prototype.updateBadge_ = function(tab, request) {
+  var text = null;
+  switch (request['action']) {
+    case bite.client.Background.FetchEventType.FETCH_BEGIN:
+      text = '...';
+      break;
+    case bite.client.Background.FetchEventType.FETCH_END:
+      var count = request['count'];
+      text = count.toString();
+      break;
+    default:
+      throw new Error('The specified action is not valid: ' +
+                      request['action']);
+  }
+
+  chrome.browserAction.setBadgeText({'text': text,
+                                     'tabId': tab.id});
 };
 
 
@@ -440,136 +395,6 @@ bite.client.Background.prototype.sendRequestToTab_ =
   goog.Timer.callOnce(
       goog.bind(chrome.tabs.sendRequest, this, tab.id, {'action': action}),
       delay);
-};
-
-
-/**
- * Updates a Bug's status.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @private
- */
-bite.client.Background.prototype.updateBugStatus_ = function(
-    request, callback) {
-  var queryParams = {'project': request['project'],
-                     'provider': request['provider'],
-                     'id': request['id'],
-                     'comment': request['comment'],
-                     'status': (request['status'] || '')};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
-
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(this.bugsUpdateStatusApiPath_);
-
-  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
-      goog.bind(this.updateBugCallback_, this, callback));
-};
-
-
-/**
- * Updates a Bug's bindings.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @private
- */
-bite.client.Background.prototype.updateBugBinding_ = function(
-    request, callback) {
-  var queryParams = {'project': request['project'],
-                     'provider': request['provider'],
-                     'id': request['id'],
-                     'action': request['update_action'],
-                     'target_element': (request['target_element'] || '')};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
-
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(this.bugsUpdateBindingApiPath_);
-
-  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
-      goog.bind(this.updateBugCallback_, this, callback));
-};
-
-
-/**
- * Updates a Bug's recording.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @private
- */
-bite.client.Background.prototype.updateBugRecording_ = function(
-    request, callback) {
-  var queryParams = {'project': request['project'],
-                     'provider': request['provider'],
-                     'id': request['id'],
-                     'action': request['update_action'],
-                     'recording_link': (request['recording_link'] || '')};
-  var queryData = goog.Uri.QueryData.createFromMap(queryParams);
-
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(this.bugsUpdateRecordingApiPath_);
-
-  bite.common.net.xhr.async.post(url.toString(), queryData.toString(),
-      goog.bind(this.updateBugCallback_, this, callback));
-};
-
-
-/**
- * Handles update Bug's status server callback.
- * @param {function(!{success: boolean, error: string}): void} callback
- *     The callback function to call when done updating.
- * @param {boolean} success Whether or not the request was successful.
- * @param {string} data The data returned by the request or an error string.
- * @private
- */
-bite.client.Background.prototype.updateBugCallback_ =
-    function(callback, success, data) {
-  if (success) {
-    var response = goog.json.parse(data);
-    callback({'success': response['success'],
-              'error': response['error'] || ''});
-  } else {
-    console.error('Updating bug request encountered: ' + data);
-    callback({'success': false, 'error': data});
-  }
-};
-
-
-/**
- * Get's bug data for a specific ID.
- * @param {Object} request Dictionary containing request details.
- * @param {function(!{success: boolean, data: Object}): void} callback
- * @private
- */
-bite.client.Background.prototype.getBugData_ = function(
-    request, callback) {
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
-  var url = goog.Uri.parse(server);
-  url.setPath(this.getBugApiPath_);
-  url.setParameterValue('id', request['id']);
-  url.setParameterValue('provider', request['provider']);
-  bite.common.net.xhr.async.get(url.toString(),
-      goog.bind(this.getBugDataCallback_, this, callback));
-};
-
-
-/**
- * Handles get bug data server callback.
- * @param {function(!{success: boolean, data: Object}): void} callback
- * @param {boolean} success Whether or not the request was successful.
- * @param {Object} data List of dictionaries containing bug data.
- * @private
- */
-bite.client.Background.prototype.getBugDataCallback_ =
-    function(callback, success, data) {
-  // "data" will be a list of bugs found, typically only one issue should
-  // be returned, but in the case of multiple bugs with the same ID simply
-  // return the first.
-  callback({'success': success, 'data': goog.json.parse(data)[0]});
 };
 
 
@@ -708,7 +533,7 @@ bite.client.Background.logEvent = function(category, action, label) {
 bite.client.Background.prototype.captureVisibleTab_ = function(callback) {
   chrome.tabs.captureVisibleTab(
       null, null,
-      goog.partial(rpf.MiscHelper.resizeImage, callback, 600, null));
+      goog.partial(rpf.MiscHelper.resizeImage, callback, 800, null));
 };
 
 
@@ -808,23 +633,33 @@ bite.client.Background.prototype.onRequest =
     case Bite.Constants.HUD_ACTION.HIDE_ALL_CONSOLES:
       this.hideAllConsoles_();
       break;
-    case Bite.Constants.HUD_ACTION.UPDATE_BUG_STATUS:
-      this.updateBugStatus_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.GET_BUG:
-      this.getBugData_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.UPDATE_BUG_BINDING:
-      this.updateBugBinding_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.UPDATE_BUG_RECORDING:
-      this.updateBugRecording_(request, callback);
-      break;
     // UPDATE_DATA updates the data (such as bugs and tests) on the current
     // tab.
     case Bite.Constants.HUD_ACTION.UPDATE_DATA:
       chrome.tabs.getSelected(null, goog.bind(this.updateData_, this));
       break;
+
+    // Bug templates
+    case Bite.Constants.HUD_ACTION.GET_TEMPLATES:
+      this.getTemplates_(request, callback);
+      break;
+
+    // Bug information handling.
+    case Bite.Constants.HUD_ACTION.START_NEW_BUG:
+      chrome.tabs.getSelected(null, goog.bind(this.startNewBug_, this));
+      break;
+    case Bite.Constants.HUD_ACTION.UPDATE_BUG:
+      bugs.api.update(request['details'], callback);
+      break;
+    case Bite.Constants.HUD_ACTION.CREATE_BUG:
+      if (request['details'] &&
+          request['details']['summary'] && request['details']['title']) {
+        request['details']['summary'] +=
+            this.getNewScriptUrl_('bugs', request['details']['title']);
+      }
+      bugs.api.create(request['details'], callback);
+      break;
+
     case Bite.Constants.HUD_ACTION.GET_LOCAL_STORAGE:
       this.getLocalStorage_(request['key'], callback);
       break;
@@ -833,12 +668,6 @@ bite.client.Background.prototype.onRequest =
       break;
     case Bite.Constants.HUD_ACTION.REMOVE_LOCAL_STORAGE:
       this.removeLocalStorage_(request['key'], callback);
-      break;
-    case Bite.Constants.HUD_ACTION.GET_TEMPLATES:
-      this.getTemplates_(request, callback);
-      break;
-    case Bite.Constants.HUD_ACTION.START_NEW_BUG:
-      chrome.tabs.getSelected(null, goog.bind(this.startNewBug_, this));
       break;
     case Bite.Constants.HUD_ACTION.ENSURE_CONTENT_SCRIPT_LOADED:
       chrome.tabs.getSelected(

@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +18,7 @@ __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import StringIO
 import zipfile
-import simplejson
+import json
 
 
 class BadInput(Exception):
@@ -41,12 +39,10 @@ def JsonStringToZip(data):
 
   Raises:
     BadInput: Raised by ObjToZip.
-    simplejson.JSONDecodeError: An error that occurs while converting the data
-      into an object.
   """
   try:
-    obj = simplejson.loads(data)
-  except TypeError:
+    obj = json.loads(data)
+  except (ValueError, OverflowError, TypeError):
     raise BadInput('Invalid data received.')
 
   return ObjToZip(obj)
@@ -100,4 +96,3 @@ def ObjToZip(data):
   zip_file.close()
 
   return (title, output.getvalue())
-

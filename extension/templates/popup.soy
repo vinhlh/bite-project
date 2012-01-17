@@ -36,22 +36,9 @@
 {template .all}
   <div class="popup">
     {call .header data="all" /}
-    {if $username }
+    {if $username}
       {call .bodyLoggedIn data="all" /}
     {/if}
-  </div>
-{/template}
-
-
-/**
- * Displayed when an error occurs.
- * @param message Text to show the user.
- *
- */
-{template .error}
-  {call .logo /}
-  <div class="popup-error">
-    {$message|noAutoescape}
   </div>
 {/template}
 
@@ -70,7 +57,27 @@
  * Displays the logo image.
  */
 {template .logo}
-  <img src="/imgs/popup/bite-noname-tiny.png" />
+  <img src="/imgs/popup/noname-tiny.png" />
+{/template}
+
+
+/**
+ * Return the url div.
+ * @param url
+ * @param username
+ */
+{template .url}
+  {if $url}
+    <div class="setting">
+      {if $username}
+        <a href="{$url}" target="_blank">Sign out</a>
+      {else}
+        <a href="{$url}" target="_blank">Sign in</a>
+      {/if}
+    </div>
+  {else}
+    <div class="popup-error">No login available</div>
+  {/if}
 {/template}
 
 
@@ -87,20 +94,16 @@
       <td class="logo">
         {call .logo /}
       </td>
+      {if $version}
         <td class="version">
-        <span class="version">{$version}</span>
-      </td>
+          <span class="version">{$version}</span>
+        </td>
+      {/if}
       <td class="userbar">
-        {if not $username}
-          <div class="setting">
-            <a href="{$url}" target="_blank">Sign in</a>
-          </div>
-        {else}
+        {if $username}
           <div class="setting">{$username}</div>
-          <div class="setting">
-            <a href="{$url}" target="_blank">Sign out</a>
-          </div>
         {/if}
+        {call .url data="all" /}
       </td>
   </table>
 {/template}

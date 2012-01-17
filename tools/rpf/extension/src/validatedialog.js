@@ -253,7 +253,6 @@ rpf.ValidateDialog.prototype.generateDescriptor_ = function() {
          'action': this.actionSelector_.getSelectedItem().getValue(),
          'descriptor': JSON.stringify(this.validDescriptor_),
          'elemVarName': this.validationElem_['elemVarName'],
-         'noconsole': this.validationElem_['noConsole'],
          'iframeInfo': this.validationElem_['iframeInfo'],
          'xpaths': xpaths,
          'className': this.validationElem_['className']}},

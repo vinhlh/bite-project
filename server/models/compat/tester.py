@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -142,3 +140,4 @@ def GetTesters():
     results = q.fetch(9999)
     cursor = q.cursor()
   return testers
+

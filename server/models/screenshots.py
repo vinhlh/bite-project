@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2011 Google Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -91,3 +89,4 @@ def GetScreenshots(source, source_id=None, project=None,
   if project:
     query.filter('project=', project)
   return query.fetch(limit)
+
