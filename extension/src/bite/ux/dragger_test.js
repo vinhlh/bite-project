@@ -13,7 +13,9 @@
 // limitations under the License.
 
 /**
- * @fileoverview Tests for the BITE resizer.
+ * @fileoverview Tests for the BITE dragger.
+ *
+ * TODO (jason.stredwick): Add in revised unit test.
  *
  * @author ralphj@google.com (Julie Ralph)
  */
@@ -32,7 +34,7 @@ var stubs_ = new goog.testing.PropertyReplacer();
 var sandbox;
 var container;
 
-
+/*
 function getViewportSize() {
   return new goog.math.Size(1000, 1000);
 }
@@ -146,4 +148,4 @@ function testNWResize() {
   assertEquals('310px', container.style.width);
   assertEquals('321px', container.style.height);
 }
-
+*/
