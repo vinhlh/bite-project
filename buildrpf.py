@@ -15,10 +15,11 @@
 # limitations under the License.
 
 
-"""Build the BITE Extension."""
+"""Build the RPF Extension."""
 
 __author__ = ('ralphj@google.com (Julie Ralph)'
-              'jason.stredwick@gmail.com (Jason Stredwick)')
+              'jason.stredwick@gmail.com (Jason Stredwick)',
+              'phu@google.com (Po Hu)')
 
 import logging
 import optparse
@@ -105,9 +106,8 @@ CLOSURE_COMPILER = os.path.join(DEPS['closure-library'][ROOT], 'closure',
 COMPILE_CLOSURE_COMMAND = ' '.join([
   sys.executable, CLOSURE_COMPILER,
   ('--root=%s' % os.path.join('common', 'extension')),
-  ('--root=%s' % os.path.join('extension', 'src')),
-  ('--root=%s' % os.path.join(BUG_ROOT, 'src')),
-  ('--root=%s' % os.path.join(RPF_ROOT, 'src', 'libs')),
+  ('--root=%s' % os.path.join('extension', 'src', 'options')),
+  ('--root=%s' % os.path.join(RPF_ROOT, 'src')),
   ('--root=%s' % DEPS['closure-library'][ROOT]),
   ('--root=%s' % SOY_COMPILER_SRC),
   ('--root=%s' % GENFILES_ROOT),
@@ -121,14 +121,14 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
   '--compiler_flags=--jscomp_error=accessControls',
   '--compiler_flags=--jscomp_error=ambiguousFunctionDecl',
   '--compiler_flags=--jscomp_error=checkRegExp',
-  '--compiler_flags=--jscomp_error=checkTypes',
+  '--compiler_flags=--jscomp_warning=checkTypes',
   '--compiler_flags=--jscomp_error=checkVars',
   '--compiler_flags=--jscomp_error=constantProperty',
   '--compiler_flags=--jscomp_error=deprecated',
   '--compiler_flags=--jscomp_error=fileoverviewTags',
   '--compiler_flags=--jscomp_error=globalThis',
   '--compiler_flags=--jscomp_error=invalidCasts',
-  '--compiler_flags=--jscomp_error=missingProperties',
+  '--compiler_flags=--jscomp_warning=missingProperties',
   '--compiler_flags=--jscomp_error=nonStandardJsDocs',
   '--compiler_flags=--jscomp_error=strictModuleDepCheck',
   '--compiler_flags=--jscomp_error=undefinedVars',
@@ -337,15 +337,9 @@ def main():
   soy_files = {
     'popup': os.path.join('extension', 'templates'),
     'consoles': os.path.join(BUG_ROOT, 'templates'),
-    'newbug_console': os.path.join(BUG_ROOT, 'templates'),
-    'newbug_type_selector': os.path.join(BUG_ROOT, 'templates'),
     'rpfconsole': os.path.join(RPF_ROOT, 'templates'),
     'rpf_dialogs': os.path.join(RPF_ROOT, 'templates'),
-    'locatorsupdater': os.path.join(RPF_ROOT, 'templates'),
-    'explore': os.path.join('extension', 'src', 'project', 'templates'),
-    'general': os.path.join('extension', 'src', 'project', 'templates'),
-    'member': os.path.join('extension', 'src', 'project', 'templates'),
-    'settings': os.path.join('extension', 'src', 'project', 'templates')
+    'locatorsupdater': os.path.join(RPF_ROOT, 'templates')
   }
 
   ps = []
@@ -361,13 +355,11 @@ def main():
   ps = []
   # JavaScript
   js_targets = {
-    'background': os.path.join('extension', 'src', 'bite'),
-    'content': os.path.join('extension', 'src', 'bite'),
+    'background': os.path.join(RPF_ROOT, 'src', 'base'),
     'getactioninfo': os.path.join(RPF_ROOT, 'src', 'libs'),
     'console': os.path.join(RPF_ROOT, 'src', 'libs'),
     'elementhelper': os.path.join('common', 'extension', 'dom'),
-    'popup': os.path.join('extension', 'src'),
-    'page': os.path.join('extension', 'src', 'options')
+    'popup': os.path.join(RPF_ROOT, 'src', 'base')
   }
 
   for target in js_targets:
@@ -392,7 +384,7 @@ def main():
       os.mkdir(path)
 
   #   Manifest
-  shutil.copy(os.path.join('extension', 'manifest.json'), EXTENSION_DST)
+  shutil.copy(os.path.join(RPF_ROOT, 'manifest.json'), EXTENSION_DST)
 
   #   Styles
   styles = [os.path.join('extension', 'styles', 'consoles.css'),
@@ -423,8 +415,8 @@ def main():
                            EXTENSION_DST)
 
   #   Changes the name from page_script.js to options_script.js.
-  shutil.move(os.path.join(EXTENSION_DST, 'page_script.js'),
-              os.path.join(EXTENSION_DST, 'options_script.js'))
+  #shutil.move(os.path.join(EXTENSION_DST, 'page_script.js'),
+  #            os.path.join(EXTENSION_DST, 'options_script.js'))
 
   #   Copy the required ACE files.
   ace_dst = os.path.join(EXTENSION_DST, 'ace')

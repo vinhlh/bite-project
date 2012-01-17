@@ -1,0 +1,31 @@
+{
+  "name": "RPF (Dev)",
+  "version": "1.0.0.0",
+  "description": "Open source version of RPF. (Dev)",
+  "options_page": "options.html",
+  "browser_action": {
+    "default_icon": "imgs/logo-19x19.png",
+    "default_title": "RPF",
+    "popup": "popup.html"
+  },
+  "icons": {
+    "48": "imgs/logo-48x48.png",
+    "128": "imgs/logo-128x128.png"
+  },
+  "background_page": "background.html",
+  "content_scripts": [
+    {
+      "js": [ "getactioninfo_script.js" ],
+      "matches": [ "*://*/*" ],
+      "all_frames": true
+    }
+  ],
+  "incognito": "spanning",
+  "permissions": [
+    "tabs",
+    "<all_urls>",
+    "management",
+    "unlimitedStorage"
+  ]
+}
+
