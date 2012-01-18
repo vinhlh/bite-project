@@ -691,7 +691,7 @@ bite.client.Background.prototype.onRequest =
     case Bite.Constants.HUD_ACTION.GET_CURRENT_USER:
       var server = bite.options.data.get(
           bite.options.constants.Id.SERVER_CHANNEL);
-      this.loginManager_.getCurrentUser(callback, server);
+      this.loginManager_.getCurrentUser(callback);
       break;
     case Bite.Constants.HUD_ACTION.GET_SERVER_CHANNEL:
       callback(this.getServerChannel_());
