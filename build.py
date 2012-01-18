@@ -144,38 +144,9 @@ def main():
   shutil.move(os.path.join(EXTENSION_DST, 'page_script.js'),
               os.path.join(EXTENSION_DST, 'options_script.js'))
 
-  #   Copy the required ACE files.
-  ace_dst = os.path.join(EXTENSION_DST, 'ace')
-  ace_src = os.path.join(DEPS['ace'][ROOT], 'build', 'src')
-  if os.path.exists(ace_dst):
-    shutil.rmtree(ace_dst)
-  shutil.copytree(ace_src, ace_dst)
+  CopyAceFiles()
 
-  # Create server bundle.
-  print('Creating server bundle.')
-  server_src = 'server'
-  shutil.copytree(server_src, SERVER_DST)
-
-  bugs_src = os.path.join('tools', 'bugs', 'server', 'appengine')
-  shutil.copytree(bugs_src, os.path.join(SERVER_DST, 'bugs'))
-
-  common_src = os.path.join('common', 'server', 'appengine')
-  shutil.copytree(common_src, os.path.join(SERVER_DST, 'common'))
-
-  gdata_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'gdata')
-  shutil.copytree(gdata_src, os.path.join(SERVER_DST, 'gdata'))
-
-  atom_src = os.path.join(DEPS['gdata-python-client'][ROOT], 'src', 'atom')
-  shutil.copytree(atom_src, os.path.join(SERVER_DST, 'atom'))
-
-  urlnorm_src = os.path.join(DEPS['urlnorm'][ROOT], 'urlnorm.py')
-  shutil.copy(urlnorm_src, os.path.join(SERVER_DST, 'third_party'))
-
-  mrtaskman_root = DEPS['mrtaskman'][ROOT]
-  mrtaskman_src = os.path.join(mrtaskman_root, 'server', 'util')
-  mrtaskman_dst = os.path.join(SERVER_DST, 'util')
-  shutil.copytree(mrtaskman_src, mrtaskman_dst)
-
+  CopyServerFiles()
 
 if __name__ == '__main__':
   main()
