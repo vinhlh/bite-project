@@ -92,32 +92,6 @@ bite.Popup.CONSOLE_OPTIONS_ = {
     name: MSG_POPUP_OPTION_FLUX_NAME,
     img: '/imgs/popup/rpf_32.png',
     description: MSG_POPUP_OPTION_FLUX_DESC
-  },
-  REPORT_BUG: {
-    name: MSG_POPUP_OPTION_REPORT_BUG_NAME,
-    img: '/imgs/popup/new_bug_32.png',
-    description: MSG_POPUP_OPTION_REPORT_BUG_DESC
-  },
-  BUGS: {
-    name: MSG_POPUP_OPTION_BUGS_NAME,
-    img: '/imgs/popup/bugs_32.png',
-    description: MSG_POPUP_OPTION_BUGS_DESC
-  },
-  TESTS: {
-    name: MSG_POPUP_OPTION_TEST_NAME,
-    img: '/imgs/popup/tests_32.png',
-    description: MSG_POPUP_OPTION_TEST_DESC
-  },
-  // TODO(ralphj): Make a dedicated close image.
-  CLOSE: {
-    name: MSG_POPUP_OPTION_CLOSE_NAME,
-    img: '/imgs/bug-unknown-32.png',
-    description: MSG_POPUP_OPTION_CLOSE_DESC
-  },
-  SETTINGS: {
-    name: MSG_POPUP_OPTION_SETTINGS_NAME,
-    img: '/imgs/popup/help_32.png',
-    description: MSG_POPUP_OPTION_SETTINGS_DESC
   }
 };
 
@@ -292,34 +266,10 @@ bite.Popup.prototype.initLoginComplete_ = function(callback, responseObj) {
  */
 bite.Popup.prototype.onClickCallback_ = function(optionName) {
   switch (optionName) {
-    case bite.Popup.CONSOLE_OPTIONS_.REPORT_BUG.name:
-      chrome.extension.sendRequest(
-          {'action': Bite.Constants.HUD_ACTION.START_NEW_BUG});
-      break;
-
-    case bite.Popup.CONSOLE_OPTIONS_.BUGS.name:
-      chrome.extension.sendRequest(
-          {'action': Bite.Constants.HUD_ACTION.TOGGLE_BUGS});
-      break;
-
-    case bite.Popup.CONSOLE_OPTIONS_.TESTS.name:
-      chrome.extension.sendRequest(
-          {'action': Bite.Constants.HUD_ACTION.TOGGLE_TESTS});
-      break;
-
-    case bite.Popup.CONSOLE_OPTIONS_.CLOSE.name:
-      chrome.extension.sendRequest(
-          {'action': Bite.Constants.HUD_ACTION.HIDE_ALL_CONSOLES});
-      break;
-
     case bite.Popup.CONSOLE_OPTIONS_.FLUX.name:
       chrome.extension.sendRequest(
           {'action': Bite.Constants.HUD_ACTION.CREATE_RPF_WINDOW,
            'userId': this.userId_});
-      break;
-
-    case bite.Popup.CONSOLE_OPTIONS_.SETTINGS.name:
-      chrome.tabs.create({'url': Bite.Constants.getOptionsPageUrl()});
       break;
 
     default:

@@ -21,10 +21,9 @@
 goog.provide('rpf.SaveLoadManager');
 
 goog.require('Bite.Constants');
-goog.require('bite.options.constants');
-goog.require('bite.options.data');
 goog.require('goog.Uri');
 goog.require('goog.net.XhrIo');
+goog.require('rpf.Constants');
 goog.require('rpf.DataModel');
 goog.require('rpf.MiscHelper');
 goog.require('rpf.ScriptManager');
@@ -47,7 +46,7 @@ rpf.SaveLoadManager = function(scriptMgr, sendMessageToConsole,
   this.scriptMgr_ = scriptMgr;
 
   // TODO(phu): Put the test data in get method.
-  this.server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
+  this.server = rpf.Constants.DEFAULT_SERVER;
 
   /**
    * The function to send message to console world.

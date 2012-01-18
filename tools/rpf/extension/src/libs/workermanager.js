@@ -25,14 +25,13 @@ goog.provide('rpf.WorkerManager');
 goog.require('Bite.Constants');
 goog.require('bite.base.Helper');
 goog.require('bite.common.net.xhr.async');
-goog.require('bite.options.constants');
-goog.require('bite.options.data');
 goog.require('goog.Timer');
 goog.require('goog.array');
 goog.require('goog.events');
 goog.require('goog.json');
 goog.require('goog.net.XhrIo');
 goog.require('goog.userAgent');
+goog.require('rpf.Constants');
 goog.require('rpf.MiscHelper');
 goog.require('rpf.soy.Dialog');
 
@@ -164,8 +163,7 @@ rpf.WorkerManager.token = '';
  * @type {string}
  * @private
  */
-rpf.WorkerManager.TESTS_EXECUTION_SERVER_ =
-    bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
+rpf.WorkerManager.TESTS_EXECUTION_SERVER_ = rpf.Constants.DEFAULT_SERVER;
 
 
 /**

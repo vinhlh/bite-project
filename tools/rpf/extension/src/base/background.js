@@ -30,6 +30,7 @@ goog.require('goog.Timer');
 goog.require('goog.Uri');
 goog.require('goog.json');
 goog.require('goog.userAgent');
+goog.require('rpf.Constants');
 goog.require('rpf.Rpf');
 
 
@@ -200,7 +201,8 @@ bite.client.Background.prototype.onRequest =
       this.rpf_.focusRpf();
       break;
     case Bite.Constants.HUD_ACTION.GET_CURRENT_USER:
-      this.loginManager_.getCurrentUser(callback);
+      var server = rpf.Constants.DEFAULT_SERVER;
+      this.loginManager_.getCurrentUser(callback, server);
       break;
     default:
       throw new Error('The specified action is not valid: ' +

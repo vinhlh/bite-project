@@ -689,7 +689,9 @@ bite.client.Background.prototype.onRequest =
       this.rpf_.focusRpf();
       break;
     case Bite.Constants.HUD_ACTION.GET_CURRENT_USER:
-      this.loginManager_.getCurrentUser(callback);
+      var server = bite.options.data.get(
+          bite.options.constants.Id.SERVER_CHANNEL);
+      this.loginManager_.getCurrentUser(callback, server);
       break;
     case Bite.Constants.HUD_ACTION.GET_SERVER_CHANNEL:
       callback(this.getServerChannel_());

@@ -23,8 +23,6 @@
 goog.provide('bite.LoginManager');
 
 goog.require('bite.common.net.xhr.async');
-goog.require('bite.options.constants');
-goog.require('bite.options.data');
 goog.require('goog.Uri');
 goog.require('goog.json');
 goog.require('goog.string');
@@ -69,9 +67,10 @@ bite.LoginManager.CHECK_LOGIN_STATUS_PATH_ = '/check_login_status';
  *     callback A callback which will be invoked
  *     with a loginOrOutUrl that can be used by the client and optionally
  *     the username, if it exists.
+ * @param {string} server The server URL.
  * @export
  */
-bite.LoginManager.prototype.getCurrentUser = function(callback) {
+bite.LoginManager.prototype.getCurrentUser = function(callback, server) {
   if (this.username_) {
     // If the username exists, no need to send an additional ping to server,
     // if the sync issue happens, we should periodically ping server to
@@ -80,12 +79,12 @@ bite.LoginManager.prototype.getCurrentUser = function(callback) {
         true, this.loginOrOutUrl_, this.username_));
     return;
   }
-  var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
+  //var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
   url.setPath(bite.LoginManager.CHECK_LOGIN_STATUS_PATH_);
 
   bite.common.net.xhr.async.get(url.toString(),
-      goog.bind(this.getCurrentUserCallback_, this, callback));
+      goog.bind(this.getCurrentUserCallback_, this, callback, server));
 };
 
 
@@ -93,12 +92,13 @@ bite.LoginManager.prototype.getCurrentUser = function(callback) {
  * Callback invoked when the getCurrentUser request finishes.
  * @param {function({success: boolean, url: string, username: string})}
  *     operationFinishedCallback A callback invoked on completion.
+ * @param {string} server The server URL.
  * @param {boolean} success Whether or not the request was successful.
  * @param {string} data The data from the request or an error string.
  * @private
  */
 bite.LoginManager.prototype.getCurrentUserCallback_ =
-    function(operationFinishedCallback, success, data) {
+    function(operationFinishedCallback, server, success, data) {
   var responseObj = null;
 
   try {
@@ -113,8 +113,6 @@ bite.LoginManager.prototype.getCurrentUserCallback_ =
       // The dev appengine server returns a login url that is simply a path
       // on the current dev server url whereas production returns
       // a path that is a fully qualified url.
-      var optionId = bite.options.constants.Id.SERVER_CHANNEL;
-      var server = bite.options.data.get(optionId);
       loginOrOutUrl = server + loginOrOutUrl;
     }
 

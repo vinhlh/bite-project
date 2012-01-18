@@ -36,7 +36,6 @@ import zipfile
 COMPILE_CLOSURE_COMMAND = ' '.join([
   sys.executable, CLOSURE_COMPILER,
   ('--root=%s' % os.path.join('common', 'extension')),
-  ('--root=%s' % os.path.join('extension', 'src', 'options')),
   ('--root=%s' % os.path.join(RPF_ROOT, 'src')),
   ('--root=%s' % DEPS['closure-library'][ROOT]),
   ('--root=%s' % SOY_COMPILER_SRC),

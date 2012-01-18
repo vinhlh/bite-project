@@ -551,7 +551,9 @@ bite.options.Page.prototype.refreshInterface_ = function() {
   if (usernameElement) {
     // Retrieve the current user asynchronously.
     var callback = goog.bind(this.refreshUsername_, this, usernameElement);
-    bite.LoginManager.getInstance().getCurrentUser(callback);
+    var server = bite.options.data.get(
+        bite.options.constants.Id.SERVER_CHANNEL);
+    bite.LoginManager.getInstance().getCurrentUser(callback, server);
   }
 };
 
