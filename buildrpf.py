@@ -53,7 +53,7 @@ def main():
   # Soy
   soy_files = {
     'popup': os.path.join('extension', 'templates'),
-    'consoles': os.path.join(BUG_ROOT, 'templates'),
+    'common_ux': os.path.join('common', 'extension', 'ux'),
     'rpfconsole': os.path.join(RPF_ROOT, 'templates'),
     'rpf_dialogs': os.path.join(RPF_ROOT, 'templates'),
     'locatorsupdater': os.path.join(RPF_ROOT, 'templates')

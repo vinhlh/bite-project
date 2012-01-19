@@ -79,7 +79,6 @@ bite.LoginManager.prototype.getCurrentUser = function(callback, server) {
         true, this.loginOrOutUrl_, this.username_));
     return;
   }
-  //var server = bite.options.data.get(bite.options.constants.Id.SERVER_CHANNEL);
   var url = goog.Uri.parse(server);
   url.setPath(bite.LoginManager.CHECK_LOGIN_STATUS_PATH_);
 

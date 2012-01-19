@@ -23,7 +23,6 @@ goog.provide('rpf.ContentScript.RecordHelper');
 
 goog.require('Bite.Constants');
 goog.require('bite.ux.Container');
-goog.require('bite.client.Templates');
 goog.require('bite.rpf.BotHelper');
 goog.require('common.client.ElementDescriptor');
 goog.require('element.helper.Templates.locatorsUpdater');
