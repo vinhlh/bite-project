@@ -180,6 +180,7 @@ def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
   data = {'input': input,
           'output': output}
   result = ExecuteCommand(command % data, True)
+  print ''
   return result
 
 

@@ -34,6 +34,7 @@ goog.provide('bite.ux.Dragger');
 goog.require('common.dom.element');
 goog.require('goog.dom');
 goog.require('goog.events');
+goog.require('goog.events.BrowserEvent');
 goog.require('goog.events.EventHandler');
 
 
@@ -191,7 +192,8 @@ bite.ux.Dragger.prototype.dock_ = function() {
 /**
  * Handles mouse down event on the drag target; i.e. select the associated
  * container for dragging.
- * @param {!Event} e A mouse event from the drag target being clicked.
+ * @param {!goog.events.BrowserEvent} e A mouse event from the drag target
+ *     being clicked.
  * @private
  */
 bite.ux.Dragger.prototype.onMouseDown_ = function(e) {
@@ -265,12 +267,9 @@ bite.ux.Dragger.prototype.onMouseMove_ = function(e) {
 
 /**
  * Handles a mouse up event releasing the container when it's being dragged.
- * @param {number} startX Start x coordinate of the drag.
- * @param {number} startY Start y coordinate of the drag.
- * @param {!Event} e A mouse event from the drag target.
  * @private
  */
-bite.ux.Dragger.prototype.onMouseUp_ = function(startX, startY, e) {
+bite.ux.Dragger.prototype.onMouseUp_ = function() {
   while (this.dragListenerKeys_.length > 0) {
     goog.events.unlistenByKey(this.dragListenerKeys_.pop());
   }

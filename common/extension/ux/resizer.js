@@ -81,12 +81,11 @@ bite.ux.Resizer = function(element, opt_resizedCallback) {
   /**
    * An object containing the resizer elements, keyed by their cardinal
    * direction.
-   * @type {!{n: Element, ne: Element, e: Element, se: Element,
-   *          s: Element, sw: Element, w: Element, nw: Element}}
+   * @type {!{n: !Element, ne: !Element, e: !Element, se: !Element,
+   *          s: !Element, sw: !Element, w: !Element, nw: !Element}}
    * @private
    */
-  this.resizers_ = {n: null, ne: null, e: null, se: null,
-                    s: null, sw: null, w: null, nw: null};
+  this.resizers_ = bite.ux.Resizer.createResizers_();
 
   /**
    * The resizer div that contains all the resizer elements.
@@ -214,8 +213,7 @@ bite.ux.Resizer.prototype.onMouseMove_ = function(mode, resizer, e) {
 
   // Compute the movement delta based on the new mouse position.
   var mousePos = {x: e.clientX, y: e.clientY};
-  var delta = bite.ux.Resizer.computeDelta_(this.prevMousePos_, mousePos,
-                                            elemP0, elemP1, mode);
+  var delta = bite.ux.Resizer.computeDelta_(this.prevMousePos_, mousePos);
   this.prevMousePos_ = mousePos;
 
   // Calculate the new position of the element.
@@ -234,10 +232,10 @@ bite.ux.Resizer.prototype.onMouseMove_ = function(mode, resizer, e) {
 
 /**
  * Handles a mouse up event releasing the container when it's being resized.
- * @param {Object} e A mouseEvent object from the object being dragged.
+ * @param {Object=} opt_e A mouseEvent object from the object being dragged.
  * @private
  */
-bite.ux.Resizer.prototype.onMouseUp_ = function(e) {
+bite.ux.Resizer.prototype.onMouseUp_ = function(opt_e) {
   while (this.resizeListenerKeys_.length > 0) {
     goog.events.unlistenByKey(this.resizeListenerKeys_.pop());
   }
@@ -247,18 +245,44 @@ bite.ux.Resizer.prototype.onMouseUp_ = function(e) {
 
 
 /**
+ * An object containing the resizer elements, keyed by their cardinal
+ * direction.
+ * @return {!{n: !Element, ne: !Element, e: !Element, se: !Element,
+ *            s: !Element, sw: !Element, w: !Element, nw: !Element}} The new
+ *     resizer elements.
+ * @private
+ */
+bite.ux.Resizer.createResizers_ = function() {
+  var n = goog.dom.createDom('div', 'n-resizer');
+  var ne = goog.dom.createDom('div', 'ne-resizer');
+  var e = goog.dom.createDom('div', 'e-resizer');
+  var se = goog.dom.createDom('div', 'se-resizer');
+  var s = goog.dom.createDom('div', 's-resizer');
+  var sw = goog.dom.createDom('div', 'sw-resizer');
+  var w = goog.dom.createDom('div', 'w-resizer');
+  var nw = goog.dom.createDom('div', 'nw-resizer');
+  if (!(n && ne && e && se && s && sw && w && nw)) {
+    throw 'Failed to create resizers needed to implement Resizer ' +
+          'functinality.';
+  }
+  return {
+    n: /** @type {!Element} */ (n),
+    ne: /** @type {!Element} */ (ne),
+    e: /** @type {!Element} */ (e),
+    se: /** @type {!Element} */ (se),
+    s: /** @type {!Element} */ (s),
+    sw: /** @type {!Element} */ (sw),
+    w: /** @type {!Element} */ (w),
+    nw: /** @type {!Element} */ (nw)
+  };
+};
+
+
+/**
  * Adds edge and corner resizers to the container.
  * @private
  */
 bite.ux.Resizer.prototype.resizersAdd_ = function() {
-  this.resizers_.n = goog.dom.createDom('div', 'n-resizer');
-  this.resizers_.ne = goog.dom.createDom('div', 'ne-resizer');
-  this.resizers_.e = goog.dom.createDom('div', 'e-resizer');
-  this.resizers_.se = goog.dom.createDom('div', 'se-resizer');
-  this.resizers_.s = goog.dom.createDom('div', 's-resizer');
-  this.resizers_.sw = goog.dom.createDom('div', 'sw-resizer');
-  this.resizers_.w = goog.dom.createDom('div', 'w-resizer');
-  this.resizers_.nw = goog.dom.createDom('div', 'nw-resizer');
   this.resizerDom_ = goog.dom.createDom('div', 'bite-resizers',
                                         this.resizers_.n, this.resizers_.ne,
                                         this.resizers_.e, this.resizers_.se,

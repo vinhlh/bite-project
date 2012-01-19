@@ -168,7 +168,8 @@ bite.ux.Container = function(server, consoleId, headerText,
    * @type {!bite.ux.Dragger}
    * @private
    */
-  this.dragger_ = new bite.ux.Dragger(this.root_, header, dragCallback);
+  this.dragger_ = new bite.ux.Dragger(this.root_,
+      /** @type {!Element} */ (header), dragCallback);
 
   this.getSavedConsoleLocation_();
 
@@ -431,9 +432,10 @@ bite.ux.Container.prototype.removeMessage_ =
  * @private
  */
 bite.ux.Container.prototype.setLastSizeAndPosition_ = function() {
-  var consoleLocation = {position: this.getPosition(),
-                         size: {width: this.root_.clientWidth,
-                                height: this.root_.clientHeight}};
+  var consoleLocation = {
+    position: common.dom.element.getPosition(this.root_),
+    size: common.dom.element.getSize(this.root_)
+  };
   chrome.extension.sendRequest(
       {action: Bite.Constants.HUD_ACTION.SET_LOCAL_STORAGE,
        key: bite.ux.Container.Keys_.CONSOLE_LOCATION + this.consoleId_,

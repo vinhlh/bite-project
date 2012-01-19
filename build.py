@@ -42,10 +42,10 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
   ('--root=%s' % SOY_COMPILER_SRC),
   ('--root=%s' % GENFILES_ROOT),
   ('--root=%s' % DEPS['selenium-atoms-lib'][ROOT]),
-  '--input=%(input)s',
   '--output_mode=compiled',
-  '--output_file=%(output)s',
-  ('--compiler_jar=%s' % CLOSURE_COMPILER_JAR)] + COMPILER_FLAGS)
+  ('--compiler_jar=%s' % CLOSURE_COMPILER_JAR)] +
+  COMPILER_FLAGS +
+  ['--input=%(input)s', '--output_file=%(output)s'])
 
 
 def main():

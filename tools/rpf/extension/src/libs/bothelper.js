@@ -130,7 +130,7 @@ bite.rpf.BotHelper.prototype.click = function(elem) {
     mouse.move(elem, opt_coords);
 
     var pos = goog.style.getClientPosition(elem);
-    var args = {
+    var args = /** @type {bot.events.MouseArgs} */ ({
       clientX: pos.x + opt_coords.x,
       clientY: pos.y + opt_coords.y,
       button: 0,
@@ -139,7 +139,7 @@ bite.rpf.BotHelper.prototype.click = function(elem) {
       shiftKey: false,
       metaKey: false,
       relatedTarget: null
-    };
+    });
 
     bot.events.fire(elem, bot.events.EventType.MOUSEDOWN, args);
     bot.events.fire(elem, bot.events.EventType.MOUSEUP, args);

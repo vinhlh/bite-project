@@ -120,7 +120,10 @@ bite.client.ElementSelector.prototype.startRecording = function(callback) {
       this.popup_,
       (viewport.width - popupSize.width) / 2,
       (viewport.height - popupSize.height) / 2);
-  this.dragger_ = new bite.ux.Dragger(this.popup_, headerElement);
+  if (headerElement) {
+    this.dragger_ = new bite.ux.Dragger(this.popup_,
+        /** @type {!Element} */ (headerElement));
+  }
   this.setHandlers_();
   return true;
 };

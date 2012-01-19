@@ -142,9 +142,11 @@ bite.client.console.NewBugTypeSelector.prototype.load = function(templates) {
       (left - goog.style.getSize(this.rootElement_).width) / 2,
       (top - goog.style.getSize(this.rootElement_).height) / 2);
 
-  var headerElement =
-      this.rootElement_.querySelector('.bite-header');
-  this.dragger_ = new bite.ux.Dragger(this.rootElement_, headerElement);
+  var headerElement = this.rootElement_.querySelector('.bite-header');
+  if (headerElement) {
+    this.dragger_ = new bite.ux.Dragger(this.rootElement_,
+        /** @type {!Element} */ (headerElement));
+  }
   this.attachHandlers_(bugTypes);
   this.isActive_ = true;
 };
