@@ -615,6 +615,21 @@ bite.client.Background.prototype.onRequest =
   }
 
   switch (request['action']) {
+    case Bite.Constants.Action.XHR_REQUEST:
+      {
+        var command = request['cmd'];
+        var url = request['url'];
+        var data = request['data'];
+        var headers = request['headers'];
+        if (command == 'GET') {
+          bite.common.net.xhr.async.get(url, callback);
+        } else if (command == 'POST') {
+          bite.common.net.xhr.async.post(url, data, callback, headers);
+        } else if (command == 'PUT') {
+          bite.common.net.xhr.async.put(url, data, callback, headers);
+        }
+      }
+      break;
     case Bite.Constants.HUD_ACTION.FETCH_TEST_DATA:
       this.fetchTestData_(sender.tab, callback);
       break;

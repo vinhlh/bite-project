@@ -49,6 +49,7 @@ bugs.api.Handler_ = {
  *     callbackReturnId type.
  */
 bugs.api.create = function(bug, opt_callback) {
+  opt_callback = opt_callback || function() {};
   try {
     var url = bugs.api.constructUrl_(bugs.api.Handler_.CREATE);
     bug['kind'] = bugs.kind.Kind.BUG;
@@ -70,6 +71,7 @@ bugs.api.create = function(bug, opt_callback) {
  *     callbackReturnBug.
  */
 bugs.api.get = function(id, opt_callback) {
+  opt_callback = opt_callback || function() {};
   try {
     var url = bugs.api.constructUrl_(bugs.api.Handler_.GET + id);
     var callback = goog.partial(bugs.api.wrapperForBug_, opt_callback);
@@ -90,6 +92,7 @@ bugs.api.get = function(id, opt_callback) {
  *     callbackReturnId type.
  */
 bugs.api.update = function(bug, opt_callback) {
+  opt_callback = opt_callback || function() {};
   try {
     var url = bugs.api.constructUrl_(bugs.api.Handler_.UPDATE + bug['id']);
     if (!('kind' in bug)) {
@@ -113,6 +116,7 @@ bugs.api.update = function(bug, opt_callback) {
  *     callbackReturnUrlBugMap type.
  */
 bugs.api.urls = function(target_urls, opt_callback) {
+  opt_callback = opt_callback || function() {};
   try{
     var url = bugs.api.constructUrl_(bugs.api.Handler_.URLS);
     var data = JSON.stringify({'kind': bugs.kind.Kind.URLS,
@@ -142,13 +146,13 @@ bugs.api.constructUrl_ = function(path) {
 /**
  * Wraps the user-defined callback to ensure the return of an object with the
  * proper data and type information.
- * @param {bugs.kind.callbackReturnBug=} opt_callback See details for the
+ * @param {bugs.kind.callbackReturnBug} callback See details for the
  *     callbackReturnBug type.
  * @param {boolean} success Whether or not the request was a success.
  * @param {string} data The error message or data string returned from server.
  * @private
  */
-bugs.api.wrapperForBug_ = function(opt_callback, success, data) {
+bugs.api.wrapperForBug_ = function(callback, success, data) {
   try {
     if (success) {
       var bug = /** @type {bugs.kind.Bug} */ (JSON.parse(data));
@@ -158,13 +162,13 @@ bugs.api.wrapperForBug_ = function(opt_callback, success, data) {
         throw 'Invalid kind; [kind=' + bug['kind'] + ']';
       }
 
-      opt_callback && opt_callback({success: true, bug: bug});
+      callback && callback({success: true, bug: bug});
     } else {
       throw data; // Contains error message from server.
     }
   } catch (error) {
     var msg = 'Invalid bug data received; ' + error;
-    opt_callback && opt_callback({success: false, error: msg});
+    callback && callback({success: false, error: msg});
   }
 };
 
@@ -172,13 +176,13 @@ bugs.api.wrapperForBug_ = function(opt_callback, success, data) {
 /**
  * Wraps the user-defined callback to ensure the return of an object with the
  * proper data and type information.
- * @param {bugs.kind.callbackReturnId=} opt_callback See details for the
+ * @param {bugs.kind.callbackReturnId} callback See details for the
  *     callbackReturnId type.
  * @param {boolean} success Whether or not the request was a success.
  * @param {string} data The error message or data string returned from server.
  * @private
  */
-bugs.api.wrapperForId_ = function(opt_callback, success, data) {
+bugs.api.wrapperForId_ = function(callback, success, data) {
   try {
     if (success) {
       var id_data = /** @type {bugs.kind.Id} */ (JSON.parse(data));
@@ -189,13 +193,13 @@ bugs.api.wrapperForId_ = function(opt_callback, success, data) {
       }
 
       var id = /** @type {number} */ (id_data['id']);
-      opt_callback && opt_callback({success: true, id: id});
+      callback && callback({success: true, id: id});
     } else {
       throw data; // Contains error message from server.
     }
   } catch (error) {
     var msg = 'Invalid id data received; ' + error;
-    opt_callback && opt_callback({success: false, error: msg});
+    callback && callback({success: false, error: msg});
   }
 };
 
@@ -203,13 +207,13 @@ bugs.api.wrapperForId_ = function(opt_callback, success, data) {
 /**
  * Wraps the user-defined callback to ensure the return of an object with the
  * proper data and type information.
- * @param {bugs.kind.callbackReturnUrlBugMap=} opt_callback See details for the
+ * @param {bugs.kind.callbackReturnUrlBugMap} callback See details for the
  *     callbackReturnUrlBugMap type.
  * @param {boolean} success Whether or not the request was a success.
  * @param {string} data The error message or data string returned from server.
  * @private
  */
-bugs.api.wrapperForUrlBugMap_ = function(opt_callback, success, data) {
+bugs.api.wrapperForUrlBugMap_ = function(callback, success, data) {
   try {
     if (success) {
       var bugMap = /** @type {bugs.kind.UrlBugMap} */ (JSON.parse(data));
@@ -218,12 +222,12 @@ bugs.api.wrapperForUrlBugMap_ = function(opt_callback, success, data) {
       } else if (bugMap['kind'] != bugs.kind.Kind.URL_BUG_MAP) {
         throw 'Invalid kind; [kind=' + bugMap['kind'] + ']';
       }
-      opt_callback && opt_callback({success: true, bugMap: bugMap});
+      callback && callback({success: true, bugMap: bugMap});
     } else {
       throw data; // Contains error message from server.
     }
   } catch (error) {
     var msg = 'Invalid UrlBugMap data received; ' + error;
-    opt_callback && opt_callback({success: false, error: msg});
+    callback && callback({success: false, error: msg});
   }
 };

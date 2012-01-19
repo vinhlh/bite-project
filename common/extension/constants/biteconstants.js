@@ -217,6 +217,15 @@ Bite.Constants.BITE_CONSOLE_LOCK = 'biteConsoleLock';
 
 
 /**
+ * Define common actions that everyone can use.
+ * @enum {string}
+ */
+Bite.Constants.Action = {
+  XHR_REQUEST: 'xhrRequest'
+};
+
+
+/**
  * Enum of actions handled by the Background script.
  * @enum {string}
  */
