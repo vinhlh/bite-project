@@ -553,7 +553,7 @@ bite.options.Page.prototype.refreshInterface_ = function() {
     var callback = goog.bind(this.refreshUsername_, this, usernameElement);
     var server = bite.options.data.get(
         bite.options.constants.Id.SERVER_CHANNEL);
-    bite.LoginManager.getInstance().getCurrentUser(callback);
+    bite.LoginManager.getInstance().getCurrentUser(callback, server);
   }
 };
 
