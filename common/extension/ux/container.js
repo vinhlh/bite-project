@@ -26,7 +26,7 @@
 goog.provide('bite.ux.Container');
 
 goog.require('Bite.Constants');
-goog.require('bite.client.Templates');
+goog.require('bite.client.Templates.ux');
 goog.require('bite.ux.Dragger');
 goog.require('bite.ux.Resizer');
 goog.require('common.dom.element');
@@ -60,8 +60,8 @@ goog.require('soy');
  * @constructor
  */
 bite.ux.Container = function(server, consoleId, headerText,
-                                 opt_headerSubtext, opt_savePosition,
-                                 opt_hideOnLoad, opt_tooltip) {
+                             opt_headerSubtext, opt_savePosition,
+                             opt_hideOnLoad, opt_tooltip) {
   /**
    * The id of the current console element.
    * @type {string}
@@ -87,7 +87,7 @@ bite.ux.Container = function(server, consoleId, headerText,
   var tooltip = opt_tooltip || '';
   var rootFolder = chrome.extension.getURL('');
   var container = soy.renderAsElement(
-      bite.client.Templates.consoleContainer,
+      bite.client.Templates.ux.consoleContainer,
       {rootFolder: rootFolder,
        serverUrl: server,
        consoleId: this.consoleId_,

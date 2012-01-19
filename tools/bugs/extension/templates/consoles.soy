@@ -15,50 +15,6 @@
 {namespace bite.client.Templates}
 
 /**
- * @param rootFolder
- * @param serverUrl
- * @param consoleId
- * @param headerText
- * @param headerSubtext
- * @param tooltip
- */
-{template .consoleContainer}
-  <div {if $consoleId}id="{$consoleId}"{/if} class="bite-container"
-       style="visibility:hidden">
-    <link rel="stylesheet" href="{$rootFolder}/styles/consoles.css"
-          type="text/css">
-    <div class="bite-header">
-      <div class="bite-logo">
-        <a target="_blank" href="{$serverUrl}">
-          <img src="{$rootFolder}/imgs/logo-24x24.png" alt="Logo">
-        </a>
-      </div>
-      <div class="bite-header-text">
-        <span class="bite-header-text-main">
-          {if $headerText}{$headerText}{/if}
-        </span>
-        <span class="bite-header-text-sub">
-          {if $headerSubtext} - {$headerSubtext}{/if}
-        </span>
-      </div>
-      {if $tooltip}
-        <img title="{$tooltip}" src="{$rootFolder}/imgs/rpf/step-issue-16.png"
-             width="16px" height="16px">
-      {/if}
-      <div class="bite-close-button">
-        ✕
-      </div>
-    </div>
-    <div class="bite-console-content">
-      No content yet defined.
-    </div>
-    <div class="bite-console-infobar bite-hidden">
-    </div>
-  </div>
-{/template}
-
-
-/**
  * Bugs console.
  * @param rootFolder
  */

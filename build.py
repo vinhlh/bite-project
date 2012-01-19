@@ -55,6 +55,7 @@ def main():
   soy_files = {
     'popup': os.path.join('extension', 'templates'),
     'consoles': os.path.join(BUG_ROOT, 'templates'),
+    'common_ux': os.path.join('common', 'extension', 'ux'),
     'newbug_console': os.path.join(BUG_ROOT, 'templates'),
     'newbug_type_selector': os.path.join(BUG_ROOT, 'templates'),
     'rpfconsole': os.path.join(RPF_ROOT, 'templates'),
