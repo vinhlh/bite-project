@@ -624,6 +624,8 @@ bite.client.Background.prototype.onRequest =
         var headers = request['headers'];
         if (command == 'GET') {
           bite.common.net.xhr.async.get(url, callback, headers);
+        } else if (command == 'DELETE') {
+          bite.common.net.xhr.async.del(url, callback, headers);
         } else if (command == 'POST') {
           bite.common.net.xhr.async.post(url, data, callback, headers);
         } else if (command == 'PUT') {

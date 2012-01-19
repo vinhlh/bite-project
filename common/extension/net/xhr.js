@@ -66,7 +66,25 @@ bite.common.net.xhr.async.get = function(url, opt_callback, opt_headers) {
   var callback = opt_callback || null;
   var headers = opt_headers || null;
   bite.common.net.xhr.async.send_(url, callback, 'GET', null, headers);
-}
+};
+
+
+/**
+ * Sends a request to the given url and returns the response.
+ * @param {string} url The url.
+ * @param {function(boolean, string, number)=} opt_callback The callback that
+ *     is fired when the request is complete.  The boolean input is the success
+ *     of the request.  The string is the request response text or an error
+ *     message if the request failed.  The number is the request status.
+ *     Decoding does not occur for the response string, and is up to the caller
+ *     if necessary.
+ * @param {Object.<string>=} opt_headers Headers to be added to the request.
+ */
+bite.common.net.xhr.async.del = function(url, opt_callback, opt_headers) {
+  var callback = opt_callback || null;
+  var headers = opt_headers || null;
+  bite.common.net.xhr.async.send_(url, callback, 'DELETE', null, headers);
+};
 
 
 /**
