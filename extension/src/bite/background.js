@@ -168,10 +168,11 @@ bite.client.Background.prototype.fetchTestData_ =
  *     Callback function.
  * @param {boolean} success Whether or not the request was successful.
  * @param {string} data The data received from the request or an error string.
+ * @param {number} status The status of the request.
  * @private
  */
 bite.client.Background.prototype.fetchTestsDataCallback_ =
-    function(callback, success, data) {
+    function(callback, success, data, status) {
   var test = null;
   var user = null;
 

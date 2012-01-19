@@ -46,6 +46,7 @@ goog.require('goog.events.EventType');
 goog.require('goog.events.KeyCodes');
 goog.require('goog.format.JsonPrettyPrinter');
 goog.require('goog.json');
+goog.require('goog.net.XhrIo');
 goog.require('goog.ui.CustomButton');
 goog.require('goog.ui.Dialog');
 goog.require('goog.ui.TabBar');

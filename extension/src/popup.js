@@ -190,7 +190,7 @@ bite.Popup.prototype.init = function(opt_initCallback) {
   var body = goog.dom.getDocument().body;
   soy.renderElement(body, bite.client.Templates.popup.loading);
 
-  this.initData_(callback);
+  this.initData_(/** @type {function(boolean, string, number)} */ (callback));
 };
 
 

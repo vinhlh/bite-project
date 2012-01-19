@@ -54,9 +54,10 @@ bite.common.net.xhr.ErrorMessage_ = {
 /**
  * Sends a request to the given url and returns the response.
  * @param {string} url The url.
- * @param {function(boolean, string)=} opt_callback The callback that is fired
- *     when the request is complete.  The boolean input is the success of the
- *     action.  If the action failed the string will be a simple error message.
+ * @param {function(boolean, string, number)=} opt_callback The callback that
+ *     is fired when the request is complete.  The boolean input is the success
+ *     of the request.  The string is the request response text or an error
+ *     message if the request failed.  The number is the request status.
  *     Decoding does not occur for the response string, and is up to the caller
  *     if necessary.
  */
@@ -71,12 +72,12 @@ bite.common.net.xhr.async.get = function(url, opt_callback) {
  * @param {string} url The url.
  * @param {string} data The data to send; in string form.  Caller is
  *     responsible for encoding the string if necessary.
- * @param {function(boolean, string)=} opt_callback The callback that is fired
- *     when the request is complete.  The boolean input is the success of the
- *     action.  If the action failed the string will be a simple error message.
+ * @param {function(boolean, string, number)=} opt_callback The callback that
+ *     is fired when the request is complete.  The boolean input is the success
+ *     of the request.  The string is the request response text or an error
+ *     message if the request failed.  The number is the request status.
  *     Decoding does not occur for the response string, and is up to the caller
- *     if necessary.  Please pass null if no callback is desired but the
- *     optional headers are desired.
+ *     if necessary.
  * @param {Object.<string>=} opt_headers Headers to be added to the request.
  */
 bite.common.net.xhr.async.post = function(url, data, opt_callback,
@@ -92,12 +93,12 @@ bite.common.net.xhr.async.post = function(url, data, opt_callback,
  * @param {string} url The url.
  * @param {string} data The data to send; in string form.  Caller is
  *     responsible for encoding the string if necessary.
- * @param {function(boolean, string)=} opt_callback The callback that is fired
- *     when the request is complete.  The boolean input is the success of the
- *     action.  If the action failed the string will be a simple error message.
+ * @param {function(boolean, string, number)=} opt_callback The callback that
+ *     is fired when the request is complete.  The boolean input is the success
+ *     of the request.  The string is the request response text or an error
+ *     message if the request failed.  The number is the request status.
  *     Decoding does not occur for the response string, and is up to the caller
- *     if necessary.  Please pass null if no callback is desired but the
- *     optional headers are desired.
+ *     if necessary.
  * @param {Object.<string>=} opt_headers Headers to be added to the request.
  */
 bite.common.net.xhr.async.put = function(url, data, opt_callback,
@@ -206,10 +207,11 @@ bite.common.net.xhr.async.getMultiple.prototype.openBarrier_ = null;
  * The callback that is fired when bite.common.net.xhr.async.get or
  * bite.common.net.xhr.async.post request completes.
  * @param {EventTarget} event The event.
- * @param {?function(boolean, string)} callback The callback will be fired
- *     when the request returns.  It will be passed a boolean for the success
- *     of the request and either the data or error message respective to that
- *     success.  If the callback is null then the response is ignored.
+ * @param {?function(boolean, string, number)} callback The callback will be
+ *     fired when the request returns.  It will be passed a boolean for the
+ *     success of the request and either the responseText or error message
+ *     respective to that success.  The number is the request status.  If the
+ *     callback is null then the response is ignored.
  * @private
  */
 bite.common.net.xhr.async.requestComplete_ = function(event, callback) {
@@ -219,30 +221,34 @@ bite.common.net.xhr.async.requestComplete_ = function(event, callback) {
   }
 
   var success = false;
-  var msg = bite.common.net.xhr.ErrorMessage_.REQUEST_FAILED;
+  var responseText = bite.common.net.xhr.ErrorMessage_.REQUEST_FAILED;
+  var status = -1;
 
   try {
     var xhrIo = event.target;
 
     if (xhrIo.isSuccess()) {
       success = true;
-      msg = xhrIo.getResponseText() || '';
+      responseText = xhrIo.getResponseText() || '';
+      status = xhrIo.getStatus();
     } else {
-      msg = '[' + xhrIo.getLastErrorCode() + '] ' + xhrIo.getLastError();
+      responseText =
+          '[' + xhrIo.getLastErrorCode() + '] ' + xhrIo.getLastError();
     }
   } catch (error) {
-    msg = bite.common.net.xhr.ErrorMessage_.EXCEPTION + error;
+    responseText = bite.common.net.xhr.ErrorMessage_.EXCEPTION + error;
   }
 
-  callback(success, msg);
+  callback(success, responseText, status);
 };
 
 
 /**
  * Sends the asynchronous request given well defined inputs.
  * @param {string} url See bite.common.net.xhr.async.get.
- * @param {?function(boolean, string)} callback The callback to be fired when
- *     the request is complete.  Can be null if no callback was supplied.
+ * @param {?function(boolean, string, number)} callback The callback to be
+ *     fired when the request is complete.  Can be null if no callback was
+ *     supplied.
  * @param {string} method The method used to send the request.
  * @param {string?} data The data to send or null if no data is supplied.
  * @param {Object.<string>} headers Optional request headers. Can be null if
@@ -252,7 +258,8 @@ bite.common.net.xhr.async.requestComplete_ = function(event, callback) {
 bite.common.net.xhr.async.send_ = function(url, callback, method, data,
                                            headers) {
   if (!url) {
-    callback && callback(false, bite.common.net.xhr.ErrorMessage_.MISSING_URL);
+    callback && callback(false, bite.common.net.xhr.ErrorMessage_.MISSING_URL,
+                         -1);
     return;
   }
 
@@ -264,7 +271,7 @@ bite.common.net.xhr.async.send_ = function(url, callback, method, data,
     goog.net.XhrIo.send(url, localCallback, method, data, headers);
   } catch (error) {
     var messages = bite.common.net.xhr.ErrorMessage_;
-    callback && callback(false, messages.EXCEPTION + error);
+    callback && callback(false, messages.EXCEPTION + error, -1);
   }
 };
 

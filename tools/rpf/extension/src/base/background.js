@@ -25,7 +25,6 @@ goog.provide('bite.client.Background');
 
 goog.require('Bite.Constants');
 goog.require('bite.LoginManager');
-goog.require('bite.common.net.xhr.async');
 goog.require('goog.Timer');
 goog.require('goog.Uri');
 goog.require('goog.json');

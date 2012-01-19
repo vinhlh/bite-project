@@ -22,7 +22,6 @@
 
 goog.provide('rpf.NotesDialog');
 
-goog.require('bite.common.net.xhr.async');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.events');

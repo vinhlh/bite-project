@@ -54,7 +54,8 @@ bugs.api.create = function(bug, opt_callback) {
     var url = bugs.api.constructUrl_(bugs.api.Handler_.CREATE);
     bug['kind'] = bugs.kind.Kind.BUG;
     var data = JSON.stringify(bug);
-    var callback = goog.partial(bugs.api.wrapperForId_, opt_callback);
+    var callback = goog.partial(bugs.api.wrapperForId_,
+        /** @type {function(boolean, string, number)} */ (opt_callback));
     var headers = {'Content-Type': 'application/json'};
     bite.common.net.xhr.async.post(url, data, callback, headers);
   } catch (error) {
@@ -74,7 +75,8 @@ bugs.api.get = function(id, opt_callback) {
   opt_callback = opt_callback || function() {};
   try {
     var url = bugs.api.constructUrl_(bugs.api.Handler_.GET + id);
-    var callback = goog.partial(bugs.api.wrapperForBug_, opt_callback);
+    var callback = goog.partial(bugs.api.wrapperForBug_,
+        /** @type {function(boolean, string, number)} */ (opt_callback));
     bite.common.net.xhr.async.get(url, callback);
   } catch (error) {
     var msg = 'bugs.api.get failed; ' + error;
@@ -99,7 +101,8 @@ bugs.api.update = function(bug, opt_callback) {
       bug['kind'] = bugs.kind.Kind.BUG;
     }
     var data = JSON.stringify(bug);
-    var callback = goog.partial(bugs.api.wrapperForId_, opt_callback);
+    var callback = goog.partial(bugs.api.wrapperForId_,
+        /** @type {function(boolean, string, number)} */ (opt_callback));
     var headers = {'Content-Type': 'application/json'};
     bite.common.net.xhr.async.put(url, data, callback, headers);
   } catch (error) {
@@ -121,7 +124,8 @@ bugs.api.urls = function(target_urls, opt_callback) {
     var url = bugs.api.constructUrl_(bugs.api.Handler_.URLS);
     var data = JSON.stringify({'kind': bugs.kind.Kind.URLS,
                                'urls': target_urls});
-    var callback = goog.partial(bugs.api.wrapperForUrlBugMap_, opt_callback);
+    var callback = goog.partial(bugs.api.wrapperForUrlBugMap_,
+        /** @type {function(boolean, string, number)} */ (opt_callback));
     var headers = {'Content-Type': 'application/json'};
     bite.common.net.xhr.async.post(url, data, callback, headers);
   } catch (error) {

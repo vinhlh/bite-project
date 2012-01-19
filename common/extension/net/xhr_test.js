@@ -33,6 +33,7 @@ var failEvent = {
     getLastError: function() { return 'error' },
     getLastErrorCode: function() { return 400; },
     getResponseText: function() { return 'fail'; },
+    getStatus: function() { return 400; },
     isSuccess: function() { return false; }
   }
 }
@@ -63,6 +64,7 @@ var successEvent = {
     getLastError: function() { return 'none' },
     getLastErrorCode: function() { return 200; },
     getResponseText: function() { return SUCCESS_MESSAGE; },
+    getStatus: function() { return 200; },
     isSuccess: function() { return true; }
   }
 }
@@ -112,10 +114,13 @@ function tearDown() {
  * @param {string} expectedData The expected value for data.
  * @param {boolean} success The value passed from the request.
  * @param {string} data The data passed from the request.
+ * @param {number} status The status of the response.
  */
-function validate(msg, expectedSuccess, expectedData, success, data) {
+function validate(msg, expectedSuccess, expectedData, expectedStatus,
+                  success, data, status) {
   assertEquals(msg, expectedSuccess, success);
   assertEquals(msg, expectedData, data);
+  assertEquals(msg, expectedStatus, status);
 }
 
 
@@ -128,13 +133,13 @@ function testResponse() {
   var data = '';
   var response = SUCCESS_MESSAGE;
 
-  var callback = goog.partial(validate, 'AsyncGet' + msg, true, response);
+  var callback = goog.partial(validate, 'AsyncGet' + msg, true, response, 200);
   bite.common.net.xhr.async.get(url, callback);
 
-  callback = goog.partial(validate, 'AsyncPost' + msg, true, response);
+  callback = goog.partial(validate, 'AsyncPost' + msg, true, response, 200);
   bite.common.net.xhr.async.post(url, data, callback);
 
-  callback = goog.partial(validate, 'AsyncPut' + msg, true, response);
+  callback = goog.partial(validate, 'AsyncPut' + msg, true, response, 200);
   bite.common.net.xhr.async.put(url, data, callback);
 }
 
@@ -177,13 +182,16 @@ function testRequestFailedException() {
   var url = 'fail';
   var data = '';
 
-  var callback = goog.partial(validate, 'AsyncGet' + msg, false, FAIL_MESSAGE);
+  var callback =
+      goog.partial(validate, 'AsyncGet' + msg, false, FAIL_MESSAGE, 400);
   bite.common.net.xhr.async.get(url, callback);
 
-  callback = goog.partial(validate, 'AsyncPost' + msg, false, FAIL_MESSAGE);
+  callback =
+      goog.partial(validate, 'AsyncPost' + msg, false, FAIL_MESSAGE, 400);
   bite.common.net.xhr.async.post(url, data, callback);
 
-  callback = goog.partial(validate, 'AsyncPut' + msg, false, FAIL_MESSAGE);
+  callback =
+      goog.partial(validate, 'AsyncPut' + msg, false, FAIL_MESSAGE, 400);
   bite.common.net.xhr.async.put(url, data, callback);
 }
 
@@ -198,14 +206,17 @@ function testMissingUrl() {
   var data = '';
 
   var callback = goog.partial(validate, 'AsyncGet' + msg, false,
-                              bite.common.net.xhr.ErrorMessage_.MISSING_URL);
+                              bite.common.net.xhr.ErrorMessage_.MISSING_URL,
+                              400);
   bite.common.net.xhr.async.get(url, callback);
 
   callback = goog.partial(validate, 'AsyncPost' + msg, false,
-                          bite.common.net.xhr.ErrorMessage_.MISSING_URL);
+                          bite.common.net.xhr.ErrorMessage_.MISSING_URL,
+                          400);
   bite.common.net.xhr.async.post(url, data, callback);
 
   callback = goog.partial(validate, 'AsyncPut' + msg, false,
-                          bite.common.net.xhr.ErrorMessage_.MISSING_URL);
+                          bite.common.net.xhr.ErrorMessage_.MISSING_URL,
+                          400);
   bite.common.net.xhr.async.put(url, data, callback);
 }

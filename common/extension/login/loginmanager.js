@@ -95,10 +95,11 @@ bite.LoginManager.prototype.getCurrentUser = function(callback, server) {
  * @param {string} server The server URL.
  * @param {boolean} success Whether or not the request was successful.
  * @param {string} data The data from the request or an error string.
+ * @param {number} status The status of the request.
  * @private
  */
 bite.LoginManager.prototype.getCurrentUserCallback_ =
-    function(operationFinishedCallback, server, success, data) {
+    function(operationFinishedCallback, server, success, data, status) {
   var responseObj = null;
 
   try {

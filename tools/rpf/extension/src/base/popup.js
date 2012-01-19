@@ -176,7 +176,8 @@ bite.Popup.prototype.initData_ = function(callback) {
   var url = chrome.extension.getURL('manifest.json');
   console.log('initData_: url='+url);
   bite.common.net.xhr.async.get(url,
-      goog.bind(this.initDataComplete_, this, callback));
+      goog.bind(this.initDataComplete_, this,
+                /** @type {function(boolean, string, number)} */ (callback)));
 };
 
 

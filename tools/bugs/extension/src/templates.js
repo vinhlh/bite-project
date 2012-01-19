@@ -256,7 +256,8 @@ bite.client.TemplateManager.prototype.loadTemplates_ = function(callback) {
   var url = goog.Uri.parse(server);
   url.setPath(bite.client.TemplateManager.FETCH_TEMPLATE_PATH_);
   bite.common.net.xhr.async.get(url.toString(),
-      goog.bind(this.loadTemplatesCallback_, this, callback));
+      goog.bind(this.loadTemplatesCallback_, this,
+                /** @type {function(boolean, string, number)} */ (callback)));
 };
 
 

@@ -27,7 +27,6 @@
 
 goog.provide('rpf.Rpf');
 
-goog.require('bite.common.net.xhr.async');
 goog.require('goog.json');
 goog.require('goog.structs.Set');
 goog.require('rpf.ConsoleLogger');
