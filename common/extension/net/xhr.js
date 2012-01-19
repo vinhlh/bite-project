@@ -60,10 +60,13 @@ bite.common.net.xhr.ErrorMessage_ = {
  *     message if the request failed.  The number is the request status.
  *     Decoding does not occur for the response string, and is up to the caller
  *     if necessary.
+ * @param {Object.<string>=} opt_headers Headers to be added to the request.
  */
-bite.common.net.xhr.async.get = function(url, opt_callback) {
+bite.common.net.xhr.async.get = function(url, opt_callback, opt_headers) {
   var callback = opt_callback || null;
-  bite.common.net.xhr.async.send_(url, callback, 'GET', null, null);
+  var headers = opt_headers || null;
+  console.log('GET [url='+url+']');
+  bite.common.net.xhr.async.send_(url, callback, 'GET', null, headers);
 }
 
 
