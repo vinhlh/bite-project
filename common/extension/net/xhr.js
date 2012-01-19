@@ -65,7 +65,6 @@ bite.common.net.xhr.ErrorMessage_ = {
 bite.common.net.xhr.async.get = function(url, opt_callback, opt_headers) {
   var callback = opt_callback || null;
   var headers = opt_headers || null;
-  console.log('GET [url='+url+']');
   bite.common.net.xhr.async.send_(url, callback, 'GET', null, headers);
 }
 
