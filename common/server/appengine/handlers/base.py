@@ -240,7 +240,7 @@ class BaseHandler(webapp2.RequestHandler):
     except ValueError:
       raise InvalidIntValueError(parameter_name, str_value)
 
-  def RenderTemplate(self, name, template_args, path='../templates'):
+  def RenderTemplate(self, name, template_args, path='templates'):
     """Renders the specified django template.
 
     If path is not specified, the we assume the hander and templates are on
