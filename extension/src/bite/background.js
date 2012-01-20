@@ -622,12 +622,27 @@ bite.client.Background.prototype.onRequest =
         var url = request['url'];
         var data = request['data'];
         var headers = request['headers'];
+
+        var callback_wrapper = function (success, resultText, status) {
+          if (!callback) {
+            return;
+          }
+          var resultObj = {'success': success,
+                           'reply': resultText,
+                           'status': status};
+          console.log('Result obj: ');
+          console.log(resultObj);
+          callback(resultObj);
+        };
+
         if (command == 'GET') {
-          bite.common.net.xhr.async.get(url, callback);
+          bite.common.net.xhr.async.get(url, callback_wrapper, headers);
+        } else if (command == 'DELETE') {
+          bite.common.net.xhr.async.del(url, callback_wrapper, headers);
         } else if (command == 'POST') {
-          bite.common.net.xhr.async.post(url, data, callback, headers);
+          bite.common.net.xhr.async.post(url, data, callback_wrapper, headers);
         } else if (command == 'PUT') {
-          bite.common.net.xhr.async.put(url, data, callback, headers);
+          bite.common.net.xhr.async.put(url, data, callback_wrapper, headers);
         }
       }
       break;
