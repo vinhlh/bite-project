@@ -180,6 +180,11 @@ def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
   data = {'input': input,
           'output': output}
   result = ExecuteCommand(command % data, True)
+
+  if result:
+    if os.path.exists(output):
+      os.remove(output)
+
   print ''
   return result
 
