@@ -1,0 +1,51 @@
+<!DOCTYPE HTML>
+<html>
+<!--
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Use of this source code is governed by the Apache License, Version 2.0.
+See the COPYING file for details.
+-->
+  <head>
+    <title>Example page</title>
+    <link rel="stylesheet" href="/styles/base_css_ltr.css" />
+    <link rel="stylesheet" href="/styles/explore.css">
+    <script language="javascript" src="/scripts/client_script.js"></script>
+    <script type="text/javascript" src="http://www.google.com/jsapi"></script>
+  </head>
+  <body>
+    <table width="100%" height="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="height: 67px;">
+          <table width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="100%">
+                <div class="kd-googlebar">
+                  <div style="float:left;">
+                    <a class="logo">
+                      <img src="/images/logo_Google_BITE.png"
+                           style="width:104px;">
+                    </a>
+                  </div>
+                  <div id="baseHeader" style="float:left;"></div>
+                  <div id="topRow" style="float:right; margin-right:44px;"></div>
+                  <div class="kd-butterbar" id="statusMessageDiv">
+                    <p id="statusMessage"></p>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="baseView"></div>
+        </td>
+      </tr>
+    </table>
+  </body>
+  <script language="javascript">
+    bite.server.UrlParser.getInstance().init();
+  </script>
+</html>

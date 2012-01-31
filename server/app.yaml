@@ -98,6 +98,9 @@ handlers:
   script: handlers.home.app
   login: required
 
+- url: /examples
+  script: handlers.examples_handler.app
+
 # Login utility urls.
 - url: /check_login_status
   script: handlers.login_handler.app

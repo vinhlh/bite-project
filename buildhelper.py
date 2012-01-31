@@ -303,6 +303,9 @@ def ParseOptions():
   parser.add_option('--deps', dest='build_deps',
                     action='store_true', default=False,
                     help='Download deps.')
+  parser.add_option('--serveronly', dest='build_server',
+                    action='store_true', default=False,
+                    help='Build the server code only.')
   (options, _) = parser.parse_args()
 
   # Exit if only want to clean.
@@ -311,6 +314,9 @@ def ParseOptions():
     exit()
   elif options.build_expunge:
     CleanExpunge()
+    exit()
+  elif options.build_server:
+    CopyServerFiles()
     exit()
 
   # Set up the directories that will be built into.
