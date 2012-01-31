@@ -764,7 +764,10 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
       this.latestEnterTime_ = goog.now();
       return;
     case 'click':
-      delayTime = 0; //Revert to 300 if necessary.
+      // TODO(phu): The delay is because click event always comes before the
+      // onchange event. We need to figure out a way to resolve this and leave
+      // no delay time here.
+      delayTime = 300;
       break;
     case 'submit':
       if (goog.now() - this.latestEnterTime_ > 500) {

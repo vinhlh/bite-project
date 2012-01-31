@@ -10,7 +10,6 @@ See the COPYING file for details.
     <title>Example page</title>
     <link rel="stylesheet" href="/styles/base_css_ltr.css" />
     <link rel="stylesheet" href="/styles/explore.css">
-    <script language="javascript" src="/scripts/client_script.js"></script>
     <script type="text/javascript" src="http://www.google.com/jsapi"></script>
   </head>
   <body>
@@ -40,12 +39,112 @@ See the COPYING file for details.
       </tr>
       <tr>
         <td>
-          <div id="baseView"></div>
+          <div id="baseView">
+            <table width="100%">
+              <tr>
+                <td>button</td>
+                <td>
+                  <input type="button" onclick="changeColor();"
+                         value="change color">
+                </td>
+              </tr>
+              <tr>
+                <td>radio button</td>
+                <td>
+                  <input type="radio" name="radio-buttons" value="1">
+                  <input type="radio" name="radio-buttons" value="2">
+                </td>
+              </tr>
+              <tr>
+                <td>checkbox</td>
+                <td>
+                  <input type="checkbox">
+                </td>
+              </tr>
+              <tr>
+                <td>selection</td>
+                <td>
+                  <select>
+                    <option>Google+</option>
+                    <option>Chrome</option>
+                    <option>Android</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>input box</td>
+                <td>
+                  <input type="text" id="text">
+                  <input type="button" onclick="displayText('text', 'display-area-1');"
+                         value="show">
+                  <div id="display-area-1" style="display:inline;"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>text area</td>
+                <td>
+                  <textarea id="textarea"></textarea>
+                  <input type="button" onclick="displayText('textarea', 'display-area-2');"
+                         value="show">
+                  <div id="display-area-2" style="display:inline;"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>double click</td>
+                <td>
+                  <input type="button" ondblclick="changeColor();"
+                         value="change color">
+                </td>
+              </tr>
+              <tr>
+                <td>mouse over</td>
+                <td>
+                  <input type="button" onmouseover="showMouseOverMessage();"
+                         value="mouse over">
+                  <div id="display-area-3" style="display:inline;"></div>
+                </td>
+              </tr>
+              <tr>
+                <td>verification</td>
+                <td>
+                  <span style="font-weight:bold;">verify this</span>
+                </td>
+              </tr>
+              <tr>
+                <td>link</td>
+                <td>
+                  <a href="http://www.google.com" target="_blank">
+                    open a new tab
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </div>
         </td>
       </tr>
     </table>
   </body>
   <script language="javascript">
-    bite.server.UrlParser.getInstance().init();
+    function changeColor() {
+      if (!document.body.style.backgroundColor) {
+        document.body.style.backgroundColor = '#f3f3f3';
+      } else {
+        document.body.style.backgroundColor = '';
+      }
+    }
+
+    function displayText(input, display) {
+      var text = document.getElementById(input).value;
+      document.getElementById(display).innerHTML = text;
+    }
+
+    function showMouseOverMessage() {
+      document.getElementById('display-area-3').innerHTML = 'This will disappear soon.';
+      setTimeout('clearMouseOverMessage();', 500);
+    }
+
+    function clearMouseOverMessage() {
+      document.getElementById('display-area-3').innerHTML = '';
+    }
   </script>
 </html>
