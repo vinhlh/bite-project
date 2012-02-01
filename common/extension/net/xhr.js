@@ -148,9 +148,10 @@ bite.common.net.xhr.async.put = function(url, data, opt_callback,
  * @param {function(Array.<*>)=} opt_complete The function to be called once
  *     all the requests and child requests have completed.  The original array
  *     is passed in.
+ * @param {Object.<string>=} opt_headers Headers to be added to the request.
  */
 bite.common.net.xhr.async.getMultiple = function(array, getUrl, app,
-                                                 opt_complete) {
+                                                 opt_complete, opt_headers) {
   var async = bite.common.net.xhr.async;
   var openBarrier = async.getMultiple.prototype.openBarrier_;
 
@@ -192,14 +193,18 @@ bite.common.net.xhr.async.getMultiple = function(array, getUrl, app,
     var appFunc = (function(e, b, f) {
         return function(success, data) {
             async.getMultiple.prototype.openBarrier_ = b;
-            f(e, success, data);
+            try {
+              f(e, success, data);
+            } catch (e) {
+              console.error('Error when calling apply function. Error: ' + e);
+            }
             async.getMultiple.prototype.openBarrier_ = null;
             b.fire();
         };
     })(element, barrier, app);
 
     barrier.increment();
-    async.get(url, appFunc);
+    async.get(url, appFunc, opt_headers);
   }
   element = array[0];
 
