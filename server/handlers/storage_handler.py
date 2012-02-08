@@ -204,7 +204,7 @@ class GetZipFile(base.BaseHandler):
     zip.delete()
     disposition = 'attachment; filename="' + title + '"'
     self.response.headers['Content-Type'] = 'application/zip'
-    self.response.headers['Content-Disposition'] = disposition
+    self.response.headers['Content-Disposition'] = str(disposition)
     self.response.out.write(contents)
 
 

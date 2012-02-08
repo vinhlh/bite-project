@@ -645,7 +645,7 @@ rpf.ExportDialog.prototype.handleExport_ = function() {
       // down to the local machine.
       var msg = xhr.getResponseText() || 'Local server is not ready...';
       rpf.StatusLogger.getInstance().setStatus(msg, 'red');
-      this.exportAsDataModelZip_(dataFile);
+      this.exportAsJavaFilesZip_(data);
     }
   }, this), 'POST', parameters);
 };
