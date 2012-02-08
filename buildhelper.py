@@ -104,6 +104,7 @@ CLOSURE_COMPILER = os.path.join(DEPS['closure-library'][ROOT], 'closure',
                                 'bin', 'build', 'closurebuilder.py')
 
 COMPILER_FLAGS = [
+  '--compiler_flags=--formatting=pretty_print',
   '--compiler_flags=--generate_exports',
   '--compiler_flags=--js=%s' % os.path.join(
       DEPS['closure-library'][ROOT], 'closure', 'goog', 'deps.js'),

@@ -128,7 +128,7 @@ class UpdateTest(base.BaseHandler):
 
   def post(self):
     test_id = self.GetRequiredParameter('id')
-    json = self.GetRequiredParameter('json')
+    test = self.GetRequiredParameter('json')
     project = self.GetRequiredParameter('project')
     js_files = self.GetOptionalParameter('jsFiles')
 
@@ -140,10 +140,10 @@ class UpdateTest(base.BaseHandler):
       self.error(400)
       return
 
-    json_obj = json.loads(json)
+    json_obj = json.loads(test)
     new_test_name = json_obj['name']
     storage_project.UpdateProject(project, {'js_files': js_files})
-    test_metadata.Update(project, new_test_name, json)
+    test_metadata.Update(project, new_test_name, test)
 
 
 class SaveTest(base.BaseHandler):
