@@ -49,7 +49,7 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
 
 
 def main():
-  ParseOptions()
+  result = ParseOptions()
   # Compile the closure scripts.
   # Soy
   soy_files = {
@@ -147,7 +147,8 @@ def main():
 
   CopyAceFiles()
 
-  CopyServerFiles()
+  if not result['build_extension_only']:
+    CopyServerFiles()
 
 if __name__ == '__main__':
   main()

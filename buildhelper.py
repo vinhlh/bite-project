@@ -304,6 +304,9 @@ def WaitUntilSubprocessesFinished(ps):
 
 def ParseOptions():
   """Parses the command and perform tasks."""
+
+  result = {'build_extension_only': False}
+
   usage = 'usage: %prog [options]'
   parser = optparse.OptionParser(usage)
   parser.add_option('--clean', dest='build_clean',
@@ -318,6 +321,9 @@ def ParseOptions():
   parser.add_option('--serveronly', dest='build_server',
                     action='store_true', default=False,
                     help='Build the server code only.')
+  parser.add_option('--extensiononly', dest='build_extension',
+                    action='store_true', default=False,
+                    help='Build the extension code only.')
   (options, _) = parser.parse_args()
 
   # Exit if only want to clean.
@@ -330,6 +336,8 @@ def ParseOptions():
   elif options.build_server:
     CopyServerFiles()
     exit()
+  elif options.build_extension:
+    result['build_extension_only'] = True
 
   # Set up the directories that will be built into.
   paths = [GENFILES_ROOT, DEPS_ROOT]
@@ -345,6 +353,8 @@ def ParseOptions():
 
   if options.build_deps:
     exit()
+
+  return result
 
 
 def CopyAceFiles():

@@ -4,13 +4,13 @@
   "description": "Open source version of RPF. (Dev)",
   "options_page": "options.html",
   "browser_action": {
-    "default_icon": "imgs/logo-19x19.png",
+    "default_icon": "imgs/rpflogo.png",
     "default_title": "RPF",
     "popup": "popup.html"
   },
   "icons": {
-    "48": "imgs/logo-48x48.png",
-    "128": "imgs/logo-128x128.png"
+    "48": "imgs/rpflogo-48.png",
+    "128": "imgs/rpflogo-128.png"
   },
   "background_page": "background.html",
   "content_scripts": [
