@@ -1,0 +1,195 @@
+{namespace bite.server.templates.details}
+
+
+/**
+ * Shows the settings tab of set page.
+ * TODO(phu): Move the styles to css and keep line < 80 chars.
+ */
+{template .showTabSettings}
+  <td colspan="3">
+  <table width="100%" style="border-spacing: 0;">
+    <tr>
+      <td align="right" style="vertical-align: middle;" width="30%">
+        Worker-mode Token
+      </td>
+      <td style="padding: 5px"><input style="width: 400px;" id="setToken">
+        <img src="/images/bugstate-resolved-32.png" width="15px">
+      </td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align: middle;" width="30%">
+        Replace starting test URL
+      </td>
+      <td style="padding: 5px"><input style="width: 400px;" id="setReplaceUrl">
+        <img src="/images/bugstate-resolved-32.png" width="15px">
+      </td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align: middle;">Interval</td>
+      <td style="padding: 5px">
+        <input style="width: 50px;" id="setInterval">
+        {sp}minutes{sp}
+        <img src="/images/bugstate-resolved-32.png" width="15px">
+      </td>
+    </tr>
+    </tr>
+  </table>
+  <table width="100%" style="border-spacing: 0;">
+    <tr>
+      <td align="right" style="vertical-align: middle;" width="30%">
+        Email-from address
+      </td>
+      <td style="padding: 5px">
+        <input style="width: 400px;" id="setEmailFrom">
+      </td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align: middle;">
+        Email-to address
+      </td>
+      <td style="padding: 5px">
+        <input style="width: 400px;" id="setEmailTo">
+      </td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align: middle;">
+        Test failure email threshold %
+      </td>
+      <td style="padding: 5px">
+        <input style="width: 50px;" id="setEmailThreshold">
+        <img src="/images/bugstate-resolved-32.png" width="15px">
+      </td>
+    </tr>
+  </table>
+  </td>
+{/template}
+
+
+/**
+ * Shows the tests tab of set page.
+ */
+{template .showTabOverview}
+  <td colspan="3">
+  <table width="100%" style="border-spacing: 0;">
+    <tr>
+      <td align="right" style="vertical-align: middle;" width="30%">
+        Project
+      </td>
+      <td style="padding: 5px">
+        <input style="width: 400px;" id="setProject">
+      </td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align: middle;">
+        Description
+      </td>
+      <td style="padding: 5px">
+        <textarea style="width: 400px;" rows="3" id="setDesc"></textarea>
+      </td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align: middle;">
+        Labels (separated by comma)
+      </td>
+      <td style="padding: 5px">
+        <input style="width: 400px;" id="setLabels">
+      </td>
+    </tr>
+  </table>
+  </td>
+{/template}
+
+
+/**
+ * Shows the overview tab of set page.
+ */
+{template .showTabTests}
+  <td colspan="3">
+  <table width="100%" style="border-spacing: 0;">
+    <tr class="mainnav">
+      <td style="padding: 8px" colspan="2">
+        <div style="display: inline">Pick test cases using</div>
+        <div style="display: inline">
+          <input type="radio" name="testsSrc" id="acc">ACC</div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div id="loadTestsFromDiv"></div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div id="showTestsDiv"></div>
+      </td>
+    </tr>
+  </table>
+  </td>
+{/template}
+
+
+/**
+ * Shows the tests list from server.
+ * @param tests
+ */
+{template .showTestList}
+  <table width="100%">
+    <tr>
+      <td align="center">
+        <div style="padding: 10px" class="artifact-title">
+          Tests included in This Set ({$tests.length})
+        </div>
+      </td>
+    </tr>
+  </table>
+  <table width="100%" style="border-spacing: 0;">
+    <tr class="mainnav">
+      <td style="vertical-align: middle; min-width: 3px;"
+          rowspan="{$tests.length + 2}"></td>
+      <td style="vertical-align: middle;" width="10%">id</td>
+      <td style="vertical-align: middle;" width="50%">Title</td>
+      <td style="vertical-align: middle;" width="15%">Author</td>
+      <td style="vertical-align: middle;" width="25%">Labels</td>
+      <td style="vertical-align: middle; min-width: 3px;"
+          rowspan="{$tests.length + 2}"></td>
+    </tr>
+    {foreach $test in $tests}
+      <tr>
+        <td style="vertical-align: middle;" width="10%">{$test['id']}</td>
+        <td style="vertical-align: middle;" width="50%">{$test['title']}</td>
+        <td style="vertical-align: middle;" width="15%">
+          {if $test['author']}
+            {$test['author']}
+          {/if}
+        </td>
+        <td style="vertical-align: middle;" width="25%">
+        {foreach $label in $test['labels']}
+          <div class="data-label">{$label}</div>
+        {/foreach}
+        </td>
+      </tr>
+    {/foreach}
+    <tr class="mainnav">
+      <td height="3px" colspan="4"></td>
+    </tr>
+  </table>
+{/template}
+
+
+/**
+ * Shows the header.
+ */
+{template .showHeader}
+  <input type="text" id="setName" style="width: 150px;display: none;">
+  <div style="display: inline" id="savedTime"></div>
+  <div style="display: none" id="saveSuiteButton"></div>
+  <div style="display: inline" id="loadSuiteButton"></div>
+{/template}
+
+
+/**
+ * Shows the body area.
+ */
+{template .showBodyArea}
+    <div id="setTabDetailDiv"></div>
+{/template}

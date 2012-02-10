@@ -1,0 +1,44 @@
+{namespace bite.server.templates.details.RunSettings}
+
+
+
+/**
+ * Shows the settings tab of the run page.
+ */
+{template .showTabSettings}
+  <td colspan="3">
+  <table width="100%" style="border-spacing: 0;">
+    <tr>
+      <td align="right" style="vertical-align:middle;" width="30%">Filtered results labels</td>
+      <td style="padding:5px"><input style="width: 400px;" id="runFilteredLabels"></td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align:middle;">Test dimension labels</td>
+      <td style="padding:5px"><input style="width: 400px;" id="runDimensionLabels"></td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align:middle;">Worker-mode token</td>
+      <td style="padding:5px"><input style="width: 400px;" id="runWorkerToken"></td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align:middle;">Replace starting test URL</td>
+      <td style="padding:5px"><input style="width: 400px;" id="runStartUrl"></td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center" style="vertical-align:middle;">
+        Line Timeout limit (in sec) {sp} <input style="width: 50px;" id="runLineTimeout">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center" style="vertical-align:middle;">
+        Max run time per test (in min) {sp} <input style="width: 50px;" id="runTestTimeout">
+      </td>
+    </tr>
+    <tr>
+      <td colspan="2" align="center" style="vertical-align:middle;">
+        Save screenshots {sp} <input type="checkbox" id="runSaveScnShots">
+      </td>
+    </tr>
+  </table>
+  </td>
+{/template}

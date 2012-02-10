@@ -802,7 +802,8 @@ rpf.PlayBackManager.prototype.createPlayBackScript = function(datafile) {
       index, ']);} else if (typeof(ContentMap[v]) == "string")',
       ' {ContentMap[v] = unescape(ContentMap[v]);}} } catch(e) ',
       '{console.log(e.toString())}',
-      'var cmdIndex = ', this.currentStep_, ';');
+      'var cmdIndex = ', this.currentStep_, ';',
+      'window.ContentMap = ContentMap;');
 };
 
 

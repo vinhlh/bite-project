@@ -127,7 +127,7 @@ class ShowRunsHandler(base.BaseHandler):
           'type': 'run',
           'title': run_template.name,
           'labels': [suite.parent().name].extend(run_template.filtered_labels),
-          'icon': '/images/sample/run00-pie.png',
+          'icon': '/images/run00-pie.png',
           'props': [{'label': '# of tests', 'value': suite.tests_number},
                     {'label': 'last time', 'value': last_time},
                     {'label': 'interval', 'value': str(interval) + ' min'}]

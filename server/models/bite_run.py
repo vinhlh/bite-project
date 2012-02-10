@@ -381,7 +381,7 @@ def GetEmptyTemplateData(templates):
       'title': template.name,
       'labels': template.filtered_labels.extend(
           template.test_dimension_labels),
-      'icon': '/images/sample/run00-pie.png',
+      'icon': '/images/run00-pie.png',
       'state': 'template',
       'actions': [{'title': 'View details',
                    'operation': 'runDetails'},
@@ -424,7 +424,7 @@ def GetRunsData(runs):
         'type': 'run',
         'title': run.name,
         'labels': labels,
-        'icon': '/images/sample/run00-pie.png',
+        'icon': '/images/run00-pie.png',
         'state': state,
         'actions': [
             {'title': 'View details',

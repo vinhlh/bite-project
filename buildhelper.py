@@ -138,6 +138,17 @@ SOY_COMPILER_COMMAND = ' '.join([('java -jar %s' % SOY_COMPILER_JAR),
                                  '--outputPathFormat %(output)s',
                                  '%(input)s'])
 
+COMPILE_CLOSURE_COMMAND_FOR_SERVER = ' '.join([
+  sys.executable, CLOSURE_COMPILER,
+  ('--root=%s' % os.path.join('server', 'scripts')),
+  ('--root=%s' % DEPS['closure-library'][ROOT]),
+  ('--root=%s' % SOY_COMPILER_SRC),
+  ('--root=%s' % GENFILES_ROOT),
+  ('--root=%s' % DEPS['selenium-atoms-lib'][ROOT]),
+  '--input=%(input)s',
+  '--output_mode=compiled',
+  '--output_file=%(output)s',
+  ('--compiler_jar=%s' % CLOSURE_COMPILER_JAR)] + COMPILER_FLAGS)
 
 class ClosureError(Exception):
   pass
@@ -350,6 +361,43 @@ def CopyServerFiles():
   """Copies the server files to the right location."""
   # Create server bundle.
   print('Creating server bundle.')
+
+  soy_files = {
+    'explore_page': os.path.join('server', 'scripts', 'soys'),
+    'set_details_page': os.path.join('server', 'scripts', 'soys'),
+    'result_page': os.path.join('server', 'scripts', 'soys'),
+    'run_details_settings': os.path.join('server', 'scripts', 'soys'),
+    'run_details_results': os.path.join('server', 'scripts', 'soys'),
+    'run_details_overview': os.path.join('server', 'scripts', 'soys'),
+    'run_details_page': os.path.join('server', 'scripts', 'soys'),
+    'set_details_runs': os.path.join('server', 'scripts', 'soys'),
+    'project_details_page': os.path.join('server', 'scripts', 'soys')
+  }
+
+  ps = []
+
+  current_time = time.time()
+
+  for soy_filename in soy_files:
+    soy_filepath = soy_files[soy_filename]
+    ps.append(CompileScript(soy_filename, soy_filepath, '.soy', '.soy.js',
+        SOY_COMPILER_COMMAND))
+  WaitUntilSubprocessesFinished(ps)
+
+  ps = []
+  # JavaScript
+  js_targets = {
+    'url_parser': os.path.join('server', 'scripts')
+  }
+
+  for target in js_targets:
+    target_filepath = js_targets[target]
+    ps.append(CompileScript(target, target_filepath, '.js', '_script.js',
+        COMPILE_CLOSURE_COMMAND_FOR_SERVER))
+  WaitUntilSubprocessesFinished(ps)
+
+  print 'Totally %s (s) elapsed for server!' % (time.time() - current_time)
+
   server_src = 'server'
   shutil.copytree(server_src, SERVER_DST)
 
@@ -373,3 +421,6 @@ def CopyServerFiles():
   mrtaskman_dst = os.path.join(SERVER_DST, 'util')
   shutil.copytree(mrtaskman_src, mrtaskman_dst)
 
+  js_src = os.path.join(GENFILES_ROOT, 'url_parser_script.js')
+  js_dst = os.path.join(SERVER_DST, 'scripts', 'client_script.js')
+  shutil.copyfile(js_src, js_dst)

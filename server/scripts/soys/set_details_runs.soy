@@ -1,0 +1,99 @@
+{namespace bite.server.templates.details.SetRuns}
+
+
+/**
+ * Shows the runs tab of set page.
+ * @param data
+ */
+{template .showTabRuns}
+  <table width="100%">
+    <tr>
+    <td width="20%" style="vertical-align:top;">
+      <div class="sidebarHolder" style="float:left;">
+        <div id="leftnav-bar" class="kd-content-sidebar">
+          <ul class="iconlist">
+            {foreach $row in $data}
+            <li class="kd-sidebarlistitem" id="{$row.name}">
+              <a>
+                {$row.title}
+              </a>
+            </li>
+            {/foreach}
+          </ul>
+        </div>
+      </div>
+    </td>
+    <td width="50%" style="vertical-align:top;font-size:16px;">
+      <div style="float: left; padding: 15px 0 0 5px;">
+        <div id="filteredRuns"></div>
+      </div>
+    </td>
+    <td width="30%" style="font-size:16px;vertical-align:top;">
+      <div style="float: left; padding: 15px 0 0 5px;">
+        <div id="main_preview"></div>
+      </div>
+    </td>
+    </tr>
+  </table>
+{/template}
+
+
+/**
+ * Shows the filtered runs.
+ * @param runs
+ */
+{template .showFilteredRuns}
+  {foreach $run in $runs}
+    <div class="data-row" id="artifact{$run.type|id}_{$run.id|id}" name="{ $run.title }"
+         onclick="">
+      <div id="artifact{$run.type|id}_{$run.id|id}main" style="height: 65px;">
+        <img class="data-icon" src="{ $run.icon }" />
+        <div class="data-title">{ $run.title }</div>
+        {foreach $label in $run.labels}
+          <div class="data-label" title="{$label}">{$label|truncate:20}</div>
+        {/foreach}
+        {if $run.highs}
+        {foreach $highlight in $run.highs}
+          <div class="data-label data-highlight"
+               title="{ $highlight.note }">{ $highlight.title }</div>
+        {/foreach}
+        {/if}
+        <br />
+        {foreach $prop in $run.props}
+          <span>
+            <span class="prop-label">{ $prop.label }</span>
+            {sp}
+            <span class="prop-value">
+              {if $prop.href }<a onclick="swallowEvent" href="{ $prop.href }">
+              {/if}{ $prop.value }{if $prop.href}</a>{/if}
+            </span>
+            {if not isLast($prop)}
+              <span class="prop-separator"> | </span>
+            {/if}
+          </span>
+        {/foreach}
+        {if $run.description}
+          <div class="data-notes">{ $run.description }</div>
+        {/if}
+      </div>
+      <div id="artifact{$run.type|id}_{$run.id|id}more" class="data-more">
+      <div class="data-actions">
+        {if $run.actions}
+          {foreach $action in $run.actions}
+          <span class="data-action" id="{$action.operation}">{$action.title}</span>
+          {sp}
+          {/foreach}
+        {/if}
+      </div>
+      <table cellpadding="4">
+        <tr>
+          <td>
+          </td>
+        </tr>
+      </table>
+    </div>
+    </div>
+  {/foreach}
+{/template}
+
+

@@ -24,8 +24,6 @@ goog.provide('bite.server.UrlParser');
 
 goog.require('bite.server.LayoutHelper');
 goog.require('bite.server.Page');
-goog.require('bite.server.Project');
-goog.require('bite.server.ProjectDetails');
 goog.require('bite.server.Result');
 goog.require('bite.server.Run');
 goog.require('bite.server.Set');
@@ -93,12 +91,6 @@ bite.server.UrlParser.prototype.parseLayout = function(opt_fragment) {
         break;
       case 'run_details':
         this.selectedPage = new bite.server.Run();
-        break;
-      case 'project_explore':
-        this.selectedPage = new bite.server.Project();
-        break;
-      case 'project_details':
-        this.selectedPage = new bite.server.ProjectDetails();
         break;
       case 'result':
         this.selectedPage = new bite.server.Result();

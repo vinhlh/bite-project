@@ -1,0 +1,26 @@
+{namespace bite.server.templates.details.RunOverview}
+
+
+/**
+ * Shows the overview tab of the run page.
+ */
+{template .showTabOverview}
+  <td colspan="3">
+  <table width="100%" style="border-spacing: 0;">
+    <tr>
+      <td align="right" style="vertical-align:middle;" width="30%">Name</td>
+      <td style="padding:5px"><input style="width: 400px;" id="runName"></td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align:middle;">Description</td>
+      <td style="padding:5px"><textarea style="width: 400px;" rows="3" id="runDesc"></textarea></td>
+    </tr>
+    <tr>
+      <td align="right" style="vertical-align:middle;">Run occurrence</td>
+      <td style="vertical-align:middle; padding:5px">
+         every {sp}<input type="text" name="interval" id="interval">{sp} minutes
+      </td>
+    </tr>
+  </table>
+  </td>
+{/template}

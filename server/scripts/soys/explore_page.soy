@@ -1,0 +1,289 @@
+{namespace bite.server.templates.explore}
+
+
+/**
+ * Shows the top row.
+ * @param data
+ */
+{template .showPageTopRow}
+  {foreach $topnav in $data.topnavs}
+  <div class="topnav-item"
+      id="topnav-{$topnav.name}"
+      style="width: 50px;">{$topnav.title}</div>
+  {/foreach}
+  <span class="topnav-username"
+       style="text-align: right;"></span>
+{/template}
+
+
+/**
+ * Shows the header.
+ */
+{template .showHeader}
+  <div id="projectSelector"></div>
+{/template}
+
+
+/**
+ * Shows the main navigations in toolbar.
+ * @param data
+ */
+{template .showMainNavs}
+  {foreach $mainNav in $data.mainNavs}
+    <div class="mainnav-item"{sp}
+         id="mainnav-{$mainNav.name}">{$mainNav.title}</div>
+  {/foreach}
+{/template}
+
+
+/**
+ * Shows the leftside navigations.
+ * @param data
+ */
+{template .showLeftNavs}
+  {foreach $leftNav in $data.filters}
+    <div class="leftnav-item"
+         id="leftnav-{$leftNav.name}">{$leftNav.title}</div>
+  {/foreach}
+{/template}
+
+
+/**
+ * Shows the body area.
+ * @param data
+ */
+{template .showBodyArea}
+  <table width="100%" height="100%" cellspacing="0" cellpadding="0">
+    <tr class="mainnav">
+      <td style="width: 180px; background-color: rgb(222, 228, 251);
+                 text-align: center; height: 24px;">
+        <button id="createButton" style="width: 60%;">Create</button>
+      </td>
+      <td style="width: 10px;" rowspan="2">
+      <td>
+        {call .showMainNavs data="all"/}
+      </td>
+      <td style="width: 2px" rowspan="2"></td>
+      <td></td>
+    </tr>
+    <tr>
+      <td id="leftnav-bar" style="vertical-align: top; padding-top: 4px;">
+
+      </td>
+      <td style="vertical-align: top; padding: 4px 4px 4px 4px; min-width: 300px;">
+        <div id="main_content">
+        </div>
+      </td>
+      <td>
+        <div id="main_preview"></div>
+      </td>
+    </tr>
+  </table>
+{/template}
+
+
+/**
+ * Shows the artifact header area.
+ * @param data
+ */
+{template .showArtifactHeader}
+  <img class="artifact-logo" src="{$data.artifactHeader.icon}">
+  <div class="artifact-title">
+    {if $data.artifactHeader.artifactTitle}
+      {$data.artifactHeader.artifactTitle}
+    {else}
+      {$data.artifactHeader.title}
+    {/if}
+  </div>
+  <div class="artifact-notes">{$data.artifactHeader.description}</div>
+{/template}
+
+
+/**
+ * Shows the artifact content and operations.
+ * @param data
+ */
+{template .showArtifactContent}
+  {foreach $row in $data.artifacts}
+    <div class="data-row" id="artifact{$row.type|id}_
+         {if $row.id}
+           {$row.id|id}
+         {else}
+           {$row.templateId|id}
+         {/if}
+         {if $row.extraId}
+           _{$row.extraId|id}
+         {/if}
+         "
+         name="{$row.title}">
+      <div id="artifact{$row.type}_{$row.id}main" style="height: 50px;">
+        <img class="data-icon" src="{$row.icon}" />
+        <div class="data-title">{$row.title}</div>
+        {if $row.labels}
+        {foreach $label in $row.labels}
+          {if $label}
+            <div class="data-label">{$label}</div>
+          {/if}
+        {/foreach}
+        {/if}
+        {if $row.highs}
+        {foreach $highlight in $row.highs}
+          <div class="data-label data-highlight"
+               title="{$highlight.note}">{$highlight.title}</div>
+        {/foreach}
+        {/if}
+        {if $row.lows}
+        {foreach $lowlight in $row.lows}
+          <div class="data-label data-lowlight"
+               title="{$lowlight.note}">{$lowlight.title}</div>
+        {/foreach}
+        {/if}
+        <br />
+        {foreach $prop in $row.props}
+          {if $prop.value}
+            <span>
+              <span class="prop-label">{$prop.label}</span>{sp}
+              <span class="prop-value">
+                {if $prop.href}<a onclick="swallowEvent" href="{$prop.href}">
+                {/if}{$prop.value}{if $prop.href}</a>{/if}
+              </span>
+              {if not isLast($prop)}
+              <span class="prop-separator"> | </span>
+              {/if}
+            </span>
+          {/if}
+        {/foreach}
+        {if $row.description}
+        <div class="data-notes">{$row.description}</div>
+        {/if}
+      </div>
+    </div>
+    <div id="artifact{$row.type|id}_
+         {if $row.id}
+           {$row.id|id}
+         {else}
+           {$row.templateId|id}
+         {/if}
+         {if $row.extraId}
+           _{$row.extraId|id}
+         {/if}more" class="data-more">
+      <div class="data-actions">
+        {if $row.actions}
+        {foreach $action in $row.actions}
+        <span class="data-action" id="{$action.operation}">{$action.title}</span>
+        {sp}
+        {/foreach}
+        {/if}
+      </div>
+      <table cellpadding="4">
+        <tr>
+          <td>
+          </td>
+        </tr>
+      </table>
+    </div>
+  {/foreach}
+{/template}
+
+
+/**
+ * Shows the content.
+ * @param data
+ */
+{template .showContent}
+  <div style="height: 55px;">
+    {call .showArtifactHeader data="all"/}
+  </div>
+
+  <div class="action-row">
+    <span class="action-label">sort by</span>
+    <span class="action-link">Time</span>
+  </div>
+
+  <div id="artifactItems">
+  </div>
+{/template}
+
+
+/**
+ * Shows the preview.
+ */
+{template .showPreview}
+    <div id="detailsPanel" style="padding-left: 10px; display: none">
+      <div id="visualization"></div>
+      <div>
+        <table>
+          <tr>
+            <td><span class="prop-label">Completed:</td>
+            <td><span class="prop-value" id="detailCompleted"></span></td>
+          </tr>
+        </table>
+      </div>
+      <div>
+        <table>
+          <tr>
+            <td><span class="prop-label">Passed:</td>
+            <td><span class="prop-value" id="detailPassed"></span></td>
+          </tr>
+        </table>
+      </div>
+      <div>
+        <table>
+          <tr>
+            <td><span class="prop-label">Failed:</td>
+            <td><span class="prop-value" id="detailFailed"></span></td>
+          </tr>
+        </table>
+      </div>
+      <div>
+        <table>
+          <tr>
+            <td><span class="prop-label">Run duration:</span></td>
+            <td><span class="prop-value" id="detailDuration"></span></td>
+          </tr>
+        </table>
+      </div>
+      <div>
+        <table>
+            <tr>
+              <td><span class="prop-label">Started:</span></td>
+              <td><span class="prop-value" id="detailStartTime"></span></td>
+            </tr>
+        </table>
+      </div>
+      <div>
+        <table>
+          <tr>
+            <td><span class="prop-label">Run lead:</span></td>
+            <td><span class="prop-value" id="detailLead"></span></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+{/template}
+
+
+/**
+ * Shows the results.
+ * @param results
+ */
+{template .showResults}
+  <table>
+    {foreach $result in $results}
+      <tr>
+        <td><span class="prop-value">{$result.id}</span></td>
+        <td><span class="prop-value">{$result.name}</span></td>
+        <td>
+          {if $result.status == 'passed'}
+            <img src="/images/state/teststate-passed-16.png">
+          {elseif $result.status == 'failed'}
+            <img src="/images/state/teststate-failed-16.png">
+          {else}
+            <span class="prop-value">{$result.status}</span>
+          {/if}
+        </td>
+      </tr>
+    {/foreach}
+  </table>
+{/template}
+

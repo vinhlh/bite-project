@@ -1,0 +1,164 @@
+{namespace bite.server.templates.details.RunResults}
+
+
+/**
+ * Shows the results data.
+ */
+{template .showResultsData}
+  <table width="100%">
+    <tr>
+      <td id="detailedResultsTable" width="70%" style="vertical-align:top;">
+      </td>
+      <td id="summaryResultsData" style="padding:0 0 0 20px;">
+      </td>
+    </tr>
+  </table>
+{/template}
+
+
+/**
+ * Shows the results summary data.
+ * @param data
+ */
+{template .showResultsSummaryData}
+  <table width="100%">
+    <tr>
+      <td>
+        <div id="visualization" style="text-align:center;"></div>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <table width="100%" height="200px" style="font-size:16px;">
+          <tr>
+            <td>
+              <ul>
+                {foreach $row in $data.summaryRows}
+                <li>
+                  <div>
+                    <span class="prop-label">Pass:</span>{sp}
+                    <span class="prop-value">{$row.pass}</span>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span class="prop-label">Fail:</span>{sp}
+                    <span class="prop-value">{$row.fail}</span>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span class="prop-label">Not Run:</span>{sp}
+                    <span class="prop-value">{$row.notRun}</span>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span class="prop-label">Total number:</span>{sp}
+                    <span class="prop-value">{$row.total}</span>
+                  </div>
+                </li>
+                {/foreach}
+                <li>
+                  <div>
+                    <span class="prop-label">Run duration:</span>{sp}
+                    <span class="prop-value">{$data.elapsedTimeStr}</span>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span class="prop-label">Started:</span>{sp}
+                    <span class="prop-value">{$data.startTimeStr}</span>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span class="prop-label">Number of testers:</span>{sp}
+                    <span class="prop-value">{$data.numOfTesters}</span>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    <span class="prop-label">Results labels:</span>{sp}
+                    <span class="prop-value">{$data.resultsLabels}</span>
+                  </div>
+                </li>
+              </ul>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+{/template}
+
+
+/**
+ * Shows the detailed results table.
+ * @param data
+ */
+{template .showDetailedResultsTable}
+  <div style="height:25px;padding:10px 0px;">
+    <span class="title-style">
+      Tests In This Run ({$data.numOfTests})
+    </span>
+  </div>
+  <div class="kd-toolbar kd-buttonbar">
+    <div class="kd-button kd-toolbarbutton small left" id="playbackTests"
+         style="float:left;">
+      <img src="images/play.png" width="21px" height="21px"
+           title="Replay the selected tests.">
+    </div>
+  </div>
+  <table width="100%" border="0" cellspacing="0" cellpadding="0"
+         class="kd-table" id="resultTable">
+    <thead>
+      <tr>
+        <th width="10%"></th>
+        <th width="20%"><span style="font-weight: bold;">Title</span></th>
+        <th width="15%"><span style="font-weight: bold;">Result</span></th>
+        <th width="20%"><span style="font-weight: bold;">Ago</span></th>
+        <th width="20%"><span style="font-weight: bold;">IP address</span></th>
+        <th width="15%"><span style="font-weight: bold;">Screenshot</span></th>
+      </tr>
+    </thead>
+    <tbody>
+      {foreach $row in $data.resultRows}
+      <tr>
+        <td><input id="{index($row)}-checkbox" type="checkbox"
+                   name="resultCheckbox"></td>
+        <td>
+          <span id="{index($row)}_testName" style="font-weigth: bold;"
+                title="{$row.id}">
+            {$row.name}
+          </span>
+        </td>
+        <td>
+          {if $row.status == 'passed'}
+          <span style="color: green;">
+          {elseif $row.status == 'failed'}
+          <span style="color: red;">
+          {else}
+          <span>
+          {/if}
+          {$row.status}
+          </span>
+        </td>
+        <td><span>{$row.when}</span></td>
+        <td><span>{$row.tester}</span></td>
+        <td>
+          {if $row.status == 'failed'}
+          <a href="/home#page=result&resultKey={$row.resultKey}"
+             target="_blank">
+            here
+          </a>
+          {/if}
+          <div id="{index($row)}_log" style="display:none">{$row.log}</div>
+        </td>
+      </tr>
+      {/foreach}
+    </tbody>
+    <div id="rpfLaunchData" style="display:none;"></div>
+  </table>
+{/template}
+

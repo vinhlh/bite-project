@@ -49,6 +49,7 @@ COMPILE_CLOSURE_COMMAND = ' '.join([
 
 def main():
   ParseOptions()
+
   # Compile the closure scripts.
   # Soy
   soy_files = {

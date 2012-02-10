@@ -1,0 +1,31 @@
+{namespace bite.server.templates.details.ProjectPage}
+
+
+/**
+ * Shows the header.
+ */
+{template .showHeader}
+  <div style="display: inline" id="savedTime"></div>
+  <div style="display: inline" id="saveProjectButton"></div>
+{/template}
+
+
+/**
+ * Shows the body area.
+ * @param data
+ */
+{template .showBodyArea}
+  <table width="100%" style="border-spacing: 0;">
+    <tr class="mainnav">
+      <td colspan="3">
+        <div id="mainnav-group">
+          {call bite.server.templates.explore.showMainNavs data="all"/}
+        </div>
+      </td>
+    </tr>
+    <tr>
+      <td id="setTabDetailDiv">
+      </td>
+    </tr>
+  </table>
+{/template}
