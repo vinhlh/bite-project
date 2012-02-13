@@ -18,7 +18,7 @@
 #     http://code.google.com/appengine/docs/python/config/appconfig.html
 #
 # This version number forces folks to deploy with:
-#     appcfg.py -A <desired_app_id> -V <desired_app_version> /path/to/bundle
+#     appcfg.py -A <desired_app_id> -V <desired_app_version> update /path/to/bundle
 
 application: invalid-do-not-change-see-comments
 version: invalid-do-not-change-see-comments
@@ -28,7 +28,6 @@ api_version: 1
 
 builtins:
 - appstats: on
-- datastore_admin: on
 - deferred: on
 - remote_api: on
 
