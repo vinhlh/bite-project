@@ -103,7 +103,6 @@ handlers:
 # Login utility urls.
 - url: /check_login_status
   script: handlers.login_handler.app
-  login: required
 
 - url: /check_gdata_login_status
   script: handlers.login_handler.app
