@@ -58,9 +58,8 @@ rpf.StatusLogger.ID_ = 'statusLog';
  * @type {string}
  */
 rpf.StatusLogger.DEFAULT = [
-  'Click Record/Playback option in popup to switch the tab under record ' +
-  '(You might need to refresh the tab)',
-  'Double click on a step to view the details.'].join('<br>');
+  'Learn the tutorial <a href="https://sites.google.com/site' +
+  '/rpfwiki/about" target="_blank">here</a>'].join('<br>');
 
 
 /**
@@ -68,9 +67,8 @@ rpf.StatusLogger.DEFAULT = [
  * @type {string}
  */
 rpf.StatusLogger.START_RECORDING = [
-  'Started recording (You might need to refresh the tab' +
-  ' if elements are not highlighting on hover)',
-  'Right click on an element to verify attributes.'].join('<br>');
+  'Started recording (<a href="https://sites.google.com/site' +
+  '/rpfwiki/about/new" target="_blank">tutorial</a>)'].join('<br>');
 
 
 /**

@@ -92,6 +92,11 @@ bite.Popup.CONSOLE_OPTIONS_ = {
     name: MSG_POPUP_OPTION_FLUX_NAME,
     img: '/imgs/popup/rpf_32.png',
     description: MSG_POPUP_OPTION_FLUX_DESC
+  },
+  HELP: {
+    name: MSG_POPUP_OPTION_HELP_NAME,
+    img: '/imgs/popup/help_32.png',
+    description: MSG_POPUP_OPTION_HELP_DESC
   }
 };
 
@@ -241,6 +246,7 @@ bite.Popup.prototype.initLoginComplete_ = function(callback, responseObj) {
   // Only display console options if logged in.
   if (responseObj['success']) {
     consoleOptions.push(bite.Popup.CONSOLE_OPTIONS_['FLUX']);
+    consoleOptions.push(bite.Popup.CONSOLE_OPTIONS_['HELP']);
   }
 
   var body = goog.dom.getDocument().body;
@@ -271,6 +277,9 @@ bite.Popup.prototype.onClickCallback_ = function(optionName) {
       chrome.extension.sendRequest(
           {'action': Bite.Constants.HUD_ACTION.CREATE_RPF_WINDOW,
            'userId': this.userId_});
+      break;
+    case bite.Popup.CONSOLE_OPTIONS_.HELP.name:
+      window.open('https://sites.google.com/site/rpfwiki/about');
       break;
 
     default:

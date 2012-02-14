@@ -85,7 +85,7 @@ var MSG_POPUP_OPTION_ADMIN_DESC = goog.getMsg(
 var MSG_POPUP_OPTION_HELP_NAME = goog.getMsg('Help');
 
 /** @desc Help option info. */
-var MSG_POPUP_OPTION_HELP_DESC = goog.getMsg('Learn how to use BITE.');
+var MSG_POPUP_OPTION_HELP_DESC = goog.getMsg('Learn how to use RPF.');
 
 /** @desc Settings option title. */
 var MSG_POPUP_OPTION_SETTINGS_NAME = goog.getMsg('Settings');
