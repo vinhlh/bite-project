@@ -25,12 +25,10 @@ import logging
 import re
 import uuid
 from google.appengine.ext import db
-from googledocs import docs_gateway
 from config import settings
 
 
 DEFAULT_NUMBER_PER_BATCH = 500
-DOCS_GATEWAY = None
 
 
 # In the bite test code, any references to legacy wtf ids have
@@ -71,21 +69,7 @@ class StorageMetadata(db.Model):
 
   def GetText(self):
     """Retrieves the active revision text blob for this storage entity."""
-    result = ''
-    try:
-      gateway = GetSingletonDocsGateway()
-      if not gateway:
-        logging.info('Test failed to be loaded from GoogleDocs.  Gateway was '
-                     'not available.')
-        result = self._GetActiveTestVersion()
-      else:
-        result = gateway.GetFileContentAsText(self.docs_resource_url)
-    except Exception, e:
-      logging.error('Test failed to be loaded from GoogleDocs. ERROR: %s',
-                    str(e))
-      result = self._GetActiveTestVersion()
-
-    return result
+    return self._GetActiveTestVersion()
 
   def _GetActiveTestVersion(self):
     """Gets the active test version."""
@@ -97,16 +81,6 @@ class StorageMetadata(db.Model):
 
   def Update(self, new_project, new_name, new_contents):
     """Updates the metadata and Google Docs using a transaction."""
-    try:
-      gateway = GetSingletonDocsGateway()
-      if not gateway:
-        logging.info('Test failed to be updated in GoogleDocs. Gateway was '
-                     'not available.')
-      else:
-        gateway.UpdateDocument(self.docs_resource_id, new_name, new_contents)
-    except Exception, e:
-      logging.error('Test failed to be updated in GoogleDoc. ERROR: %s',
-                    str(e))
     db.run_in_transaction(self._UpdateTransaction,
                           new_project, new_name, new_contents)
 
@@ -145,20 +119,6 @@ def LoadZipByKeyStr(key_str):
   return ZipData.get(db.Key(key_str))
 
 
-def GetSingletonDocsGateway():
-  """Returns the singleton docs gateway object."""
-  try:
-    global DOCS_GATEWAY
-    if not DOCS_GATEWAY:
-      DOCS_GATEWAY = docs_gateway.GatewayForAppEngine(
-          settings.STORAGE_GMAIL_ACCOUNT)
-  except Exception, e:
-    logging.info('Failed to create DocsGateway: %s' % e)
-    DOCS_GATEWAY = None
-
-  return DOCS_GATEWAY
-
-
 def GetTestString(contents):
   """Gets the test contents to be saved in the metadata."""
   return json.dumps(
@@ -169,37 +129,17 @@ def GetTestString(contents):
 
 def Save(project, new_test_name, contents):
   """Saves both new metadata and a new docs object."""
-  gateway = None
-  try:
-    gateway = GetSingletonDocsGateway()
-  except Exception, e:
-    pass
-
   return db.run_in_transaction(
-      _SaveTransaction, gateway, project, new_test_name, contents)
+      _SaveTransaction, project, new_test_name, contents)
 
 
-def _SaveTransaction(gateway, project, new_test_name, contents):
+def _SaveTransaction(project, new_test_name, contents):
   """Carries out the actual save operation, retrying if necessary."""
-  src_url = ''
-  resource_id = ''
-  try:
-    if not gateway:
-      logging.info('Failed to save test to GoogleDocs. Gateway was not '
-                   'available.')
-    else:
-      docs_entry = gateway.CreateNewDoc(new_test_name, contents)
-      src_url = docs_entry.src_url
-      resource_id = docs_entry.resource_id
-  except Exception, e:
-    logging.error('Test failed to be saved in GoogleDoc. ERROR: %s',
-                  str(e))
-
   storage_metadata = StorageMetadata(
       id=GetUniqueId(),
       project=project,
-      docs_resource_url=src_url,
-      docs_resource_id=resource_id,
+      docs_resource_url='',
+      docs_resource_id='',
       test_name=new_test_name,
       test=GetTestString(contents))
   storage_metadata.put()
