@@ -36,13 +36,6 @@ rpf.MiscHelper.CONSOLE_HTML_ = 'console.html';
 
 
 /**
- * @const The common lib server.
- * @type {string}
- */
-rpf.MiscHelper.COMMON_LIB_SERVER = 'http://suite-executor.appspot.com';
-
-
-/**
  * Enum for modes values.
  * @enum {string}
  * @export

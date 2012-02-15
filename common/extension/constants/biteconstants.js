@@ -42,22 +42,6 @@ Bite.Constants.FUNCTION_PARSE_DESCRIPTOR = 'parseElementDescriptor';
 
 
 /**
- * The default url to suite-executor.
- * @const
- * @type {string}
- */
-Bite.Constants.SUITE_EXECUTOR_URL = 'suite-executor-test.appspot.com';
-
-
-/**
- * The handler for clicking link to run feature.
- * @const
- * @type {string}
- */
-Bite.Constants.CLICK_LINK_TO_RUN_HANDLER = '/clicklinktorun';
-
-
-/**
  * A list of URLs which should trigger automatic recording.
  * @const
  * @type {Array.<string>}

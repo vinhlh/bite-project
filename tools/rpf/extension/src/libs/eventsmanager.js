@@ -181,8 +181,6 @@ rpf.EventsManager = function() {
 
   this.refresh();
 
-  this.registerOneClickToRun_();
-
   chrome.extension.onRequest.addListener(this.boundOnMessageFunc);
   chrome.extension.onRequest.addListener(this.boundOnRequestFunc);
 };
@@ -284,16 +282,6 @@ rpf.EventsManager.prototype.testAutomation = function() {
 
 
 /**
- * Adds listener for one click to run feature.
- * @private
- */
-rpf.EventsManager.prototype.registerOneClickToRun_ = function() {
-  chrome.tabs.onUpdated.addListener(
-      goog.bind(this.onUpdateHandler_, this));
-};
-
-
-/**
  * Executes multiple scripts in sequence.
  * @param {Array} scriptsAry The scripts Array.
  * @param {number} index The current index.
@@ -315,28 +303,6 @@ rpf.EventsManager.prototype.executeMultipleScripts = function(
     if (opt_callback) {
       opt_callback.apply(null);
     }
-  }
-};
-
-
-/**
- * The tabs onupdated handler.
- * @param {number} tabId The tab id.
- * @param {{status: string, url: string, pinned: boolean}}
- *     changeInfo The changeinfo object.
- * @param {Tab} tab The updated tab.
- * @private
- */
-rpf.EventsManager.prototype.onUpdateHandler_ = function(
-    tabId, changeInfo, tab) {
-  if (!changeInfo['url']) {
-    return;
-  }
-  var uri = new goog.Uri(changeInfo['url']);
-  if (uri.getDomain() == Bite.Constants.SUITE_EXECUTOR_URL &&
-      uri.getPath() == Bite.Constants.CLICK_LINK_TO_RUN_HANDLER) {
-    var testId = uri.getParameterValue('testId');
-    // TODO(phu): Uses the rpfautomator to handle the auto run.
   }
 };
 

@@ -74,15 +74,6 @@ rpf.SaveLoadManager.STORAGE_SERVER_PATH_ = '/storage';
 
 
 /**
- * The test steps depository server.
- * @const
- * @type {string}
- * @private
- */
-rpf.SaveLoadManager.STEPS_DEPOSIT_SERVER_ =
-    'http://suite-executor.appspot.com';
-
-/**
  * The local storage name.
  * @const
  * @type {string}
@@ -267,12 +258,11 @@ rpf.SaveLoadManager.prototype.saveScreens_ = function(idStr,
   var requestUrl = '';
   var parameters = '';
   requestUrl = rpf.MiscHelper.getUrl(
-      rpf.SaveLoadManager.STEPS_DEPOSIT_SERVER_,
-      '/requests',
+      this.server,
+      rpf.SaveLoadManager.STORAGE_SERVER_PATH_ + '/addscreenshots',
       {});
   parameters = goog.Uri.QueryData.createFromMap(
-      {'cmd': '23',
-       'id': idStr,
+      {'id': idStr,
        'steps': goog.json.serialize(screens)}).toString();
   goog.net.XhrIo.send(requestUrl, function() {}, 'POST', parameters);
 };
@@ -381,10 +371,9 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(jsonId, opt_callback) {
 
   // Saves the screenshots to server.
   requestUrl = rpf.MiscHelper.getUrl(
-      rpf.SaveLoadManager.STEPS_DEPOSIT_SERVER_,
-      '/requests',
-      {'cmd': '24',
-       'id': jsonId});
+      this.server,
+      rpf.SaveLoadManager.STORAGE_SERVER_PATH_ + '/getscreenshots',
+      {'id': jsonId});
   var that = this;
   goog.net.XhrIo.send(requestUrl, function() {
     var jsonObj = this.getResponseJson();

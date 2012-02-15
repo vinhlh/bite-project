@@ -116,10 +116,12 @@ class DeleteTest(base.BaseHandler):
     self.post()
 
   def post(self):
-    test_ids = self.GetRequiredParameter('ids')
-    instances = storage.FetchByIds(json.loads(test_ids))
+    test_id_str = self.GetRequiredParameter('ids')
+    test_ids = json.loads(test_id_str)
+    instances = storage.FetchByIds(test_ids)
     if instances:
       storage.DeleteMetadata(instances)
+    storage.DeleteAllStepsByScriptIds(test_ids)
     self.response.out.write('delete successfully.')
 
 
@@ -285,6 +287,42 @@ class GetProjectNames(base.BaseHandler):
     self.response.out.write(json.dumps(names))
 
 
+class AddScreenshots(base.BaseHandler):
+  """Adds the screenshots."""
+
+  def get(self):
+    self.post()
+
+  def post(self):
+    """Adds the screenshots to a script."""
+    test_id = self.GetRequiredParameter('id')
+    steps = self.GetRequiredParameter('steps')
+    storage.DeleteAllSteps(test_id)
+    steps = json.loads(steps)
+    for index in steps:
+      storage.AddNewScriptStep(
+          test_id, steps[index]['index'], steps[index]['data'])
+
+
+class GetScreenshots(base.BaseHandler):
+  """Gets the screenshots of a given script."""
+
+  def get(self):
+    self.post()
+
+  def post(self):
+    """Returns the screenshots of a script."""
+    test_id = self.GetRequiredParameter('id')
+    steps = storage.GetAllSteps(test_id)
+    rtn_obj = {}
+    for step in steps:
+      rtn_obj[step.step_index] = {}
+      rtn_obj[step.step_index]['index'] = step.step_index
+      rtn_obj[step.step_index]['id'] = step.script_id
+      rtn_obj[step.step_index]['data'] = step.image_url
+    self.response.out.write(json.dumps(rtn_obj))
+
+
 app = webapp2.WSGIApplication(
     [('/storage/add_test_metadata', AddPreexistingDocsMetadata),
      ('/storage/getalltestsasjson', GetAllTestNamesAndIds),
@@ -296,5 +334,7 @@ app = webapp2.WSGIApplication(
      ('/storage/deletetest', DeleteTest),
      ('/storage/getproject', GetProject),
      ('/storage/saveproject', SaveProject),
-     ('/storage/getprojectnames', GetProjectNames)
+     ('/storage/getprojectnames', GetProjectNames),
+     ('/storage/addscreenshots', AddScreenshots),
+     ('/storage/getscreenshots', GetScreenshots)
     ])

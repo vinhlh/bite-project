@@ -108,6 +108,38 @@ class ZipData(db.Model):
   json_str = db.TextProperty(required=True)
 
 
+class ScriptStep(db.Model):
+  """Stores the screenshot for a step."""
+  script_id = db.StringProperty()
+  step_index = db.StringProperty()
+  image_url = db.TextProperty()
+
+
+def AddNewScriptStep(id, index, data):
+  """Adds a new script step."""
+  new_step = ScriptStep(script_id=id,
+                        step_index=index,
+                        image_url=data)
+  new_step.put()
+
+
+def GetAllSteps(id):
+  """Gets all of the screenshots of a script."""
+  return db.GqlQuery('SELECT * FROM ScriptStep WHERE script_id = :1', id)
+
+
+def DeleteAllSteps(id):
+  """Deletes all of the screenshots of a script."""
+  keys = db.GqlQuery('SELECT __key__ FROM ScriptStep WHERE script_id = :1', id)
+  db.delete(keys)
+
+
+def DeleteAllStepsByScriptIds(ids):
+  """Deletes all of the screenshots of the given scripts."""
+  for id in ids:
+    DeleteAllSteps(id)
+
+
 def SaveZipData(json_str):
   """Saves the zip data to db."""
   zip = ZipData(json_str=json_str)
