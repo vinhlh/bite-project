@@ -57,11 +57,12 @@ goog.require('soy');
  * @param {boolean=} opt_hideOnLoad Whether or not the console should begin
  *     as a hidden element.
  * @param {string=} opt_tooltip The optional tooltip of this dialog.
+ * @param {string=} opt_link The optional link to a tutorial.
  * @constructor
  */
 bite.ux.Container = function(server, consoleId, headerText,
                              opt_headerSubtext, opt_savePosition,
-                             opt_hideOnLoad, opt_tooltip) {
+                             opt_hideOnLoad, opt_tooltip, opt_link) {
   /**
    * The id of the current console element.
    * @type {string}
@@ -85,6 +86,7 @@ bite.ux.Container = function(server, consoleId, headerText,
 
   var headerSubtext = opt_headerSubtext || '';
   var tooltip = opt_tooltip || '';
+  var link = opt_link || '';
   var rootFolder = chrome.extension.getURL('');
   var container = soy.renderAsElement(
       bite.client.Templates.ux.consoleContainer,
@@ -93,7 +95,8 @@ bite.ux.Container = function(server, consoleId, headerText,
        consoleId: this.consoleId_,
        headerText: headerText,
        headerSubtext: headerSubtext,
-       tooltip: tooltip});
+       tooltip: tooltip,
+       link: link});
 
   /**
    * The root element of the bugs console.

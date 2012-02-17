@@ -1,7 +1,7 @@
 {
-  "name": "RPF (Dev)",
+  "name": "RPF (Beta)",
   "version": "1.0.0.0",
-  "description": "Open source version of RPF. (Dev)",
+  "description": "Open source version of Record and Playback Framework for Web UI Testing.",
   "options_page": "options.html",
   "browser_action": {
     "default_icon": "imgs/rpflogo.png",

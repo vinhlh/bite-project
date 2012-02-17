@@ -21,6 +21,7 @@
  * @param headerText
  * @param headerSubtext
  * @param tooltip
+ * @param link
  */
 {template .consoleContainer}
   <div {if $consoleId}id="{$consoleId}"{/if} class="bite-container"
@@ -42,8 +43,14 @@
         </span>
       </div>
       {if $tooltip}
-        <img title="{$tooltip}" src="{$rootFolder}/imgs/rpf/step-issue-16.png"
-             width="16px" height="16px">
+        {if $link}
+          <a href="{$link}" target="_blank">
+        {/if}
+          <img title="{$tooltip}" src="{$rootFolder}/imgs/rpf/step-issue-16.png"
+               width="16px" height="16px">
+        {if $link}
+          </a>
+        {/if}
       {/if}
       <div class="bite-close-button">
         ✕

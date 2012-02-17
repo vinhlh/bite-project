@@ -1286,9 +1286,17 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
     case Bite.Constants.CONSOLE_CMDS.SET_RECORDING_TAB:
       this.recordMgr_.setRecordingTab();
       break;
+    case Bite.Constants.CONSOLE_CMDS.PREPARE_XPATH_FINDER:
+      this.recordMgr_.setRecordingTab(
+          undefined, undefined, goog.bind(this.openXpathFinder_, this));
+      break;
     case Bite.Constants.CONSOLE_CMDS.ENTER_UPDATER_MODE:
       this.initAllRecordListeners();
       this.recordMgr_.enterUpdaterMode();
+      break;
+    case Bite.Constants.CONSOLE_CMDS.OPEN_XPATH_FINDER:
+      this.initAllRecordListeners();
+      this.recordMgr_.openXpathFinder();
       break;
     case Bite.Constants.CONSOLE_CMDS.SET_ACTION_CALLBACK:
       this.onReceiveActionCallback_ = sendResponse;
@@ -1322,6 +1330,16 @@ rpf.EventsManager.prototype.setInjectedTab_ = function(id) {
   if (id) {
     this.injectedTabs_[id] = true;
   }
+};
+
+
+/**
+ * Opens the xpath finder.
+ * @private
+ */
+rpf.EventsManager.prototype.openXpathFinder_ = function() {
+  this.sendMessage(
+      {'command': Bite.Constants.CONSOLE_CMDS.OPEN_XPATH_FINDER});
 };
 
 

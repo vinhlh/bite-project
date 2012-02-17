@@ -216,9 +216,11 @@ rpf.ContentScript.RecordHelper.DRAG_FILTER_ = {
 /**
  * Opens the locator helper dialog.
  * TODO(phu): Move the bite console to common lib and call it directly.
+ * @param {boolean=} opt_isStandalone Whether this is a standalone tool.
  * @private
  */
-rpf.ContentScript.RecordHelper.prototype.openLocatorDialog_ = function() {
+rpf.ContentScript.RecordHelper.prototype.openLocatorDialog_ = function(
+    opt_isStandalone) {
   if (goog.dom.getElement('bite-locator-console-container')) {
     this.finderConsole_.show();
     return;
@@ -226,16 +228,18 @@ rpf.ContentScript.RecordHelper.prototype.openLocatorDialog_ = function() {
   this.finderConsole_ = new bite.ux.Container(
       '', 'bite-locator-console-container',
       'Xpath Finder',
-      '', true, false, 'Press Shift to pause & resume Xpath changes');
+      '', true, false, 'Press Shift to pause & resume Xpath changes',
+      'https://sites.google.com/site/rpfwiki/about/xpath-finder');
   this.finderConsole_.setContentFromHtml(
-      element.helper.Templates.locatorsUpdater.showHelperContent({}));
+      element.helper.Templates.locatorsUpdater.showHelperContent(
+          {notStandalone: !opt_isStandalone}));
   var size = goog.dom.getViewportSize();
   this.finderConsole_.updateConsolePosition(
       {'position': {'x': size.width - 535,
                     'y': size.height - 345},
        'size': {'width': 530,
                 'height': 340}});
-  this.registerAncestorEvents_();
+  this.registerAncestorEvents_(opt_isStandalone);
   this.registerOnClose_();
 };
 
@@ -300,13 +304,17 @@ rpf.ContentScript.RecordHelper.prototype.onPingSelector_ = function() {
 
 /**
  * Registers all of the attribute checkboxes of the ancestors.
+ * @param {boolean=} opt_isStandalone Whether it's used in a standalone mode.
  * @private
  */
-rpf.ContentScript.RecordHelper.prototype.registerAncestorEvents_ = function() {
-  goog.events.listen(
-      goog.dom.getElement('saveSelector'),
-      'click',
-      goog.bind(this.onSaveSelector_, this));
+rpf.ContentScript.RecordHelper.prototype.registerAncestorEvents_ = function(
+    opt_isStandalone) {
+  if (!opt_isStandalone) {
+    goog.events.listen(
+        goog.dom.getElement('saveSelector'),
+        'click',
+        goog.bind(this.onSaveSelector_, this));
+  }
   goog.events.listen(
       goog.dom.getElement('pingSelector'),
       'click',
@@ -712,6 +720,9 @@ rpf.ContentScript.RecordHelper.prototype.onRequest = function(
       this.xpathFinderOn_ = request['params']['xpathFinderOn'];
       this.startRecording();
       break;
+    case Bite.Constants.RECORD_ACTION.OPEN_XPATH_FINDER:
+      this.openXpathFinder_();
+      break;
     case Bite.Constants.RECORD_ACTION.STOP_RECORDING:
       this.rootArr_ = [];
       this.stopRecording();
@@ -973,6 +984,7 @@ rpf.ContentScript.RecordHelper.prototype.sendActionBack_ = function(
  * @export
  */
 rpf.ContentScript.RecordHelper.ReqCmds = {
+  OPEN_XPATH_FINDER: 'openXpathFinder',
   TEST_DESCRIPTOR: 'testDescriptor',
   TEST_LOCATOR: 'testLocator'
 };
@@ -1019,6 +1031,29 @@ rpf.ContentScript.RecordHelper.prototype.callBackAddOnRequest_ = function(
       }
       sendResponse({'results': results});
       break;
+  }
+};
+
+
+/**
+ * Opens the xpath finder in the standalone mode.
+ * @private
+ */
+rpf.ContentScript.RecordHelper.prototype.openXpathFinder_ = function() {
+  goog.events.listen(goog.dom.getDocument(),
+      'mouseover',
+      this.onMouseOverHandler_,
+      true);
+  goog.events.listen(goog.dom.getDocument(),
+      'mouseout',
+      this.onMouseOutHandler_,
+      true);
+  goog.events.listen(goog.dom.getDocument(),
+      'keydown',
+      this.onKeyDownHandler_,
+      true);
+  if (goog.global.window == goog.global.window.parent) {
+    this.openLocatorDialog_(true);
   }
 };
 

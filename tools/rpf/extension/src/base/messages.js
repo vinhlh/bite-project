@@ -53,6 +53,13 @@ var MSG_POPUP_OPTION_FLUX_NAME = goog.getMsg('Record/Playback');
 var MSG_POPUP_OPTION_FLUX_DESC = goog.getMsg(
     'Record and playback UI automation.');
 
+/** @desc Xpath finder option title. */
+var MSG_POPUP_OPTION_XPATH_NAME = goog.getMsg('Xpath Finder');
+
+/** @desc Xpath finder option info. */
+var MSG_POPUP_OPTION_XPATH_DESC = goog.getMsg(
+    'Help to get a custom Xpath.');
+
 /** @desc Layers option title. */
 var MSG_POPUP_OPTION_LAYERS_NAME = goog.getMsg('Layers');
 

@@ -39,7 +39,7 @@ from models import bite_suite
 from utils import basic_util
 
 
-DEFAULT_RUNS_NUMBER_PER_PAGE = 500
+DEFAULT_RUNS_NUMBER_PER_PAGE = 50
 
 
 class Error(Exception):

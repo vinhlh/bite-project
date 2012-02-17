@@ -82,6 +82,7 @@
 
 /**
  * Shows the helper dialog content.
+ * @param notStandalone
  */
 {template .showHelperContent}
   <table width="98%">
@@ -91,7 +92,9 @@
                              style="width:100%"></td>
       <td align="right" colspan="2">
         <input type="button" id="pingSelector" value="ping">
+        {if $notStandalone}
         <input type="button" id="saveSelector" value="save">
+        {/if}
       </td>
     </tr>
   </table>

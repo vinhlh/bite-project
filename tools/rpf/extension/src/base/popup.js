@@ -93,6 +93,11 @@ bite.Popup.CONSOLE_OPTIONS_ = {
     img: '/imgs/popup/rpf_32.png',
     description: MSG_POPUP_OPTION_FLUX_DESC
   },
+  XPATH: {
+    name: MSG_POPUP_OPTION_XPATH_NAME,
+    img: '/imgs/popup/layers_32.png',
+    description: MSG_POPUP_OPTION_XPATH_DESC
+  },
   HELP: {
     name: MSG_POPUP_OPTION_HELP_NAME,
     img: '/imgs/popup/help_32.png',
@@ -246,6 +251,7 @@ bite.Popup.prototype.initLoginComplete_ = function(callback, responseObj) {
   // Only display console options if logged in.
   if (responseObj['success']) {
     consoleOptions.push(bite.Popup.CONSOLE_OPTIONS_['FLUX']);
+    consoleOptions.push(bite.Popup.CONSOLE_OPTIONS_['XPATH']);
     consoleOptions.push(bite.Popup.CONSOLE_OPTIONS_['HELP']);
   }
 
@@ -277,6 +283,10 @@ bite.Popup.prototype.onClickCallback_ = function(optionName) {
       chrome.extension.sendRequest(
           {'action': Bite.Constants.HUD_ACTION.CREATE_RPF_WINDOW,
            'userId': this.userId_});
+      break;
+    case bite.Popup.CONSOLE_OPTIONS_.XPATH.name:
+      chrome.extension.sendRequest(
+          {'command': Bite.Constants.CONSOLE_CMDS.PREPARE_XPATH_FINDER});
       break;
     case bite.Popup.CONSOLE_OPTIONS_.HELP.name:
       window.open('https://sites.google.com/site/rpfwiki/about');

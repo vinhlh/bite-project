@@ -143,9 +143,6 @@ common.client.ElementDescriptor.prototype.generateXpath = function(
     xpath = this.generateXpath_(curElem, ancestorAttrs) + '/' + xpath;
   }
   if (notUnique) {
-    console.log('The final xpath is (not working): ' + ('//' + xpath) + '\n' +
-                'The found elements by the above xpath are:');
-    console.log(this.getAllElementsByXpath_('//' + xpath));
     return 'Error (please check the developer console for xpath)';
   } else {
     return '//' + xpath;

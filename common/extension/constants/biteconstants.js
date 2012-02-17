@@ -127,8 +127,10 @@ Bite.Constants.CONSOLE_CMDS = {
   GET_TEST_NAMES_LOCALLY: 'getTestNamesLocally',
   INSERT_CMDS_WHILE_PLAYBACK: 'insertCmdsWhilePlayback',
   LOAD_PROJECT_FROM_LOCAL_SERVER: 'loadProjectFromLocalServer',
+  OPEN_XPATH_FINDER: 'openXpathFinder',
   PAGE_LOADED_COMPLETE: 'pageLoadedComplete',
   PREPARE_RECORD_PLAYBACK_PAGE: 'prepareRecordPlaybackPage',
+  PREPARE_XPATH_FINDER: 'prepareXpathFinder',
   RECORD_PAGE_LOADED_COMPLETE: 'recordPageLoadedComplete',
   REFRESH_CODE_TREE: 'refreshCodeTree',
   RUN_GROUP_TESTS: 'runGroupTests',
@@ -488,6 +490,7 @@ Bite.Constants.RpfConsoleId = {
  * @enum {string}
  */
 Bite.Constants.RECORD_ACTION = {
+  OPEN_XPATH_FINDER: 'openXpathFinder',
   START_RECORDING: 'startRecording',
   START_UPDATE_MODE: 'startUpdateMode',
   STOP_RECORDING: 'stopRecording'

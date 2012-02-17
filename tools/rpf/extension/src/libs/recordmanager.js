@@ -313,26 +313,29 @@ rpf.RecordManager.prototype.recordingIconOff_ = function() {
  * Sets the tab and window ids of the page under test.
  * @param {number=} opt_tabId The sender tab id.
  * @param {number=} opt_windowId The sender window id.
+ * @param {Function=} opt_callback The callback function.
  * @export
  */
 rpf.RecordManager.prototype.setRecordingTab = function(
-    opt_tabId, opt_windowId) {
+    opt_tabId, opt_windowId, opt_callback) {
+  var callback = opt_callback || goog.nullFunction;
   if (opt_tabId && opt_windowId) {
-    this.setStatusBeforeRecording_(opt_tabId, opt_windowId);
+    this.setStatusBeforeRecording_(opt_tabId, opt_windowId, callback);
   } else {
     chrome.tabs.getSelected(
-        null, goog.bind(this.callbackSetRecordingTab_, this));
+        null, goog.bind(this.callbackSetRecordingTab_, this, callback));
   }
 };
 
 
 /**
  * Sets the tab and window ids.
+ * @param {Function} callback The callback function.
  * @param {Object} tab Chrome tab object.
  * @private
  */
-rpf.RecordManager.prototype.callbackSetRecordingTab_ = function(tab) {
-  this.setStatusBeforeRecording_(tab.id, tab.windowId);
+rpf.RecordManager.prototype.callbackSetRecordingTab_ = function(callback, tab) {
+  this.setStatusBeforeRecording_(tab.id, tab.windowId, callback);
 };
 
 
@@ -340,13 +343,15 @@ rpf.RecordManager.prototype.callbackSetRecordingTab_ = function(tab) {
  * Sets status and to prepare recording.
  * @param {number} tabId The sender tab id.
  * @param {number} windowId The sender window id.
+ * @param {Function} callback The callback function.
  * @private
  */
 rpf.RecordManager.prototype.setStatusBeforeRecording_ = function(
-    tabId, windowId) {
+    tabId, windowId, callback) {
   this.testTabId_ = tabId;
   this.testWindowId_ = windowId;
   this.addTestTabRemovedListener_();
+  callback();
 };
 
 
@@ -372,6 +377,18 @@ rpf.RecordManager.prototype.enterUpdaterMode = function() {
   this.highlightRecordTab();
   chrome.tabs.executeScript(this.testTabId_,
       {code: 'recordHelper.enterUpdaterMode();'});
+};
+
+
+/**
+ * Opens the xpath finder in page.
+ * @export
+ */
+rpf.RecordManager.prototype.openXpathFinder = function() {
+  this.highlightRecordTab();
+  chrome.tabs.sendRequest(
+      this.testTabId_,
+      {recordAction: Bite.Constants.RECORD_ACTION.OPEN_XPATH_FINDER});
 };
 
 
