@@ -104,6 +104,7 @@ Bite.Constants.CONSOLE_CMDS = {
   CALLBACK_AFTER_EXEC_CMDS: 'callBackAfterExecCmds',
   CHECK_PLAYBACK_OPTION_AND_RUN: 'checkPlaybackOptionAndRun',
   CHECK_READY_TO_RECORD: 'checkReadyToRecord',
+  CLOSE_CURRENT_TAB: 'closeCurrentTab',
   DELETE_CMD: 'deleteCommand',
   DELETE_TEST_LOCAL: 'deleteTestLocal',
   DELETE_TEST_ON_WTF: 'deleteTestOnWTF',

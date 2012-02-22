@@ -183,6 +183,13 @@ rpf.ContentScript.RecordHelper = function() {
   this.onMouseUpHandler_ = goog.bind(this.mouseUpHandler_, this);
 
   /**
+   * The on blur event handler for the contenteditable elements.
+   * @type {function(Event)}
+   * @private
+   */
+  this.onContentEditableBlur_ = goog.bind(this.contentEditableOnBlur_, this);
+
+  /**
    * The xpath finder console.
    * @type {bite.ux.Container}
    * @private
@@ -501,11 +508,11 @@ rpf.ContentScript.RecordHelper.prototype.contentEditableOnBlur_ =
 rpf.ContentScript.RecordHelper.prototype.addListenersToContentEditables_ =
     function() {
   var attrName = 'contenteditable';
-  var divs = goog.dom.getElementsByTagNameAndClass(goog.dom.TagName.DIV);
-  for (var i = 0; i < divs.length; i++) {
-    var attr = divs[i].attributes.getNamedItem(attrName);
-    if (attr) {
-      divs[i].onblur = goog.bind(this.contentEditableOnBlur_, this);
+  var elems = document.querySelectorAll('*[contenteditable]');
+  for (var i = 0; i < elems.length; ++i) {
+    var attr = elems[i].getAttribute(attrName);
+    if (attr != 'false') {
+      elems[i].onblur = this.onContentEditableBlur_;
     }
   }
 };
@@ -1237,6 +1244,16 @@ rpf.ContentScript.RecordHelper.automateRpf_ = function(params) {
 
 
 /**
+ * Closes the current tab.
+ * @private
+ */
+rpf.ContentScript.RecordHelper.closeCurrentTab_ = function() {
+  chrome.extension.sendRequest({
+    'command': Bite.Constants.CONSOLE_CMDS.CLOSE_CURRENT_TAB});
+};
+
+
+/**
  * Groups the parameters in URL to an object.
  * @param {string} url The current page url.
  * @private
@@ -1274,6 +1291,7 @@ if (window == window.parent) {
       }
       rpf.ContentScript.RecordHelper.automateRpf_(parameters);
     }
+    rpf.ContentScript.RecordHelper.closeCurrentTab_();
   }
   goog.dom.getDocument().addEventListener('rpfLaunchEvent', function(e) {
     var parameters = {

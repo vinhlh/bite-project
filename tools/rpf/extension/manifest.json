@@ -17,6 +17,7 @@
     {
       "js": [ "getactioninfo_script.js" ],
       "matches": [ "*://*/*" ],
+      "run_at": "document_end",
       "all_frames": true
     }
   ],

@@ -1305,6 +1305,9 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
       this.removeAllListeners();
       this.recordMgr_.endUpdaterMode();
       break;
+    case Bite.Constants.CONSOLE_CMDS.CLOSE_CURRENT_TAB:
+      this.closeCurrentTab_(sender.tab.id);
+      break;
     case Bite.Constants.CONSOLE_CMDS.RECORD_PAGE_LOADED_COMPLETE:
       this.setInjectedTab_(sender.tab.id);
       break;
@@ -1329,6 +1332,18 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
 rpf.EventsManager.prototype.setInjectedTab_ = function(id) {
   if (id) {
     this.injectedTabs_[id] = true;
+  }
+};
+
+
+/**
+ * Closes the tab.
+ * @param {number} id The tab id.
+ * @private
+ */
+rpf.EventsManager.prototype.closeCurrentTab_ = function(id) {
+  if (id) {
+    chrome.tabs.remove(id);
   }
 };
 
