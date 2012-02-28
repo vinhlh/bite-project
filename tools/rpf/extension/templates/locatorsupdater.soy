@@ -85,36 +85,55 @@
  * @param notStandalone
  */
 {template .showHelperContent}
-  <table width="98%">
+  <table width="100%">
     <tr>
-      <td width="15px"></td>
-      <td width="70%"><input type="text" id="cssSelectorInput"
-                             style="width:100%"></td>
-      <td align="right" colspan="2">
-        <input type="button" id="pingSelector" value="ping">
-        {if $notStandalone}
-        <input type="button" id="saveSelector" value="save">
-        {/if}
+      <td style="border-bottom: 1px solid #E5E5E5;
+                 border-top: 1px solid #E5E5E5;padding:10px;">
+        <table width="100%">
+          <tr>
+            <td width="15px"></td>
+            <td width="70%"><input type="text" id="cssSelectorInput"
+                                   style="width:100%"></td>
+            <td align="right" colspan="2">
+              <div class="rpf-kd-button" id="pingSelector"
+                   title="Highlight the element based on the given xpath.">
+              ping
+              </div>
+              {if $notStandalone}
+              <div class="rpf-kd-button" id="saveSelector"
+                   title="Bind the element to the given xpath.">
+              save
+              </div>
+              {/if}
+            </td>
+          </tr>
+        </table>
       </td>
     </tr>
-  </table>
-  <hr width="98%">
-  <table width="98%">
     <tr>
-      <td colspan="4" style="padding-left:15px">
-        <b>Attributes used for the ancestors.</b>
+      <td style="border-bottom: 1px solid #E5E5E5;padding:10px;">
+        <table width="100%">
+          <tr>
+            <td colspan="4" style="padding-left:15px">
+              <b>Attributes used for the ancestors.</b>
+            </td>
+          </tr>
+          <tr>
+            <td width="15px"></td>
+            <td width="30px"><input type="checkbox" checked
+                       name="ancestorLocatorCheck" value="id"></td>
+            <td>id</td>
+            <td></td>
+          </tr>
+        </table>
+       </td>
+    </tr>
+    <tr>
+      <td>
+        <table id="locatorMethodsTable" width="100%" style="margin-top:10px">
+        </table>
       </td>
     </tr>
-    <tr>
-      <td width="15px"></td>
-      <td width="30px"><input type="checkbox" checked
-                 name="ancestorLocatorCheck" value="id"></td>
-      <td>id</td>
-      <td></td>
-    </tr>
-  </table>
-  <hr width="98%">
-  <table id="locatorMethodsTable" width="98%" style="margin-top:10px">
   </table>
 {/template}
 

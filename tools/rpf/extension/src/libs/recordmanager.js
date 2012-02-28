@@ -184,8 +184,10 @@ rpf.RecordManager.prototype.checkTestTabExistsCallback_ = function(
   var result = {};
   if (!tab) {
     result['success'] = false;
-    result['message'] = 'The tab under record is missing.' +
-                        'Please set a new one first.';
+    result['message'] = 'The page under record is missing. ' +
+                        'For more details, please check ' +
+                        '<a href="https://sites.google.com/site/' +
+                        'rpfwiki/q-a#selectnewtab" target="_blank">here</a>.';
   } else {
     if (injectedTabs[tab.id]) {
       result['success'] = true;
@@ -193,8 +195,11 @@ rpf.RecordManager.prototype.checkTestTabExistsCallback_ = function(
       this.scriptMgr_.startUrl = tab.url;
     } else {
       result['success'] = false;
-      result['message'] = 'Your tab under record is not ready.' +
-                          'Please refresh the tab.';
+      result['message'] = 'Maybe you would need to refresh the page' +
+                          ' under record. ' +
+                          'For more details, please check ' +
+                          '<a href="https://sites.google.com/site/' +
+                          'rpfwiki/q-a#cannotrecord" target="_blank">here</a>.';
     }
   }
   callback(result);
@@ -223,7 +228,6 @@ rpf.RecordManager.prototype.startRecording_ = function(info) {
   this.recordingInfo_ = info;
   this.initAllListeners_();
   this.isRecording_ = true;
-  this.recordingIconOn_();
   this.highlightRecordTab();
   this.executePageInit(goog.bind(this.startRecordingInPage, this));
 };
@@ -264,7 +268,6 @@ rpf.RecordManager.prototype.runCode = function(cmd, opt_allFrame) {
  * @export
  */
 rpf.RecordManager.prototype.stopRecording = function() {
-  this.recordingIconOff_();
   this.isRecording_ = false;
   this.removeAllListeners_();
   if (this.testTabId_ > 0) {
@@ -273,39 +276,6 @@ rpf.RecordManager.prototype.stopRecording = function() {
         {recordAction: Bite.Constants.RECORD_ACTION.STOP_RECORDING,
          params: {}});
   }
-};
-
-
-/**
- * Change the tab's extension icon to indicate that the tab is being
- * recorded.
- * @private
- */
-rpf.RecordManager.prototype.recordingIconOn_ = function() {
-  var iconDetails = {
-      'path': 'imgs/logo-recording-19x19.png',
-      'tabId': this.testTabId_};
-  chrome.browserAction.setIcon(iconDetails);
-  var tooltipDetails = {
-      'title': 'BITE: Recording',
-      'tabId': this.testTabId_};
-  chrome.browserAction.setTitle(tooltipDetails);
-};
-
-
-/**
- * Change the tab's extension icon back to normal.
- * @private
- */
-rpf.RecordManager.prototype.recordingIconOff_ = function() {
-  var iconDetails = {
-      'path': 'imgs/bite-logo-19x19.png',
-      'tabId': this.testTabId_};
-  chrome.browserAction.setIcon(iconDetails);
-  var tooltipDetails = {
-      'title': 'BITE',
-      'tabId': this.testTabId_};
-  chrome.browserAction.setTitle(tooltipDetails);
 };
 
 
@@ -335,7 +305,26 @@ rpf.RecordManager.prototype.setRecordingTab = function(
  * @private
  */
 rpf.RecordManager.prototype.callbackSetRecordingTab_ = function(callback, tab) {
+  this.checkUrlMatching_(tab.url);
   this.setStatusBeforeRecording_(tab.id, tab.windowId, callback);
+};
+
+
+/**
+ * Warns users if the URL is not matching.
+ * @param {string} url The tab under record's url.
+ * @private
+ */
+rpf.RecordManager.prototype.checkUrlMatching_ = function(url) {
+  // To avoid making users confused about why pages are not recordable, we
+  // have to warn them if the current URL is not allowed.
+  if (goog.string.contains(url, 'chrome.google.com/webstore') ||
+      goog.string.startsWith(url, 'chrome://') ||
+      goog.string.startsWith(url, 'about:')) {
+    alert('The selected page does not allow content script. For more details,' +
+          ' please refer to https://sites.google.com/site' +
+          '/rpfwiki/q-a#cannotrecord');
+  }
 };
 
 

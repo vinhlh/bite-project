@@ -1076,3 +1076,54 @@ span.icon {
   padding-left: 4px;
 }
 
+.rpf-kd-button {
+  display: inline-block;
+  min-width: 20px;
+  border: 1px solid #dcdcdc;
+  border: 1px solid rgba(0,0,0,0.1);
+  text-align: center;
+  color: #444;
+  font-size: 11px;
+  font-weight: bold;
+  height: 22px;
+  padding: 0 8px;
+  line-height: 22px;
+  -webkit-border-radius: 2px;
+  -moz-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-transition: all 0.218s;
+  -moz-transition: all 0.218s;
+  -o-transition: all 0.218s;
+  transition: all 0.218s;
+  background-color: #f5f5f5;
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#f5f5f5),to(#f1f1f1));
+  background-image: -webkit-linear-gradient(top,#f5f5f5,#f1f1f1);
+  background-image: -moz-linear-gradient(top,#f5f5f5,#f1f1f1);
+  background-image: -ms-linear-gradient(top,#f5f5f5,#f1f1f1);
+  background-image: -o-linear-gradient(top,#f5f5f5,#f1f1f1);
+  background-image: linear-gradient(top,#f5f5f5,#f1f1f1);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#f5f5f5',EndColorStr='#f1f1f1');
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  cursor: default;
+}
+
+.rpf-kd-button:hover, .rpf-kd-button.hover {
+  border: 1px solid #c6c6c6;
+  color: #222;
+  -webkit-transition: all 0.0s;
+  -moz-transition: all 0.0s;
+  -o-transition: all 0.0s;
+  transition: all 0.0s;
+  background-color: #f8f8f8;
+  background-image: -webkit-gradient(linear,left top,left bottom,from(#f8f8f8),to(#f1f1f1));
+  background-image: -webkit-linear-gradient(top,#f8f8f8,#f1f1f1);
+  background-image: -moz-linear-gradient(top,#f8f8f8,#f1f1f1);
+  background-image: -ms-linear-gradient(top,#f8f8f8,#f1f1f1);
+  background-image: -o-linear-gradient(top,#f8f8f8,#f1f1f1);
+  background-image: linear-gradient(top,#f8f8f8,#f1f1f1);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorStr='#f8f8f8',EndColorStr='#f1f1f1');
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 1px rgba(0,0,0,0.1);
+}

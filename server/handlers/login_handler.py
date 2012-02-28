@@ -33,8 +33,6 @@ from config import settings
 from common.handlers import base
 
 SCOPES = [
-    'http://docs.google.com/feeds/',
-    'https://docs.google.com/feeds/',
     'http://code.google.com/feeds/issues'
     ]
 

@@ -1156,13 +1156,20 @@ rpf.PlayBackManager.prototype.executeCmd = function() {
     console.log('The next step is an URL change, so set ready to false');
   }
 
+  var cmdMap = {};
+  try {
+    cmdMap = rpf.MiscHelper.getElemMap(this.currentCmd_, this.infoMap_);
+  } catch (e) {
+    console.log(e);
+  }
+
   chrome.tabs.sendRequest(
       this.playbackTabId_,
       {script: this.createPlayBackScript(this.datafile_),
        realTimeBag: this.realTimeBack_,
        stepCommand: this.currentCmd_,
        useXpath: this.useXpath_,
-       cmdMap: rpf.MiscHelper.getElemMap(this.currentCmd_, this.infoMap_)},
+       cmdMap: cmdMap},
       goog.bind(this.callBackWhileExecCmds, this));
 };
 

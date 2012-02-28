@@ -237,6 +237,8 @@ rpf.ContentScript.RecordHelper.prototype.openLocatorDialog_ = function(
       'Xpath Finder',
       '', true, false, 'Press Shift to pause & resume Xpath changes',
       'https://sites.google.com/site/rpfwiki/about/xpath-finder');
+  var content = this.finderConsole_.getContentElement();
+  content.style.overflow = 'auto';
   this.finderConsole_.setContentFromHtml(
       element.helper.Templates.locatorsUpdater.showHelperContent(
           {notStandalone: !opt_isStandalone}));
@@ -246,6 +248,8 @@ rpf.ContentScript.RecordHelper.prototype.openLocatorDialog_ = function(
                     'y': size.height - 345},
        'size': {'width': 530,
                 'height': 340}});
+  this.finderConsole_.showInfoMessage(
+      'Press Shift to pause & resume Xpath changes');
   this.registerAncestorEvents_(opt_isStandalone);
   this.registerOnClose_();
 };
@@ -301,7 +305,7 @@ rpf.ContentScript.RecordHelper.prototype.onPingSelector_ = function() {
   try {
     var elems = doc.evaluate(xpath, doc, null, XPathResult.ANY_TYPE, null);
     var firstR = elems.iterateNext();
-    firstR.style.outline = 'medium solid blue';
+    firstR.style.outline = 'medium solid orange';
     goog.Timer.callOnce(function() {firstR.style.outline = '';}, 1500);
   } catch (e) {
     console.log('Failed to find elements through xpath ' + xpath);
@@ -1155,7 +1159,7 @@ rpf.ContentScript.RecordHelper.prototype.outlineElems_ = function(
   elems = elems.length == undefined ? [elems] : elems;
   for (var i = 0; i < elems.length; ++i) {
     var elem = elems[i];
-    goog.style.setStyle(elem, 'outline', 'medium solid blue');
+    goog.style.setStyle(elem, 'outline', 'medium solid orange');
     goog.Timer.callOnce(
         function() {goog.style.setStyle(elem, 'outline', '');},
         1500);

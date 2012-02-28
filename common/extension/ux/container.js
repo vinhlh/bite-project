@@ -277,6 +277,15 @@ bite.ux.Container.prototype.setContentFromHtml = function(innerHtml) {
 
 
 /**
+ * Gets the content of the container.
+ * @return {Element} The content element of the container.
+ */
+bite.ux.Container.prototype.getContentElement = function() {
+  return this.content_;
+};
+
+
+/**
  * Sets the content of the container from an element.
  * @param {Element} element The element to set as the content.
  */
