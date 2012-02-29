@@ -168,6 +168,13 @@ rpf.ConsoleManager = function() {
    */
   this.initialScript_ = '';
 
+  /**
+   * The helper message element.
+   * @type {Element}
+   * @private
+   */
+  this.helperMessageElem_ = null;
+
   this.init_();
 };
 goog.addSingletonGetter(rpf.ConsoleManager);
@@ -567,6 +574,8 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
   this.boundOnScriptNameChange_ = goog.bind(this.onScriptChangeHandler_, this);
 
   this.setupProjectInfoUi_();
+  this.setupHelpMessage_();
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_START);
 };
 
 
@@ -603,6 +612,87 @@ rpf.ConsoleManager.prototype.setupProjectInfoUi_ = function() {
   var urlInput = startUrlDiv.querySelector('.label-input-label');
   urlInput.setAttribute('id', 'startUrl');
   goog.style.setStyle(urlInput, {'width': '100%'});
+};
+
+
+/**
+ * Sets up the help message in the main RPF console.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setupHelpMessage_ = function() {
+  this.helperMessageElem_ = soy.renderAsElement(
+      rpf.soy.Dialog.createAlert,
+      {});
+  goog.dom.appendChild(goog.dom.getElement('rpf-help-message'),
+                       this.helperMessageElem_);
+  goog.events.listen(goog.dom.getElement('rpf-alert-box-dismiss'),
+                     goog.events.EventType.CLICK,
+                     goog.bind(this.onDismissHelpMessage_, this));
+  this.showHelpMessage_(false);
+};
+
+
+/**
+ * The handler on help message dismiss.
+ * @private
+ */
+rpf.ConsoleManager.prototype.onDismissHelpMessage_ = function() {
+  this.showHelpMessage_(false);
+};
+
+
+/**
+ * Hides the help message.
+ * @param {boolean} display Whether to display the message box.
+ * @private
+ */
+rpf.ConsoleManager.prototype.showHelpMessage_ = function(display) {
+  goog.style.showElement(this.helperMessageElem_, display);
+};
+
+
+/**
+ * Prompts the help message.
+ * @param {Object} message The message object.
+ * @private
+ */
+rpf.ConsoleManager.prototype.promptHelpMessage_ = function(message) {
+  var text = message['text'];
+  var link = message['link'];
+  this.setHelpMessage_(text, link);
+};
+
+
+/**
+ * Resizes the message box.
+ * @param {Object} curSize The current viewport size.
+ * @private
+ */
+rpf.ConsoleManager.prototype.resizeMessageBox_ = function(curSize) {
+  var toolbarSize = 34;
+  var infopanelSize = 163;
+  var newWidth = curSize.width * 2 / 5;
+  var newHeight = (curSize.height - toolbarSize) * 2 / 5;
+  goog.style.setSize(this.helperMessageElem_, newWidth, newHeight);
+  this.helperMessageElem_.style.left = curSize.width - newWidth - 45;
+  if (this.moreInfoState_ == Bite.Constants.RpfConsoleInfoType.NONE) {
+    this.helperMessageElem_.style.top = toolbarSize;
+  } else {
+    this.helperMessageElem_.style.top = toolbarSize + infopanelSize;
+  }
+};
+
+
+/**
+ * Sets the help message.
+ * @param {string} text The help message.
+ * @param {string} link The link to more information.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setHelpMessage_ = function(text, link) {
+  goog.dom.getElement('rpf-alert-box-text').innerHTML = text;
+  goog.dom.getElement('rpf-alert-box-more').setAttribute('href', link);
+  goog.style.showElement(this.helperMessageElem_, true);
 };
 
 
@@ -926,6 +1016,7 @@ rpf.ConsoleManager.prototype.onResize_ = function() {
   this.screenshotDialog_.resize();
   this.notesDialog_.resize();
   this.editorMngr_.resize();
+  this.resizeMessageBox_(curSize);
 };
 
 
@@ -2693,6 +2784,9 @@ rpf.ConsoleManager.prototype.saveTestCallback_ = function(response) {
   this.messenger_.sendStatusMessage(
       Bite.Constants.COMPLETED_EVENT_TYPES.TEST_SAVED);
   if (response['success']) {
+    if (response['testId']) {
+      this.setScriptId_(response['testId']);
+    }
     this.saveScript_();
     // After saving the test, it needs to load the project again to sync up.
     this.loaderDialog_.loadProject(

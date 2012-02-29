@@ -96,8 +96,8 @@ class StorageMetadata(db.Model):
     result = ''
     if self.test:
       cur_test = json.loads(self.test)
-      cur_test['backup2'] = cur_test['backup1']
-      cur_test['backup1'] = cur_test['active']
+      cur_test['backup2'] = ''
+      cur_test['backup1'] = ''
       cur_test['active'] = new_contents
       result = json.dumps(cur_test)
     return result

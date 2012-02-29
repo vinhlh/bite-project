@@ -191,20 +191,20 @@ rpf.SaveLoadManager.prototype.deleteTestOnWtf = function(
  * Create a new test in the cloud.
  * @param {string} jsonName the test name.
  * @param {Object} jsonObj the test object.
- * @param {string=} opt_projectName The project name.
- * @param {Object=} opt_screens The optional screen data url.
- * @param {string=} opt_url The optional url.
- * @param {function(Object)=} opt_callback The response function.
- * @param {string=} opt_userLib The user library.
+ * @param {string} projectName The project name.
+ * @param {Object} screens The screen data url.
+ * @param {string} url The url.
+ * @param {function(Object)} callback The response function.
+ * @param {string} userLib The user library.
  * @export
  */
 rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
-    jsonName, jsonObj, opt_projectName, opt_screens, opt_url,
-    opt_callback, opt_userLib) {
-  var projectName = opt_projectName ||
+    jsonName, jsonObj, projectName, screens, url,
+    callback, userLib) {
+  var projectName = projectName ||
                     rpf.SaveLoadManager.WEB_DEFAULT_PROJECT_;
-  var url = opt_url || '';
-  var screens = opt_screens || '';
+  var url = url || '';
+  var screens = screens || null;
   var requestUrl = rpf.MiscHelper.getUrl(
       this.server,
       rpf.SaveLoadManager.STORAGE_SERVER_PATH_ + '/addtest',
@@ -216,8 +216,8 @@ rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
     'url_to_test': url,
     'test_flavor': 'json',
     'json': goog.json.serialize(jsonObj)};
-  if (opt_userLib) {
-    params['jsFiles'] = opt_userLib;
+  if (userLib) {
+    params['jsFiles'] = userLib;
   }
   var parameters = goog.Uri.QueryData.createFromMap(params).toString();
 
@@ -225,20 +225,20 @@ rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
     var xhr = e.target;
     if (xhr.isSuccess()) {
       var idStr = xhr.getResponseText().split('=')[1];
-      if (opt_callback) {
-        opt_callback({'message': rpf.StatusLogger.SAVE_SUCCESS,
-                      'color': 'green',
-                      'success': true});
-      }
-      this.getJsonFromWTF(idStr, null);
       if (screens) {
         this.saveScreens_(idStr, screens);
       }
+      if (callback) {
+        callback({'message': rpf.StatusLogger.SAVE_SUCCESS,
+                  'color': 'green',
+                  'success': true,
+                  'testId': idStr});
+      }
     } else {
-      if (opt_callback) {
-        opt_callback({'message': rpf.StatusLogger.SAVE_FAILED,
-                      'color': 'red',
-                      'success': false});
+      if (callback) {
+        callback({'message': 'Failed saving. Status: ' + xhr.getLastError(),
+                  'color': 'red',
+                  'success': false});
       }
       throw new Error('Failed to create the new test. Error status: ' +
                       xhr.getStatus());
@@ -273,18 +273,18 @@ rpf.SaveLoadManager.prototype.saveScreens_ = function(idStr,
  * @param {string} jsonName the test name.
  * @param {Object} jsonObj the test object.
  * @param {string} jsonId the test id.
- * @param {string=} opt_projectName The project name.
- * @param {Object=} opt_screens The optional screen data url object.
- * @param {function(Object)=} opt_callback The response function.
- * @param {string=} opt_userLib The user library.
+ * @param {string} projectName The project name.
+ * @param {Object} screens The screen data url object.
+ * @param {function(Object)} callback The response function.
+ * @param {string} userLib The user library.
  * @export
  */
 rpf.SaveLoadManager.prototype.updateTestOnWeb = function(
-    jsonName, jsonObj, jsonId, opt_projectName, opt_screens,
-    opt_callback, opt_userLib) {
-  var projectName = opt_projectName ||
+    jsonName, jsonObj, jsonId, projectName, screens,
+    callback, userLib) {
+  var projectName = projectName ||
                     rpf.SaveLoadManager.WEB_DEFAULT_PROJECT_;
-  var screens = opt_screens || null;
+  var screens = screens || null;
   var requestUrl = rpf.MiscHelper.getUrl(
       this.server,
       rpf.SaveLoadManager.STORAGE_SERVER_PATH_ + '/updatetest',
@@ -296,27 +296,27 @@ rpf.SaveLoadManager.prototype.updateTestOnWeb = function(
     'url_to_test': 'na',
     'test_flavor': 'json',
     'json': goog.json.serialize(jsonObj)};
-  if (opt_userLib) {
-    params['jsFiles'] = opt_userLib;
+  if (userLib) {
+    params['jsFiles'] = userLib;
   }
   var parameters = goog.Uri.QueryData.createFromMap(params).toString();
   goog.net.XhrIo.send(requestUrl, goog.bind(function(e) {
     var xhr = e.target;
     if (xhr.isSuccess()) {
-      if (opt_callback) {
-        opt_callback({'message': rpf.StatusLogger.SAVE_SUCCESS,
-                      'color': 'green',
-                      'success': true});
+      if (callback) {
+        callback({'message': rpf.StatusLogger.SAVE_SUCCESS,
+                  'color': 'green',
+                  'success': true,
+                  'testId': jsonId});
       }
-      this.getJsonFromWTF(jsonId, null);
     } else {
-      if (opt_callback) {
-        opt_callback({'message': rpf.StatusLogger.SAVE_FAILED,
-                      'color': 'red',
-                      'success': false});
+      if (callback) {
+        callback({'message': 'Failed saving. Status: ' + xhr.getLastError(),
+                  'color': 'red',
+                  'success': false});
       }
       throw new Error('Failed to update the test. Error status: ' +
-                      xhr.getStatus());
+                      xhr.getLastError());
     }
   }, this), 'POST', parameters);
   if (screens) {
@@ -344,7 +344,6 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(jsonId, opt_callback) {
       var jsonObjprop = goog.json.parse(jsonObj[0].json);
 
       this.scriptMgr_.parseJsonObj(jsonObjprop);
-      this.scriptMgr_.idOnWeb = jsonObj[0].id;
 
       var scriptInfo = {
         'name': jsonObjprop['name'],
@@ -362,7 +361,8 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(jsonId, opt_callback) {
       }
     } else {
       if (opt_callback) {
-        opt_callback({'message': rpf.StatusLogger.LOAD_TEST_FAILED,
+        opt_callback({'message': rpf.StatusLogger.LOAD_TEST_FAILED +
+                                 xhr.getLastError(),
                       'color': 'red',
                       'success': false});
       }
@@ -407,7 +407,7 @@ rpf.SaveLoadManager.prototype.updateOnWeb = function(
         this.scriptMgr_.createJsonObj(
             name, url, script, datafile,
             '', projectName),
-        this.scriptMgr_.idOnWeb, projectName,
+        scriptId, projectName,
         screenshots, sendResponse, userLib);
   } else {
     this.createNewTestOnWeb(
@@ -649,8 +649,6 @@ rpf.SaveLoadManager.prototype.getJsonLocally = function(
         goog.global.localStorage[rpf.SaveLoadManager.LOCAL_STORAGE_NAME_]);
     var jsonTestObject = allEntries[projectName]['tests'][testName];
     this.scriptMgr_.parseJsonObj(jsonTestObject);
-    // TODO(phu): Implement idOnWeb related part.
-    this.scriptMgr_.idOnWeb = '';
     var scriptInfo = {
       'name': jsonTestObject['name'],
       'url': jsonTestObject['url'],

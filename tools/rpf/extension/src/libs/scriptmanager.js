@@ -68,12 +68,6 @@ rpf.ScriptManager = function() {
   this.projectName = '';
 
   /**
-   * The test id in the test deposit.
-   * @type {string}
-   */
-  this.idOnWeb = '';
-
-  /**
    * The element's css selectors.
    * @type {Array}
    */

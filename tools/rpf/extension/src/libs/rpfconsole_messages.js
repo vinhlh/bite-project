@@ -67,8 +67,10 @@ rpf.StatusLogger.DEFAULT = [
  * @type {string}
  */
 rpf.StatusLogger.START_RECORDING = [
-  'Started recording (<a href="https://sites.google.com/site' +
-  '/rpfwiki/about/new" target="_blank">tutorial</a>)'].join('<br>');
+  'Started recording',
+  '(<a href="https://sites.google.com/site' +
+  '/rpfwiki/about/basic-functionalities/new"' +
+  ' target="_blank">Learn what you can record</a>)'].join('<br>');
 
 
 /**
@@ -188,6 +190,21 @@ rpf.StatusLogger.SAVE_FAILED = [
  */
 rpf.StatusLogger.SAVE_SUCCESS = [
   'Saved successfully.'].join('<br>');
+
+
+/**
+ * The helper message for record button.
+ * @type {Object}
+ */
+rpf.StatusLogger.MESSAGE_START = {
+  'text': ['Welcome to use RPF!',
+           '',
+           'Try recording scripts by clicking the record button,',
+           'or',
+           'load existing scripts by clicking the load button.'].join('<br>'),
+  'link': 'https://sites.google.com/site' +
+      '/rpfwiki/about/basic-functionalities/new'
+};
 
 
 /**
