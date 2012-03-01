@@ -674,7 +674,7 @@ rpf.ConsoleManager.prototype.resizeMessageBox_ = function(curSize) {
   var newWidth = curSize.width * 2 / 5;
   var newHeight = (curSize.height - toolbarSize) * 2 / 5;
   goog.style.setSize(this.helperMessageElem_, newWidth, newHeight);
-  this.helperMessageElem_.style.left = curSize.width - newWidth - 45;
+  this.helperMessageElem_.style.left = curSize.width - newWidth - 55;
   if (this.moreInfoState_ == Bite.Constants.RpfConsoleInfoType.NONE) {
     this.helperMessageElem_.style.top = toolbarSize;
   } else {
@@ -1306,6 +1306,7 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       this.playbackRuntimeDialog_.makeChoiceAfterFailure(
           params['failureReason'], params['failureLog']);
       this.editorMngr_.addFailedClass(params['currentStep']);
+      this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_FAILED);
       break;
     case Bite.Constants.UiCmds.UPDATE_WHEN_RUN_FINISHED:
       this.setPlayStatus(false, params['status']);
@@ -1380,6 +1381,7 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       }
       break;
     case Bite.Constants.UiCmds.TOGGLE_CONTENT_MAP:
+      this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_CONTENT_MAP);
       this.handleInfoPanelButton_(
           Bite.Constants.RpfConsoleInfoType.CONTENT_MAP);
       break;
@@ -1547,6 +1549,7 @@ rpf.ConsoleManager.prototype.automateLoadDialog_ = function(
  */
 rpf.ConsoleManager.prototype.addNewTest_ = function() {
   this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_ADD);
   this.updateScriptInfo(
       '', '', '', '', '', '', this.getProjectName_());
   this.screenshotDialog_.getScreenshotManager().clear();
@@ -2075,6 +2078,7 @@ rpf.ConsoleManager.prototype.getInfoDialog = function() {
  * @private
  */
 rpf.ConsoleManager.prototype.popupDetailedInfo_ = function(e) {
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_DETAILS);
   var currentLineNumber = this.editorMngr_.getCurrentSelection().start['row'];
   this.popDescInfoMap_(currentLineNumber);
 };
@@ -2414,6 +2418,7 @@ rpf.ConsoleManager.prototype.addNewData_ = function(opt_dCmd) {
  */
 rpf.ConsoleManager.prototype.showNotes = function() {
   rpf.ConsoleManager.logEvent_('Notes', '');
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_METHODS);
   this.notesDialog_.setVisible(true);
 };
 
@@ -2429,6 +2434,7 @@ rpf.ConsoleManager.prototype.showPlaybackRuntime = function() {
     this.setStatus('Can not playback while recording.', 'red');
     throw new Error('Can not play back during recording.');
   }
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_PLAYBACK);
   this.playbackRuntimeDialog_.setVisible(true);
   this.messenger_.sendStatusMessage(
       Bite.Constants.COMPLETED_EVENT_TYPES.PLAYBACK_DIALOG_OPENED);
@@ -2441,6 +2447,7 @@ rpf.ConsoleManager.prototype.showPlaybackRuntime = function() {
  */
 rpf.ConsoleManager.prototype.showScreenshot = function() {
   rpf.ConsoleManager.logEvent_('ShowScreenshot', '');
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_SCREENSHOTS);
   this.screenshotDialog_.setVisible(true);
 };
 
@@ -2451,6 +2458,7 @@ rpf.ConsoleManager.prototype.showScreenshot = function() {
  */
 rpf.ConsoleManager.prototype.showSetting = function() {
   rpf.ConsoleManager.logEvent_('Setting', '');
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_SETTINGS);
   this.settingDialog_.setVisible(true);
 };
 
@@ -2500,7 +2508,7 @@ rpf.ConsoleManager.prototype.getUserLib = function() {
  */
 rpf.ConsoleManager.prototype.showExportDialog = function() {
   rpf.ConsoleManager.logEvent_('Export', '');
-
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_PROJECT);
   this.exportDialog_.setVisible(true);
 };
 
@@ -2510,6 +2518,7 @@ rpf.ConsoleManager.prototype.showExportDialog = function() {
  */
 rpf.ConsoleManager.prototype.loadCmds = function() {
   rpf.ConsoleManager.logEvent_('Load', '');
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_LOAD);
   this.handleInfoPanelButton_(
       Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
 };
@@ -2731,6 +2740,8 @@ rpf.ConsoleManager.prototype.startRecording = function(opt_pass) {
     throw new Error('Can not record during playing back.');
   }
 
+  this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_RECORD);
+
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.CHECK_READY_TO_RECORD,
        'params': {}},
@@ -2818,6 +2829,7 @@ rpf.ConsoleManager.prototype.loadTestCallback_ = function(response) {
         params['id'],
         params['projectname']);
     this.saveScript_();
+    this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_LOAD_COMPLETE);
   }
 };
 
