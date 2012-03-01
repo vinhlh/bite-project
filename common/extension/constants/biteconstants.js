@@ -382,6 +382,7 @@ Bite.Constants.UiCmds = {
   RESET_SCREENSHOTS: 'resetScreenShots',
   SET_CONSOLE_STATUS: 'setConsoleStatus',
   SET_FINISHED_TESTS_NUMBER: 'setFinishedTestsNumber',
+  SET_SHOW_TIPS: 'setShowTips',
   SET_START_URL: 'setStartUrl',
   SHOW_EXPORT: 'showExport',
   SHOW_INFO: 'showInfo',

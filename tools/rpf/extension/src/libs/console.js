@@ -175,6 +175,13 @@ rpf.ConsoleManager = function() {
    */
   this.helperMessageElem_ = null;
 
+  /**
+   * Whether to show tips.
+   * @type {boolean}
+   * @private
+   */
+  this.showTips_ = true;
+
   this.init_();
 };
 goog.addSingletonGetter(rpf.ConsoleManager);
@@ -628,6 +635,9 @@ rpf.ConsoleManager.prototype.setupHelpMessage_ = function() {
   goog.events.listen(goog.dom.getElement('rpf-alert-box-dismiss'),
                      goog.events.EventType.CLICK,
                      goog.bind(this.onDismissHelpMessage_, this));
+  goog.events.listen(goog.dom.getElement('rpf-alert-box-never'),
+                     goog.events.EventType.CLICK,
+                     goog.bind(this.onNeverShowHelpMessage_, this));
   this.showHelpMessage_(false);
 };
 
@@ -638,6 +648,15 @@ rpf.ConsoleManager.prototype.setupHelpMessage_ = function() {
  */
 rpf.ConsoleManager.prototype.onDismissHelpMessage_ = function() {
   this.showHelpMessage_(false);
+};
+
+
+/**
+ * The handler on help message never show.
+ * @private
+ */
+rpf.ConsoleManager.prototype.onNeverShowHelpMessage_ = function() {
+  this.settingDialog_.automateShowTips(false);
 };
 
 
@@ -657,6 +676,9 @@ rpf.ConsoleManager.prototype.showHelpMessage_ = function(display) {
  * @private
  */
 rpf.ConsoleManager.prototype.promptHelpMessage_ = function(message) {
+  if (!this.showTips_) {
+    return;
+  }
   var text = message['text'];
   var link = message['link'];
   this.setHelpMessage_(text, link);
@@ -671,7 +693,7 @@ rpf.ConsoleManager.prototype.promptHelpMessage_ = function(message) {
 rpf.ConsoleManager.prototype.resizeMessageBox_ = function(curSize) {
   var toolbarSize = 34;
   var infopanelSize = 163;
-  var newWidth = curSize.width * 2 / 5;
+  var newWidth = curSize.width * 2 / 5 + 20;
   var newHeight = (curSize.height - toolbarSize) * 2 / 5;
   goog.style.setSize(this.helperMessageElem_, newWidth, newHeight);
   this.helperMessageElem_.style.left = curSize.width - newWidth - 55;
@@ -1439,6 +1461,9 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
     case Bite.Constants.UiCmds.CHECK_TAB_READY_TO_UPDATE:
       this.checkTabReadyToUpdate_();
       break;
+    case Bite.Constants.UiCmds.SET_SHOW_TIPS:
+      this.setShowTips_(params['show']);
+      break;
     default:
       break;
   }
@@ -1505,6 +1530,19 @@ rpf.ConsoleManager.Buttons = {
   PLAY: 'rpf-startPlayback',
   STOP: 'rpf-stop',
   WORKER: 'rpf-workerMode'
+};
+
+
+/**
+ * Sets whether to show tips.
+ * @param {boolean} show Whether to show tips.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setShowTips_ = function(show) {
+  this.showTips_ = show;
+  if (!show && this.helperMessageElem_) {
+    this.showHelpMessage_(false);
+  }
 };
 
 

@@ -87,6 +87,14 @@ rpf.SettingDialog.USE_XPATH_ = 'useXpath';
 
 
 /**
+ * Localstorage name for whether to show tips.
+ * @type {string}
+ * @private
+ */
+rpf.SettingDialog.SHOW_TIPS_ = 'showTips';
+
+
+/**
  * Inits the setting dialog.
  * @private
  */
@@ -101,6 +109,7 @@ rpf.SettingDialog.prototype.initSettingDialog_ = function() {
   this.registerListeners_();
   this.initTakeScreenshotsCheckbox_();
   this.initUseXpath_();
+  this.initShowTips_();
 };
 
 
@@ -125,6 +134,10 @@ rpf.SettingDialog.prototype.registerListeners_ = function() {
       goog.dom.getElement('whetherUseXpath'),
       'click',
       goog.bind(this.setUseXpath_, this));
+  goog.events.listen(
+      goog.dom.getElement('whetherShowTips'),
+      'click',
+      goog.bind(this.setShowTips_, this));
 };
 
 
@@ -193,6 +206,57 @@ rpf.SettingDialog.prototype.initUseXpath_ = function() {
     this.messenger_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.SET_USE_XPATH,
          'params': {'use': true}});
+  }
+};
+
+
+/**
+ * Gets whether to show tips.
+ * @return {boolean} Whether to show tips.
+ */
+rpf.SettingDialog.prototype.getShowTips = function() {
+  return goog.dom.getElement('whetherShowTips').checked;
+};
+
+
+/**
+ * Sets whether to show tips.
+ * @param {boolean} show Whether to show the tips.
+ * @export
+ */
+rpf.SettingDialog.prototype.automateShowTips = function(show) {
+  goog.dom.getElement('whetherShowTips').checked = show;
+  this.setShowTips_();
+};
+
+
+/**
+ * Sets whether to show tips.
+ * @private
+ */
+rpf.SettingDialog.prototype.setShowTips_ = function() {
+  var checked = goog.dom.getElement('whetherShowTips').checked;
+  goog.global.localStorage[rpf.SettingDialog.SHOW_TIPS_] = checked;
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.SET_SHOW_TIPS,
+      {'show': checked},
+      /** @type {Event} */ ({}));
+};
+
+
+/**
+ * Sets whether to show tips.
+ * @private
+ */
+rpf.SettingDialog.prototype.initShowTips_ = function() {
+  var show = goog.global.localStorage[rpf.SettingDialog.SHOW_TIPS_];
+  if (!show || show == 'true') {
+    goog.dom.getElement('whetherShowTips').checked = true;
+  } else {
+    this.onUiEvents_(
+        Bite.Constants.UiCmds.SET_SHOW_TIPS,
+        {'show': false},
+        /** @type {Event} */ ({}));
   }
 };
 
