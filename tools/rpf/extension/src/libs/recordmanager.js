@@ -321,7 +321,9 @@ rpf.RecordManager.prototype.checkUrlMatching_ = function(url) {
   if (goog.string.contains(url, 'chrome.google.com/webstore') ||
       goog.string.startsWith(url, 'chrome://') ||
       goog.string.startsWith(url, 'about:')) {
-    alert('The selected page does not allow content script. For more details,' +
+    alert('The selected page does not allow content script. ' +
+          'For example, blank page, webstore page, other non-http(s) pages. ' +
+          'Please select a valid page to record. For more details,' +
           ' please refer to https://sites.google.com/site' +
           '/rpfwiki/q-a#cannotrecord');
   }

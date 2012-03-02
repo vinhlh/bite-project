@@ -511,6 +511,16 @@ Bite.Constants.RPF_AUTOMATION = {
 
 
 /**
+ * The constants to playback scripts.
+ * @enum {number}
+ */
+Bite.Constants.RPF_PLAYBACK = {
+  INTERVAL: 700,
+  REDIRECTION_TIMEOUT: 40 * 1000
+};
+
+
+/**
  * Enum for view modes.
  * @enum {string}
  */

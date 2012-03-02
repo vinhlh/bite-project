@@ -21,6 +21,7 @@
 
 goog.provide('rpf.SettingDialog');
 
+goog.require('Bite.Constants');
 goog.require('bite.common.mvc.helper');
 goog.require('goog.dom');
 goog.require('goog.dom.TagName');
@@ -107,6 +108,8 @@ rpf.SettingDialog.prototype.initSettingDialog_ = function() {
   this.settingDialog_.setVisible(true);
   this.settingDialog_.setVisible(false);
   this.registerListeners_();
+  this.initPlaybackInterval_();
+  this.initTimeout_();
   this.initTakeScreenshotsCheckbox_();
   this.initUseXpath_();
   this.initShowTips_();
@@ -262,14 +265,44 @@ rpf.SettingDialog.prototype.initShowTips_ = function() {
 
 
 /**
+ * Inits the playback redirection timeout.
+ * @private
+ */
+rpf.SettingDialog.prototype.initTimeout_ = function() {
+  goog.dom.getElement('defaulttimeout').value =
+      Bite.Constants.RPF_PLAYBACK.REDIRECTION_TIMEOUT / 1000;
+};
+
+
+/**
  * Sets time out.
  * @private
  */
 rpf.SettingDialog.prototype.setTimeout_ = function() {
-  var time = parseInt(goog.dom.getElement('defaulttimeout').value, 10) * 1000;
+  var time = parseInt(goog.dom.getElement('defaulttimeout').value, 10);
+  if (isNaN(time)) {
+    alert('Invalid input, please type in a number.');
+    return;
+  }
+  time = time * 1000;
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.SET_DEFAULT_TIMEOUT,
        'params': {'time': time}});
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.SET_CONSOLE_STATUS,
+      {'message': 'Saved the playback timeout successfully.',
+       'color': 'green'},
+      /** @type {Event} */ ({}));
+};
+
+
+/**
+ * Inits the playback interval box.
+ * @private
+ */
+rpf.SettingDialog.prototype.initPlaybackInterval_ = function() {
+  goog.dom.getElement('playbackinterval').value =
+      Bite.Constants.RPF_PLAYBACK.INTERVAL * 1.0 / 1000;
 };
 
 
@@ -279,9 +312,18 @@ rpf.SettingDialog.prototype.setTimeout_ = function() {
  */
 rpf.SettingDialog.prototype.setPlaybackInterval_ = function() {
   var interval = parseFloat(goog.dom.getElement('playbackinterval').value);
+  if (isNaN(interval)) {
+    alert('Invalid input, please type in a float number.');
+    return;
+  }
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.SET_PLAYBACK_INTERVAL,
        'params': {'interval': interval}});
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.SET_CONSOLE_STATUS,
+      {'message': 'Saved the playback interval successfully.',
+       'color': 'green'},
+      /** @type {Event} */ ({}));
 };
 
 

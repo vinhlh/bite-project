@@ -201,7 +201,10 @@ rpf.StatusLogger.MESSAGE_START = {
            '',
            'Try recording scripts by clicking the record button,',
            'or',
-           'load existing scripts by clicking the load button.'].join('<br>'),
+           'load existing scripts by clicking the load button.',
+           '',
+           'For experienced users, feel free to choose never show tooltips.'
+          ].join('<br>'),
   'link': 'https://sites.google.com/site' +
       '/rpfwiki/about/a-quick-example-to-start'
 };
@@ -212,12 +215,15 @@ rpf.StatusLogger.MESSAGE_START = {
  * @type {Object}
  */
 rpf.StatusLogger.MESSAGE_RECORD = {
-  'text': ['Moving cursor in the target page, you should see elements ' +
-           'get highlighted.',
+  'text': ['Make sure elements get highlighted before performing actions' +
+           ' in page, and then keep an eye on the generated code.',
+           '',
+           'Enter key is not captured, try mouse clicks if possible. ' +
+           'Back button, address bar, flash can not be recorded either.',
            '',
            'Right click on elements for advanced actions like verification.',
            '',
-           'Click the stop button to stop recording, then you could ' +
+           'Click the stop button first, then you could ' +
            'playback or save it.'].join('<br>'),
   'link': 'https://sites.google.com/site' +
       '/rpfwiki/about/basic-functionalities/new'

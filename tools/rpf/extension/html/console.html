@@ -64,11 +64,17 @@ See the COPYING file for details.
           <div style="display:inline;padding-left:15px;">
             <input type="radio" name="projectLocation" id="location-local"
                    value="local">
-            <label class="dialog-label">Local</label>
+            <label class="dialog-label"
+                   title="Save or load from localStorage which is in browser.">
+              Local
+            </label>
             <input type="radio" name="projectLocation" id="location-web"
                    value="web"
                    checked style="margin-left: 20px">
-            <label class="dialog-label">Web</label>
+            <label class="dialog-label"
+                   title="Save or load from the server, which could be seen by anyone.">
+              Web
+            </label>
           </div>
         </div>
 
@@ -78,7 +84,8 @@ See the COPYING file for details.
                style="display:inline;width:60%;"></div>
           <div style="display:inline;padding-left:21px;vertical-align:bottom;">
             <input type="image" name="testId" id="testId"
-                   src="imgs/rpf/ghost-avatar.svg">
+                   src="imgs/rpf/ghost-avatar.svg",
+                   title="No script id">
           </div>
         </div>
 

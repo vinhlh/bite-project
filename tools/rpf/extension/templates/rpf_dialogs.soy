@@ -279,25 +279,27 @@
  */
 {template .settingsContent}
     <ul>
-      <li>
+      <li style="padding-bottom: 5px">
         <label for="playbackinterval">
-          Playback Interval (sec)
+          Playback Interval (seconds)
         </label>
         <input type="text" id="playbackinterval" />
-        <input type="button" value="ok" id="playbackintervalbutton" />
+        <input type="button" value="ok" id="playbackintervalbutton"
+               title="Sets the interval that RPF tries to execute a command." />
       </li>
-      <li>
+      <li style="padding-bottom: 5px">
         <label for="defaulttimeout">
-          Default timeout (seconds)
+          Redirection timeout (seconds)
         </label>
         <input type="text" id="defaulttimeout" />
-        <input type="button" value="ok" id="defaulttimeoutbutton" />
+        <input type="button" value="ok" id="defaulttimeoutbutton"
+               title="Sets the default timeout for URL redirections." />
       </li>
-      <li>
+      <li style="padding-bottom: 5px">
         <label for="whetherUseXpath">Take Screenshot</label>
         <input type="checkbox" id="whethertakescreenshot" />
       </li>
-      <li>
+      <li style="padding-bottom: 5px">
         <label for="whetherUseXpath">Use Xpath</label>
         <input type="checkbox" id="whetherUseXpath" />
       </li>

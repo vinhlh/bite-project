@@ -182,6 +182,13 @@ rpf.ConsoleManager = function() {
    */
   this.showTips_ = true;
 
+  /**
+   * The script id.
+   * @type {string}
+   * @private
+   */
+  this.scriptId_ = '';
+
   this.init_();
 };
 goog.addSingletonGetter(rpf.ConsoleManager);
@@ -2568,9 +2575,7 @@ rpf.ConsoleManager.prototype.loadCmds = function() {
  * @private
  */
 rpf.ConsoleManager.prototype.getScriptId_ = function() {
-  var idElement = goog.dom.getElement(
-    Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID);
-  return idElement.getAttribute('title') || '';
+  return this.scriptId_ || '';
 };
 
 
@@ -2582,7 +2587,14 @@ rpf.ConsoleManager.prototype.getScriptId_ = function() {
 rpf.ConsoleManager.prototype.setScriptId_ = function(id) {
   var idElement = goog.dom.getElement(
       Bite.Constants.RpfConsoleId.ELEMENT_TEST_ID);
-  idElement.setAttribute('title', id);
+  var title = id;
+  if (!id) {
+    title = 'No script id';
+  } else {
+    title = 'Script id: ' + id;
+  }
+  idElement.setAttribute('title', title);
+  this.scriptId_ = id;
 };
 
 

@@ -20,6 +20,7 @@
 
 goog.provide('rpf.PlayBackManager');
 
+goog.require('Bite.Constants');
 goog.require('goog.Timer');
 goog.require('goog.events');
 goog.require('goog.string');
@@ -403,7 +404,7 @@ rpf.PlayBackManager.FAILURE_TOTAL_RETRY_TIMES_ = 5;
  * @type {number}
  * @private
  */
-rpf.PlayBackManager.rpfPlaybackInterval_ = 700;
+rpf.PlayBackManager.rpfPlaybackInterval_ = Bite.Constants.RPF_PLAYBACK.INTERVAL;
 
 
 /**
@@ -419,7 +420,8 @@ rpf.PlayBackManager.EACH_CMD_TIMEOUT_ = 6 * 1000;
  * @type {number}
  * @private
  */
-rpf.PlayBackManager.PLAYBACK_TIMEOUT_EACHRUN_ = 40 * 1000;
+rpf.PlayBackManager.PLAYBACK_TIMEOUT_EACHRUN_ =
+    Bite.Constants.RPF_PLAYBACK.REDIRECTION_TIMEOUT;
 
 
 /**
