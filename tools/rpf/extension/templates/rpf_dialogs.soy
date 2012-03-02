@@ -280,7 +280,8 @@
 {template .settingsContent}
     <ul>
       <li style="padding-bottom: 5px">
-        <label for="playbackinterval">
+        <label for="playbackinterval"
+               title="The interval that RPF tries to execute a command.">
           Playback Interval (seconds)
         </label>
         <input type="text" id="playbackinterval" />
@@ -288,7 +289,8 @@
                title="Sets the interval that RPF tries to execute a command." />
       </li>
       <li style="padding-bottom: 5px">
-        <label for="defaulttimeout">
+        <label for="defaulttimeout"
+               title="The default timeout for URL redirections in playback.">
           Redirection timeout (seconds)
         </label>
         <input type="text" id="defaulttimeout" />
@@ -296,15 +298,21 @@
                title="Sets the default timeout for URL redirections." />
       </li>
       <li style="padding-bottom: 5px">
-        <label for="whetherUseXpath">Take Screenshot</label>
+        <label for="whetherUseXpath" title="Takes screenshot during recording.">
+          Take screenshot
+        </label>
         <input type="checkbox" id="whethertakescreenshot" />
       </li>
       <li style="padding-bottom: 5px">
-        <label for="whetherUseXpath">Use Xpath</label>
+        <label for="whetherUseXpath"
+               title="Use xpath or attributes to locate elements.">
+           Use xpath
+        </label>
         <input type="checkbox" id="whetherUseXpath" />
       </li>
       <li>
-        <label for="whetherShowTips">Show Tips</label>
+        <label for="whetherShowTips"
+               title="Shows the tips.">Show tips</label>
         <input type="checkbox" id="whetherShowTips" />
       </li>
     </ul>
@@ -318,7 +326,9 @@
   <div id="rpf-console-js-functions-toolbar"
        style="height:30px;vertical-align:center;padding-top:5px;
               border-bottom:1px solid #CCC;">
-    <div id="rpf-js-play-button"></div>
+    <div id="rpf-js-play-button"
+         title="Runs all the following code in the target page as content scripts.">
+    </div>
   </div>
   <div id="rpf-console-js-functions">
   </div>

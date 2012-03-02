@@ -811,7 +811,8 @@ rpf.ExportDialog.prototype.requestDataComplete = function(
     bite.webdriver.getWebdriverCode(this.data_);
   } catch (error) {
     this.data_ = null;
-    statusLogger.setStatus('Parse json failed.');
+    statusLogger.setStatus('Potentially one or more' +
+                           ' scripts in this project have issues.');
     console.error('ERROR (rpf.ExportDialog.requestDataComplete_): Failed to ' +
                   'parse json for url/page map: ' + error);
     return;

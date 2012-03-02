@@ -304,7 +304,7 @@ rpf.ConsoleManager.prototype.init_ = function() {
   toolbar.addChild(new goog.ui.ToolbarSeparator(), true);
 
   this.setButton(rpf.ConsoleManager.Buttons.REFRESH,
-                 'Refresh the rpf console',
+                 'Refresh',
                  toolbar,
                  Bite.Constants.UiCmds.ON_CONSOLE_REFRESH);
 

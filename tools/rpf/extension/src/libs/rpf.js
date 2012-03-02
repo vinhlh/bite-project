@@ -216,11 +216,14 @@ rpf.Rpf.prototype.setUserId = function(userId) {
 /**
  * Creates the physical rpf window if it does not yet
  * already exist.
+ * @param {boolean=} opt_refresh Whether this is a refresh or fresh open.
  * @private
  */
-rpf.Rpf.prototype.createRpfWindow_ = function() {
-  this.eventsMgr_.sendMessage(
-      {'command': Bite.Constants.CONSOLE_CMDS.SET_RECORDING_TAB});
+rpf.Rpf.prototype.createRpfWindow_ = function(opt_refresh) {
+  if (!opt_refresh) {
+    this.eventsMgr_.sendMessage(
+        {'command': Bite.Constants.CONSOLE_CMDS.SET_RECORDING_TAB});
+  }
   this.eventsMgr_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
   this.eventsMgr_.sendMessage(
@@ -277,6 +280,9 @@ rpf.Rpf.prototype.createWindow = function(opt_forceRefresh) {
   if (opt_forceRefresh) {
     this.removeWindow();
     this.windowId_ = -1;
+    this.eventsMgr_.sendMessage(
+        {'command': Bite.Constants.CONSOLE_CMDS.SET_CONSOLE_TAB_ID,
+         'params': {'id': -1}});
   }
   if (this.windowId_ >= 0) {
     this.eventsMgr_.sendMessage(
@@ -288,7 +294,7 @@ rpf.Rpf.prototype.createWindow = function(opt_forceRefresh) {
     this.focusRpf();
   } else {
     this.eventsMgr_.refresh();
-    this.createRpfWindow_();
+    this.createRpfWindow_(opt_forceRefresh);
   }
 };
 
@@ -335,6 +341,9 @@ rpf.Rpf.prototype.windowDestroyed_ = function(windowId) {
   }
   this.windowId_ = -1;
 
+  this.eventsMgr_.sendMessage(
+      {'command': Bite.Constants.CONSOLE_CMDS.SET_CONSOLE_TAB_ID,
+       'params': {'id': -1}});
   this.eventsMgr_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
   this.eventsMgr_.sendMessage(

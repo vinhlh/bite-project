@@ -236,7 +236,10 @@ rpf.StatusLogger.MESSAGE_RECORD = {
  */
 rpf.StatusLogger.MESSAGE_PLAYBACK = {
   'text': ['If the playback could not start, try clicking stop button to ' +
-           'clear the status first.'].join('<br>'),
+           'clear the status first.',
+           '',
+           'Once you have paused at certain line, you could click the play ' +
+           'button to continue playing.'].join('<br>'),
   'link': 'https://sites.google.com/site/rpfwiki/about/playback'
 };
 
