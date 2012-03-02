@@ -531,6 +531,9 @@ rpf.EventsManager.CmdTypes_ = {
  */
 rpf.EventsManager.prototype.sendMessageToConsole_ = function(
     request, opt_callback) {
+  if (this.consoleTabId_ < 0) {
+    return;
+  }
   chrome.tabs.sendRequest(this.consoleTabId_, request, opt_callback);
 };
 

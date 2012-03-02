@@ -220,9 +220,11 @@ rpf.Rpf.prototype.setUserId = function(userId) {
  */
 rpf.Rpf.prototype.createRpfWindow_ = function() {
   this.eventsMgr_.sendMessage(
-    {'command': Bite.Constants.CONSOLE_CMDS.SET_RECORDING_TAB});
+      {'command': Bite.Constants.CONSOLE_CMDS.SET_RECORDING_TAB});
   this.eventsMgr_.sendMessage(
-    {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
+      {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
+  this.eventsMgr_.sendMessage(
+      {'command': Bite.Constants.CONSOLE_CMDS.USER_SET_STOP});
 
   var options = {
     url: rpf.Rpf.CONSOLE_HTML_FILE_,
@@ -280,6 +282,8 @@ rpf.Rpf.prototype.createWindow = function(opt_forceRefresh) {
     this.eventsMgr_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
     this.eventsMgr_.sendMessage(
+        {'command': Bite.Constants.CONSOLE_CMDS.USER_SET_STOP});
+    this.eventsMgr_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.SET_RECORDING_TAB});
     this.focusRpf();
   } else {
@@ -333,6 +337,8 @@ rpf.Rpf.prototype.windowDestroyed_ = function(windowId) {
 
   this.eventsMgr_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.STOP_RECORDING});
+  this.eventsMgr_.sendMessage(
+      {'command': Bite.Constants.CONSOLE_CMDS.USER_SET_STOP});
   chrome.tabs.onRemoved.removeListener(
       this.eventsMgr_.callBackAddTestTabRemoved);
 };
