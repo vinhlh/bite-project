@@ -312,6 +312,8 @@ rpf.ExportDialog.prototype.onDeleteTests_ = function() {
            'params': {'jsonIds': selectedTestIds}},
           this.reloadProject_);
     }
+  } else {
+    alert('Please select at least one script to delete.');
   }
 };
 

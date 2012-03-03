@@ -231,6 +231,22 @@ rpf.StatusLogger.MESSAGE_RECORD = {
 
 
 /**
+ * The helper message for recording.
+ * @type {Object}
+ */
+rpf.StatusLogger.MESSAGE_VERIFICATION = {
+  'text': ['To generate the "verify" command, you would normally select at ' +
+           'least one attribute as "must". The command is used to:',
+           '1. Verify element attributes.',
+           '2. Wait until the element shows up.',
+           '',
+           'You could generate verify, verifyNot, and mouseover commands here.'
+          ].join('<br>'),
+  'link': 'https://sites.google.com/site/rpfwiki/about/verification'
+};
+
+
+/**
  * The helper message for playback.
  * @type {Object}
  */

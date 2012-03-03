@@ -255,6 +255,7 @@ rpf.PlayDialog.prototype.updateTestSelection = function(names, testIds) {
   selector.innerHTML = '';
   for (var i = 0; i < names.length; i++) {
     var opt = new Option(names[i], names[i]);
+    opt.setAttribute('title', names[i]);
     selector.add(opt, null);
   }
   this.setTestSelectorVisibility(true);

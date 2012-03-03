@@ -1347,6 +1347,7 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
     case Bite.Constants.UiCmds.OPEN_VALIDATION_DIALOG:
       this.validationDialog_.openValidationDialog(
           params['request']);
+      this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_VERIFICATION);
       break;
     case Bite.Constants.UiCmds.SET_START_URL:
       this.setStartUrl(params['url']);
@@ -2991,8 +2992,11 @@ rpf.ConsoleManager.prototype.saveTest = function() {
   userLib = this.getUserLib();
   scriptId = this.getScriptId_();
 
-  if (!goog.string.trim(testName) || !goog.string.trim(projectName)) {
-    this.setStatus('Please provide both project and script name.', 'red');
+  if (!goog.string.trim(testName) ||
+      !goog.string.trim(projectName) ||
+      testName.length > 500 ||
+      projectName.length > 500) {
+    this.setStatus('Please provide valid project and script name.', 'red');
     this.switchInfoPanel_(Bite.Constants.RpfConsoleInfoType.PROJECT_INFO);
     return;
   }

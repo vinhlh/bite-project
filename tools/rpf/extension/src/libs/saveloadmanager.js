@@ -534,7 +534,7 @@ rpf.SaveLoadManager.prototype.loadProjectFromLocalServer = function(
         alert('Invalid json: ' + exception.message());
       }
     } else {
-      alert('Error reading the data file.');
+      alert('This feature is not currently available.');
     }
   }, this), 'GET');
 };
