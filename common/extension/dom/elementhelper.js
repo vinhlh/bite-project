@@ -863,14 +863,16 @@ common.client.ElementDescriptor.instance =
 common.client.ElementDescriptor.getElement = function(elemMap, method) {
   // TODO(phu): Use all the data in elemMap like css selector to find the
   // best match.
+  var xpath = elemMap['xpaths'][0];
+  var log = 'Cannot find the element whose xpath is ' + xpath +
+            ' (Recommend to update it).';
   if (method == 'xpath') {
-    var xpath = elemMap['xpaths'][0];
     console.log('Uses xpath to find element: ' + xpath);
     return {'elem': common.client.ElementDescriptor.getElemBy(method, xpath),
-            'log': 'xPath: ' + elemMap['xpaths'][0]};
+            'log': log};
   }
   return {'elem': parseElementDescriptor(elemMap['descriptor']),
-          'log': 'descriptor: ' + elemMap['descriptor']};
+          'log': log};
 };
 
 

@@ -865,7 +865,9 @@ rpf.PlayBackManager.prototype.checkReadyForNext_ = function() {
   }
 
   if (!urlChange) {
-    logText = ('The url change has not finished. Elapsed: ' +
+    logText = ('The url change has not finished (If this is an issue, ' +
+               'you could click the pause button and then delete or insert' +
+               ' new recordings). Elapsed: ' +
                this.elapsedTime_);
     console.log(logText);
     this.updateRuntimeStatus_(logText, 'red');

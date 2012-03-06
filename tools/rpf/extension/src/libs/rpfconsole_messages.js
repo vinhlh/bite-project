@@ -319,7 +319,10 @@ rpf.StatusLogger.MESSAGE_CONTENT_MAP = {
  */
 rpf.StatusLogger.MESSAGE_LOAD_COMPLETE = {
   'text': ['Double click on an action line in editor will ' +
-           'open the details dialog.'].join('<br>'),
+           'open the details dialog.',
+           '',
+           'Press Ctrl+Alt+s, the code will be translated to' +
+           ' readable script. Press again to turn it back.'].join('<br>'),
   'link': 'https://sites.google.com/site/rpfwiki/about/details-dialog'
 };
 
@@ -337,7 +340,7 @@ rpf.StatusLogger.MESSAGE_DETAILS = {
            '',
            'When you are updating an element, you could either right click' +
            ' the new element in target page to update or click' +
-           ' "stop" button to cancel.'
+           ' "stop" button to cancel. Do not forget to save the change.'
           ].join('<br>'),
   'link': 'https://sites.google.com/site/rpfwiki/about/details-dialog'
 };

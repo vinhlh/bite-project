@@ -200,8 +200,20 @@ rpf.Attributes.prototype.callbackStartUpdateMode_ = function() {
     this.messenger_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.SET_ACTION_CALLBACK},
         goog.bind(this.callbackOnReceiveAction_, this));
+    this.onUiEvents_(
+        Bite.Constants.UiCmds.SET_CONSOLE_STATUS,
+        {'message': 'Please right click the new element in page' +
+                    ' to finish the update' +
+                    ' or click stop to cancel.',
+         'color': 'green'},
+        /** @type {Event} */ ({}));
   } else {
     this.setBackUpdateButton_();
+    this.onUiEvents_(
+        Bite.Constants.UiCmds.SET_CONSOLE_STATUS,
+        {'message': 'Cancelled updating the element.',
+         'color': 'black'},
+        /** @type {Event} */ ({}));
   }
 };
 
@@ -260,6 +272,11 @@ rpf.Attributes.prototype.callbackOnReceiveAction_ = function(response) {
   // Updates the descriptor inputs.
   this.descriptor_ = response['cmdMap']['descriptor'];
   this.showTabContent_(this.currentLevel_);
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.SET_CONSOLE_STATUS,
+      {'message': 'Updated the element, please double check and save.',
+       'color': 'green'},
+      /** @type {Event} */ ({}));
 };
 
 
@@ -345,6 +362,11 @@ rpf.Attributes.prototype.getButtonSet_ = function(dialog) {
  */
 rpf.Attributes.prototype.generateDescriptor_ = function() {
   this.updateDescriptor_();
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.SET_CONSOLE_STATUS,
+      {'message': 'Saved the updated element.',
+       'color': 'green'},
+      /** @type {Event} */ ({}));
   this.generateCmdCallback_();
 };
 

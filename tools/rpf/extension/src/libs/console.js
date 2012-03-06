@@ -1724,6 +1724,7 @@ rpf.ConsoleManager.prototype.updateElementAtLine_ = function(
     line, cmdMap, callback) {
   var lineContent = this.editorMngr_.getTextAtLine(line);
   var stepId = bite.base.Helper.getStepId(lineContent);
+  // Updates the element with the newly recorded one.
   var oldXpath = this.updateElement_(stepId, cmdMap, this.infoMap_ || {});
   var loadFrom = '';
   // If the project was loaded from local, we could update all of the
@@ -1740,8 +1741,10 @@ rpf.ConsoleManager.prototype.updateElementAtLine_ = function(
   } else {
     var data = this.getStepsFromInfoMap_(
         this.getTestName_(), this.infoMap_, oldXpath);
-    this.showElementsWithSameXpath_(
-        data, rpf.LoaderDialog.Locations.WEB, callback, cmdMap);
+    if (data && data.length > 1) {
+      this.showElementsWithSameXpath_(
+          data, rpf.LoaderDialog.Locations.WEB, callback, cmdMap);
+    }
   }
 };
 

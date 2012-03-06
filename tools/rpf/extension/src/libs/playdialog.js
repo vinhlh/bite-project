@@ -454,6 +454,11 @@ rpf.PlayDialog.prototype.switchChoiceSet = function(turnOn) {
 rpf.PlayDialog.prototype.insertCmd = function() {
   var line =
       parseInt(goog.dom.getElement('playbackcurrentstep').value, 10);
+  var message = 'After you have recorded more steps immediately after' +
+                ' the failed step, you could click play to ' +
+                'continue playback.';
+  this.updatePlaybackStatus(message, 'green');
+  this.clearMatchHtml();
   this.setVisible(false);
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.PREPARE_RECORD_PLAYBACK_PAGE},
@@ -467,6 +472,11 @@ rpf.PlayDialog.prototype.insertCmd = function() {
  * @export
  */
 rpf.PlayDialog.prototype.updateCmd = function() {
+  var message = 'You should be able to see the Xpath finder opened in page' +
+                ' and you could right click an element to finish' +
+                ' the update.';
+  this.updatePlaybackStatus(message, 'green');
+  this.clearMatchHtml();
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.PREPARE_RECORD_PLAYBACK_PAGE},
       goog.bind(this.callbackStartUpdateMode_, this));
@@ -508,9 +518,11 @@ rpf.PlayDialog.prototype.setHtmlDiv = function(html) {
 rpf.PlayDialog.prototype.callbackOnReceiveAction_ = function(response) {
   var line =
       parseInt(goog.dom.getElement('playbackcurrentstep').value, 10);
-  var message = 'The xpath was updated to: ' + response['cmdMap']['xpaths'][0];
+  var message = 'The element was updated, and the new xPath is: ' +
+                response['cmdMap']['xpaths'][0] +
+                '. You could click the play button to continue playback.';
   this.updatePlaybackStatus(message, 'green');
-
+  this.clearMatchHtml();
   this.messenger_.sendMessage(
       {'command': Bite.Constants.CONSOLE_CMDS.END_UPDATER_MODE,
        'params': {}});
@@ -568,8 +580,11 @@ rpf.PlayDialog.prototype.callbackDeleteCmd_ = function(
  * @export
  */
 rpf.PlayDialog.prototype.deleteCmd = function() {
-  goog.dom.removeChildren(goog.dom.getElement('playbackstatus'));
-  goog.dom.removeChildren(goog.dom.getElement('matchHtmlDiv'));
+  var message = 'You have successfully deleted the failed step. You could' +
+                ' either insert more recordings or click the play button' +
+                ' to continue playback.';
+  this.updatePlaybackStatus(message, 'green');
+  this.clearMatchHtml();
   var deleteLine =
       parseInt(goog.dom.getElement('playbackcurrentstep').value, 10);
   this.messenger_.sendMessage(
@@ -683,7 +698,8 @@ rpf.PlayDialog.prototype.makeChoiceAfterFailure =
         goog.dom.getElement('matchHtmlDiv').innerHTML = opt_failureLog;
       }
       this.updatePlaybackStatus(
-          'This step failed finding element:', 'red');
+          'This step failed.',
+          'red');
       break;
     case Bite.Constants.PlaybackFailures.MULTIPLE_RETRY_CUSTOM_JS:
       matchHtmlDiv.innerHTML = '';
@@ -703,7 +719,7 @@ rpf.PlayDialog.prototype.makeChoiceAfterFailure =
     case Bite.Constants.PlaybackFailures.USER_PAUSE_FAILURE:
       matchHtmlDiv.innerHTML = '';
       this.updatePlaybackStatus(
-          'Manually pause the failure.', 'red');
+          'Manually paused the failure.', 'red');
       break;
     default:
       this.updatePlaybackStatus(
