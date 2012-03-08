@@ -115,6 +115,20 @@ class ScriptStep(db.Model):
   image_url = db.TextProperty()
 
 
+class ScriptActivity(db.Model):
+  """Stores the script activity."""
+  loaded_times = db.IntegerProperty()
+  modified = db.DateTimeProperty(required=False, auto_now=True)
+
+
+def IncreaseAndGetLoadedTimes(id):
+  """Gets the total loaded times."""
+  instance = ScriptActivity.get_or_insert(id + '_activity', loaded_times=0)
+  instance.loaded_times += 1
+  instance.put()
+  return instance.loaded_times
+
+
 def AddNewScriptStep(id, index, data):
   """Adds a new script step."""
   new_step = ScriptStep(script_id=id,

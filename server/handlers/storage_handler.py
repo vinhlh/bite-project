@@ -92,6 +92,7 @@ class GetTestAsJson(base.BaseHandler):
   def get(self):
     test_id = self.GetRequiredParameter('id')
     test_metadata = storage.FetchById(test_id)
+    loaded_times = storage.IncreaseAndGetLoadedTimes(test_id)
     if not test_metadata:
       logging.info('Test with id %s not found.', test_id)
       self.error(400)

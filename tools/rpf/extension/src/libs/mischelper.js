@@ -108,7 +108,7 @@ rpf.MiscHelper.resizeImage = function(
 
     var canvas2 = document.createElement('canvas');
     // Convert the canvas to a data URL in PNG format
-    callback(canvas.toDataURL('img/png'),
+    callback(canvas.toDataURL('img/jpeg'),
              rpf.MiscHelper.sliceImage(dimension, canvas2, sourceImage,
                                        {'width': 9999, 'height': 9999}));
   };
@@ -137,7 +137,7 @@ rpf.MiscHelper.cropImage = function(callback, dimension, url) {
         0, 0, dimension['sWidth'], dimension['sHeight']);
 
     // Convert the canvas to a data URL in PNG format
-    callback(canvas.toDataURL('img/png'), '');
+    callback(canvas.toDataURL('img/jpeg'), '');
   };
   sourceImage.src = url;
 };
@@ -177,7 +177,7 @@ rpf.MiscHelper.sliceImage = function(
       dimension['sX'], dimension['sY'],
       dimension['sWidth'], dimension['sHeight'],
       0, 0, newWidth, newHeight);
-  return canvas.toDataURL('img/png');
+  return canvas.toDataURL('img/jpeg');
 };
 
 
