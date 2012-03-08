@@ -162,8 +162,10 @@ class SaveTest(base.BaseHandler):
     json_obj = json.loads(json_str)
     new_test_name = json_obj['name']
 
-    if storage.FetchByProjectAndTestName(project, new_test_name):
-      raise DuplicatedNameError('The name exists, please provide a new name.')
+    exist_instance = storage.FetchByProjectAndTestName(project, new_test_name)
+    if exist_instance:
+      storage.DeleteMetadata([exist_instance])
+      storage.DeleteAllStepsByScriptIds([exist_instance.id])
 
     storage_project.UpdateProject(project, {'js_files': js_files})
     storage_instance = storage.Save(project, new_test_name, json_str)

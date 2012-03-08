@@ -362,6 +362,21 @@ rpf.StatusLogger.MESSAGE_SCREENSHOTS = {
 
 
 /**
+ * The helper message for local radio button.
+ * @type {Object}
+ */
+rpf.StatusLogger.MESSAGE_LOCAL = {
+  'text': ['Scripts stored locally are slightly different from' +
+           ' the ones on web. They do not have ids, and they use project' +
+           ' and script names as key.',
+           '',
+           'Screenshots and common methods are ' +
+           'both disabled for local scripts.'].join('<br>'),
+  'link': 'https://sites.google.com/site/rpfwiki/about/save-and-load'
+};
+
+
+/**
  * The helper message for js settings button.
  * @type {Object}
  */

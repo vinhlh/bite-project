@@ -360,14 +360,16 @@ select:focus {
   vertical-align: middle;
 }
 
-.goog-toolbar-button-selected {
+.goog-toolbar-button-selected,
+.goog-menu-button-selected {
   border: 1px solid #ccc;
   background-color: #eee;
   background-image: -webkit-linear-gradient(top, #eee, #e0e0e0);
   box-shadow: inset 0px 1px 2px rbga(0, 0, 0, 0.1);
 }
 
-.goog-toolbar-button-hover {
+.goog-toolbar-button-hover,
+.goog-menu-button-hover {
   border: 1px solid #c6c6c6;
   box-shadow: 0px 1px 1px rgba(0, 0, 0, 0.1);
 }
@@ -387,7 +389,6 @@ select:focus {
   overflow: hidden;
 }
 
-.goog-menu-button,
 .goog-toolbar-menu-button,
 .goog-custom-button {
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -414,7 +415,6 @@ select:focus {
   color: #333;
 }
 
-.goog-menu-button:hover,
 .goog-toolbar-menu-button:hover,
 .goog-custom-button:hover {
   border: 1px solid #c6c6c6;
@@ -422,14 +422,6 @@ select:focus {
   backgorund-color: #f8f8f8;
   -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
-}
-
-.goog-menu-button-dropdown,
-.goog-toolbar-menu-button-dropdown {
-  background: url('../imgs/rpf/downbtn.png');
-  background-position: center;
-  padding: 0 3px;
-  width: 7px;
 }
 
 /** Specific styles. */

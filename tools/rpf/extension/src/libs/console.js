@@ -308,6 +308,10 @@ rpf.ConsoleManager.prototype.init_ = function() {
                  toolbar,
                  Bite.Constants.UiCmds.ON_CONSOLE_REFRESH);
 
+  this.setMoreButton_(rpf.ConsoleManager.Buttons.MORE,
+                      'More options',
+                      toolbar);
+
   // Allow the content map and project info buttons to have a 'selected' state.
   this.btns_[rpf.ConsoleManager.Buttons.CONTENT_MAP].setSupportedState(
       goog.ui.Component.State.SELECTED, true)
@@ -363,9 +367,13 @@ rpf.ConsoleManager.prototype.init_ = function() {
  */
 rpf.ConsoleManager.prototype.checkLocationAndSetProjects_ = function() {
   var location = this.loaderDialog_.getStorageLocation();
-  var command = location == rpf.LoaderDialog.Locations.WEB ?
-                Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_WEB :
-                Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_LOCAL;
+  var command = '';
+  if (location == rpf.LoaderDialog.Locations.WEB) {
+    command = Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_WEB;
+  } else {
+    command = Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_LOCAL;
+    this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_LOCAL);
+  }
   this.messenger_.sendMessage(
       {'command': command,
        'params': {}},
@@ -1136,6 +1144,41 @@ rpf.ConsoleManager.prototype.setButton = function(
 
 
 /**
+ * Adds the more toolbar menu button.
+ * @param {rpf.ConsoleManager.Buttons} btn The buttons displayed on console UI.
+ * @param {string} tooltip Tool tip for the toolbar button.
+ * @param {goog.ui.Toolbar} toolbar The toolbar to add buttons on.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setMoreButton_ = function(btn, tooltip, toolbar) {
+  var menu = new goog.ui.Menu();
+  var saveAsItem = new goog.ui.MenuItem('Save as new');
+  goog.events.listen(
+      saveAsItem,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.saveScriptAsNew_, this));
+  menu.addChild(saveAsItem, true);
+  var menuButton = new goog.ui.MenuButton(
+      goog.dom.getElement(btn), menu);
+  menuButton.setTooltip(tooltip);
+  this.btns_[btn] = menuButton;
+  toolbar.addChild(menuButton, true);
+  var saveAsElem = saveAsItem.getElement();
+  saveAsElem.setAttribute(
+      'title', 'Save the current script as a new one.');
+};
+
+
+/**
+ * Saves the script as a new one.
+ * @private
+ */
+rpf.ConsoleManager.prototype.saveScriptAsNew_ = function() {
+  this.saveTest(true);
+};
+
+
+/**
  * Event handler for calls from background world.
  * @param {Object} request The request object.
  * @param {MessageSender} sender The sender object.
@@ -1528,6 +1571,7 @@ rpf.ConsoleManager.Buttons = {
   EXPORT: 'rpf-export',
   INFO: 'rpf-info',
   LOAD: 'rpf-loadTest',
+  MORE: 'rpf-more',
   NOTES: 'rpf-notes',
   RECORD: 'rpf-record',
   REFRESH: 'rpf-refresh',
@@ -2965,9 +3009,10 @@ rpf.ConsoleManager.prototype.getScreenshots_ = function() {
 
 /**
  * Saves the script locally or in the cloud.
+ * @param {boolean=} opt_isNew Whether to save it as a new one.
  * @export
  */
-rpf.ConsoleManager.prototype.saveTest = function() {
+rpf.ConsoleManager.prototype.saveTest = function(opt_isNew) {
   var testName = 'testName';
   var startUrl = goog.global.location.href;
   var scripts = this.recordedScript_;
@@ -2993,7 +3038,9 @@ rpf.ConsoleManager.prototype.saveTest = function() {
   datafile = bite.console.Helper.appendInfoMap(this.infoMap_, datafile);
   projectName = this.getProjectName_();
   userLib = this.getUserLib();
-  scriptId = this.getScriptId_();
+  if (!opt_isNew) {
+    scriptId = this.getScriptId_();
+  }
 
   if (!goog.string.trim(testName) ||
       !goog.string.trim(projectName) ||
@@ -3231,7 +3278,8 @@ rpf.ConsoleManager.ModeInfo = function() {
                 rpf.ConsoleManager.Buttons.CONTENT_MAP,
                 rpf.ConsoleManager.Buttons.NOTES,
                 rpf.ConsoleManager.Buttons.SETTING,
-                rpf.ConsoleManager.Buttons.REFRESH]};
+                rpf.ConsoleManager.Buttons.REFRESH,
+                rpf.ConsoleManager.Buttons.MORE]};
 };
 
 
