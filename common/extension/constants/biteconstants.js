@@ -378,6 +378,7 @@ Bite.Constants.UiCmds = {
   ON_KEY_UP: 'onKeyUp',
   ON_SHOW_MORE_INFO: 'onShowMoreInfo',
   ON_SHOW_MORE_OPTIONS: 'onShowMoreOptions',
+  OPEN_GENERATE_INVOCATION: 'openGenerateInvocation',
   OPEN_VALIDATION_DIALOG: 'openValidationDialog',
   RECORD_TAB_CLOSED: 'recordTabClosed',
   RESET_SCREENSHOTS: 'resetScreenShots',

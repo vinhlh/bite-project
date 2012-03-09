@@ -900,6 +900,57 @@ rpf.ConsoleManager.prototype.checkForCustomMethods_ = function(
 
 
 /**
+ * Opens the generate invocation dialog.
+ * @private
+ */
+rpf.ConsoleManager.prototype.openGenerateInvocationDialog_ = function() {
+  var content = soy.renderAsElement(
+      rpf.soy.Dialog.getGenerateInvocationUi,
+      {});
+  this.openInputDialog_('Generate an invocation', content);
+
+  goog.events.listen(
+      goog.dom.getElement('generate-invocation-submit'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.generateInvocation_, this));
+  goog.events.listen(
+      goog.dom.getElement('generate-invocation-cancel'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.cancelGenerateInvocation_, this));
+};
+
+
+/**
+ * Generates an invocation to the script.
+ * @private
+ */
+rpf.ConsoleManager.prototype.generateInvocation_ = function() {
+  var funcName = goog.dom.getElement('method-name-input').value;
+  var paramString = goog.dom.getElement('method-parameter-input').value.trim();
+  paramString = paramString ? ', ' + paramString : '';
+  var isSync = goog.dom.getElement('method-is-synchronous').checked;
+  var command = '';
+  if (isSync) {
+    command = 'call(' + funcName + paramString + ');\n';
+  } else {
+    command = 'call(true, sendResultToBackground, ' + funcName +
+              paramString + ');\n';
+  }
+  this.addNewCommand(command);
+  this.setStatus('Successfully added an invocation command.', 'green');
+};
+
+
+/**
+ * Cancels to generate an invocation.
+ * @private
+ */
+rpf.ConsoleManager.prototype.cancelGenerateInvocation_ = function() {
+  this.inputDialog_.setVisible(false);
+};
+
+
+/**
  * On script name change handler.
  * @private
  */
@@ -1514,6 +1565,9 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
       break;
     case Bite.Constants.UiCmds.SET_SHOW_TIPS:
       this.setShowTips_(params['show']);
+      break;
+    case Bite.Constants.UiCmds.OPEN_GENERATE_INVOCATION:
+      this.openGenerateInvocationDialog_();
       break;
     default:
       break;

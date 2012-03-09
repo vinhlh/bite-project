@@ -360,6 +360,10 @@ select:focus {
   vertical-align: middle;
 }
 
+.rpf-js-function-toolbar-button {
+  padding: 5px;
+}
+
 .goog-toolbar-button-selected,
 .goog-menu-button-selected {
   border: 1px solid #ccc;

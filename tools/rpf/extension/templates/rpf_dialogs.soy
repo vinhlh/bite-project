@@ -203,6 +203,44 @@
 
 
 /**
+ * Creates the UI for generating invocation.
+ */
+{template .getGenerateInvocationUi}
+<div class="kd-modaldialog visible kd-prompt">
+  <p>
+    <label for="label">Please enter a method name</label>
+    <input type="text" id="method-name-input"
+           placeholder="ex. verifyNameAndAge">
+  </p>
+  <p>
+    <label for="label">Please enter the parameters string</label>
+    <input type="text" id="method-parameter-input"
+           placeholder="ex. 'Google', 14">
+  </p>
+  <p>
+    <label for="label">
+      Is the method asynchronous?
+    </label>
+    <input type="radio" name="method-asynchronous"
+           style="margin-right:8px">
+    Yes
+    <input type="radio" name="method-asynchronous"
+           id="method-is-synchronous"
+           style="margin-left:8px;margin-right:8px" checked>
+    No
+  </p>
+  <div class="kd-formbuttons">
+    <a class="kd-button kd-button-submit primary"
+       style="-webkit-user-select: none; "
+       id="generate-invocation-submit">OK</a>
+    <a class="kd-button" style="-webkit-user-select: none;"
+       id="generate-invocation-cancel">Cancel</a>
+  </div>
+</div>
+{/template}
+
+
+/**
  * Creates the UI to confirm whether needs to save.
  */
 {template .getSaveScriptConfirmUi}
@@ -323,11 +361,16 @@
  * Creates the JS function dialog main content.
  */
 {template .jsContent}
-  <div id="rpf-console-js-functions-toolbar"
-       style="height:30px;vertical-align:center;padding-top:5px;
-              border-bottom:1px solid #CCC;">
+  <div id="rpf-console-js-functions-toolbar" class="console-toolbar">
     <div id="rpf-js-play-button"
-         title="Runs all the following code in the target page as content scripts.">
+         title="Runs all the following code in the target page as content scripts."
+         class="console-menu-button rpf-js-function-toolbar-button">
+      Play
+    </div>
+    <div id="rpf-js-generate-button"
+         title="Generates an invocation to a function defined here."
+         class="console-menu-button rpf-js-function-toolbar-button">
+      Generate
     </div>
   </div>
   <div id="rpf-console-js-functions">

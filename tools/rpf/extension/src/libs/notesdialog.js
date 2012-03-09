@@ -93,14 +93,26 @@ rpf.NotesDialog = function(messenger, onUiEvents) {
  * @private
  */
 rpf.NotesDialog.prototype.initToolbar_ = function() {
-  var playBtn = new goog.ui.CustomButton('Play');
+  var toolbar = new goog.ui.Toolbar();
+
+  var playBtn = new goog.ui.ToolbarButton(
+      goog.dom.getElement('rpf-js-play-button'));
+  var generateBtn = new goog.ui.ToolbarButton(
+      goog.dom.getElement('rpf-js-generate-button'));
 
   goog.events.listen(
       playBtn,
       goog.ui.Component.EventType.ACTION,
       goog.bind(this.playJsFile_, this));
 
-  playBtn.render(goog.dom.getElement('rpf-js-play-button'));
+  goog.events.listen(
+      generateBtn,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.popToGenerateJsCall_, this));
+
+  toolbar.addChild(playBtn, true);
+  toolbar.addChild(generateBtn, true);
+  toolbar.render(goog.dom.getElement('rpf-console-js-functions-toolbar'));
 };
 
 
@@ -113,6 +125,18 @@ rpf.NotesDialog.prototype.playJsFile_ = function() {
       {'command': Bite.Constants.CONSOLE_CMDS.EXECUTE_SCRIPT_IN_RECORD_PAGE,
        'params': {'code': this.editorMngr_.getCode(),
                   'allFrames': false}});
+};
+
+
+/**
+ * Pops up the dialog for generating an invocation.
+ * @private
+ */
+rpf.NotesDialog.prototype.popToGenerateJsCall_ = function() {
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.OPEN_GENERATE_INVOCATION,
+      {},
+      /** @type {Event} */ ({}));
 };
 
 

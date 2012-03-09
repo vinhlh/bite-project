@@ -106,13 +106,14 @@ rpf.SettingDialog.prototype.initSettingDialog_ = function() {
   this.settingDialog_.setTitle('Settings');
   this.settingDialog_.setButtonSet(null);
   this.settingDialog_.setVisible(true);
-  this.settingDialog_.setVisible(false);
+
   this.registerListeners_();
   this.initPlaybackInterval_();
   this.initTimeout_();
   this.initTakeScreenshotsCheckbox_();
   this.initUseXpath_();
   this.initShowTips_();
+  this.settingDialog_.setVisible(false);
 };
 
 
@@ -150,8 +151,8 @@ rpf.SettingDialog.prototype.registerListeners_ = function() {
  */
 rpf.SettingDialog.prototype.initTakeScreenshotsCheckbox_ =
     function() {
-  var takes = goog.global.localStorage[
-      rpf.SettingDialog.TAKE_SCREENSHOTS_];
+  var takes = goog.global.localStorage.getItem(
+      rpf.SettingDialog.TAKE_SCREENSHOTS_);
   if (!takes || takes == 'true') {
     goog.dom.getElement('whethertakescreenshot').checked = true;
   } else {
@@ -203,7 +204,7 @@ rpf.SettingDialog.prototype.setUseXpath_ = function() {
  * @private
  */
 rpf.SettingDialog.prototype.initUseXpath_ = function() {
-  var use = goog.global.localStorage[rpf.SettingDialog.USE_XPATH_];
+  var use = goog.global.localStorage.getItem(rpf.SettingDialog.USE_XPATH_);
   if (use && use == 'true') {
     goog.dom.getElement('whetherUseXpath').checked = true;
     this.messenger_.sendMessage(
@@ -252,7 +253,7 @@ rpf.SettingDialog.prototype.setShowTips_ = function() {
  * @private
  */
 rpf.SettingDialog.prototype.initShowTips_ = function() {
-  var show = goog.global.localStorage[rpf.SettingDialog.SHOW_TIPS_];
+  var show = goog.global.localStorage.getItem(rpf.SettingDialog.SHOW_TIPS_);
   if (!show || show == 'true') {
     goog.dom.getElement('whetherShowTips').checked = true;
   } else {
