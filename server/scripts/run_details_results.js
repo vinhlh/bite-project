@@ -181,8 +181,11 @@ bite.server.run.Results.prototype.onPlaybackTests_ = function(e) {
       testsInfo[testName] = goog.dom.getElement(index + '_log').innerHTML;
     }
   }
-  goog.dom.getElement('rpfLaunchData').innerHTML =
-      goog.json.serialize(testsInfo);
+
+  var data = {'command': 'playbackMultiple',
+              'data': testsInfo};
+
+  goog.dom.getElement('rpfLaunchData').innerHTML = goog.json.serialize(data);
   var evt = goog.dom.getDocument().createEvent('Event');
   evt.initEvent('rpfLaunchEvent', true, true);
   e.target.dispatchEvent(evt);

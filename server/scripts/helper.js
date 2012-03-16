@@ -252,14 +252,19 @@ bite.server.Helper.joinToStr = function(strOrArr, delimiter) {
 /**
  * Displays a status message in Google bar, and optionally dismiss it.
  * @param {string} message The message to be displayed.
- * @param {number} opt_timeout The optional time out to hide the message.
+ * @param {number=} opt_timeout The optional time out to hide the message.
+ * @param {boolean=} opt_error Whether this is an error message.
  */
-bite.server.Helper.displayMessage = function(message, opt_timeout) {
+bite.server.Helper.displayMessage = function(message, opt_timeout, opt_error) {
   goog.dom.getElement('statusMessage').innerHTML = message;
-  bite.server.Helper.updateSelectedCss(
-      goog.dom.getElement('statusMessageDiv'),
-      'kd-butterbar',
-      'kd-butterbar shown');
+  var elem = goog.dom.getElement('statusMessageDiv');
+
+  if (opt_error) {
+    goog.dom.setProperties(elem, {'class': 'kd-butterbar error shown'});
+  } else {
+    goog.dom.setProperties(elem, {'class': 'kd-butterbar shown'});
+  }
+
   if (opt_timeout) {
     goog.Timer.callOnce(bite.server.Helper.dismissMessage, opt_timeout);
   }
@@ -270,9 +275,7 @@ bite.server.Helper.displayMessage = function(message, opt_timeout) {
  * Dismisses the message.
  */
 bite.server.Helper.dismissMessage = function() {
-  bite.server.Helper.updateSelectedCss(
-      goog.dom.getElement('statusMessageDiv'),
-      'kd-butterbar shown',
-      'kd-butterbar');
+  var elem = goog.dom.getElement('statusMessageDiv');
+  goog.dom.setProperties(elem, {'class': 'kd-butterbar'});
 };
 

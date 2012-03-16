@@ -508,7 +508,9 @@ Bite.Constants.RECORD_ACTION = {
 Bite.Constants.RPF_AUTOMATION = {
   AUTOMATE_SINGLE_SCRIPT: 'automateSingleScript',
   LOAD_AND_RUN_FROM_LOCAL: 'loadAndRunFromLocal',
-  PLAYBACK_MULTIPLE: 'playbackMultiple'
+  OPEN_TEST_WINDOW: 'openTestWindow',
+  PLAYBACK_MULTIPLE: 'playbackMultiple',
+  RUN_METHOD_IN_WINDOW: 'runMethodInWindow'
 };
 
 

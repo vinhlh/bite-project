@@ -1298,11 +1298,9 @@ if (window == window.parent) {
     rpf.ContentScript.RecordHelper.closeCurrentTab_();
   }
   goog.dom.getDocument().addEventListener('rpfLaunchEvent', function(e) {
-    var parameters = {
-      'command': Bite.Constants.RPF_AUTOMATION.PLAYBACK_MULTIPLE};
-    parameters['data'] = goog.json.parse(
+    var rpfData = goog.json.parse(
         goog.dom.getElement('rpfLaunchData').innerHTML);
-    rpf.ContentScript.RecordHelper.automateRpf_(parameters);
+    rpf.ContentScript.RecordHelper.automateRpf_(rpfData);
   }, false);
 }
 

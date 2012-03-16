@@ -137,6 +137,13 @@ rpf.EventsManager = function() {
    */
   this.workerMgr_ = null;
 
+  /**
+   * The test window id and tab id.
+   * @type {Object}
+   * @private
+   */
+  this.testWindowIds_ = {};
+
   //These are necessary because goog.bind() returns a different
   // function each time.  As a result, when you try to do
   // chrome.extension.onRequest.removeListener() (or something
@@ -183,6 +190,8 @@ rpf.EventsManager = function() {
 
   chrome.extension.onRequest.addListener(this.boundOnMessageFunc);
   chrome.extension.onRequest.addListener(this.boundOnRequestFunc);
+
+  chrome.tabs.onRemoved.addListener(goog.bind(this.clearTestWindowIds_, this));
 };
 goog.addSingletonGetter(rpf.EventsManager);
 
@@ -268,6 +277,18 @@ rpf.EventsManager.prototype.refresh = function() {
  */
 rpf.EventsManager.prototype.getRecorder = function() {
   return this.recordMgr_;
+};
+
+
+/**
+ * Clear the test window id object when the window is closed.
+ * @param {number} tabId The tab id which is closed.
+ * @private
+ */
+rpf.EventsManager.prototype.clearTestWindowIds_ = function(tabId) {
+  if (tabId == this.testWindowIds_['tabId']) {
+    this.testWindowIds_ = {};
+  }
 };
 
 
@@ -925,7 +946,50 @@ rpf.EventsManager.prototype.automateRpf = function(params) {
           params['projectName'], params['location'], params['scriptName'],
           params['autoPlay']);
       break;
+    case Bite.Constants.RPF_AUTOMATION.OPEN_TEST_WINDOW:
+      if (!this.testWindowIds_['tabId']) {
+        this.openTestWindow_();
+      } else {
+        chrome.windows.update(this.testWindowIds_['windowId'],
+                              {focused: true});
+      }
+      break;
+    case Bite.Constants.RPF_AUTOMATION.RUN_METHOD_IN_WINDOW:
+      if (!this.testWindowIds_['tabId']) {
+        alert('Please click the option to create a test window first.');
+      } else {
+        chrome.tabs.executeScript(
+            this.testWindowIds_['tabId'],
+            {code: params['code'], allFrames: true});
+      }
+      break;
   }
+};
+
+
+/**
+ * Callback when the test window is opened.
+ * @param {Window} win The test window.
+ * @private
+ */
+rpf.EventsManager.prototype.openTestWindowCallback_ = function(win) {
+  this.testWindowIds_['windowId'] = win['id'];
+  this.testWindowIds_['tabId'] = win.tabs[0].id;
+};
+
+
+/**
+ * Opens the test window.
+ * @private
+ */
+rpf.EventsManager.prototype.openTestWindow_ = function() {
+  chrome.windows.create(
+      {url: 'http://www.google.com',
+       width: 1000,
+       height: 800,
+       top: 10,
+       left: 10},
+      goog.bind(this.openTestWindowCallback_, this));
 };
 
 
