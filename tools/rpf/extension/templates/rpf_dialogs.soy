@@ -183,102 +183,6 @@
 
 
 /**
- * Creates the UI for new name.
- */
-{template .getNewNameUi}
-<div class="kd-modaldialog visible kd-prompt">
-  <p>
-    <label for="label">Please enter a new name</label>
-    <input type="text" id="new-name-input">
-  </p>
-  <div class="kd-formbuttons">
-    <a class="kd-button kd-button-submit primary"
-       style="-webkit-user-select: none; "
-       id="new-name-submit">OK</a>
-    <a class="kd-button" style="-webkit-user-select: none;"
-       id="new-name-cancel">Cancel</a>
-  </div>
-</div>
-{/template}
-
-
-/**
- * Creates the UI for generating invocation.
- */
-{template .getGenerateInvocationUi}
-<div class="kd-modaldialog visible kd-prompt">
-  <p>
-    <label for="label">Please enter a method name</label>
-    <input type="text" id="method-name-input"
-           placeholder="ex. verifyNameAndAge">
-  </p>
-  <p>
-    <label for="label">Please enter the parameters string</label>
-    <input type="text" id="method-parameter-input"
-           placeholder="ex. 'Google', 14">
-  </p>
-  <p>
-    <label for="label">
-      Is the method asynchronous?
-    </label>
-    <input type="radio" name="method-asynchronous"
-           style="margin-right:8px">
-    Yes
-    <input type="radio" name="method-asynchronous"
-           id="method-is-synchronous"
-           style="margin-left:8px;margin-right:8px" checked>
-    No
-  </p>
-  <div class="kd-formbuttons">
-    <a class="kd-button kd-button-submit primary"
-       style="-webkit-user-select: none; "
-       id="generate-invocation-submit">OK</a>
-    <a class="kd-button" style="-webkit-user-select: none;"
-       id="generate-invocation-cancel">Cancel</a>
-  </div>
-</div>
-{/template}
-
-
-/**
- * Creates the UI to confirm whether needs to save.
- */
-{template .getSaveScriptConfirmUi}
-<div class="kd-modaldialog visible kd-prompt">
-  <p>
-    <label for="label">
-      Are you sure to discard the script and continue loading?
-    </label>
-  </p>
-  <div class="kd-formbuttons">
-    <a class="kd-button kd-button-submit primary"
-       style="-webkit-user-select: none; "
-       id="save-script-submit">Continue</a>
-    <a class="kd-button" style="-webkit-user-select: none;"
-       id="save-script-cancel">Cancel</a>
-  </div>
-</div>
-{/template}
-
-
-/**
- * Creates the UI to warn users about the record tab is closed.
- */
-{template .getRecordTabClosedUi}
-<div class="kd-modaldialog visible kd-prompt">
-  <p>
-    <label for="label">
-      Chrome reported that the tab under record was closed. If you would like
-      to continue recording, you'll need to select/prepare a tab and then
-      click the "record and playback" option in extension popup to mark it as
-      the new tab under record.
-    </label>
-  </p>
-</div>
-{/template}
-
-
-/**
  * Creates the play dialog main content.
  */
 {template .playContent}
@@ -371,6 +275,16 @@
          title="Generates an invocation to a function defined here."
          class="console-menu-button rpf-js-function-toolbar-button">
       Generate
+    </div>
+    <div id="rpf-js-store-button"
+         title="Opens the Method Store page to leverage common methods."
+         class="console-menu-button rpf-js-function-toolbar-button">
+      Store
+    </div>
+    <div id="rpf-js-deps-button"
+         title="Views the dependent common methods of the current project."
+         class="console-menu-button rpf-js-function-toolbar-button">
+      Dependency
     </div>
   </div>
   <div id="rpf-console-js-functions">
@@ -522,6 +436,112 @@
       <a id="rpf-alert-box-dismiss" href="#">Dismiss</a>
       {sp}|{sp}
       <a id="rpf-alert-box-never" href="#">Never Show</a>
+    </p>
+  </div>
+{/template}
+
+
+/**
+ * Creates the input dialog.
+ */
+{template .createInputDialog}
+  <div class="kd-modaldialog visible kd-prompt rpf-input-dialog"
+       id="rpf-input-dialog-project-name">
+    <p>
+      <label for="label">Please enter a new name</label>
+      <input type="text" id="new-name-input-project">
+    </p>
+    <div class="kd-formbuttons">
+      <a class="kd-button kd-button-submit primary"
+         style="-webkit-user-select: none; "
+         id="new-name-submit-project">OK</a>
+      <a class="kd-button" style="-webkit-user-select: none;"
+         id="new-name-cancel-project">Cancel</a>
+    </div>
+  </div>
+
+  <div class="kd-modaldialog visible kd-prompt rpf-input-dialog"
+       id="rpf-input-dialog-script-name">
+    <p>
+      <label for="label">Please enter a new name</label>
+      <input type="text" id="new-name-input-script">
+    </p>
+    <div class="kd-formbuttons">
+      <a class="kd-button kd-button-submit primary"
+         style="-webkit-user-select: none; "
+         id="new-name-submit-script">OK</a>
+      <a class="kd-button" style="-webkit-user-select: none;"
+         id="new-name-cancel-script">Cancel</a>
+    </div>
+  </div>
+
+  <div class="kd-modaldialog visible kd-prompt rpf-input-dialog"
+       id="rpf-input-dialog-generate-method">
+    <p>
+      <label for="label">Please enter a method name</label>
+      <input type="text" id="method-name-input"
+             placeholder="ex. verifyNameAndAge">
+    </p>
+    <p>
+      <label for="label">Please enter the parameters string</label>
+      <input type="text" id="method-parameter-input"
+             placeholder="ex. 'Google', 14">
+    </p>
+    <p>
+      <label for="label">
+        Is the method asynchronous?
+      </label>
+      <input type="radio" name="method-asynchronous"
+             style="margin-right:8px">
+      Yes
+      <input type="radio" name="method-asynchronous"
+             id="method-is-synchronous"
+             style="margin-left:8px;margin-right:8px" checked>
+      No
+    </p>
+    <div class="kd-formbuttons">
+      <a class="kd-button kd-button-submit primary"
+         style="-webkit-user-select: none; "
+         id="generate-invocation-submit">OK</a>
+      <a class="kd-button" style="-webkit-user-select: none;"
+         id="generate-invocation-cancel">Cancel</a>
+    </div>
+  </div>
+
+  <div class="kd-modaldialog visible kd-prompt rpf-input-dialog"
+       id="rpf-input-dialog-deps-string">
+    <p>
+      <label for="label">The current dependency names string.</label>
+      <input type="text" id="methods-deps-input"
+             placeholder="a, b, c (comma-separated)">
+    </p>
+  </div>
+
+  <div class="kd-modaldialog visible kd-prompt rpf-input-dialog"
+       id="rpf-input-dialog-discard">
+    <p>
+      <label for="label">
+        Are you sure to discard the script and continue loading?
+      </label>
+    </p>
+    <div class="kd-formbuttons">
+      <a class="kd-button kd-button-submit primary"
+         style="-webkit-user-select: none; "
+         id="save-script-submit">Continue</a>
+      <a class="kd-button" style="-webkit-user-select: none;"
+         id="save-script-cancel">Cancel</a>
+    </div>
+  </div>
+
+  <div class="kd-modaldialog visible kd-prompt rpf-input-dialog"
+       id="rpf-input-dialog-close-record">
+    <p>
+      <label for="label">
+        Chrome reported that the tab under record was closed. If you would like
+        to continue recording, you'll need to select/prepare a tab and then
+        click the "record and playback" option in extension popup to mark it as
+        the new tab under record.
+      </label>
     </p>
   </div>
 {/template}

@@ -45,6 +45,8 @@ class StorageProjectMetadata(db.Model):
   #   Java
   java_package_path = db.StringProperty(required=False, default='')
 
+  common_methods = db.StringListProperty(default=[])
+
 
 def GetOrInsertProject(name):
   """Gets or inserts a project object.
@@ -115,11 +117,16 @@ def GetProjectObject(name):
   if project is None:
     return None
 
+  common_methods = ''
+  if project.common_methods:
+    common_methods = ','.join(project.common_methods)
+
   obj = {
     'name': project.name,
     'page_map': project.page_map,
     'params': project.params,
     'js_files': GetJsFiles(project),
+    'common_methods': common_methods,
     'java_package_path': project.java_package_path
   }
 
@@ -150,6 +157,8 @@ def UpdateProject(name, data):
   if 'js_files' in data and data['js_files'] is not None:
     DeleteFiles(project)
     SaveFiles(project, data['js_files'])
+  if 'common_methods' in data and data['common_methods'] is not None:
+    project.common_methods = data['common_methods']
 
   project.put()
 

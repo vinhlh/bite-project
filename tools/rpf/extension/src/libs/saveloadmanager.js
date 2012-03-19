@@ -92,27 +92,6 @@ rpf.SaveLoadManager.WEB_DEFAULT_PROJECT_ = 'rpf';
 
 
 /**
- * Gets all the test names from cloud and updates the loader dialog.
- * @param {string} projectName The project name.
- * @param {function(Object)} sendResponse The response function.
- * @export
- */
-rpf.SaveLoadManager.prototype.getAllFromWeb = function(
-    projectName, sendResponse) {
-  var requestUrl = rpf.MiscHelper.getUrl(
-      this.server,
-      rpf.SaveLoadManager.STORAGE_SERVER_PATH_ + '/getalltestsasjson',
-      {'test_flavor': 'json',
-       'project': projectName});
-  // TODO(phu): If this causes memory leak, move it out.
-  goog.net.XhrIo.send(requestUrl, function() {
-    var jsonObj = this.getResponseJson();
-    sendResponse({'jsonObj': jsonObj});
-  });
-};
-
-
-/**
  * Gets project details and all its tests from cloud and updates.
  * @param {string} name The project name.
  * @param {string} userId A string representation of the current user.
@@ -196,11 +175,12 @@ rpf.SaveLoadManager.prototype.deleteTestOnWtf = function(
  * @param {string} url The url.
  * @param {function(Object)} callback The response function.
  * @param {string} userLib The user library.
+ * @param {string} commonMethodsString The common methods string.
  * @export
  */
 rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
     jsonName, jsonObj, projectName, screens, url,
-    callback, userLib) {
+    callback, userLib, commonMethodsString) {
   var projectName = projectName ||
                     rpf.SaveLoadManager.WEB_DEFAULT_PROJECT_;
   var url = url || '';
@@ -218,6 +198,9 @@ rpf.SaveLoadManager.prototype.createNewTestOnWeb = function(
     'json': goog.json.serialize(jsonObj)};
   if (userLib) {
     params['jsFiles'] = userLib;
+  }
+  if (commonMethodsString) {
+    params['commonMethodsString'] = commonMethodsString;
   }
   var parameters = goog.Uri.QueryData.createFromMap(params).toString();
 
@@ -277,11 +260,12 @@ rpf.SaveLoadManager.prototype.saveScreens_ = function(idStr,
  * @param {Object} screens The screen data url object.
  * @param {function(Object)} callback The response function.
  * @param {string} userLib The user library.
+ * @param {string} commonMethodsString The common methods string.
  * @export
  */
 rpf.SaveLoadManager.prototype.updateTestOnWeb = function(
     jsonName, jsonObj, jsonId, projectName, screens,
-    callback, userLib) {
+    callback, userLib, commonMethodsString) {
   var projectName = projectName ||
                     rpf.SaveLoadManager.WEB_DEFAULT_PROJECT_;
   var screens = screens || null;
@@ -298,6 +282,9 @@ rpf.SaveLoadManager.prototype.updateTestOnWeb = function(
     'json': goog.json.serialize(jsonObj)};
   if (userLib) {
     params['jsFiles'] = userLib;
+  }
+  if (commonMethodsString) {
+    params['commonMethodsString'] = commonMethodsString;
   }
   var parameters = goog.Uri.QueryData.createFromMap(params).toString();
   goog.net.XhrIo.send(requestUrl, goog.bind(function(e) {
@@ -394,12 +381,13 @@ rpf.SaveLoadManager.prototype.getJsonFromWTF = function(jsonId, opt_callback) {
  * @param {string} projectName Project name.
  * @param {Object} screenshots The img data url.
  * @param {string} scriptId The script id.
+ * @param {string} commonMethodsString The common methods string.
  * @param {function(Object)} sendResponse The response function.
  * @export
  */
 rpf.SaveLoadManager.prototype.updateOnWeb = function(
     name, url, script, datafile, userLib, projectName,
-    screenshots, scriptId, sendResponse) {
+    screenshots, scriptId, commonMethodsString, sendResponse) {
   // Tests are saved as new all the time, if recorded not from rpf Console UI.
   if (scriptId) {
     this.updateTestOnWeb(
@@ -408,7 +396,7 @@ rpf.SaveLoadManager.prototype.updateOnWeb = function(
             name, url, script, datafile,
             '', projectName),
         scriptId, projectName,
-        screenshots, sendResponse, userLib);
+        screenshots, sendResponse, userLib, commonMethodsString);
   } else {
     this.createNewTestOnWeb(
         name,
@@ -418,7 +406,8 @@ rpf.SaveLoadManager.prototype.updateOnWeb = function(
         screenshots,
         url,
         sendResponse,
-        userLib);
+        userLib,
+        commonMethodsString);
   }
 };
 

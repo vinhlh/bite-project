@@ -88,10 +88,11 @@ def main():
 
   print 'Totally %s (s) elapsed!' % (time.time() - current_time)
 
-  # Remove the outputs, so they will be created again.
-  if os.path.exists(OUTPUT_ROOT):
-    shutil.rmtree(OUTPUT_ROOT)
-  os.mkdir(OUTPUT_ROOT)
+  if not result['build_extension_only']:
+    # Remove the outputs, so they will be created again.
+    if os.path.exists(OUTPUT_ROOT):
+      shutil.rmtree(OUTPUT_ROOT)
+    os.mkdir(OUTPUT_ROOT)
 
   # Create extension bundle.
   print('Creating extension bundle.')

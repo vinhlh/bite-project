@@ -1187,6 +1187,7 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
           params['projectName'],
           params['screenshots'],
           params['scriptId'],
+          params['commonMethodsString'],
           sendResponse);
       break;
     case Bite.Constants.CONSOLE_CMDS.DELETE_CMD:
@@ -1280,10 +1281,6 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
       break;
     case Bite.Constants.CONSOLE_CMDS.GET_PROJECT_NAMES_FROM_LOCAL:
       this.saveLoadMgr_.getProjectNamesFromLocal(sendResponse);
-      break;
-    case Bite.Constants.CONSOLE_CMDS.GET_ALL_FROM_WEB:
-      this.saveLoadMgr_.getAllFromWeb(
-          params['project'], sendResponse);
       break;
     case Bite.Constants.CONSOLE_CMDS.GET_PROJECT:
       this.saveLoadMgr_.getProject(params['name'], this.userId_, sendResponse);

@@ -189,6 +189,27 @@ rpf.ConsoleManager = function() {
    */
   this.scriptId_ = '';
 
+  /**
+   * The divs defined in the input dialog.
+   * @type {Array}
+   * @private
+   */
+  this.inputDivElems_ = [];
+
+  /**
+   * The map for divs defined in the input dialog.
+   * @type {Object}
+   * @private
+   */
+  this.inputDivElemMap_ = {};
+
+  /**
+   * The method deps input element.
+   * @type {Element}
+   * @private
+   */
+  this.methodDepsInputElem_ = null;
+
   this.init_();
 };
 goog.addSingletonGetter(rpf.ConsoleManager);
@@ -593,9 +614,17 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
    */
   this.lastScriptName_ = '';
 
+  /**
+   * The current name typed in.
+   * @type {string}
+   * @private
+   */
+  this.currentScriptName_ = '';
+
   this.boundOnScriptNameChange_ = goog.bind(this.onScriptChangeHandler_, this);
 
   this.setupProjectInfoUi_();
+  this.setupInputDialog_();
   this.setupHelpMessage_();
   this.promptHelpMessage_(rpf.StatusLogger.MESSAGE_START);
 };
@@ -604,16 +633,72 @@ rpf.ConsoleManager.prototype.initUI_ = function() {
 /**
  * Inits the info dialog.
  * @param {string} title The title of the dialog.
- * @param {Element} element The component element to be rendered in the dialog.
+ * @param {string} id The component element id.
  * @private
  */
-rpf.ConsoleManager.prototype.openInputDialog_ = function(title, element) {
-  var contentElement = this.inputDialog_.getContentElement();
-  contentElement.innerHTML = '';
-  contentElement.appendChild(element);
+rpf.ConsoleManager.prototype.openInputDialog_ = function(title, id) {
   this.inputDialog_.setTitle(title);
-  this.inputDialog_.setButtonSet(null);
+  for (var i = 0, len = this.inputDivElems_.length; i < len; ++i) {
+    goog.style.showElement(this.inputDivElems_[i], false);
+  }
+  goog.style.showElement(this.inputDivElemMap_[id], true);
   this.inputDialog_.setVisible(true);
+};
+
+
+/**
+ * Setups the input dialog.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setupInputDialog_ = function() {
+  var content = soy.renderAsElement(
+      rpf.soy.Dialog.createInputDialog,
+      {});
+  var contentElement = this.inputDialog_.getContentElement();
+  contentElement.appendChild(content);
+  this.inputDialog_.setButtonSet(null);
+
+  this.inputDivElems_ = /** @type {Array} */ (
+      goog.dom.getElementsByClass('rpf-input-dialog'));
+  for (var i = 0, len = this.inputDivElems_.length; i < len; ++i) {
+    var id = this.inputDivElems_[i].id;
+    this.inputDivElemMap_[id] = this.inputDivElems_[i];
+  }
+
+  this.methodDepsInputElem_ = goog.dom.getElement('methods-deps-input');
+
+  goog.events.listen(
+      goog.dom.getElement('new-name-submit-project'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.onEnterNewProjectName_, this));
+  goog.events.listen(
+      goog.dom.getElement('new-name-submit-script'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.onEnterNewScriptName_, this));
+  goog.events.listen(
+      goog.dom.getElement('new-name-cancel-project'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.onCancelNewScriptName_, this));
+  goog.events.listen(
+      goog.dom.getElement('new-name-cancel-script'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.onCancelNewScriptName_, this));
+  goog.events.listen(
+      goog.dom.getElement('generate-invocation-submit'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.generateInvocation_, this));
+  goog.events.listen(
+      goog.dom.getElement('generate-invocation-cancel'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.cancelGenerateInvocation_, this));
+  goog.events.listen(
+      goog.dom.getElement('save-script-submit'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.onContinueLoad_, this));
+  goog.events.listen(
+      goog.dom.getElement('save-script-cancel'),
+      goog.events.EventType.CLICK,
+      goog.bind(this.rollbackScriptName_, this));
 };
 
 
@@ -796,9 +881,8 @@ rpf.ConsoleManager.prototype.changeProject_ = function(
   var noCheck = opt_noCheck || false;
   var callback = opt_callback || goog.nullFunction;
   var currentProject = this.getProjectName_();
-  var onEnterNewName = goog.bind(this.onEnterNewProjectName_, this);
   var setName = goog.bind(this.setProjectName_, this);
-  var params = {'onEnterNewName': onEnterNewName,
+  var params = {'id': 'rpf-input-dialog-project-name',
                 'setName': setName};
   if (this.checkForCustomMethods_(currentProject, params)) {
     return;
@@ -830,7 +914,7 @@ rpf.ConsoleManager.prototype.onProjectChangeHandler_ = function(e) {
  * @private
  */
 rpf.ConsoleManager.prototype.onEnterNewScriptName_ = function(e) {
-  var newName = goog.dom.getElement('new-name-input').value;
+  var newName = goog.dom.getElement('new-name-input-script').value;
   if (!newName ||
       goog.array.contains(this.loaderDialog_.getTestNames(), newName)) {
     this.statusLogger_.setStatus('Please enter a valid script name', 'red');
@@ -847,7 +931,7 @@ rpf.ConsoleManager.prototype.onEnterNewScriptName_ = function(e) {
  * @private
  */
 rpf.ConsoleManager.prototype.onEnterNewProjectName_ = function(e) {
-  var newName = goog.dom.getElement('new-name-input').value;
+  var newName = goog.dom.getElement('new-name-input-project').value;
   if (!newName ||
       goog.array.contains(this.projectNames_, newName)) {
     this.statusLogger_.setStatus('Please enter a valid project name', 'red');
@@ -881,18 +965,7 @@ rpf.ConsoleManager.prototype.checkForCustomMethods_ = function(
     case rpf.ConsoleManager.CustomMethods.ADD_NEW:
       var setNameMethod = params['setName'];
       setNameMethod('');
-      var content = soy.renderAsElement(
-          rpf.soy.Dialog.getNewNameUi,
-          {});
-      this.openInputDialog_('New', content);
-      goog.events.listen(
-          goog.dom.getElement('new-name-submit'),
-          goog.events.EventType.CLICK,
-          params['onEnterNewName']);
-      goog.events.listen(
-          goog.dom.getElement('new-name-cancel'),
-          goog.events.EventType.CLICK,
-          goog.bind(this.onCancelNewScriptName_, this));
+      this.openInputDialog_('New', params['id']);
       return true;
   }
   return false;
@@ -904,19 +977,18 @@ rpf.ConsoleManager.prototype.checkForCustomMethods_ = function(
  * @private
  */
 rpf.ConsoleManager.prototype.openGenerateInvocationDialog_ = function() {
-  var content = soy.renderAsElement(
-      rpf.soy.Dialog.getGenerateInvocationUi,
-      {});
-  this.openInputDialog_('Generate an invocation', content);
+  this.openInputDialog_(
+      'Generate an invocation', 'rpf-input-dialog-generate-method');
+};
 
-  goog.events.listen(
-      goog.dom.getElement('generate-invocation-submit'),
-      goog.events.EventType.CLICK,
-      goog.bind(this.generateInvocation_, this));
-  goog.events.listen(
-      goog.dom.getElement('generate-invocation-cancel'),
-      goog.events.EventType.CLICK,
-      goog.bind(this.cancelGenerateInvocation_, this));
+
+/**
+ * Opens the common methods deps dialog.
+ * @private
+ */
+rpf.ConsoleManager.prototype.openCommonMethodsDepsDialog_ = function() {
+  this.openInputDialog_(
+      'Common methods dependency', 'rpf-input-dialog-deps-string');
 };
 
 
@@ -955,12 +1027,11 @@ rpf.ConsoleManager.prototype.cancelGenerateInvocation_ = function() {
  * @private
  */
 rpf.ConsoleManager.prototype.onScriptChangeHandler_ = function() {
-  var lastName = this.lastScriptName_;
+  this.lastScriptName_ = this.currentScriptName_;
   var currentScript = this.scriptSelector_.getValue();
-  this.lastScriptName_ = currentScript;
-  var onEnterNewName = goog.bind(this.onEnterNewScriptName_, this);
+  this.currentScriptName_ = currentScript;
   var setName = goog.bind(this.setScriptName_, this);
-  var params = {'onEnterNewName': onEnterNewName,
+  var params = {'id': 'rpf-input-dialog-script-name',
                 'setName': setName};
   if (this.checkForCustomMethods_(currentScript, params)) {
     return;
@@ -968,7 +1039,7 @@ rpf.ConsoleManager.prototype.onScriptChangeHandler_ = function() {
   var id = this.loaderDialog_.getIdByName(currentScript);
   if (goog.array.contains(this.loaderDialog_.getTestNames(), currentScript)) {
     if (this.needSave_()) {
-      this.promptSaveDialog_(lastName);
+      this.promptSaveDialog_();
     } else {
       this.loadTest_();
     }
@@ -978,33 +1049,20 @@ rpf.ConsoleManager.prototype.onScriptChangeHandler_ = function() {
 
 /**
  * Prompt the user whether to save the script first.
- * @param {string} lastName The last script name.
  * @private
  */
-rpf.ConsoleManager.prototype.promptSaveDialog_ = function(lastName) {
-  var content = soy.renderAsElement(
-      rpf.soy.Dialog.getSaveScriptConfirmUi,
-      {});
-  this.openInputDialog_('Confirm', content);
-  goog.events.listen(
-      goog.dom.getElement('save-script-submit'),
-      goog.events.EventType.CLICK,
-      goog.bind(this.onContinueLoad_, this));
-  goog.events.listen(
-      goog.dom.getElement('save-script-cancel'),
-      goog.events.EventType.CLICK,
-      goog.bind(this.rollbackScriptName_, this, lastName));
+rpf.ConsoleManager.prototype.promptSaveDialog_ = function() {
+  this.openInputDialog_('Confirm', 'rpf-input-dialog-discard');
 };
 
 
 /**
  * Rolls back to the previously saved name.
- * @param {string} lastName The last name.
  * @private
  */
-rpf.ConsoleManager.prototype.rollbackScriptName_ = function(lastName) {
-  this.lastScriptName_ = lastName;
-  this.setScriptNameStatic_(lastName);
+rpf.ConsoleManager.prototype.rollbackScriptName_ = function() {
+  this.currentScriptName_ = this.lastScriptName_;
+  this.setScriptNameStatic_(this.lastScriptName_);
   this.inputDialog_.setVisible(false);
 };
 
@@ -1569,6 +1627,9 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
     case Bite.Constants.UiCmds.OPEN_GENERATE_INVOCATION:
       this.openGenerateInvocationDialog_();
       break;
+    case  Bite.Constants.UiCmds.OPEN_COMMON_METHODS_DEPS:
+      this.openCommonMethodsDepsDialog_();
+      break;
     default:
       break;
   }
@@ -1657,10 +1718,7 @@ rpf.ConsoleManager.prototype.setShowTips_ = function(show) {
  * @private
  */
 rpf.ConsoleManager.prototype.warnRecordTabClosed_ = function() {
-  var content = soy.renderAsElement(
-      rpf.soy.Dialog.getRecordTabClosedUi,
-      {});
-  this.openInputDialog_('Warn', content);
+  this.openInputDialog_('Warn', 'rpf-input-dialog-close-record');
 };
 
 
@@ -2426,6 +2484,18 @@ rpf.ConsoleManager.prototype.setProjectInfo = function(
   this.projectInfo_.setDetails(opt_details);
   this.updateProjectInfoUi_();
   this.updateProjectJsFiles_(opt_details || {});
+  this.updateProjectCommonMethods_(opt_details || {});
+};
+
+
+/**
+ * Updates the project common methods.
+ * @param {!Object} details The project details.
+ * @private
+ */
+rpf.ConsoleManager.prototype.updateProjectCommonMethods_ = function(details) {
+  var str = details['common_methods'] ? details['common_methods'] : '';
+  this.setCommonMethodsString_(str);
 };
 
 
@@ -3043,6 +3113,45 @@ rpf.ConsoleManager.prototype.removeInfoMapRedundant_ = function(
 
 
 /**
+ * Gets the common methods deps string.
+ * @return {string} The common methods deps string.
+ * @private
+ */
+rpf.ConsoleManager.prototype.getCommonMethodsString_ = function() {
+  return this.methodDepsInputElem_.value;
+};
+
+
+/**
+ * Sets the common methods deps string.
+ * @param {string} methods The common methods deps string.
+ * @private
+ */
+rpf.ConsoleManager.prototype.setCommonMethodsString_ = function(methods) {
+  this.methodDepsInputElem_.value = methods;
+};
+
+
+/**
+ * Parses the given deps string.
+ * @param {string} deps The deps string.
+ * @return {string} The deps array json string.
+ * @private
+ */
+rpf.ConsoleManager.prototype.parseDepsString_ = function(deps) {
+  var trimmed_string = goog.string.trim(deps);
+  var result = [];
+  if (trimmed_string) {
+    var raw_deps = trimmed_string.split(',');
+    for (var i = 0, len = raw_deps.length; i < len; ++i) {
+      result.push(goog.string.trim(raw_deps[i]));
+    }
+  }
+  return goog.json.serialize(result);
+};
+
+
+/**
  * Gets the formatted screenshots data.
  * @return {Object} The screenshots info.
  * @private
@@ -3092,6 +3201,9 @@ rpf.ConsoleManager.prototype.saveTest = function(opt_isNew) {
   datafile = bite.console.Helper.appendInfoMap(this.infoMap_, datafile);
   projectName = this.getProjectName_();
   userLib = this.getUserLib();
+
+  var commonMethods = this.parseDepsString_(this.getCommonMethodsString_());
+
   if (!opt_isNew) {
     scriptId = this.getScriptId_();
   }
@@ -3116,7 +3228,8 @@ rpf.ConsoleManager.prototype.saveTest = function(opt_isNew) {
                       'userLib': userLib,
                       'projectName': projectName,
                       'screenshots': screenshots,
-                      'scriptId': scriptId}},
+                      'scriptId': scriptId,
+                      'commonMethodsString': commonMethods}},
            goog.bind(this.saveTestCallback_, this));
     } else {
       this.messenger_.sendMessage(

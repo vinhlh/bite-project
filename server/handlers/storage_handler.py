@@ -67,25 +67,6 @@ class AddPreexistingDocsMetadata(base.BaseHandler):
         project, test_name, resource_url, resource_id, wtf_id)
 
 
-class GetAllTestNamesAndIds(base.BaseHandler):
-  """Handler to retrieve a list of all the test names and their ids."""
-
-  def get(self):
-    project_name = self.GetRequiredParameter('project')
-
-    metadatas = storage.FetchByProject(project_name)
-    tests = []
-    for metadata in metadatas:
-      test_data = {
-        'test_name': metadata.test_name,
-        'test': metadata.test,
-        'id': metadata.id
-      }
-      tests.append(test_data)
-
-    self.response.out.write(json.dumps(tests))
-
-
 class GetTestAsJson(base.BaseHandler):
   """Returns one test object in a json bundle."""
 
@@ -134,9 +115,14 @@ class UpdateTest(base.BaseHandler):
     test = self.GetRequiredParameter('json')
     project = self.GetRequiredParameter('project')
     js_files = self.GetOptionalParameter('jsFiles')
+    common_methods_string = self.GetOptionalParameter('commonMethodsString')
 
     if js_files:
       js_files = json.loads(js_files)
+
+    common_methods = []
+    if common_methods_string:
+      common_methods = json.loads(common_methods_string)
 
     test_metadata = storage.FetchById(test_id)
     if not test_metadata:
@@ -145,7 +131,8 @@ class UpdateTest(base.BaseHandler):
 
     json_obj = json.loads(test)
     new_test_name = json_obj['name']
-    storage_project.UpdateProject(project, {'js_files': js_files})
+    storage_project.UpdateProject(project, {'js_files': js_files,
+                                            'common_methods': common_methods})
     test_metadata.Update(project, new_test_name, test)
 
 
@@ -156,9 +143,14 @@ class SaveTest(base.BaseHandler):
     json_str = self.GetRequiredParameter('json')
     project = self.GetRequiredParameter('project')
     js_files = self.GetOptionalParameter('jsFiles')
+    common_methods_string = self.GetOptionalParameter('commonMethodsString')
 
     if js_files:
       js_files = json.loads(js_files)
+
+    common_methods = []
+    if common_methods_string:
+      common_methods = json.loads(common_methods_string)
 
     json_obj = json.loads(json_str)
     new_test_name = json_obj['name']
@@ -168,7 +160,8 @@ class SaveTest(base.BaseHandler):
       storage.DeleteMetadata([exist_instance])
       storage.DeleteAllStepsByScriptIds([exist_instance.id])
 
-    storage_project.UpdateProject(project, {'js_files': js_files})
+    storage_project.UpdateProject(project, {'js_files': js_files,
+                                            'common_methods': common_methods})
     storage_instance = storage.Save(project, new_test_name, json_str)
 
     # TODO(michaelwill): This weird id string is left over from the
@@ -328,7 +321,6 @@ class GetScreenshots(base.BaseHandler):
 
 app = webapp2.WSGIApplication(
     [('/storage/add_test_metadata', AddPreexistingDocsMetadata),
-     ('/storage/getalltestsasjson', GetAllTestNamesAndIds),
      ('/storage/gettestasjson', GetTestAsJson),
      ('/storage/updatetest', UpdateTest),
      ('/storage/addtest', SaveTest),

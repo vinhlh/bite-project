@@ -28,6 +28,7 @@ goog.require('goog.events');
 goog.require('goog.ui.CustomButton');
 goog.require('goog.ui.Dialog');
 goog.require('rpf.Console.Messenger');
+goog.require('rpf.Constants');
 
 
 
@@ -99,6 +100,10 @@ rpf.NotesDialog.prototype.initToolbar_ = function() {
       goog.dom.getElement('rpf-js-play-button'));
   var generateBtn = new goog.ui.ToolbarButton(
       goog.dom.getElement('rpf-js-generate-button'));
+  var storeBtn = new goog.ui.ToolbarButton(
+      goog.dom.getElement('rpf-js-store-button'));
+  var depsBtn = new goog.ui.ToolbarButton(
+      goog.dom.getElement('rpf-js-deps-button'));
 
   goog.events.listen(
       playBtn,
@@ -110,9 +115,48 @@ rpf.NotesDialog.prototype.initToolbar_ = function() {
       goog.ui.Component.EventType.ACTION,
       goog.bind(this.popToGenerateJsCall_, this));
 
+  goog.events.listen(
+      storeBtn,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.openStoreTab_, this));
+
+  goog.events.listen(
+      depsBtn,
+      goog.ui.Component.EventType.ACTION,
+      goog.bind(this.popDependencyDialog_, this));
+
   toolbar.addChild(playBtn, true);
   toolbar.addChild(generateBtn, true);
+  toolbar.addChild(storeBtn, true);
+  toolbar.addChild(depsBtn, true);
+
   toolbar.render(goog.dom.getElement('rpf-console-js-functions-toolbar'));
+};
+
+
+/**
+ * Opens the methods store page in a new tab.
+ * @private
+ */
+rpf.NotesDialog.prototype.openStoreTab_ = function() {
+  chrome.windows.create(
+      {url: rpf.Constants.DEFAULT_SERVER + '/store/view',
+       width: 1000,
+       height: 800,
+       top: 10,
+       left: 10});
+};
+
+
+/**
+ * Opens the dialog to show the common methods dependency.
+ * @private
+ */
+rpf.NotesDialog.prototype.popDependencyDialog_ = function() {
+  this.onUiEvents_(
+      Bite.Constants.UiCmds.OPEN_COMMON_METHODS_DEPS,
+      {},
+      /** @type {Event} */ ({}));
 };
 
 
