@@ -511,9 +511,16 @@
   <div class="kd-modaldialog visible kd-prompt rpf-input-dialog"
        id="rpf-input-dialog-deps-string">
     <p>
-      <label for="label">The current dependency names string.</label>
+      <label for="label">The current dependency names string (only work for projects stored in web)</label>
       <input type="text" id="methods-deps-input"
              placeholder="a, b, c (comma-separated)">
+      <div style="color:#999;font-size:13px;word-wrap:break-word;">
+        If you'd like to manually modify the dependency string, you'd need to
+         save the script to take effect. It's recommeded using the "Add to RPF"
+          feature in store which automatically handles dependency for you. Please
+          note that if you load a project before saving, it will lose the unsaved
+          string.
+      </div>
     </p>
   </div>
 

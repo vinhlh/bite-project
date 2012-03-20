@@ -361,6 +361,7 @@ Bite.Constants.ListenerDestination = {
  */
 Bite.Constants.UiCmds = {
   // For main console.
+  ADD_COMMON_METHOD_DEPS: 'addCommonMethodDeps',
   ADD_GENERATED_CMD: 'addGeneratedCmd',
   ADD_NEW_COMMAND: 'addNewCommand',
   ADD_NEW_TEST: 'addNewTest',
@@ -507,6 +508,7 @@ Bite.Constants.RECORD_ACTION = {
  * @enum {string}
  */
 Bite.Constants.RPF_AUTOMATION = {
+  ADD_METHOD_TO_RPF: 'addMethodToRpf',
   AUTOMATE_SINGLE_SCRIPT: 'automateSingleScript',
   LOAD_AND_RUN_FROM_LOCAL: 'loadAndRunFromLocal',
   OPEN_TEST_WINDOW: 'openTestWindow',

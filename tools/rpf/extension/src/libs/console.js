@@ -210,6 +210,13 @@ rpf.ConsoleManager = function() {
    */
   this.methodDepsInputElem_ = null;
 
+  /**
+   * The common methods deps string.
+   * @type {string}
+   * @private
+   */
+  this.commonMethodsDeps_ = '';
+
   this.init_();
 };
 goog.addSingletonGetter(rpf.ConsoleManager);
@@ -1630,6 +1637,10 @@ rpf.ConsoleManager.prototype.handleMessages_ = function(
     case  Bite.Constants.UiCmds.OPEN_COMMON_METHODS_DEPS:
       this.openCommonMethodsDepsDialog_();
       break;
+    case  Bite.Constants.UiCmds.ADD_COMMON_METHOD_DEPS:
+      this.addCommonMethodDeps_(params);
+      this.automateGenerateInvocationDialog_(params['methodName']);
+      break;
     default:
       break;
   }
@@ -1710,6 +1721,44 @@ rpf.ConsoleManager.prototype.setShowTips_ = function(show) {
   if (!show && this.helperMessageElem_) {
     this.showHelpMessage_(false);
   }
+};
+
+
+/**
+ * Opens the generate invocation dialog.
+ * @param {string} name The method name.
+ * @private
+ */
+rpf.ConsoleManager.prototype.automateGenerateInvocationDialog_ = function(
+    name) {
+  this.openGenerateInvocationDialog_();
+  goog.dom.getElement('method-name-input').value = name;
+  goog.dom.getElement('method-parameter-input').value = '';
+};
+
+
+/**
+ * Adds the common method dependency.
+ * @param {Object} params The parameter map.
+ * @private
+ */
+rpf.ConsoleManager.prototype.addCommonMethodDeps_ = function(params) {
+  var name = params['methodName'];
+  var code = params['code'];
+  var commonMethods = this.parseDepsString_(this.getCommonMethodsString_());
+  for (var i = 0, len = commonMethods.length; i < len; ++i) {
+    if (name == commonMethods[i]) {
+      // The deps name exists, we don't need to add it again.
+      return;
+    }
+  }
+
+  // Adds the new name in the common methods string.
+  commonMethods.push(name);
+  this.setCommonMethodsString_(commonMethods.join(','));
+
+  // Adds the deps code.
+  this.commonMethodsDeps_ += code;
 };
 
 
@@ -2496,6 +2545,9 @@ rpf.ConsoleManager.prototype.setProjectInfo = function(
 rpf.ConsoleManager.prototype.updateProjectCommonMethods_ = function(details) {
   var str = details['common_methods'] ? details['common_methods'] : '';
   this.setCommonMethodsString_(str);
+  var deps = details['common_methods_deps'] ?
+             unescape(details['common_methods_deps']) : '';
+  this.commonMethodsDeps_ = deps;
 };
 
 
@@ -2852,6 +2904,8 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
     throw new Error('Can not play back during recording.');
   }
   var testNames = this.playbackRuntimeDialog_.getSelectedTests();
+  var userLib = this.commonMethodsDeps_ +
+                this.notesDialog_.getUserLibAsRunnable();
   // The current logic is to use the "multiple replay" mode when there
   // are multiple tests selected, or single test which is the same one
   // currently loaded in the console.
@@ -2865,7 +2919,8 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
          'params': {'testNames': testNames,
                     'tests': this.projectInfo_.getTests(),
                     'runName': this.getProjectName_(),
-                    'location': this.loaderDialog_.getStorageLocation()}});
+                    'location': this.loaderDialog_.getStorageLocation(),
+                    'userLib': userLib}});
     return;
   }
   if (this.checkRunnable_()) {
@@ -2874,7 +2929,6 @@ rpf.ConsoleManager.prototype.startPlayback = function(method, opt_script) {
                   this.editorMngr_.getCode();
     var datafile = this.getDatafile_();
     var startUrl = goog.string.trim(this.getStartUrl());
-    var userLib = this.notesDialog_.getUserLibAsRunnable();
     this.playbackRuntimeDialog_.clearMatchHtml();
     this.setPlayStatus(true);
     this.messenger_.sendMessage(
@@ -3135,7 +3189,7 @@ rpf.ConsoleManager.prototype.setCommonMethodsString_ = function(methods) {
 /**
  * Parses the given deps string.
  * @param {string} deps The deps string.
- * @return {string} The deps array json string.
+ * @return {Array} The deps array.
  * @private
  */
 rpf.ConsoleManager.prototype.parseDepsString_ = function(deps) {
@@ -3147,7 +3201,7 @@ rpf.ConsoleManager.prototype.parseDepsString_ = function(deps) {
       result.push(goog.string.trim(raw_deps[i]));
     }
   }
-  return goog.json.serialize(result);
+  return result;
 };
 
 
@@ -3203,6 +3257,7 @@ rpf.ConsoleManager.prototype.saveTest = function(opt_isNew) {
   userLib = this.getUserLib();
 
   var commonMethods = this.parseDepsString_(this.getCommonMethodsString_());
+  commonMethods = goog.json.serialize(commonMethods);
 
   if (!opt_isNew) {
     scriptId = this.getScriptId_();

@@ -221,11 +221,12 @@ rpf.WorkerManager.prototype.stopGroupTests = function() {
  * @param {Array} testNames The test names array.
  * @param {Array} tests The array of tests info.
  * @param {string} runName The run name.
- * @param {string=} opt_location Where the tests were loaded from.
+ * @param {string} location Where the tests were loaded from.
+ * @param {string} userLib The custom js library.
  */
 rpf.WorkerManager.prototype.runGroupTests = function(
-    testNames, tests, runName, opt_location) {
-  var location = opt_location || '';
+    testNames, tests, runName, location, userLib) {
+  location = location || '';
   this.finishedTestsNum_ = 0;
   var testsToRun = [];
   for (var i = 0, len = tests.length; i < len; ++i) {
@@ -241,7 +242,7 @@ rpf.WorkerManager.prototype.runGroupTests = function(
   var stepArr = [];
   var testInfoArr = [];
   for (var i = 0, len = testsToRun.length; i < len; ++i) {
-    this.pushTest_(testsToRun[i], stepArr, testInfoArr, location);
+    this.pushTest_(testsToRun[i], stepArr, testInfoArr, location, userLib);
   }
 
   // Sends a ping to server and starts the current run.
@@ -333,10 +334,11 @@ rpf.WorkerManager.prototype.startRunOnServer_ = function(
  * @param {Array} stepArr The step array.
  * @param {Array} testInfoArr The array contains the basic test info.
  * @param {string} location The location where the tests were from.
+ * @param {string} userLib The user custom js library.
  * @private
  */
 rpf.WorkerManager.prototype.pushTest_ = function(
-    test, stepArr, testInfoArr, location) {
+    test, stepArr, testInfoArr, location, userLib) {
   var id = test['id'];
   var testObj = bite.base.Helper.getTestObject(test['test']);
   var result = bite.console.Helper.trimInfoMap(testObj['datafile']);
@@ -366,7 +368,7 @@ rpf.WorkerManager.prototype.pushTest_ = function(
        'scripts': testObj['script'],
        'infoMap': result['infoMap'],
        'datafile': result['datafile'],
-       'userLib': testObj['userlib'],
+       'userLib': userLib,
        'needOverride': false,
        'continueOnFailure': true,
        'testName': testObj['name'],

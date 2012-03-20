@@ -963,6 +963,16 @@ rpf.EventsManager.prototype.automateRpf = function(params) {
             {code: params['code'], allFrames: true});
       }
       break;
+    case Bite.Constants.RPF_AUTOMATION.ADD_METHOD_TO_RPF:
+      if (this.getConsoleTabId() == -1) {
+        alert('Please open the RPF console first.');
+      } else {
+        this.sendMessageToConsole_(
+            {'command': Bite.Constants.UiCmds.ADD_COMMON_METHOD_DEPS,
+             'params': {'code': params['code'],
+                        'methodName': params['methodName']}});
+      }
+      break;
   }
 };
 
@@ -1314,7 +1324,8 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
       break;
     case Bite.Constants.CONSOLE_CMDS.RUN_GROUP_TESTS:
       this.workerMgr_.runGroupTests(params['testNames'], params['tests'],
-                                    params['runName'], params['location']);
+                                    params['runName'], params['location'],
+                                    params['userLib']);
       break;
     case Bite.Constants.CONSOLE_CMDS.STOP_GROUP_TESTS:
       this.workerMgr_.stopGroupTests();

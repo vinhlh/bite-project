@@ -33,6 +33,7 @@ goog.require('goog.dom.TagName');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
 goog.require('goog.events.KeyCodes');
+goog.require('goog.net.XhrIo');
 goog.require('goog.style');
 
 
