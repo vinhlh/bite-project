@@ -196,8 +196,8 @@ bite.Popup.prototype.init = function(opt_initCallback) {
 
 /**
  * Initializes data necessary for the functioning of this object.
- * @param {function()} callback The callback to invoke when initialization
- *     is complete.
+ * @param {function(boolean, string, number)} callback The callback to invoke
+ *     when initialization is complete.
  * @private
  */
 bite.Popup.prototype.initData_ = function(callback) {

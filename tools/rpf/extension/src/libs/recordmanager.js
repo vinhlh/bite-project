@@ -348,14 +348,15 @@ rpf.RecordManager.prototype.setStatusBeforeRecording_ = function(
 
 /**
  * Brings the tab under record foreground.
- * @param {function(Tab)=} opt_callback
- *     An optional callback function.
+ * @param {function()=} opt_callback An optional callback function.
  * @export
  */
 rpf.RecordManager.prototype.highlightRecordTab = function(opt_callback) {
-  var callback = opt_callback || undefined;
-  chrome.tabs.update(this.testTabId_, { selected: true }, callback);
-  chrome.windows.update(this.testWindowId_, { focused: true }, callback);
+  var callback = opt_callback || callback;
+  var tabCallback = /** @type {function(Tab)} */ (callback);
+  var windowCallback = /** @type {function()} */ (callback);
+  chrome.tabs.update(this.testTabId_, { selected: true }, tabCallback);
+  chrome.windows.update(this.testWindowId_, { focused: true }, windowCallback);
 };
 
 

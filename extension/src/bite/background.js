@@ -653,7 +653,7 @@ bite.client.Background.prototype.onRequest =
       this.fetchBugsData_(sender.tab, callback);
       break;
     case Bite.Constants.HUD_ACTION.LOG_TEST_RESULT:
-      this.logTestResult_(request, callback);
+      this.logTestResult_(request, /** @type {function()} */ (callback));
       break;
     case Bite.Constants.HUD_ACTION.TOGGLE_BUGS:
       chrome.tabs.getSelected(null, goog.bind(this.toggleBugsConsole_, this));
@@ -695,10 +695,12 @@ bite.client.Background.prototype.onRequest =
       this.getLocalStorage_(request['key'], callback);
       break;
     case Bite.Constants.HUD_ACTION.SET_LOCAL_STORAGE:
-      this.setLocalStorage_(request['key'], request['value'], callback);
+      this.setLocalStorage_(request['key'], request['value'],
+                            /** @type {function()} */ (callback));
       break;
     case Bite.Constants.HUD_ACTION.REMOVE_LOCAL_STORAGE:
-      this.removeLocalStorage_(request['key'], callback);
+      this.removeLocalStorage_(request['key'],
+                               /** @type {function()} */ (callback));
       break;
     case Bite.Constants.HUD_ACTION.ENSURE_CONTENT_SCRIPT_LOADED:
       chrome.tabs.getSelected(

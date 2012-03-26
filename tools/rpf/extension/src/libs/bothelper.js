@@ -235,7 +235,7 @@ bite.rpf.BotHelper.prototype.type = function(elem, text) {
  * @param {string|Element} elem The form to be submitted.
  */
 bite.rpf.BotHelper.prototype.submit = function(elem) {
-  bot.action.submit(this.getElement_(elem));
+  bot.action.click(this.getElement_(elem));
 };
 
 
