@@ -235,6 +235,8 @@ bite.rpf.BotHelper.prototype.type = function(elem, text) {
  * @param {string|Element} elem The form to be submitted.
  */
 bite.rpf.BotHelper.prototype.submit = function(elem) {
+  // TODO (phu): Figure out how this should work.  Changed submit to click
+  // as submit is deprecated.
   bot.action.click(this.getElement_(elem));
 };
 
