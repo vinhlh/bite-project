@@ -77,7 +77,7 @@ handlers:
 - url: /cycle/(\w+)/testers/all
   script: handlers.testers.app
   login: required
-  
+
 # Screenshots URLs.
 - url: /screenshots/upload
   script: handlers.screenshots.app
@@ -91,7 +91,7 @@ handlers:
   script: handlers.screenshots.app
   login: required
 
-  
+
 # User facing pages.
 - url: /
   script: handlers.home.app
@@ -156,6 +156,11 @@ handlers:
   script: handlers.project_handler.app
   login: required
 
+# JS Store
+- url: /store.*
+  script: handlers.store_handler.app
+  login: required
+
 # Test Suite, Run, Results handlers
 - url: /suite/.*
   script: handlers.suite_handler.app
@@ -186,7 +191,7 @@ handlers:
 - url: /new_template
   script: handlers.template_handler.app
   login: required
-  
+
 
 # Static content.
 - url: /favicon.ico

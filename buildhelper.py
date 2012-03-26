@@ -197,7 +197,6 @@ def CompileScript(filename_base, filepath, suffix_in, suffix_out, command):
     if os.path.exists(output):
       os.remove(output)
 
-  print ''
   return result
 
 
@@ -211,7 +210,6 @@ def ExecuteCommand(command, no_wait=False):
   Returns:
     The process.
   """
-  print 'Running command: %s' % command
   process = subprocess.Popen(command.split(' '),
                              stdout=subprocess.PIPE,
                              stderr=subprocess.PIPE)
@@ -334,9 +332,19 @@ def ParseOptions():
     CleanExpunge()
     exit()
   elif options.build_server:
+    server_src = os.path.join(OUTPUT_ROOT, 'server')
+    if os.path.exists(server_src):
+      shutil.rmtree(server_src)
+    if os.path.exists(GENFILES_ROOT):
+      shutil.rmtree(GENFILES_ROOT)
     CopyServerFiles()
     exit()
   elif options.build_extension:
+    extension_src = os.path.join(OUTPUT_ROOT, 'extension')
+    if os.path.exists(extension_src):
+      shutil.rmtree(extension_src)
+    if os.path.exists(GENFILES_ROOT):
+      shutil.rmtree(GENFILES_ROOT)
     result['build_extension_only'] = True
 
   # Set up the directories that will be built into.
@@ -381,7 +389,8 @@ def CopyServerFiles():
     'run_details_overview': os.path.join('server', 'scripts', 'soys'),
     'run_details_page': os.path.join('server', 'scripts', 'soys'),
     'set_details_runs': os.path.join('server', 'scripts', 'soys'),
-    'project_details_page': os.path.join('server', 'scripts', 'soys')
+    'project_details_page': os.path.join('server', 'scripts', 'soys'),
+    'store': os.path.join('server', 'scripts', 'soys')
   }
 
   ps = []
@@ -397,7 +406,9 @@ def CopyServerFiles():
   ps = []
   # JavaScript
   js_targets = {
-    'url_parser': os.path.join('server', 'scripts')
+    'url_parser': os.path.join('server', 'scripts'),
+    'store_edit': os.path.join('server', 'scripts'),
+    'store_view': os.path.join('server', 'scripts')
   }
 
   for target in js_targets:
@@ -434,3 +445,12 @@ def CopyServerFiles():
   js_src = os.path.join(GENFILES_ROOT, 'url_parser_script.js')
   js_dst = os.path.join(SERVER_DST, 'scripts', 'client_script.js')
   shutil.copyfile(js_src, js_dst)
+
+  js_src = os.path.join(GENFILES_ROOT, 'store_edit_script.js')
+  js_dst = os.path.join(SERVER_DST, 'scripts', 'store_edit_script.js')
+  shutil.copyfile(js_src, js_dst)
+
+  js_src = os.path.join(GENFILES_ROOT, 'store_view_script.js')
+  js_dst = os.path.join(SERVER_DST, 'scripts', 'store_view_script.js')
+  shutil.copyfile(js_src, js_dst)
+

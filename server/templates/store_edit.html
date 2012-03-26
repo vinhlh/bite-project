@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html>
+<!--
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Use of this source code is governed by the Apache License, Version 2.0.
+See the COPYING file for details.
+-->
+  <head>
+    <title>Edit Method</title>
+    <link rel="stylesheet" href="/styles/base_css_ltr.css" />
+    <link rel="stylesheet" href="/styles/explore.css">
+    <script language="javascript" src="/scripts/store_edit_script.js"></script>
+  </head>
+  <body>
+    <table width="100%" height="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="height: 67px;">
+          <table width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="100%">
+                <div class="kd-googlebar">
+                  <div style="width:960px;position:relative;margin:0 auto;">
+                    <div style="float:left;width:224px;">
+                      <a class="logo">
+                        <img src="/images/logo_Google_BITE.png"
+                             style="width:104px;">
+                      </a>
+                    </div>
+                    <div id="baseHeader" style="float:left;">
+                      <div class="kd-buttonbar kd-googlebuttonbar kd-segmentedcontrol">
+                        <a href="/store/view">
+                          <div class="kd-button left">
+                            <span class="maskedIcon icon_home">
+                              <img src="" width="21" height="21">
+                            </span>
+                          </div>
+                        </a>
+                        <a href="/store/edit">
+                          <div class="kd-button right">
+                            <span class="maskedIcon icon_edit">
+                              <img src="" width="21" height="21">
+                            </span>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                    <div id="topRow" style="float:right; margin-right:44px;">
+                      <span class="topnav-username" style="text-align: right;">
+                      </span>
+                    </div>
+                    <div class="kd-butterbar" id="statusMessageDiv">
+                      <p id="statusMessage"></p>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="baseView">
+            <div style="width:960px;position:relative;margin:0 auto;">
+              <div class="store-edit-row-block">
+                <div class="store-edit-row-block-title">
+                Method code
+                </div>
+                <div class="store-edit-row-block-content">
+                  <textarea style="height:14em;width:544px;" id="store-edit-method-code"
+                            placeholder="Please paste your method code"></textarea>
+                </div>
+                <div class="store-edit-row-block-star">
+                  <img src="/images/iconRequired.gif" width="13px">
+                </div>
+              </div>
+
+              <div class="store-edit-row-block">
+                <div class="store-edit-row-block-title">
+                Method name
+                </div>
+                <div class="store-edit-row-block-content">
+                  <input type="text" style="width:544px;" id="store-edit-method-name"
+                         placeholder="Please paste the exact method name above">
+                </div>
+                <div class="store-edit-row-block-star">
+                  <img src="/images/iconRequired.gif" width="13px">
+                </div>
+              </div>
+
+              <div class="store-edit-row-block">
+                <div class="store-edit-row-block-title">
+                Description
+                </div>
+                <div class="store-edit-row-block-content">
+                  <textarea style="height:14em;width:544px;" id="store-edit-description"
+                            placeholder="Please provide description and examples of usage"></textarea>
+                </div>
+                <div class="store-edit-row-block-star">
+                  <img src="/images/iconRequired.gif" width="13px">
+                </div>
+              </div>
+
+              <div class="store-edit-row-block">
+                <div class="store-edit-row-block-title">
+                Labels
+                </div>
+                <div class="store-edit-row-block-content">
+                  <div id="label-selector"></div>
+                  <input type="text" style="width:544px;margin-top:16px;"
+                         id="store-edit-addl-labels"
+                         placeholder="Additional labels (comma-separated)">
+                </div>
+                <div class="store-edit-row-block-star">
+                  <img src="/images/iconRequired.gif" width="13px">
+                </div>
+              </div>
+
+              <div class="store-edit-row-block">
+                <div class="store-edit-row-block-title">
+                Dependency name
+                </div>
+                <div class="store-edit-row-block-content">
+                  <input type="text" style="width:544px;" id="store-edit-deps-name"
+                         placeholder="Please type in the dependency name">
+                </div>
+              </div>
+
+              <div class="store-edit-row-block">
+                <div class="store-edit-row-block-title">
+                Dependency code
+                </div>
+                <div class="store-edit-row-block-content">
+                  <textarea style="height:14em;width:544px;" id="store-edit-deps-code"
+                            placeholder=""></textarea>
+                </div>
+              </div>
+
+              <div class="store-edit-row-block">
+                <div class="store-edit-row-block-title">
+                  <div class="kd-formbuttons">
+                    <a class="kd-button kd-button-submit primary"
+                       id="store-edit-publish"
+                       style="-webkit-user-select: none; ">
+                      Publish
+                    </a>
+                    <a class="kd-button" style="-webkit-user-select: none;"
+                       id="store-edit-reset">
+                      Reset
+                    </a>
+                  </div>
+                </div>
+                <div class="store-edit-row-block-content">
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+  <script language="javascript">
+    {% autoescape off %}
+    new rpf.server.StoreEdit('{{method}}');
+    {% endautoescape %}
+  </script>
+</html>

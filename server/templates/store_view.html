@@ -1,0 +1,79 @@
+<!DOCTYPE HTML>
+<html>
+<!--
+Copyright 2011 Google Inc. All Rights Reserved.
+
+Use of this source code is governed by the Apache License, Version 2.0.
+See the COPYING file for details.
+-->
+  <head>
+    <title>Methods Store</title>
+    <link rel="stylesheet" href="/styles/base_css_ltr.css" />
+    <link rel="stylesheet" href="/styles/explore.css">
+    <script language="javascript" src="/scripts/store_view_script.js"></script>
+  </head>
+  <body>
+    <table width="100%" height="100%" cellpadding="0" cellspacing="0">
+      <tr>
+        <td style="height: 67px;">
+          <table width="100%" cellspacing="0" cellpadding="0">
+            <tr>
+              <td width="100%">
+                <div class="kd-googlebar">
+                  <div style="width:960px;position:relative;margin:0 auto;">
+                    <div style="float:left;width:224px;">
+                      <a class="logo">
+                        <img src="/images/logo_Google_BITE.png"
+                             style="width:104px;">
+                      </a>
+                    </div>
+                    <div id="baseHeader" style="float:left;">
+                      <div class="kd-buttonbar kd-googlebuttonbar kd-segmentedcontrol">
+                        <a href="/store/view">
+                          <div class="kd-button left">
+                            <span class="maskedIcon icon_home">
+                              <img src="" width="21" height="21">
+                            </span>
+                          </div>
+                        </a>
+                        <a href="/store/edit">
+                          <div class="kd-button right">
+                            <span class="maskedIcon icon_edit">
+                              <img src="" width="21" height="21">
+                            </span>
+                          </div>
+                        </a>
+                      </div>
+                    </div>
+                    <div id="topRow" style="float:right; margin-right:44px;">
+                      <span class="topnav-username" style="text-align: right;">
+                      </span>
+                    </div>
+                    <div class="kd-butterbar" id="statusMessageDiv">
+                      <p id="statusMessage"></p>
+                    </div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <div id="baseView">
+            <div style="width:960px;position:relative;margin:0 auto;">
+              <div class="store-view-sidebar" id="store-view-sidebar"></div>
+              <div class="store-view-content" id="store-view-content"></div>
+            </div>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </body>
+  <script language="javascript">
+    {% autoescape off %}
+    new rpf.server.StoreView('{{label}}', '{{methods}}');
+    {% endautoescape %}
+  </script>
+</html>

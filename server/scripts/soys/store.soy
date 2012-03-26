@@ -1,0 +1,134 @@
+{namespace rpf.server.Store}
+
+
+/**
+ * Creates the sidebar on store view page.
+ * @param data
+ */
+{template .createViewSidebar}
+  <div class="kd-content-sidebar">
+    <ul class="iconlist">
+      {foreach $row in $data}
+        {if $row.selected}
+        <li class="kd-sidebarlistitem selected">
+        {else}
+        <li class="kd-sidebarlistitem">
+        {/if}
+          <a href="/store/view?label={$row.name}" style="font-size:13px;">{$row.name}</a>
+        </li>
+      {/foreach}
+    </ul>
+  </div>
+{/template}
+
+
+/**
+ * Creates the content in details dialog.
+ */
+{template .createDetailsDialogContent}
+  <div style="width:100%;">
+    <div style="width:400px;float:left;">
+      <textarea style="width:400px;height:520px;"
+                id="store-view-details-code"></textarea>
+    </div>
+    <div style="width:280px;float:left;padding-left:40px;">
+      <div>
+        <span id="store-view-details-name" style="font-weight:bold;padding-right:5px;">
+        </span>
+        -
+        <span id="store-view-details-author" style="color:#999;padding-left:5px;">
+        </span>
+      </div>
+      <div style="padding-top:15px;font-size:13px;word-wrap:break-word;"
+           id="store-view-details-description"></div>
+      <div style="padding-top:50px;">
+        <div style="font-weight:bold;">Want to try out?</div>
+        <div style="font-size:12px;">
+        (If you haven't, you would need to install
+          <a href="https://chrome.google.com/webstore/a/google.com/detail/fjbjdcdnfkadlkknhdchmpkneabpmnhe"
+             target="_blank">
+          {sp}this{sp}
+          </a> extension and refresh the current page.)
+        </div>
+        <div style="padding-top:15px;">
+          <div style="float:left;width:130px;">
+            <div class="store-view-row-method-name"
+                 id="store-view-details-open-window"
+                 style="font-size:13px;">
+              Open test window
+            </div>
+            <div class="store-view-row-method-name"
+                 id="store-view-details-run-method"
+                 style="padding-top:15px;font-size:13px;">
+              Run the method
+            </div>
+            <div class="store-view-row-method-name"
+                 id="store-view-details-add-rpf"
+                 style="padding-top:15px;font-size:13px;">
+              Add to RPF
+            </div>
+          </div>
+          <div id="store-view-details-try-tips"
+               style="float:left;width:130px;word-wrap:break-word;border-left:1px solid #999;padding-left:15px;color:#999;font-size:13px;">
+          </div>
+        </div>
+        <div id="rpfLaunchData" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+{/template}
+
+
+/**
+ * Creates the content on store view page.
+ * @param data
+ */
+{template .createViewContent}
+{foreach $row in $data}
+<div class="store-view-row">
+  <div class="store-view-row-outer">
+    <div class="store-view-row-inner">
+      <div>
+        <a>
+          <img src="/images/bronze.png" width="48px" height="48px"
+               style="margin-left:-60px;float:left;">
+        </a>
+        <div class="store-view-row-name-div">
+          <span style="padding-right:5px;">
+            <a class="store-view-row-method-name">{$row.name}</a>
+          </span>
+          <span style="color:#999;">
+              -
+            <span style="color:#999;padding-left:5px;">{$row.author}</span>
+          </span>
+        </div>
+        <div class="store-view-row-description">
+          {$row.description |noAutoescape}
+        </div>
+        <div class="store-view-row-button-sets">
+          <span role="button" class="store-view-row-button store-view-button-details"
+                id="details_{$row.key}">
+            Details
+          </span>
+          -
+          <span role="button" style="padding-left:5px;"
+                class="store-view-row-button">
+            <a style="text-decoration:none;color:#36C;"
+               target="_blank" href="/store/edit?methodName={$row.name}">
+              Edit
+            </a>
+          </span>
+          -
+          <span role="button" style="padding-left:5px;"
+                class="store-view-row-button store-view-button-delete"
+                id="delete_{$row.key}">
+            Delete
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{/foreach}
+{/template}
+

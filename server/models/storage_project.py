@@ -24,6 +24,7 @@ import logging
 import json
 
 from google.appengine.ext import db
+from models import store
 
 
 class StorageProjectMetadata(db.Model):
@@ -118,8 +119,10 @@ def GetProjectObject(name):
     return None
 
   common_methods = ''
+  common_methods_deps = ''
   if project.common_methods:
     common_methods = ','.join(project.common_methods)
+    common_methods_deps = store.GetDepsByNames(project.common_methods)
 
   obj = {
     'name': project.name,
@@ -127,6 +130,7 @@ def GetProjectObject(name):
     'params': project.params,
     'js_files': GetJsFiles(project),
     'common_methods': common_methods,
+    'common_methods_deps': common_methods_deps,
     'java_package_path': project.java_package_path
   }
 
