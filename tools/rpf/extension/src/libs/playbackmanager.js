@@ -1518,6 +1518,14 @@ rpf.PlayBackManager.prototype.getCurrentTestName = function() {
 
 
 /**
+ * @return {string} The current project name.
+ */
+rpf.PlayBackManager.prototype.getCurrentProjectName = function() {
+  return this.currentProjectName_;
+};
+
+
+/**
  * @return {string} The current test id.
  * @export
  */

@@ -345,6 +345,8 @@ def ParseOptions():
       shutil.rmtree(extension_src)
     if os.path.exists(GENFILES_ROOT):
       shutil.rmtree(GENFILES_ROOT)
+    if not os.path.exists(OUTPUT_ROOT):
+      os.mkdir(OUTPUT_ROOT)
     result['build_extension_only'] = True
 
   # Set up the directories that will be built into.
@@ -408,7 +410,8 @@ def CopyServerFiles():
   js_targets = {
     'url_parser': os.path.join('server', 'scripts'),
     'store_edit': os.path.join('server', 'scripts'),
-    'store_view': os.path.join('server', 'scripts')
+    'store_view': os.path.join('server', 'scripts'),
+    'result_table': os.path.join('server', 'scripts')
   }
 
   for target in js_targets:
@@ -454,3 +457,6 @@ def CopyServerFiles():
   js_dst = os.path.join(SERVER_DST, 'scripts', 'store_view_script.js')
   shutil.copyfile(js_src, js_dst)
 
+  js_src = os.path.join(GENFILES_ROOT, 'result_table_script.js')
+  js_dst = os.path.join(SERVER_DST, 'scripts', 'result_table_script.js')
+  shutil.copyfile(js_src, js_dst)

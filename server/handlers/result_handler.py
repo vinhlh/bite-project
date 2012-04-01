@@ -17,6 +17,7 @@
 __author__ = 'phu@google.com (Po Hu)'
 
 import logging
+import json
 import webapp2
 
 from common.handlers import base
@@ -63,8 +64,13 @@ class UpdateResultHandler(base.BaseHandler):
     status = self.GetOptionalParameter('status', 'undefined')
     screenshot = self.GetOptionalParameter('screenshot', '')
     log = self.GetOptionalParameter('log', '')
+    project_name = self.GetOptionalParameter('projectName', '')
+    platform = self.GetOptionalParameter('platform', '')
+    chrome_version = self.GetOptionalParameter('chromeVersion', '')
+
     ip = self.request.remote_addr
     logging.info(str(result))
+
     result_obj = basic_util.ParseJsonStr(str(result))['result']
     if result_obj.has_key('runKey'):
       temp = bite_result.GetResult(
@@ -77,7 +83,8 @@ class UpdateResultHandler(base.BaseHandler):
 
     result = bite_result.UpdateResult(
         result_obj['id'], result_obj['parent'],
-        status, screenshot, log, '', ip)
+        status, screenshot, log, '', ip,
+        project_name, platform, chrome_version)
     self.response.out.write(
         'Result has been successfully updated.' + result.test_id)
 
@@ -96,9 +103,36 @@ class ViewResultHandler(base.BaseHandler):
     self.response.out.write(basic_util.DumpJsonStr(params))
 
 
+class TableViewResultHandler(base.BaseHandler):
+  """View result table handler."""
+
+  def get(self):
+    self.RenderTemplate('result_table.html', {})
+
+
+class GetResultTableHandler(base.BaseHandler):
+  """The handler for getting a result table."""
+
+  def get(self):
+    self.post()
+
+  def post(self):
+    """Gets the result table."""
+    project_name = self.GetRequiredParameter('projectName')
+    platform = self.GetOptionalParameter('platform', '')
+    chrome_from = self.GetOptionalParameter('chromeFrom', '')
+    chrome_to = self.GetOptionalParameter('chromeTo', '')
+
+    results = bite_result.GetResultTable(
+        project_name, platform, chrome_from, chrome_to)
+    self.response.out.write(json.dumps(results))
+
+
 app = webapp2.WSGIApplication(
     [('/result/fetch', FetchResultHandler),
      ('/result/update', UpdateResultHandler),
-     ('/result/view', ViewResultHandler)],
+     ('/result/view', ViewResultHandler),
+     ('/result/tableview', TableViewResultHandler),
+     ('/result/get_result_table', GetResultTableHandler)],
     debug=True)
 

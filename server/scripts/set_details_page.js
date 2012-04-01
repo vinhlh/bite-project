@@ -128,11 +128,8 @@ goog.inherits(bite.server.Set, bite.server.Page);
  */
 bite.server.Set.prototype.init = function(paramsMap) {
   this.layoutHelper = bite.server.LayoutHelper.getInstance();
-  var baseHeader = goog.dom.getElement('baseHeader');
   var baseView = goog.dom.getElement('baseView');
-  baseHeader.innerHTML = bite.server.templates.details.showHeader();
   baseView.innerHTML = bite.server.templates.details.showBodyArea();
-  goog.dom.getElement('setName').value = 'Untitled set';
   this.parseParams_(paramsMap);
   this.selectedTab = this.tabNameObjMap['runs'];
   this.selectedTab.init(goog.dom.getElement('setTabDetailDiv'));

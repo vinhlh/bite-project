@@ -54,9 +54,6 @@ goog.inherits(bite.server.Result, bite.server.Page);
  * @param {Object} paramsMap The params map of the url hash.
  */
 bite.server.Result.prototype.init = function(paramsMap) {
-  var baseHeader = goog.dom.getElement('baseHeader');
-  baseHeader.innerHTML =
-      bite.server.templates.details.ResultPage.showHeader();
   var baseView = goog.dom.getElement('baseView');
   baseView.innerHTML = bite.server.templates.details.ResultPage.showBodyArea();
   this.parseParams_(paramsMap);

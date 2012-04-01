@@ -162,3 +162,62 @@
   </table>
 {/template}
 
+
+/**
+ * Gets the result table head row.
+ * @param projectName
+ * @param columns
+ */
+{template .getResultsTableHeadRow}
+<tr>
+  <th>{$projectName}</th>
+  {foreach $column in $columns}
+  <th>
+    <a href="/home#page=run_details&runKey={$column.result.runKey}" target="_blank"
+       title="{$column.result.createdTime}" style="text-decoration:none;">
+      <div style="font-weight:bold;">{$column.result.chromeVersion}</div>
+      <div style="font-weight:bold;">{$column.result.platform}</div>
+    </a>
+  </th>
+  {/foreach}
+</tr>
+{/template}
+
+
+/**
+ * Gets the results table row.
+ * @param columns
+ */
+{template .getResultsTableRow}
+<tr>
+  {foreach $column in $columns}
+  <td
+   {if $column.platform == 'win'}
+   {sp}style="background-color:#ADDFFF;"
+   {elseif $column.platform == 'linux'}
+   {sp}style="background-color:#FFF8C6;"
+   {/if}
+  >
+    {if $column.displayName}
+      {$column.displayName}
+    {else}
+      {if $column.result == 'passed'}
+        <span style="color: green;">
+      {elseif $column.result == 'failed'}
+        <a href="/home#page=result&resultKey={$column.resultKey}" target="_blank"
+           style="text-decoration:none;">
+          <span style="color: red;">
+      {else}
+        <span style="color: black;">
+      {/if}
+      {$column.result}
+      </span>
+      {if $column.result == 'failed'}
+        </a>
+      {/if}
+    {/if}
+  </td>
+  {/foreach}
+</tr>
+{/template}
+

@@ -1029,6 +1029,10 @@ input[type=text].disabled {
   -webkit-mask-image:url('/images/edit.png');
 }
 
+.kd-googlebuttonbar .kd-button .maskedIcon.icon_dash{
+  -webkit-mask-image:url('/images/trends.svg');
+}
+
 .kd-googlebuttonbar.kd-segmentedcontrol{
   display:inline-block;
   float:none;

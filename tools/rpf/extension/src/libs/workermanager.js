@@ -31,6 +31,8 @@ goog.require('goog.events');
 goog.require('goog.json');
 goog.require('goog.net.XhrIo');
 goog.require('goog.userAgent');
+goog.require('goog.userAgent.product');
+goog.require('goog.userAgent.product.isVersion');
 goog.require('rpf.Constants');
 goog.require('rpf.MiscHelper');
 goog.require('rpf.soy.Dialog');
@@ -292,6 +294,38 @@ rpf.WorkerManager.prototype.runFinishCallback_ = function(response) {
 
 
 /**
+ * Gets the platform.
+ * @return {string} The platform.
+ * @private
+ */
+rpf.WorkerManager.prototype.getPlatform_ = function() {
+  if (goog.userAgent.WINDOWS) {
+    return 'win';
+  }
+  if (goog.userAgent.LINUX) {
+    return 'linux';
+  }
+  if (goog.userAgent.MAC) {
+    return 'mac';
+  }
+  return 'others';
+}
+
+
+/**
+ * Gets the Chrome version.
+ * @return {string} The Chrome version.
+ * @private
+ */
+rpf.WorkerManager.prototype.getChromeVersion_ = function() {
+  if (goog.userAgent.product.CHROME) {
+    return goog.userAgent.product.VERSION;
+  }
+  return '';
+}
+
+
+/**
  * Gets the user agent string.
  * @return {string} The user agent string.
  * @private
@@ -488,7 +522,10 @@ rpf.WorkerManager.prototype.updateRunningTestStatus = function(
       'testId': this.playbackMgr_.getCurrentTestId()}}),
     'status': result,
     'screenshot': dataUrl,
-    'log': log
+    'log': log,
+    'projectName': this.playbackMgr_.getCurrentProjectName(),
+    'chromeVersion': this.getChromeVersion_(),
+    'platform': this.getPlatform_()
   };
   var requestUrl = rpf.MiscHelper.getUrl(
       rpf.WorkerManager.TESTS_EXECUTION_SERVER_,

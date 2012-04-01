@@ -63,6 +63,9 @@ class BiteResult(db.Model):
   automated = db.BooleanProperty(required=False, default=True)
   test_name = db.StringProperty(required=False)
   labels = db.StringListProperty(default=None)
+  project_name = db.StringProperty(required=False)
+  platform = db.StringProperty(required=False)
+  chrome_version = db.StringProperty(required=False)
 
 
 def GetResult(run_key, test_id='', test_name=''):
@@ -138,11 +141,13 @@ def GetRandomQueuedJob(run):
 
 
 def UpdateResult(result_id, parent_key_str, status, screenshot='',
-                 log='', finished_time='', executor_ip=''):
+                 log='', finished_time='', executor_ip='',
+                 project_name='', platform='', chrome_version=''):
   """Updates the result and run slice info in a transaction."""
   result = db.run_in_transaction(
       _UpdateResult, result_id, parent_key_str,
-      status, screenshot, log, finished_time, executor_ip)
+      status, screenshot, log, finished_time, executor_ip,
+      project_name, platform, chrome_version)
   run_slice = result.parent()
   run = run_slice.run
   if (run_slice.passed_number + run_slice.failed_number ==
@@ -159,7 +164,8 @@ def UpdateResult(result_id, parent_key_str, status, screenshot='',
 
 
 def _UpdateResult(result_id, parent_key_str, status, screenshot='',
-                  log='', finished_time='', executor_ip=''):
+                  log='', finished_time='', executor_ip='',
+                  project_name='', platform='', chrome_version=''):
   """Updates the result after it's executed."""
   parent_key = None
   if parent_key_str:
@@ -172,6 +178,9 @@ def _UpdateResult(result_id, parent_key_str, status, screenshot='',
     finished_time = datetime.datetime.now()
   result.finished_time = finished_time
   result.executor_ip = executor_ip
+  result.project_name = project_name
+  result.platform = platform
+  result.chrome_version = chrome_version
   result.put()
   if status == 'passed':
     result.parent().passed_number += 1
@@ -185,4 +194,31 @@ def GetResultsOfRun(run_key_str, number):
   """Gets a number of results of the specified run."""
   return (BiteResult.all().filter('run =', db.Key(run_key_str)).
           order('-finished_time').fetch(number))
+
+
+def GetResultTable(project_name, platform, chrome_from, chrome_to):
+  """Gets the result table."""
+  results = []
+  q = BiteResult.all()
+  q.filter('project_name =', project_name)
+  if platform == 'win' or platform == 'mac' or platform == 'linux':
+    q.filter('platform =', platform)
+  if chrome_from:
+    q.filter('chrome_version >=', chrome_from)
+  if chrome_to:
+    q.filter('chrome_version <=', chrome_to)
+  q.order('chrome_version')
+  q.order('platform')
+  q.order('created_time')
+  q.order('test_name')
+
+  for entity in q:
+    results.append({'testName': entity.test_name,
+                    'platform': entity.platform,
+                    'chromeVersion': entity.chrome_version,
+                    'createdTime': str(entity.run.start_time),
+                    'result': entity.status,
+                    'runKey': str(entity.run.key()),
+                    'resultKey': str(entity.key())})
+  return results
 
