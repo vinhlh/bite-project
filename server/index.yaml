@@ -168,6 +168,22 @@ indexes:
   - name: finished_time
     direction: desc
 
+- kind: BiteResult
+  properties:
+  - name: project_name
+  - name: chrome_version
+  - name: platform
+  - name: created_time
+  - name: test_name
+
+- kind: BiteResult
+  properties:
+  - name: platform
+  - name: project_name
+  - name: chrome_version
+  - name: created_time
+  - name: test_name
+
 - kind: BiteRun
   properties:
   - name: run_template
