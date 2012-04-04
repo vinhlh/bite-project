@@ -22,11 +22,11 @@ __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import logging
 
-from builddefs.tools import base
+import base
 
 
 COMMAND = 'java'
-HELP = '\n'.join(['svn not installed.  Please install the JDK from',
+HELP = '\n'.join(['java JRE 1.6+ not installed.  Please install JRE from',
                   ('    http://www.oracle.com/technetwork/java/javase/'
                    'downloads/index.html')])
 
@@ -96,8 +96,3 @@ class Java(base.Tool):
       base.Tool._Uninstall(COMMAND, location, Java.IsInstalled)
     except base.ToolError:
       raise JavaError
-
-
-if __name__ == '__main__':
-  pass
-

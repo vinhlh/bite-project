@@ -28,8 +28,8 @@ import sys
 import urllib
 import zipfile
 
-from builddefs.tools import base
-from builddefs.tools import java
+import base
+import java
 
 
 COMPILER_JAR_NAME = 'SoyToJsSrcCompiler.jar'
@@ -153,8 +153,3 @@ class SoyToJsCompiler(base.Tool):
       except OSError, e:
         logging.error('Failed to remove the soy compiler: %s.' % e)
         raise SoyToJsCompilerError
-
-
-if __name__ == '__main__':
-  pass
-

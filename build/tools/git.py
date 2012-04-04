@@ -22,7 +22,7 @@ __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import logging
 
-from builddefs.tools import base
+import base
 
 
 COMMAND = 'git'
@@ -100,5 +100,5 @@ class Git(base.Tool):
 
 
 if __name__ == '__main__':
-  pass
-
+  git = Git()
+  print git.IsInstalled()

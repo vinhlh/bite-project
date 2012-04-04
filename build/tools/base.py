@@ -20,7 +20,6 @@
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 
-import logging
 import os
 import subprocess
 
@@ -35,6 +34,16 @@ class Tool(object):
 
   # Public Functions
   @staticmethod
+  def CheckForUpdate(location=None):
+    """Checkes to see if the tool has changed since last installed.
+    
+    Args:
+      location: Optional location to search for the tool. (string)
+    """
+    print 'Tool.CheckForUpdate is not defined.'
+    raise ToolError
+
+  @staticmethod
   def Execute(params, location=None):
     """Executes the tool with the given parameters.
 
@@ -42,7 +51,7 @@ class Tool(object):
       params: Arguments supplied to the tool. (list of strings)
       location: Optional location to search for the tool. (string)
     """
-    logging.error('Tool.Execute is not defined.')
+    print 'Tool.Execute is not defined.'
     raise ToolError
 
   @staticmethod
@@ -54,7 +63,7 @@ class Tool(object):
     Args:
       location: Optional location to search for the tool. (string)
     """
-    logging.error('Tool.Install is not defined.')
+    print 'Tool.Install is not defined.'
     raise ToolError
 
   @staticmethod
@@ -67,7 +76,7 @@ class Tool(object):
     Returns:
       Whether or not the tool is installed.
     """
-    logging.error('Tool.IsInstalled is not defined.')
+    print 'Tool.IsInstalled is not defined.'
     raise ToolError
 
   @staticmethod
@@ -96,7 +105,7 @@ class Tool(object):
     """
     executable = Tool._GetExecutable(executable, location)
     if not executable:
-      logging.error('Execution failed; %s not installed.' % executable)
+      print ('Execution failed; %s not installed.' % executable)
       print(help)
       raise ToolError
 
@@ -104,7 +113,7 @@ class Tool(object):
     try:
       Tool._ExecuteCommand(command)
     except ToolError:
-      logging.error('%s failed to execute:\n    %s.' % (executable, command))
+      print ('%s failed to execute:\n    %s.' % (executable, command))
       raise ToolError
 
   @staticmethod
@@ -123,7 +132,7 @@ class Tool(object):
                                stderr=subprocess.PIPE)
     results = process.communicate()
     if process.returncode:
-      logging.error(results[1])
+      print results[1]
       raise ToolError
 
   @staticmethod
@@ -157,8 +166,11 @@ class Tool(object):
     return None
 
   @staticmethod
-  def _Install(executable, location, is_installed, help):
-    """OS specific and not supported, will give a message to help the user.
+  def _FakeInstall(executable, location, is_installed, help):
+    """Called by tools that have no way of installing themselves.
+
+    When called check if already installed otherwise print a message to help
+    the user.
 
     Args:
       executable: The name of the executable. (string)
@@ -171,13 +183,15 @@ class Tool(object):
       ToolError: Install fails.
     """
     if not is_installed(location):
-      logging.error('Unable to install %s.' % executable)
+      print ('Unable to install %s.' % executable)
       print(help)
       raise ToolError
 
   @staticmethod
-  def _Uninstall(executable, location, is_installed):
-    """Uninstalls svn.
+  def _FakeUninstall(executable, location, is_installed):
+    """Called by tools that have no way of uninstalling themselves.
+
+    Print a message for the user informing them of the failure.
 
     Args:
       executable: The name of the executable. (string)
@@ -189,10 +203,5 @@ class Tool(object):
       ToolError: Fails to uninstall svn.
     """
     if is_installed(location):
-      logging.error('Unable to uninstall %s.' % executable)
+      print ('Unable to uninstall %s.' % executable)
       raise ToolError
-
-
-if __name__ == '__main__':
-  pass
-

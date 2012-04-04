@@ -22,11 +22,11 @@ __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import logging
 
-from builddefs.tools import base
+import base
 
 
 COMMAND = 'svn'
-HELP = '\n'.join([('svn not installed.  Please install a command line tool '
+HELP = '\n'.join([('svn not installed.  Please install the command line tool '
                    'from'),
                   '    http://subversion.apache.org/packages.html',
                   '    Win32Svn (recommended for Windows'])

@@ -22,11 +22,11 @@ __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 import logging
 
-from builddefs.tools import base
+import base
 
 
 COMMAND = 'hg'
-HELP = '\n'.join([('hg (Mercurial) not installed.  Please install a command '
+HELP = '\n'.join([('hg (Mercurial) not installed.  Please install the command '
                    'line tool from:'),
                   '    http://mercurial.selenic.com/downloads/',
                   '    Mercurial 2.0 MSI Installer (recommended for Windows'])
@@ -97,8 +97,3 @@ class Mercurial(base.Tool):
       base.Tool._Uninstall(COMMAND, location, Mercurial.IsInstalled)
     except base.ToolError:
       raise MercurialError
-
-
-if __name__ == '__main__':
-  pass
-

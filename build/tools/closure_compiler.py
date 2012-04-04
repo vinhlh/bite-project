@@ -28,8 +28,8 @@ import sys
 import urllib
 import zipfile
 
-from builddefs.tools import base
-from builddefs.tools import svn
+import base
+import svn
 
 
 COMPILER_JAR_NAME = 'compiler.jar'
@@ -169,8 +169,3 @@ class ClosureCompiler(base.Tool):
       except OSError, e:
         logging.error('Failed to remove the closure compiler: %s.' % e)
         raise ClosureCompilerError
-
-
-if __name__ == '__main__':
-  pass
-
