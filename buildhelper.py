@@ -103,7 +103,25 @@ SOYDATA_URL = ('http://closure-templates.googlecode.com/svn/trunk/javascript/'
 CLOSURE_COMPILER = os.path.join(DEPS['closure-library'][ROOT], 'closure',
                                 'bin', 'build', 'closurebuilder.py')
 
+CSS_COMPILER_DEFS = [
+    '--add_copyright',
+    '--allow_unrecognized_functions',
+    '--allowed_non_standard_function=color-stop',
+    '--allowed_non_standard_pseudo_type=nth-child',
+    '--allowed_non_standard_function=-moz-linear-gradient',
+    '--allowed_non_standard_function=-webkit-gradient',
+    '--allowed_non_standard_function=from',
+    '--allowed_non_standard_function=to',
+    '--allowed_non_standard_function=alpha',
+    '--allow_ie_function_syntax',
+    '--allow_unrecognized_pseudo_types',
+    '--simplify_css',
+    '--eliminate_dead_styles',
+]
+
 COMPILER_FLAGS = [
+  #'--compiler_flags=--aggressive_var_check_level=ERROR',
+  #'--compiler_flags=--check_global_names_level=ERROR',
   '--compiler_flags=--formatting=pretty_print',
   '--compiler_flags=--generate_exports',
   '--compiler_flags=--js=%s' % os.path.join(
