@@ -20,5 +20,37 @@
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 
+import os
+
+
 def Construct(verbose):
+  print 'extension'
   return
+
+
+
+def X():
+  externs_location=None
+
+  externs_root = os.path.join('common', 'extension', 'externs')
+  if externs_location:
+    externs_root = os.path.join(externs_location, externs_root)
+
+    '--compiler_flags=--externs=%s' % os.path.join(externs_root,
+                                                   'chrome_extensions.js'),
+    '--compiler_flags=--externs=%s' % os.path.join(externs_root,
+                                                   'rpf_externs.js'),
+    '--compiler_flags=--externs=%s' % os.path.join(externs_root,
+                                                   'ace_externs.js')
+
+
+
+
+def CopyAceFiles():
+  """Copies the ACE files to the destination folder."""
+  #   Copy the required ACE files.
+  ace_dst = os.path.join(EXTENSION_DST, 'ace')
+  ace_src = os.path.join(DEPS['ace'][ROOT], 'build', 'src')
+  if os.path.exists(ace_dst):
+    shutil.rmtree(ace_dst)
+  shutil.copytree(ace_src, ace_dst)

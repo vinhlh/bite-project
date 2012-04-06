@@ -21,9 +21,16 @@ __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 
 import subprocess
+import time
 
 
-def ExecuteCommand(command, no_wait=False):
+ONCOMPLETE = 'oncomplete'
+OUT = 'out'
+PROCESS = 'process'
+SUCCESS = 'success'
+
+
+def ExecuteCommand(command, on_complete=None, no_wait=False):
   """Execute the given command and return the output.
 
   Args:
@@ -34,10 +41,39 @@ def ExecuteCommand(command, no_wait=False):
     The process or None if no_wait is True.
   """
   process = subprocess.Popen(command.split(' '),
-                             stdout=subprocess.PIPE,
-                             stderr=subprocess.PIPE)
+                             stderr=subprocess.STDOUT,
+                             stdout=subprocess.PIPE)
   if no_wait:
-    return process
+    return {PROCESS: process, SUCCESS: None, OUT: None,
+            ONCOMPLETE: on_complete}
 
-  process.communicate()
-  return None
+  (out, _) = process.communicate()
+  if process.returncode:
+    success = False
+  else:
+    success = True
+
+  if on_complete:
+    on_complete(success, out)
+
+  return {PROCESS: process, SUCCESS: success, OUT: out,
+          ONCOMPLETE: on_complete}
+
+
+def WaitUntilSubprocessesFinished(ps):
+  """Waits until the given sub processes are all finished."""
+
+  while True:
+    changed = [p for p in ps
+               if p[PROCESS].poll() is not None and p[SUCCESS] is None]
+    for p in changed:
+      p[SUCCESS] = p[PROCESS].returncode == 0
+      p[OUT] = p[PROCESS].stdout.read()
+      if p[ONCOMPLETE] is not None:
+        p[ONCOMPLETE](p[SUCCESS], p[OUT])
+
+    status = [p[PROCESS].poll() for p in ps]
+    if all([x is not None for x in status]):
+      return
+    else:
+      time.sleep(0.2) # Sleep before pulling again.

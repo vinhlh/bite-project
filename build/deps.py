@@ -36,7 +36,6 @@ ATOMS = 'selenium-atoms-lib'
 CLOSURE_COMPILER = 'closure-compiler'
 CLOSURE_LIB = 'closure-library'
 CLOSURE_SOY_COMPILER = 'closure-soy-compiler'
-CLOSURE_SOY_DATA = 'closure-soy-lib'
 GDATA = 'gdata'
 MRTASKMAN = 'mrtaskman'
 URLNORM = 'urlnorm'
@@ -166,6 +165,12 @@ def VerifyAndDownload(deps, verbose, location=None):
   return verified
 
 
+def GetSoyLibraryPath(deps):
+  soy_compiler = deps[CLOSURE_SOY_COMPILER][ROOT]
+  (root_loc, _) = os.path.split(soy_compiler) # Remove compiler's name
+  return os.path.join(root_loc, SOY_LIB)
+
+
 def _Download(command, url, location):
   """Download dependency using the given command from the url to location.
 
@@ -192,7 +197,8 @@ def _InstallClosureCompiler(url, location):
 
     (compiler_zip, _) = urllib.urlretrieve(url)
     compiler_zipfile = zipfile.ZipFile(compiler_zip)
-    compiler_zipfile.extract('compiler.jar', location)
+    (path, name) = os.path.split(location)
+    compiler_zipfile.extract(name, path)
     if not os.path.exists(location):
       return False
 

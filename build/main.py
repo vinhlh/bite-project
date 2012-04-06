@@ -27,32 +27,33 @@ import os
 import shutil
 
 import clean
-import deps
-#import extension
-import flags
-import paths
+import closure
+import deps as DEPS
+import extension
+import flags as FLAGS
+import paths as PATHS
 import server
 import tools
 
 
 def Main():
   """The main entry point for the build system."""
-  cmdline_flags = flags.FLAGS
-  args = flags.Process(cmdline_flags)
-  verbose = not args[flags.QUIET]
+  cmdline_flags = FLAGS.FLAGS
+  args = FLAGS.Process(cmdline_flags)
+  verbose = not args[FLAGS.QUIET]
 
   # Prioritized process of command line arguments
-  if args[flags.EXPUNGE]:
+  if args[FLAGS.EXPUNGE]:
     clean_paths = clean.CLEAN_PATHS
     expunge_paths = clean.EXPUNGE_PATHS
     clean.RemovePaths(clean_paths.values() + expunge_paths.values())
     exit()
-  elif args[flags.CLEAN]:
+  elif args[FLAGS.CLEAN]:
     clean.RemovePaths(clean.CLEAN_PATHS)
     exit()
 
   # Set up the directories that will be built into.
-  output_paths = [paths.GENFILES_ROOT, paths.DEPS_ROOT]
+  output_paths = [PATHS.GENFILES_ROOT, PATHS.DEPS_ROOT]
   for path in output_paths:
     if not os.path.exists(path):
       os.mkdir(path)
@@ -66,36 +67,48 @@ def Main():
     print ''
 
   # Verify and download dependencies
-  req_deps = deps.CreateDeps()
-  if not deps.VerifyAndDownload(req_deps, verbose):
+  deps = DEPS.CreateDeps()
+  if not DEPS.VerifyAndDownload(deps, verbose):
     print 'Build failed ... exiting.'
     exit()
   if verbose:
     print ''
 
-  if args[flags.DEPS]: # Stop here if deps flag is given; only download deps.
+  if args[FLAGS.DEPS]: # Stop here if deps flag is given; only download deps.
     exit()
 
   # Remove outputs, so they will be created again.
-  if os.path.exists(paths.OUTPUT_ROOT):
-    shutil.rmtree(paths.OUTPUT_ROOT)
-  os.mkdir(paths.OUTPUT_ROOT)
+  if os.path.exists(PATHS.OUTPUT_ROOT):
+    shutil.rmtree(PATHS.OUTPUT_ROOT)
+  os.mkdir(PATHS.OUTPUT_ROOT)
 
   # T T -> Build
   # T F -> Build
   # F T -> No build
   # F F -> Build
-  if args[flags.EXTENSION_ONLY] or not args[flags.SERVER_ONLY]:
-    # Build extension
-    #extension.Build(verbose)
-    pass
+  if args[FLAGS.EXTENSION_ONLY] or not args[FLAGS.SERVER_ONLY]:
+    extension.Construct(verbose)
 
   # T T -> No build
   # T F -> No build
   # F T -> Build
   # F F -> Build
-  if not args[flags.EXTENSION_ONLY]:
-    server.Construct(verbose)
+  if not args[FLAGS.EXTENSION_ONLY]:
+    js_targets = server.CreateJsTargets()
+    soy_targets = server.CreateSoyTargets()
+    copy_targets = server.CreateCopyTargets(deps)
+
+    compiler_flags = closure.CreateClosureCompilerFlags(deps, debug=True)
+    compiler_controls = server.CreateClosureCompilerControls(deps)
+    compiler_command = closure.CreateClosureCompilerCommand(deps,
+                                                            compiler_flags,
+                                                            compiler_controls)
+
+    soy_flags = closure.CreateSoyCompilerFlags()
+    soy_command = closure.CreateSoyCompilerCommand(deps, soy_flags)
+
+    server.Construct(copy_targets, js_targets, soy_targets, soy_command,
+                     compiler_command, verbose)
 
 
 if __name__ == '__main__':

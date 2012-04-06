@@ -20,5 +20,206 @@
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 
-def Construct(verbose):
-  return
+import os
+import shutil
+import time
+
+import closure
+import deps as DEPS
+import paths as PATHS
+import utils
+
+
+SERVER_ROOT = 'server'
+JS_SRC = os.path.join(SERVER_ROOT, 'scripts')
+SOY_SRC = os.path.join(SERVER_ROOT, 'scripts', 'soys')
+
+SRC = 'src'
+DST = 'dst'
+TREE = 'tree'
+
+
+def CreateJsTargets(src_location='', dst_location=''):
+  src_root = os.path.join(src_location, JS_SRC)
+  dst_root = os.path.join(dst_location, PATHS.GENFILES_ROOT)
+
+  names = [
+    'url_parser',
+    'store_edit',
+    'store_view',
+    'result_table'
+  ]
+
+  targets = {}
+  for name in names:
+    targets[name] = {
+      SRC: os.path.join(src_root, '%s.js' % name),
+      DST: os.path.join(dst_root, '%s_script.js' % name)
+    }
+
+  return targets
+
+
+def CreateSoyTargets(src_location='', dst_location=''):
+  src_root = os.path.join(src_location, SOY_SRC)
+  dst_root = os.path.join(dst_location, PATHS.GENFILES_ROOT)
+
+  names = [
+    'explore_page',
+    'set_details_page',
+    'result_page',
+    'run_details_settings',
+    'run_details_results',
+    'run_details_overview',
+    'run_details_page',
+    'set_details_runs',
+    'project_details_page',
+    'store'
+  ]
+
+  targets = {}
+  for name in names:
+    targets[name] = {
+      SRC: os.path.join(src_root, '%s.soy' % name),
+      DST: os.path.join(dst_root, '%s.soy.js' % name)
+    }
+
+  return targets
+
+
+def CreateCopyTargets(deps, deps_location='', genfiles_location='',
+                      src_location='', dst_location=''):
+  genfiles_root = os.path.join(genfiles_location, PATHS.GENFILES_ROOT)
+  server_src = os.path.join(src_location, SERVER_ROOT)
+  server_dst = os.path.join(dst_location, PATHS.SERVER_DST)
+  tools_src = src_location or ''
+  common_src = src_location or ''
+
+  ROOT = DEPS.ROOT
+
+  return {
+    'server_src': {
+      SRC: server_src,
+      DST: server_dst,
+      TREE: True
+    },
+
+    'bugs_src': {
+      SRC: os.path.join(tools_src, 'tools', 'bugs', 'server', 'appengine'),
+      DST: os.path.join(server_dst, 'bugs'),
+      TREE: True
+    },
+
+    'common_src': {
+      SRC: os.path.join(common_src, 'common', 'server', 'appengine'),
+      DST: os.path.join(server_dst, 'common'),
+      TREE: True
+    },
+
+    'gdata_src': {
+      SRC: os.path.join(deps_location, deps[DEPS.GDATA][ROOT],'src', 'gdata'),
+      DST: os.path.join(server_dst, 'gdata'),
+      TREE: True
+    },
+
+    'urlnorm_src': {
+      SRC: os.path.join(deps_location, deps[DEPS.URLNORM][ROOT], 'urlnorm.py'),
+      DST: os.path.join(server_dst, 'third_party', 'urlnorm.py'),
+      TREE: False
+    },
+
+    'mrtaskman_src': {
+      SRC: os.path.join(deps_location, deps[DEPS.MRTASKMAN][ROOT], 'server',
+                        'util'),
+      DST: os.path.join(server_dst, 'util'),
+      TREE: True
+    },
+
+    'url_parser_script': {
+      SRC: os.path.join(genfiles_root, 'url_parser_script.js'),
+      DST: os.path.join(server_dst, 'scripts', 'client_script.js'),
+      TREE: False
+    },
+
+    'store_edit_script': {
+      SRC: os.path.join(genfiles_root, 'store_edit_script.js'),
+      DST: os.path.join(server_dst, 'scripts', 'store_edit_script.js'),
+      TREE: False
+    },
+
+    'store_view_script': {
+      SRC: os.path.join(genfiles_root, 'store_view_script.js'),
+      DST: os.path.join(server_dst, 'scripts', 'store_view_script.js'),
+      TREE: False
+    },
+
+    'result_table_script': {
+      SRC: os.path.join(genfiles_root, 'result_table_script.js'),
+      DST: os.path.join(server_dst, 'scripts', 'result_table_script.js'),
+      TREE: False
+    }
+  }
+
+
+def CreateClosureCompilerControls(deps, src_location='', deps_location=''):
+  return [
+    '--root=%s' % os.path.join(src_location, JS_SRC),
+    '--root=%s' % os.path.join(deps_location,
+                               deps[DEPS.CLOSURE_LIB][DEPS.ROOT]),
+    '--root=%s' % os.path.join(deps_location, DEPS.GetSoyLibraryPath(deps)),
+    '--root=%s' % os.path.join(deps_location, PATHS.GENFILES_ROOT),
+    '--root=%s' % os.path.join(deps_location, deps[DEPS.ATOMS][DEPS.ROOT]),
+  ]
+
+
+def Construct(copy_targets, js_targets, soy_targets, soy_compile_command,
+              closure_compile_command, verbose, fail_early=True):
+  print('Creating server bundle ...')
+
+  current_time = time.time()
+
+  ps = []
+  for name in soy_targets:
+    src = soy_targets[name][SRC]
+    dst = soy_targets[name][DST]
+    on_complete = closure.OnComplete(src, dst, verbose, fail_early)
+
+    cs = closure.CompileScript(src, dst, soy_compile_command, on_complete)
+    if cs is not None and cs[utils.SUCCESS] is None:
+      ps.append(cs)
+    elif fail_early and cs is not None and not cs[utils.SUCCESS]:
+      exit()
+  utils.WaitUntilSubprocessesFinished(ps)
+
+  ps = []
+  for name in js_targets:
+    src = js_targets[name][SRC]
+    dst = js_targets[name][DST]
+    on_complete = closure.OnComplete(src, dst, verbose, fail_early)
+
+    cs = closure.CompileScript(src, dst, closure_compile_command, on_complete)
+    if cs is not None and cs[utils.SUCCESS] is None:
+      ps.append(cs)
+    elif fail_early and cs is not None and not cs[utils.SUCCESS]:
+      exit()
+  utils.WaitUntilSubprocessesFinished(ps)
+
+  if verbose:
+    print 'Copying target library and files ...'
+
+  for target_name in copy_targets:
+    target = copy_targets[target_name]
+    src = target[SRC]
+    dst = target[DST]
+    isTree = target[TREE]
+
+    if isTree:
+      shutil.copytree(src, dst)
+    else:
+      shutil.copyfile(src, dst)
+
+  if verbose:
+    print '[SUCCESS] Bundle construction complete.'
+  print 'Total time elapsed %s (s)' % (time.time() - current_time)
+  if verbose:
+    print ''
