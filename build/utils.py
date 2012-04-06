@@ -15,13 +15,29 @@
 # limitations under the License.
 
 
-"""Build BITE."""
+"""The build system utility functions."""
 
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 
-from build import main
+import subprocess
 
 
-if __name__ == '__main__':
-  main.Main()
+def ExecuteCommand(command, no_wait=False):
+  """Execute the given command and return the output.
+
+  Args:
+    command: A string representing the command to execute.
+    no_wait: Whether not to wait for finished.
+
+  Returns:
+    The process or None if no_wait is True.
+  """
+  process = subprocess.Popen(command.split(' '),
+                             stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE)
+  if no_wait:
+    return process
+
+  process.communicate()
+  return None

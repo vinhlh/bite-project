@@ -15,13 +15,10 @@
 # limitations under the License.
 
 
-"""Build BITE."""
+"""Constructs the extension bundle."""
 
 __author__ = 'jasonstredwick@google.com (Jason Stredwick)'
 
 
-from build import main
-
-
-if __name__ == '__main__':
-  main.Main()
+def Construct(verbose):
+  return

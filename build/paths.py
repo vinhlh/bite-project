@@ -15,21 +15,26 @@
 # limitations under the License.
 
 
-"""Build BITE."""
+"""Paths used by BITE Build."""
 
 __author__ = ('ralphj@google.com (Julie Ralph)'
-              'jasonstredwick@google.com (Jason Stredwick)')
+              'jason.stredwick@gmail.com (Jason Stredwick)')
 
 
-import sys
-
-from build import main
+import os
 
 
-class Error(Exception):
-  """General exception for this module."""
-  pass
+GENFILES_ROOT = 'genfiles'
+OUTPUT_ROOT = 'output'
+DEPS_ROOT = 'deps'
 
+# Common roots
+BUG_ROOT = os.path.join('tools', 'bugs', 'extension')
+RPF_ROOT = os.path.join('tools', 'rpf', 'extension')
 
-if __name__ == '__main__':
-  main.Main(sys.argv)
+# Output paths
+EXTENSION_DST = os.path.join(OUTPUT_ROOT, 'extension')
+SERVER_DST = os.path.join(OUTPUT_ROOT, 'server')
+IMGS_DST = os.path.join(EXTENSION_DST, 'imgs')
+OPTIONS_DST = os.path.join(EXTENSION_DST, 'options')
+STYLES_DST = os.path.join(EXTENSION_DST, 'styles')

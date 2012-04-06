@@ -24,51 +24,21 @@ __author__ = ('ralphj@google.com (Julie Ralph)'
 import os
 import shutil
 
-from build import targets
+import paths
 
 
-def All():
-  """Remove all the build targets."""
-  try:
-    if os.path.exists(targets.OUTPUT_ROOT):
-      shutil.rmtree(targets.OUTPUT_ROOT)
-    CreateRoots()
-  except (OSError, targets.Error):
-    ReportError()
+CLEAN_PATHS = {
+  'genfiles': paths.GENFILES_ROOT,
+  'output': paths.OUTPUT_ROOT
+}
+
+# Concatenation with CLEAN_PATHS expected.
+EXPUNGE_PATHS = {
+  'deps': paths.DEPS_ROOT
+}
 
 
-def Extension():
-  """Remove the extension."""
-  try:
-    if os.path.exists(targets.EXTENSION_ROOT):
-      shutil.rmtree(targets.EXTENSION_ROOT)
-  except OSError, targets.Error):
-    ReportError()
-
-
-def Expunge():
-  """Remove all build targets and the dependencies."""
-  try:
-    if os.path.exists(targets.DEPS_ROOT):
-      shutil.rmtree(targets.DEPS_ROOT)
-    All()
-  except (OSError, targets.Error):
-    ReportError()
-
-
-def Server():
-  """Remove the server (default variant)."""
-  try:
-    if os.path.exists(targets.SERVER_ROOT):
-      shutil.rmtree(targets.SERVER_ROOT)
-  except OSError:
-    ReportError()
-
-
-def ServerAppEngine():
-  """Remove the server (AppEngine variant)."""
-  try:
-    if os.path.exists(targets.SERVER_APPENGINE_ROOT):
-      shutil.rmtree(targets.SERVER_APPENGINE_ROOT)
-  except OSError:
-    ReportError()
+def RemovePaths(path_array):
+  for path in path_array:
+    if (os.path.exists(path)):
+      shutil.rmtree(path)
