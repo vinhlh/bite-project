@@ -137,28 +137,37 @@ def CompileScript(src, dst, command, on_complete=None, force_compile=False):
     os.remove(dst)
 
   data = {'input': src, 'output': dst}
+  x = command % data
   return utils.ExecuteCommand(command % data, on_complete=on_complete,
                               no_wait=True)
 
 
 class OnComplete:
-  def __init__(self, src, dst, verbose, fail_early):
+  def __init__(self, src, dst, verbose, fail_early, indent=0):
     self.src = src
     self.dst = dst
     self.verbose = verbose
     self.fail_early = fail_early
+    self.indent = utils.GetIndentString(indent)
 
-  def __call__(self, success, out):
+  def __call__(self, success, out, cancelled=False):
     try:
+      if cancelled:
+        raise Exception
+
       if success and os.path.exists(self.dst):
-        print '[SUCCESS] Compiling %s' % self.src
+        if self.verbose:
+          print '%s[SUCCESS] Compiling %s' % (self.indent, self.src)
       else:
         raise Exception
     except Exception:
       if os.path.exists(self.dst):
         os.remove(self.dst)
 
-      print '[FAILED]  Compiling %s' % self.src
+      if cancelled:
+        return
+
+      print '%s[FAILED]  Compiling %s' % (self.indent, self.src)
       if out:
         print out
         print ''

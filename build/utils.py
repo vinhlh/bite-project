@@ -60,20 +60,53 @@ def ExecuteCommand(command, on_complete=None, no_wait=False):
           ONCOMPLETE: on_complete}
 
 
-def WaitUntilSubprocessesFinished(ps):
-  """Waits until the given sub processes are all finished."""
+def WaitUntilSubprocessesFinished(process_list, fail_early=True):
+  """Waits until the given sub processes are all finished.
 
-  while True:
-    changed = [p for p in ps
-               if p[PROCESS].poll() is not None and p[SUCCESS] is None]
-    for p in changed:
+  If the list of processes to wait on contain those that have already completed
+  then their onComplete functions will be called again if given.
+
+  The fail_early flag
+  """
+  failed = False
+  ps = [p for p in process_list]
+  while len(ps):
+    completed = [p for p in ps if p[PROCESS].poll() is not None]
+    for p in completed:
+      ps.remove(p)
+
+    for p in completed:
       p[SUCCESS] = p[PROCESS].returncode == 0
       p[OUT] = p[PROCESS].stdout.read()
+
       if p[ONCOMPLETE] is not None:
         p[ONCOMPLETE](p[SUCCESS], p[OUT])
 
-    status = [p[PROCESS].poll() for p in ps]
-    if all([x is not None for x in status]):
-      return
-    else:
+      if not p[SUCCESS]:
+        failed = True
+
+    if fail_early and failed:
+      for p in ps:
+        KillSubprocess(p)
+      return False
+
+    if len(ps):
       time.sleep(0.2) # Sleep before pulling again.
+
+  return not failed
+
+
+def KillSubprocess(p):
+  if p[PROCESS].poll() is None:
+    p[PROCESS].terminate()
+
+  success = False
+  out = None
+  cancelled = True
+
+  if p[ONCOMPLETE] is not None:
+    p[ONCOMPLETE](success, out, cancelled)
+
+
+def GetIndentString(indent):
+  return ''.join([' ' for i in range(0, indent)])

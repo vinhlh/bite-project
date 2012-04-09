@@ -97,7 +97,7 @@ def CreateCopyTargets(deps, deps_location='', genfiles_location='',
 
   ROOT = DEPS.ROOT
 
-  return {
+  targets = {
     'server_src': {
       SRC: server_src,
       DST: server_dst,
@@ -134,31 +134,21 @@ def CreateCopyTargets(deps, deps_location='', genfiles_location='',
       DST: os.path.join(server_dst, 'util'),
       TREE: True
     },
+  }
 
-    'url_parser_script': {
-      SRC: os.path.join(genfiles_root, 'url_parser_script.js'),
-      DST: os.path.join(server_dst, 'scripts', 'client_script.js'),
-      TREE: False
-    },
-
-    'store_edit_script': {
-      SRC: os.path.join(genfiles_root, 'store_edit_script.js'),
-      DST: os.path.join(server_dst, 'scripts', 'store_edit_script.js'),
-      TREE: False
-    },
-
-    'store_view_script': {
-      SRC: os.path.join(genfiles_root, 'store_view_script.js'),
-      DST: os.path.join(server_dst, 'scripts', 'store_view_script.js'),
-      TREE: False
-    },
-
-    'result_table_script': {
-      SRC: os.path.join(genfiles_root, 'result_table_script.js'),
-      DST: os.path.join(server_dst, 'scripts', 'result_table_script.js'),
+  # Add in known compiled JavaScript files.
+  js_targets = CreateJsTargets(src_location=src_location,
+                               dst_location=dst_location)
+  for target_name in js_targets:
+    name = '%s_script' % target_name
+    filename = '%s.js' % name
+    targets[name] = {
+      SRC: js_targets[target_name][DST],
+      DST: os.path.join(server_dst, 'scripts', filename),
       TREE: False
     }
-  }
+
+  return targets
 
 
 def CreateClosureCompilerControls(deps, src_location='', deps_location=''):
@@ -174,38 +164,19 @@ def CreateClosureCompilerControls(deps, src_location='', deps_location=''):
 
 def Construct(copy_targets, js_targets, soy_targets, soy_compile_command,
               closure_compile_command, verbose, fail_early=True):
-  print('Creating server bundle ...')
+  print 'Creating server bundle ...'
 
   current_time = time.time()
 
-  ps = []
-  for name in soy_targets:
-    src = soy_targets[name][SRC]
-    dst = soy_targets[name][DST]
-    on_complete = closure.OnComplete(src, dst, verbose, fail_early)
-
-    cs = closure.CompileScript(src, dst, soy_compile_command, on_complete)
-    if cs is not None and cs[utils.SUCCESS] is None:
-      ps.append(cs)
-    elif fail_early and cs is not None and not cs[utils.SUCCESS]:
-      exit()
-  utils.WaitUntilSubprocessesFinished(ps)
-
-  ps = []
-  for name in js_targets:
-    src = js_targets[name][SRC]
-    dst = js_targets[name][DST]
-    on_complete = closure.OnComplete(src, dst, verbose, fail_early)
-
-    cs = closure.CompileScript(src, dst, closure_compile_command, on_complete)
-    if cs is not None and cs[utils.SUCCESS] is None:
-      ps.append(cs)
-    elif fail_early and cs is not None and not cs[utils.SUCCESS]:
-      exit()
-  utils.WaitUntilSubprocessesFinished(ps)
+  _CompileTargets(soy_compile_command, soy_targets, verbose,
+                  fail_early=fail_early, indent=2,
+                  start_msg='Compiling soy templates ...')
+  _CompileTargets(closure_compile_command, js_targets, verbose,
+                  fail_early=fail_early, indent=2,
+                  start_msg='Compiling JavaScript files ...')
 
   if verbose:
-    print 'Copying target library and files ...'
+    print '%sCopying target library and files ...' % utils.GetIndentString(2)
 
   for target_name in copy_targets:
     target = copy_targets[target_name]
@@ -219,7 +190,52 @@ def Construct(copy_targets, js_targets, soy_targets, soy_compile_command,
       shutil.copyfile(src, dst)
 
   if verbose:
-    print '[SUCCESS] Bundle construction complete.'
+    s = utils.GetIndentString(2)
+    print '%s[SUCCESS] Bundle construction complete.' % s
+
   print 'Total time elapsed %s (s)' % (time.time() - current_time)
   if verbose:
+    print ''
+
+
+def _CompileTargets(command, targets, verbose, fail_early, indent=0,
+                    start_msg=None):
+  indent_string = utils.GetIndentString(indent)
+
+  # List of processes not yet completed (when added to list).
+  ps = []
+
+  # Start compile process for each target and append it to ps if no_wait is
+  # True.  no_wait means the processes will run simultaneously as possible.
+  # For each process with no_wait == False, they will be completed immediately
+  # so no need to wait for them.
+  for target_name in targets:
+    src = targets[target_name][SRC]
+    dst = targets[target_name][DST]
+    # Callback once the compile process completes.  Used in asynchronous build
+    # environment.
+    on_complete = closure.OnComplete(src, dst, verbose, fail_early=False,
+                                     indent=indent)
+
+    # Start compile process
+    cs = closure.CompileScript(src, dst, command, on_complete)
+    # Only add process to ps if it is not done.
+    if cs is not None and cs[utils.SUCCESS] is None:
+      ps.append(cs)
+    # If compiling fails and fail_early is true then kill all currently pending
+    # processes and exit.
+    elif fail_early and cs is not None and not cs[utils.SUCCESS]:
+      for p in ps:
+        utils.KillSubprocess(p)
+      exit()
+
+  if verbose and len(ps) and start_msg is not None:
+    print '%s%s' % (indent_string, start_msg)
+
+  # Wait for all compile processes to finish and check for failure.
+  if not utils.WaitUntilSubprocessesFinished(ps, fail_early=fail_early):
+    if fail_early:
+      exit()
+
+  if verbose and len(ps) and start_msg is not None:
     print ''
