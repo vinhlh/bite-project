@@ -41,7 +41,7 @@ TREE = 'tree'
 
 def CreateJsTargets(src_location='', dst_location=''):
   src_root = os.path.join(src_location, JS_SRC)
-  dst_root = os.path.join(dst_location, PATHS.GENFILES_ROOT)
+  dst_root = os.path.join(dst_location, PATHS.GENFILES_ROOT, 'server')
 
   names = [
     'url_parser',
@@ -62,7 +62,7 @@ def CreateJsTargets(src_location='', dst_location=''):
 
 def CreateSoyTargets(src_location='', dst_location=''):
   src_root = os.path.join(src_location, SOY_SRC)
-  dst_root = os.path.join(dst_location, PATHS.GENFILES_ROOT)
+  dst_root = os.path.join(dst_location, PATHS.GENFILES_ROOT, 'server')
 
   names = [
     'explore_page',
@@ -157,7 +157,7 @@ def CreateClosureCompilerControls(deps, src_location='', deps_location=''):
     '--root=%s' % os.path.join(deps_location,
                                deps[DEPS.CLOSURE_LIB][DEPS.ROOT]),
     '--root=%s' % os.path.join(deps_location, DEPS.GetSoyLibraryPath(deps)),
-    '--root=%s' % os.path.join(deps_location, PATHS.GENFILES_ROOT),
+    '--root=%s' % os.path.join(deps_location, PATHS.GENFILES_ROOT, 'server'),
     '--root=%s' % os.path.join(deps_location, deps[DEPS.ATOMS][DEPS.ROOT]),
   ]
 
@@ -212,6 +212,12 @@ def _CompileTargets(command, targets, verbose, fail_early, indent=0,
   for target_name in targets:
     src = targets[target_name][SRC]
     dst = targets[target_name][DST]
+
+    # Ensure the directory structure exists for the destination file.
+    (path, _) = os.path.split(dst)
+    if not os.path.exists(path):
+      os.makedirs(path)
+
     # Callback once the compile process completes.  Used in asynchronous build
     # environment.
     on_complete = closure.OnComplete(src, dst, verbose, fail_early=False,
