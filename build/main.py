@@ -31,6 +31,7 @@ import deps as DEPS
 import extension as EXTENSION
 import flags as FLAGS
 import paths as PATHS
+import rpf as RPF
 import server as SERVER
 import tools
 
@@ -104,3 +105,10 @@ def Main():
                      start_msg='Creating server bundle ...',
                      fail_early=True,
                      deps_root='')
+
+  if args[FLAGS.RPF]:
+    rpf = RPF.RPF(deps, debug=True, deps_root='', src_root='', dst_root='')
+    rpf.Construct(verbose, deps,
+                  start_msg='Creating RPF extension bundle ...',
+                  fail_early=True,
+                  deps_root='')

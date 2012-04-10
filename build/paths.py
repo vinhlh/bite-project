@@ -38,3 +38,8 @@ SERVER_DST = os.path.join(OUTPUT_ROOT, 'server')
 IMGS_DST = os.path.join(EXTENSION_DST, 'imgs')
 OPTIONS_DST = os.path.join(EXTENSION_DST, 'options')
 STYLES_DST = os.path.join(EXTENSION_DST, 'styles')
+
+RPF_DST = os.path.join(OUTPUT_ROOT, 'rpf')
+RPF_IMGS_DST = os.path.join(RPF_DST, 'imgs')
+RPF_OPTIONS_DST = os.path.join(RPF_DST, 'options')
+RPF_STYLES_DST = os.path.join(RPF_DST, 'styles')

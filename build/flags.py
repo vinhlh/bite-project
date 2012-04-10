@@ -28,6 +28,7 @@ DEPS = 'deps'
 EXPUNGE = 'expunge'
 EXTENSION_ONLY = 'extension_only'
 QUIET = 'quiet'
+RPF = 'rpf'
 SERVER_ONLY = 'server_only'
 
 # Define information about each command and their options.
@@ -65,6 +66,13 @@ FLAGS = {
       'default': False,
       'required': False,
       'help': 'Minimal build output.'
+    },
+
+    RPF: {
+      'action': 'store_true',
+      'default': False,
+      'required': False,
+      'help': 'Build RPF extension.'
     },
 
     SERVER_ONLY: {

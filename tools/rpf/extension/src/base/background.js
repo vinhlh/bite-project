@@ -183,10 +183,12 @@ bite.client.Background.prototype.onRequest =
       this.getLocalStorage_(request['key'], callback);
       break;
     case Bite.Constants.HUD_ACTION.SET_LOCAL_STORAGE:
-      this.setLocalStorage_(request['key'], request['value'], callback);
+      this.setLocalStorage_(request['key'], request['value'],
+                            /** @type {function()} */ (callback));
       break;
     case Bite.Constants.HUD_ACTION.REMOVE_LOCAL_STORAGE:
-      this.removeLocalStorage_(request['key'], callback);
+      this.removeLocalStorage_(request['key'],
+                               /** @type {function()} */ (callback));
       break;
     case Bite.Constants.HUD_ACTION.LOG_EVENT:
       bite.client.Background.logEvent(
