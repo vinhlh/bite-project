@@ -66,19 +66,19 @@ def CreateClosureCompilerFlags(deps, debug=True, deps_location=''):
   deps_src = os.path.join(deps_location, deps[DEPS.CLOSURE_LIB][DEPS.ROOT],
                           'closure', 'goog', 'deps.js')
 
-  debug = [
+  debug_flags = [
     '--compiler_flags=--formatting=pretty_print',
     '--compiler_flags=--generate_exports',
     '--compiler_flags=--js=%s' % deps_src
   ]
 
-  prod = [
+  prod_flags = [
   ]
 
   if debug:
-    compile_level = debug
+    compile_level = debug_flags
   else:
-    compile_level = prod
+    compile_level = prod_flags
 
   return compile_level + [
     #'--compiler_flags=--aggressive_var_check_level=ERROR',

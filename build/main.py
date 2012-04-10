@@ -27,12 +27,11 @@ import os
 import shutil
 
 import clean
-import closure
 import deps as DEPS
-import extension
+import extension as EXTENSION
 import flags as FLAGS
 import paths as PATHS
-import server
+import server as SERVER
 import tools
 
 
@@ -87,29 +86,21 @@ def Main():
   # F T -> No build
   # F F -> Build
   if args[FLAGS.EXTENSION_ONLY] or not args[FLAGS.SERVER_ONLY]:
-    extension.Construct(verbose)
+    extension = EXTENSION.Extension(deps, debug=True, deps_root='',
+                                    src_root='', dst_root='')
+    extension.Construct(verbose, deps,
+                        start_msg='Creating extension bundle ...',
+                        fail_early=True,
+                        deps_root='')
 
   # T T -> No build
   # T F -> No build
   # F T -> Build
   # F F -> Build
   if not args[FLAGS.EXTENSION_ONLY]:
-    js_targets = server.CreateJsTargets()
-    soy_targets = server.CreateSoyTargets()
-    copy_targets = server.CreateCopyTargets(deps)
-
-    compiler_flags = closure.CreateClosureCompilerFlags(deps, debug=True)
-    compiler_controls = server.CreateClosureCompilerControls(deps)
-    compiler_command = closure.CreateClosureCompilerCommand(deps,
-                                                            compiler_flags,
-                                                            compiler_controls)
-
-    soy_flags = closure.CreateSoyCompilerFlags()
-    soy_command = closure.CreateSoyCompilerCommand(deps, soy_flags)
-
-    server.Construct(copy_targets, js_targets, soy_targets, soy_command,
-                     compiler_command, verbose)
-
-
-if __name__ == '__main__':
-  Main()
+    server = SERVER.Server(deps, debug=True, deps_root='', src_root='',
+                           dst_root='')
+    server.Construct(verbose, deps,
+                     start_msg='Creating server bundle ...',
+                     fail_early=True,
+                     deps_root='')
