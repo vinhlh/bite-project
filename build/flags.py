@@ -31,56 +31,61 @@ QUIET = 'quiet'
 RPF = 'rpf'
 SERVER_ONLY = 'server_only'
 
+ACTION = 'action'
+DEFAULT = 'default'
+REQUIRED = 'required'
+HELP = 'help'
+
 # Define information about each command and their options.
 FLAGS = {
-    CLEAN: {
-      'action': 'store_true',
-      'default': False,
-      'required': False,
-      'help': 'Remove all generated and output files.'
-    },
+  CLEAN: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Remove all generated and output files.'
+  },
 
-    DEPS: {
-      'action': 'store_true',
-      'default': False,
-      'required': False,
-      'help': 'Download depenedencies only; no building.'
-    },
+  DEPS: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Download depenedencies only; no building.'
+  },
 
-    EXPUNGE: {
-      'action': 'store_true',
-      'default': False,
-      'required': False,
-      'help': 'Remove all generated, output files, and dependencies.'
-    },
+  EXPUNGE: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Remove all generated, output files, and dependencies.'
+  },
 
-    EXTENSION_ONLY: {
-      'action': 'store_true',
-      'default': False,
-      'required': False,
-      'help': 'Only build the extension.'
-    },
+  EXTENSION_ONLY: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Only build the extension.'
+  },
 
-    QUIET: {
-      'action': 'store_true',
-      'default': False,
-      'required': False,
-      'help': 'Minimal build output.'
-    },
+  QUIET: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Minimal build output.'
+  },
 
-    RPF: {
-      'action': 'store_true',
-      'default': False,
-      'required': False,
-      'help': 'Build RPF extension.'
-    },
+  RPF: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Build RPF extension.'
+  },
 
-    SERVER_ONLY: {
-      'action': 'store_true',
-      'default': False,
-      'required': False,
-      'help': 'Only build the server'
-    }
+  SERVER_ONLY: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Only build the server'
+  }
 }
 
 
@@ -88,8 +93,8 @@ def Process(flags):
   arg_parser = argparse.ArgumentParser(prog='bb')
   for key in flags:
     flag = flags[key]
-    arg_parser.add_argument(('--%s' % key), dest=key, action=flag['action'],
-                            default=flag['default'], required=flag['required'],
-                            help=flag['help'])
+    arg_parser.add_argument(('--%s' % key), dest=key, action=flag[ACTION],
+                            default=flag[DEFAULT], required=flag[REQUIRED],
+                            help=flag[HELP])
 
   return vars(arg_parser.parse_args())

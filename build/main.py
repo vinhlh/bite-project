@@ -49,7 +49,8 @@ def Main():
     clean.RemovePaths(clean_paths.values() + expunge_paths.values())
     exit()
   elif args[FLAGS.CLEAN]:
-    clean.RemovePaths(clean.CLEAN_PATHS)
+    clean_paths = clean.CLEAN_PATHS
+    clean.RemovePaths(clean_paths.values())
     exit()
 
   # Set up the directories that will be built into.

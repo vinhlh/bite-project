@@ -110,3 +110,31 @@ def KillSubprocess(p):
 
 def GetIndentString(indent):
   return ''.join([' ' for i in range(0, indent)])
+
+
+def Merge(start, dst):
+  """Merge one directory structure onto another specified by dst.
+
+  Assume dst already exists.  Also uses copy over rather than merging
+  individual files.
+  """
+  path_parts_to_ignore = len(start.split(os.sep))
+  for root, _, files in os.walk(start):
+    # All sources include the root folder that should not be part of the path.
+    # This is required because changing the working directory will cause other
+    # issues.  In this example, it will remove utest as the root of the path.
+    root_dst_path = os.path.join(dst,
+        (os.sep).join(root.split(os.sep)[path_parts_to_ignore:]))
+    if not os.path.exists(root_dst_path):
+      os.mkdir(root_dst_path)
+
+    for filename in files:
+      root_dst = os.path.join(root_dst_path, filename)
+      root_src = os.path.join(root, filename)
+
+      # If the destination file already exists, remove it.
+      if os.path.exists(root_dst):
+        os.remove(root_dst)
+
+      # Copy the file to the new location.
+      shutil.copy(root_src, root_dst)
