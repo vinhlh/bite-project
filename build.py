@@ -15,140 +15,159 @@
 # limitations under the License.
 
 
-"""Build the BITE Extension."""
+"""Build BITE.
 
-__author__ = ('ralphj@google.com (Julie Ralph)'
-              'jason.stredwick@gmail.com (Jason Stredwick)')
+The build works by first checking out the BITE build system from
+https://code.google.com/p/bite-project.build.  The build system is then
+imported and the build process ensues.
 
-from buildhelper import *
-import logging
-import optparse
+See the build file flags.py for a list of command line flags.
+"""
+
+
+__author__ = 'jasonstredwick@google.com (Jason Stredwick)'
+
+
 import os
-import shutil
 import subprocess
-import sys
-import time
-import urllib
-import zipfile
+import shutil
 
 
-COMPILE_CLOSURE_COMMAND = ' '.join([
-  sys.executable, CLOSURE_COMPILER,
-  ('--root=%s' % os.path.join('common', 'extension')),
-  ('--root=%s' % os.path.join('extension', 'src')),
-  ('--root=%s' % os.path.join(BUG_ROOT, 'src')),
-  ('--root=%s' % os.path.join(RPF_ROOT, 'src', 'libs')),
-  ('--root=%s' % DEPS['closure-library'][ROOT]),
-  ('--root=%s' % SOY_COMPILER_SRC),
-  ('--root=%s' % GENFILES_ROOT),
-  ('--root=%s' % DEPS['selenium-atoms-lib'][ROOT]),
-  '--output_mode=compiled',
-  ('--compiler_jar=%s' % CLOSURE_COMPILER_JAR)] +
-  COMPILER_FLAGS +
-  ['--input=%(input)s', '--output_file=%(output)s'])
+BUILD_ROOT = os.path.join('build')
 
 
-def main():
-  result = ParseOptions()
-  # Compile the closure scripts.
-  # Soy
-  soy_files = {
-    'popup': os.path.join('extension', 'templates'),
-    'consoles': os.path.join(BUG_ROOT, 'templates'),
-    'common_ux': os.path.join('common', 'extension', 'ux'),
-    'newbug_console': os.path.join(BUG_ROOT, 'templates'),
-    'newbug_type_selector': os.path.join(BUG_ROOT, 'templates'),
-    'rpfconsole': os.path.join(RPF_ROOT, 'templates'),
-    'rpf_dialogs': os.path.join(RPF_ROOT, 'templates'),
-    'locatorsupdater': os.path.join(RPF_ROOT, 'templates'),
-    'explore': os.path.join('extension', 'src', 'project', 'templates'),
-    'general': os.path.join('extension', 'src', 'project', 'templates'),
-    'member': os.path.join('extension', 'src', 'project', 'templates'),
-    'settings': os.path.join('extension', 'src', 'project', 'templates')
-  }
+# Attempt to import BITE build files.
+bite_build_imported = False
+try:
+  from build import clean
+  from build import deps as DEPS
+  from build import extension as EXTENSION
+  from build import flags as FLAGS
+  from build import paths as PATHS
+  from build import rpf as RPF
+  from build import server as SERVER
+  from build import tools
+  bite_build_imported = True
+except ImportError:
+  # On failure to import build files, download them.
+  def DownloadBITEBuild():
+    """Check that opensource BITE is installed and install if not."""
+    target = BUILD_ROOT
+    if os.path.exists(target):
+      return True
 
-  ps = []
+    print 'Opensource BITE build is not downloaded.  Downloading now ...'
+    url = 'https://code.google.com/p/bite-project.build'
+    command = 'git clone %s %s' % (url, target)
 
-  current_time = time.time()
+    process = subprocess.Popen(command.split(' '),
+                               stderr=subprocess.STDOUT,
+                               stdout=subprocess.PIPE)
+    (out, _) = process.communicate()
+    if process.returncode:
+      print '[FAILED]  Could not download BITE build from %s.' % url
+      print '  %s' % out
+      return False
+    else:
+      print '[SUCCESS] Download of BITE build complete.'
+      return True
+      print ''
 
-  for soy_filename in soy_files:
-    soy_filepath = soy_files[soy_filename]
-    ps.append(CompileScript(soy_filename, soy_filepath, '.soy', '.soy.js',
-        SOY_COMPILER_COMMAND))
-  WaitUntilSubprocessesFinished(ps)
+  if not DownloadBITEBuild():
+    print 'Build failed ... exiting.'
+    exit()
 
-  ps = []
-  # JavaScript
-  js_targets = {
-    'background': os.path.join('extension', 'src', 'bite'),
-    'content': os.path.join('extension', 'src', 'bite'),
-    'getactioninfo': os.path.join(RPF_ROOT, 'src', 'libs'),
-    'console': os.path.join(RPF_ROOT, 'src', 'libs'),
-    'elementhelper': os.path.join('common', 'extension', 'dom'),
-    'popup': os.path.join('extension', 'src'),
-    'page': os.path.join('extension', 'src', 'options')
-  }
 
-  for target in js_targets:
-    target_filepath = js_targets[target]
-    ps.append(CompileScript(target, target_filepath, '.js', '_script.js',
-        COMPILE_CLOSURE_COMMAND))
-  WaitUntilSubprocessesFinished(ps)
+# If the build files failed to be imported then try again after download phase.
+if not bite_build_imported:
+  from build import clean
+  from build import deps as DEPS
+  from build import extension as EXTENSION
+  from build import flags as FLAGS
+  from build import paths as PATHS
+  from build import rpf as RPF
+  from build import server as SERVER
+  from build import tools
 
-  print 'Totally %s (s) elapsed!' % (time.time() - current_time)
 
-  # Remove the outputs, so they will be created again.
-  if os.path.exists(OUTPUT_ROOT):
-    shutil.rmtree(OUTPUT_ROOT)
-  os.mkdir(OUTPUT_ROOT)
+def Main():
+  """The main entry point for the build system."""
+  cmdline_flags = FLAGS.FLAGS
+  args = FLAGS.Process(cmdline_flags)
+  verbose = not args[FLAGS.QUIET]
 
-  # Create extension bundle.
-  print('Creating extension bundle.')
-  #   Create the extension bundle and options path.
-  paths = [EXTENSION_DST, OPTIONS_DST, STYLES_DST]
-  for path in paths:
+  # Prioritized process of command line arguments
+  if args[FLAGS.EXPUNGE]:
+    clean_paths = clean.CLEAN_PATHS
+    expunge_paths = clean.EXPUNGE_PATHS
+    clean.RemovePaths(clean_paths.values() + expunge_paths.values())
+    exit()
+  elif args[FLAGS.CLEAN]:
+    clean_paths = clean.CLEAN_PATHS
+    clean.RemovePaths(clean_paths.values())
+    exit()
+
+  # Set up the directories that will be built into.
+  output_paths = [PATHS.GENFILES_ROOT, PATHS.DEPS_ROOT]
+  for path in output_paths:
     if not os.path.exists(path):
       os.mkdir(path)
 
-  #   Manifest
-  shutil.copy(os.path.join('extension', 'manifest.json'), EXTENSION_DST)
+  # Verify required tools
+  req_tools = tools.TOOLS
+  if not tools.Verify(req_tools, verbose):
+    print 'Build failed ... exiting.'
+    exit()
+  if verbose:
+    print ''
 
-  #   Styles
-  styles = [os.path.join('extension', 'styles', 'consoles.css'),
-            os.path.join('extension', 'styles', 'options.css'),
-            os.path.join('extension', 'styles', 'popup.css'),
-            os.path.join('extension', 'styles', 'rpf_console.css'),
-            os.path.join(RPF_ROOT, 'styles', 'recordmodemanager.css')]
-  for style in styles:
-    shutil.copy(style, STYLES_DST)
+  # Verify and download dependencies
+  deps = DEPS.CreateDeps()
+  if not DEPS.VerifyAndDownload(deps, verbose):
+    print 'Build failed ... exiting.'
+    exit()
+  if verbose:
+    print ''
 
-  #   Images
-  shutil.copytree(os.path.join('extension', 'imgs'), IMGS_DST)
+  if args[FLAGS.DEPS]: # Stop here if deps flag is given; only download deps.
+    exit()
 
-  #   HTML
-  html = [os.path.join('extension', 'html', 'background.html'),
-          os.path.join('extension', 'html', 'popup.html'),
-          os.path.join('extension', 'src', 'options', 'options.html'),
-          os.path.join(RPF_ROOT, 'html', 'console.html')]
-  for html_file in html:
-    shutil.copy(html_file, EXTENSION_DST)
+  # Remove outputs, so they will be created again.
+  if os.path.exists(PATHS.OUTPUT_ROOT):
+    shutil.rmtree(PATHS.OUTPUT_ROOT)
+  os.mkdir(PATHS.OUTPUT_ROOT)
 
-  #   Scripts
-  scripts = []
-  for target in js_targets:
-    shutil.copy(os.path.join(GENFILES_ROOT, ('%s_script.js' % target)),
-                EXTENSION_DST)
-  shutil.copy(os.path.join('common', 'extension', 'analytics', 'analytics.js'),
-                           EXTENSION_DST)
+  # T T -> Build
+  # T F -> Build
+  # F T -> No build
+  # F F -> Build
+  if args[FLAGS.EXTENSION_ONLY] or not args[FLAGS.SERVER_ONLY]:
+    extension = EXTENSION.Extension(deps, debug=True, deps_root='',
+                                    src_root='', dst_root='')
+    extension.Construct(verbose, deps,
+                        start_msg='Creating extension bundle ...',
+                        fail_early=True,
+                        deps_root='')
 
-  #   Changes the name from page_script.js to options_script.js.
-  shutil.move(os.path.join(EXTENSION_DST, 'page_script.js'),
-              os.path.join(EXTENSION_DST, 'options_script.js'))
+  # T T -> No build
+  # T F -> No build
+  # F T -> Build
+  # F F -> Build
+  if not args[FLAGS.EXTENSION_ONLY]:
+    server = SERVER.Server(deps, debug=True, deps_root='', src_root='',
+                           dst_root='')
+    server.Construct(verbose, deps,
+                     start_msg='Creating server bundle ...',
+                     fail_early=True,
+                     deps_root='')
 
-  CopyAceFiles()
+  if args[FLAGS.RPF]:
+    rpf = RPF.RPF(deps, debug=True, deps_root='', src_root='', dst_root='')
+    rpf.Construct(verbose, deps,
+                  start_msg='Creating RPF extension bundle ...',
+                  fail_early=True,
+                  deps_root='')
 
-  if not result['build_extension_only']:
-    CopyServerFiles()
 
 if __name__ == '__main__':
-  main()
+  Main()
