@@ -142,12 +142,19 @@ def Main():
   # F T -> No build
   # F F -> Build
   if args[FLAGS.EXTENSION_ONLY] or not args[FLAGS.SERVER_ONLY]:
-    extension = EXTENSION.Extension(deps, debug=True, deps_root='',
-                                    src_root='', dst_root='')
-    extension.Construct(verbose, deps,
-                        start_msg='Creating extension bundle ...',
-                        fail_early=True,
-                        deps_root='')
+    if args[FLAGS.RPF]:
+      rpf = RPF.RPF(deps, debug=True, deps_root='', src_root='', dst_root='')
+      rpf.Construct(verbose, deps,
+                    start_msg='Creating RPF extension bundle ...',
+                    fail_early=True,
+                    deps_root='')
+    else:
+      extension = EXTENSION.Extension(deps, debug=True, deps_root='',
+                                      src_root='', dst_root='')
+      extension.Construct(verbose, deps,
+                          start_msg='Creating extension bundle ...',
+                          fail_early=True,
+                          deps_root='')
 
   # T T -> No build
   # T F -> No build
@@ -160,13 +167,6 @@ def Main():
                      start_msg='Creating server bundle ...',
                      fail_early=True,
                      deps_root='')
-
-  if args[FLAGS.RPF]:
-    rpf = RPF.RPF(deps, debug=True, deps_root='', src_root='', dst_root='')
-    rpf.Construct(verbose, deps,
-                  start_msg='Creating RPF extension bundle ...',
-                  fail_early=True,
-                  deps_root='')
 
 
 if __name__ == '__main__':
