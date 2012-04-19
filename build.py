@@ -33,61 +33,79 @@ import subprocess
 import shutil
 
 
-BUILD_ROOT = os.path.join('build')
+BUILD_ROOT = os.path.join('bite_build')
 
 
 # Attempt to import BITE build files.
 bite_build_imported = False
 try:
-  from build import clean
-  from build import deps as DEPS
-  from build import extension as EXTENSION
-  from build import flags as FLAGS
-  from build import paths as PATHS
-  from build import rpf as RPF
-  from build import server as SERVER
-  from build import tools
+  from bite_build import clean
+  from bite_build import deps as DEPS
+  from bite_build import extension as EXTENSION
+  from bite_build import flags as FLAGS
+  from bite_build import paths as PATHS
+  from bite_build import rpf as RPF
+  from bite_build import server as SERVER
+  from bite_build import tools
   bite_build_imported = True
 except ImportError:
-  # On failure to import build files, download them.
+  # On failure to import build files, download them.  This code should only
+  # be called upon import failure, so no need to verify existence of the target
+  # just download it again to ensure all parts are present.
   def DownloadBITEBuild():
     """Check that opensource BITE is installed and install if not."""
-    target = BUILD_ROOT
-    if os.path.exists(target):
-      return True
-
     print 'Opensource BITE build is not downloaded.  Downloading now ...'
-    url = 'https://code.google.com/p/bite-project.build'
-    command = 'git clone %s %s' % (url, target)
 
-    process = subprocess.Popen(command.split(' '),
-                               stderr=subprocess.STDOUT,
-                               stdout=subprocess.PIPE)
-    (out, _) = process.communicate()
-    if process.returncode:
+    def GetExecutable(executable):
+      """Derived from bite_build.tools.GetExecutable."""
+      extensions = os.environ.get('PATHEXT', '').split(os.pathsep)
+      paths = os.environ.get('PATH', '').split(os.pathsep)
+
+      # Loop over every combination of path and file extension.
+      for extension in extensions:
+        for path in paths:
+          full_path = os.path.join(path, '%s%s' % (executable, extension))
+          if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+            return full_path
+
+      return None
+
+    try:
+      target = BUILD_ROOT
+      url = 'https://code.google.com/p/bite-project.build'
+      git = GetExecutable('git')
+      if git is None:
+        raise Exception
+
+      process = subprocess.Popen([git, 'clone', url, target],
+                                 stderr=subprocess.STDOUT,
+                                 stdout=subprocess.PIPE)
+      (out, _) = process.communicate()
+
+      if process.returncode:
+        raise Exception
+      else:
+        print '[SUCCESS] Download of BITE build complete.'
+        print ''
+    except Exception:
       print '[FAILED]  Could not download BITE build from %s.' % url
       print '  %s' % out
-      return False
-    else:
-      print '[SUCCESS] Download of BITE build complete.'
-      return True
-      print ''
+      print 'Build failed ... exiting.'
+      exit()
 
-  if not DownloadBITEBuild():
-    print 'Build failed ... exiting.'
-    exit()
+  DownloadBITEBuild()
 
 
 # If the build files failed to be imported then try again after download phase.
 if not bite_build_imported:
-  from build import clean
-  from build import deps as DEPS
-  from build import extension as EXTENSION
-  from build import flags as FLAGS
-  from build import paths as PATHS
-  from build import rpf as RPF
-  from build import server as SERVER
-  from build import tools
+  from bite_build import clean
+  from bite_build import deps as DEPS
+  from bite_build import extension as EXTENSION
+  from bite_build import flags as FLAGS
+  from bite_build import paths as PATHS
+  from bite_build import rpf as RPF
+  from bite_build import server as SERVER
+  from bite_build import tools
 
 
 def Main():
@@ -100,6 +118,7 @@ def Main():
   if args[FLAGS.EXPUNGE]:
     clean_paths = clean.CLEAN_PATHS
     expunge_paths = clean.EXPUNGE_PATHS
+    expunge_paths['bite_build'] = BUILD_ROOT
     clean.RemovePaths(clean_paths.values() + expunge_paths.values())
     exit()
   elif args[FLAGS.CLEAN]:

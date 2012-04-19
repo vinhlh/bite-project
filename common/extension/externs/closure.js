@@ -13,15 +13,14 @@
 // limitations under the License.
 
 
-var console = {};
-var JSON = {};
-var ContentMap = {};
-var cmdIndex = 0;
+window.requestAnimationFrame = function(x) {};
+window.webkitRequestAnimationFrame = function(x) {};
+window.mozRequestAnimationFrame = function(x) {};
+window.oRequestAnimationFrame = function(x) {};
+window.msRequestAnimationFrame = function(x) {};
 
-/**
- * For selenium-atoms-lib : events.js.  Define createTouch for document which
- * refers to a touch pad device I believe.
- */
-var doc = {};
-doc.createTouch = function(a, b, c, d, e, f, g) {};
-doc.createTouchList = function(a, b) {};
+window.cancelRequestAnimationFrame = function(x) {};
+window.webkitCancelRequestAnimationFrame = function(x) {};
+window.mozCancelRequestAnimationFrame = function(x) {};
+window.oCancelRequestAnimationFrame = function(x) {};
+window.msCancelRequestAnimationFrame  = function(x) {};
