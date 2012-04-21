@@ -393,6 +393,7 @@ select:focus {
   overflow: hidden;
 }
 
+.goog-menu-button,
 .goog-toolbar-menu-button,
 .goog-custom-button {
   border: 1px solid rgba(0, 0, 0, 0.1);
@@ -419,6 +420,7 @@ select:focus {
   color: #333;
 }
 
+.goog-menu-button:hover,
 .goog-toolbar-menu-button:hover,
 .goog-custom-button:hover {
   border: 1px solid #c6c6c6;

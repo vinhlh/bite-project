@@ -535,8 +535,8 @@ rpf.WorkerManager.prototype.updateRunningTestStatus = function(
   bite.common.net.xhr.async.post(
       requestUrl,
       parameters,
-      function(success) {
-        if (success) {
+      function(response) {
+        if (response.success) {
           console.log('Successfully updated the test result for ' + testId);
         }
       });

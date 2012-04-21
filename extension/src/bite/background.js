@@ -166,23 +166,21 @@ bite.client.Background.prototype.fetchTestData_ =
  * Handle the callback to fetch the tests request.
  * @param {function({test: ?Object, user: ?string})} callback
  *     Callback function.
- * @param {boolean} success Whether or not the request was successful.
- * @param {string} data The data received from the request or an error string.
- * @param {number} status The status of the request.
+ * @param {!bite.common.net.xhr.async.response} response The response.
  * @private
  */
-bite.client.Background.prototype.fetchTestsDataCallback_ =
-    function(callback, success, data, status) {
+bite.client.Background.prototype.fetchTestsDataCallback_ = function(callback,
+                                                                    response) {
   var test = null;
   var user = null;
 
-  if (success) {
-    var compatTesting = goog.json.parse(data);
+  if (response.success) {
+    var compatTesting = goog.json.parse(response.data);
     test = compatTesting['test'];
     user = compatTesting['user'];
     this.currentUser_ = user;
   } else {
-    console.log('Failed to fetch tests: ' + data);
+    console.error('Failed to fetch tests: ' + response.data);
   }
 
   callback({'test': test,
@@ -199,9 +197,8 @@ bite.client.Background.prototype.fetchTestsDataCallback_ =
  * @private
  */
 bite.client.Background.prototype.fetchBugsData_ = function(tab, callback) {
-  this.updateBadge_(
-      tab, {'action': bite.client.Background.FetchEventType.FETCH_BEGIN});
-
+  //this.updateBadge_(
+  //    tab, {'action': bite.client.Background.FetchEventType.FETCH_BEGIN});
   bugs.api.urls([tab.url],
                 goog.bind(this.fetchBugsDataCallback_, this, tab, callback));
 };
@@ -468,9 +465,11 @@ bite.client.Background.prototype.logTestResult_ =
  * Fires when the log request completes.  Ignores request response.
  * @param {function(): void} callback Function to call after the result is
  *     sent.
+ * @param {!bite.common.net.xhr.async.response} response Ignored.
  * @private
  */
-bite.client.Background.prototype.logTestResultComplete_ = function(callback) {
+bite.client.Background.prototype.logTestResultComplete_ = function(callback,
+                                                                   response) {
   callback();
 };
 
@@ -623,17 +622,15 @@ bite.client.Background.prototype.onRequest =
         var data = request['data'];
         var headers = request['headers'];
 
-        var callback_wrapper = function (success, resultText, status) {
+        var callback_wrapper = (function(callback, response) {
           if (!callback) {
             return;
           }
-          var resultObj = {'success': success,
-                           'reply': resultText,
-                           'status': status};
-          console.log('Result obj: ');
-          console.log(resultObj);
+          var resultObj = {'success': response.success,
+                           'reply': response.data,
+                           'status': response.status};
           callback(resultObj);
-        };
+        }).bind(null, callback);
 
         if (command == 'GET') {
           bite.common.net.xhr.async.get(url, callback_wrapper, headers);
@@ -641,6 +638,9 @@ bite.client.Background.prototype.onRequest =
           bite.common.net.xhr.async.del(url, callback_wrapper, headers);
         } else if (command == 'POST') {
           bite.common.net.xhr.async.post(url, data, callback_wrapper, headers);
+        } else if (command == 'POST_FORM_DATA') {
+          bite.common.net.xhr.async.postFormData(url, data, callback_wrapper,
+                                                 headers);
         } else if (command == 'PUT') {
           bite.common.net.xhr.async.put(url, data, callback_wrapper, headers);
         }

@@ -353,7 +353,7 @@ bite.client.Content.prototype.overrideBiteInstallLink_ = function() {
 bite.client.Content.prototype.getCurrentUser_ =
     function(callback, responseObj) {
   if (!responseObj['success']) {
-    console.warn('Error checking login status.');
+    console.error('Error checking login status.');
   } else {
     this.user_ = responseObj['username'];
   }
@@ -725,8 +725,7 @@ bite.client.Content.prototype.updateBugsData_ = function(result) {
  * Updates the tests data.
  * @param {Object} result Test data known for the page.
  */
-bite.client.Content.prototype.updateTestData =
-    function(result) {
+bite.client.Content.prototype.updateTestData = function(result) {
   this.user_ = result['user'];
 
   if (this.testsConsole_) {

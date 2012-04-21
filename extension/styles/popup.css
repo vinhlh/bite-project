@@ -61,9 +61,6 @@ div.login {
 
 div.popup {
   width: 300px;
-  padding: 4px 4px 4px 4px;
-  -webkit-border-radius: 4px;
-  border: 1px solid #999999;
 }
 
 div.popup-error {
@@ -108,7 +105,6 @@ div.menuitem-title {
 
 div.menuitem-notes {
   font-size: .75em;
-  color: #999999;
   font-style: italic;
   cursor: pointer;
 }
