@@ -213,19 +213,17 @@ bite.client.TemplateManager.prototype.getTemplatesForUrlInternal_ =
  * Handles the template data returned by the server.
  * @param {function(bite.client.BugTemplateList)} callback Function to call
  *     with the loaded templates.
- * @param {boolean} success Whether or not the request was successful.
- * @param {Object} data The data received by the request or an error string.
  * @private
  */
 bite.client.TemplateManager.prototype.loadTemplatesCallback_ =
-    function(callback, success, data) {
-  if (!success) {
-    console.error('Failed to connect to load templates: ' + data);
+    function(callback, response) {
+  if (!response.success) {
+    console.error('Failed to connect to load templates: ' + response.data);
     this.useDefaultTemplate_();
   } else {
     // The data is in the form of a list of templates.
     try {
-      var templates = goog.json.parse(data);
+      var templates = goog.json.parse(response.data);
       if (templates.length < 1) {
         this.useDefaultTemplate_();
       } else {

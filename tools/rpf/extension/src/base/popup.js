@@ -195,17 +195,15 @@ bite.Popup.prototype.initData_ = function(callback) {
  * Async callback that gathers data before the final rendering of the popup.
  * @param {function()} callback The callback to invoke when initialization
  *     is complete.
- * @param {boolean} success Whether or not the request was successful.
- * @param {string} data The data retrieved from the request or an error string.
  * @private
  */
-bite.Popup.prototype.initDataComplete_ = function(callback, success, data) {
+bite.Popup.prototype.initDataComplete_ = function(callback, response) {
   try {
-    if (!success) {
-      throw data;
+    if (!response.success) {
+      throw response.data;
     }
 
-    var manifest = goog.json.parse(data);
+    var manifest = goog.json.parse(response.data);
     this.browserVersion_ = manifest['version'];
   } catch (error) {
     this.browserVersion_ = '';

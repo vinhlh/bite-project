@@ -81,7 +81,6 @@ bite.LoginManager.prototype.getCurrentUser = function(callback, server) {
   }
   var url = goog.Uri.parse(server);
   url.setPath(bite.LoginManager.CHECK_LOGIN_STATUS_PATH_);
-
   bite.common.net.xhr.async.get(url.toString(),
       goog.bind(this.getCurrentUserCallback_, this, callback, server));
 };
@@ -92,23 +91,20 @@ bite.LoginManager.prototype.getCurrentUser = function(callback, server) {
  * @param {function({success: boolean, url: string, username: string})}
  *     operationFinishedCallback A callback invoked on completion.
  * @param {string} server The server URL.
- * @param {boolean} success Whether or not the request was successful.
- * @param {string} data The data from the request or an error string.
- * @param {number} status The status of the request.
+ * @param {!bite.common.net.xhr.async.response} response The response.
  * @private
  */
 bite.LoginManager.prototype.getCurrentUserCallback_ =
-    function(operationFinishedCallback, server, success, data, status) {
+    function(operationFinishedCallback, server, response) {
   var responseObj = null;
-
   try {
-    if (!success) {
+    if (!response.success) {
       throw '';
     }
 
-    var response = goog.json.parse(data);
+    var data = goog.json.parse(response.data);
 
-    var loginOrOutUrl = response['url'] || '';
+    var loginOrOutUrl = data['url'] || '';
     if (!goog.string.startsWith(loginOrOutUrl, 'http')) {
       // The dev appengine server returns a login url that is simply a path
       // on the current dev server url whereas production returns
@@ -116,11 +112,11 @@ bite.LoginManager.prototype.getCurrentUserCallback_ =
       loginOrOutUrl = server + loginOrOutUrl;
     }
 
-    this.username_ = response['user'] || '';
+    this.username_ = data['user'] || '';
     this.loginOrOutUrl_ = loginOrOutUrl;
 
-    responseObj = this.buildResponseObject_(
-        true, loginOrOutUrl, this.username_);
+    responseObj = this.buildResponseObject_(true, loginOrOutUrl,
+                                            this.username_);
   } catch (e) {
     responseObj = this.buildResponseObject_(false, '', '');
   }

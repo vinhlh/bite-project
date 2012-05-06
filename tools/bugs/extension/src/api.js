@@ -152,14 +152,13 @@ bugs.api.constructUrl_ = function(path) {
  * proper data and type information.
  * @param {bugs.kind.callbackReturnBug} callback See details for the
  *     callbackReturnBug type.
- * @param {boolean} success Whether or not the request was a success.
- * @param {string} data The error message or data string returned from server.
+ * @param {!bite.common.net.xhr.async.response} response The response.
  * @private
  */
-bugs.api.wrapperForBug_ = function(callback, success, data) {
+bugs.api.wrapperForBug_ = function(callback, response) {
   try {
-    if (success) {
-      var bug = /** @type {bugs.kind.Bug} */ (JSON.parse(data));
+    if (response.success) {
+      var bug = /** @type {bugs.kind.Bug} */ (JSON.parse(response.data));
       if (!('kind' in bug)) {
         throw 'Missing kind information';
       } else if (bug['kind'] != bugs.kind.Kind.BUG) {
@@ -168,7 +167,7 @@ bugs.api.wrapperForBug_ = function(callback, success, data) {
 
       callback && callback({success: true, bug: bug});
     } else {
-      throw data; // Contains error message from server.
+      throw response.data; // Contains error message from server.
     }
   } catch (error) {
     var msg = 'Invalid bug data received; ' + error;
@@ -182,14 +181,13 @@ bugs.api.wrapperForBug_ = function(callback, success, data) {
  * proper data and type information.
  * @param {bugs.kind.callbackReturnId} callback See details for the
  *     callbackReturnId type.
- * @param {boolean} success Whether or not the request was a success.
- * @param {string} data The error message or data string returned from server.
+ * @param {!bite.common.net.xhr.async.response} response The response.
  * @private
  */
-bugs.api.wrapperForId_ = function(callback, success, data) {
+bugs.api.wrapperForId_ = function(callback, response) {
   try {
-    if (success) {
-      var id_data = /** @type {bugs.kind.Id} */ (JSON.parse(data));
+    if (response.success) {
+      var id_data = /** @type {bugs.kind.Id} */ (JSON.parse(response.data));
       if (!('kind' in id_data)) {
         throw 'Missing kind information';
       } else if (id_data['kind'] != bugs.kind.Kind.ID) {
@@ -199,7 +197,7 @@ bugs.api.wrapperForId_ = function(callback, success, data) {
       var id = /** @type {number} */ (id_data['id']);
       callback && callback({success: true, id: id});
     } else {
-      throw data; // Contains error message from server.
+      throw response.data; // Contains error message from server.
     }
   } catch (error) {
     var msg = 'Invalid id data received; ' + error;
@@ -213,14 +211,14 @@ bugs.api.wrapperForId_ = function(callback, success, data) {
  * proper data and type information.
  * @param {bugs.kind.callbackReturnUrlBugMap} callback See details for the
  *     callbackReturnUrlBugMap type.
- * @param {boolean} success Whether or not the request was a success.
- * @param {string} data The error message or data string returned from server.
+ * @param {!bite.common.net.xhr.async.response} response The response.
  * @private
  */
-bugs.api.wrapperForUrlBugMap_ = function(callback, success, data) {
+bugs.api.wrapperForUrlBugMap_ = function(callback, response) {
   try {
-    if (success) {
-      var bugMap = /** @type {bugs.kind.UrlBugMap} */ (JSON.parse(data));
+    if (response.success) {
+      var bugMap =
+          /** @type {bugs.kind.UrlBugMap} */ (JSON.parse(response.data));
       if (!('kind' in bugMap)) {
         throw 'Missing kind information';
       } else if (bugMap['kind'] != bugs.kind.Kind.URL_BUG_MAP) {
@@ -228,7 +226,7 @@ bugs.api.wrapperForUrlBugMap_ = function(callback, success, data) {
       }
       callback && callback({success: true, bugMap: bugMap});
     } else {
-      throw data; // Contains error message from server.
+      throw response.data; // Contains error message from server.
     }
   } catch (error) {
     var msg = 'Invalid UrlBugMap data received; ' + error;
