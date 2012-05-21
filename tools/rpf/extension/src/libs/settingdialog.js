@@ -96,6 +96,14 @@ rpf.SettingDialog.SHOW_TIPS_ = 'showTips';
 
 
 /**
+ * Localstorage name for whether to playback in incognito window.
+ * @type {string}
+ * @private
+ */
+rpf.SettingDialog.PLAYBACK_INCOGNITO_ = 'playbackIncognito';
+
+
+/**
  * Inits the setting dialog.
  * @private
  */
@@ -113,6 +121,7 @@ rpf.SettingDialog.prototype.initSettingDialog_ = function() {
   this.initTakeScreenshotsCheckbox_();
   this.initUseXpath_();
   this.initShowTips_();
+  this.initPlaybackIncognito_();
   this.settingDialog_.setVisible(false);
 };
 
@@ -142,6 +151,10 @@ rpf.SettingDialog.prototype.registerListeners_ = function() {
       goog.dom.getElement('whetherShowTips'),
       'click',
       goog.bind(this.setShowTips_, this));
+  goog.events.listen(
+      goog.dom.getElement('whetherPlaybackIncognito'),
+      'click',
+      goog.bind(this.setPlaybackIncognito_, this));
 };
 
 
@@ -209,6 +222,44 @@ rpf.SettingDialog.prototype.initUseXpath_ = function() {
     goog.dom.getElement('whetherUseXpath').checked = true;
     this.messenger_.sendMessage(
         {'command': Bite.Constants.CONSOLE_CMDS.SET_USE_XPATH,
+         'params': {'use': true}});
+  }
+};
+
+
+/**
+ * Gets whether to playback in incognito window.
+ * @return {boolean} Whether to playback in incognito window.
+ */
+rpf.SettingDialog.prototype.getPlaybackIncognito = function() {
+  return goog.dom.getElement('whetherPlaybackIncognito').checked;
+};
+
+
+/**
+ * Sets whether playback in Incognito window.
+ * @private
+ */
+rpf.SettingDialog.prototype.setPlaybackIncognito_ = function() {
+  var checked = goog.dom.getElement('whetherPlaybackIncognito').checked;
+  goog.global.localStorage[rpf.SettingDialog.PLAYBACK_INCOGNITO_] = checked;
+  this.messenger_.sendMessage(
+      {'command': Bite.Constants.CONSOLE_CMDS.SET_PLAYBACK_INCOGNITO,
+       'params': {'use': checked}});
+};
+
+
+/**
+ * Sets whether playback in Incognito window.
+ * @private
+ */
+rpf.SettingDialog.prototype.initPlaybackIncognito_ = function() {
+  var use = goog.global.localStorage.getItem(
+      rpf.SettingDialog.PLAYBACK_INCOGNITO_);
+  if (use && use == 'true') {
+    goog.dom.getElement('whetherPlaybackIncognito').checked = true;
+    this.messenger_.sendMessage(
+        {'command': Bite.Constants.CONSOLE_CMDS.SET_PLAYBACK_INCOGNITO,
          'params': {'use': true}});
   }
 };

@@ -147,6 +147,7 @@ Bite.Constants.CONSOLE_CMDS = {
   SET_DEFAULT_TIMEOUT: 'setDefaultTimeout',
   SET_INFO_MAP_IN_PLAYBACK: 'setInfoMapInPlayback',
   SET_MAXIMUM_RETRY_TIME: 'setMaximumRetryTime',
+  SET_PLAYBACK_INCOGNITO: 'setPlaybackIncognito',
   SET_PLAYBACK_INTERVAL: 'setPlaybackInterval',
   SET_RECORDING_TAB: 'setRecordingTab',
   SET_TAB_AND_START_RECORDING: 'setTabAndStartRecording',

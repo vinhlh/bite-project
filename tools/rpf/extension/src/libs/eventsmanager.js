@@ -1395,6 +1395,9 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
     case Bite.Constants.CONSOLE_CMDS.CHECK_READY_TO_RECORD:
       this.recordMgr_.checkTestTabExists(sendResponse, this.injectedTabs_);
       break;
+    case Bite.Constants.CONSOLE_CMDS.SET_PLAYBACK_INCOGNITO:
+      this.playbackMgr_.setPlaybackIncognito(params['use']);
+      break;
   }
 };
 

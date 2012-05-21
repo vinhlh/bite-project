@@ -388,6 +388,13 @@ rpf.PlayBackManager = function(
    * @private
    */
   this.continueOnFailure_ = false;
+
+  /**
+   * Whether to playback in incognito mode.
+   * @type {boolean}
+   * @private
+   */
+  this.playbackIncognito_ = false;
 };
 
 
@@ -565,7 +572,8 @@ rpf.PlayBackManager.prototype.startReplay_ = function(opt_callback) {
        width: playbackWinWidth - 650,
        height: screen.height - 50,
        top: 25,
-       left: 650},
+       left: 650,
+       incognito: this.playbackIncognito_},
       goog.bind(function(win) {
         this.callbackStartReplayOne_(callback, win);
       }, this));
@@ -1622,4 +1630,11 @@ rpf.PlayBackManager.prototype.isReplayTabReady = function() {
 rpf.PlayBackManager.prototype.setReplayTabReady = function(isReady) {
   this.replayTabReady_ = isReady;
 };
+
+/**
+ * @param {boolean} use whether to use incognito window.
+ */
+rpf.PlayBackManager.prototype.setPlaybackIncognito = function(use) {
+  this.playbackIncognito_ = use;
+}
 

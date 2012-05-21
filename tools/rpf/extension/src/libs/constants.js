@@ -27,5 +27,7 @@ goog.provide('rpf.Constants');
  * @const
  * @type {string}
  */
-rpf.Constants.DEFAULT_SERVER = 'https://bite-playground-dev.appspot.com';
-
+rpf.Constants.DEFAULT_SERVER = //'http://localhost:8080';
+                               'https://rpfserver.appspot.com';
+                               //'https://bite-playground-dev.appspot.com';
+                               //'https://phu-test-dot-rpfserver.appspot.com';

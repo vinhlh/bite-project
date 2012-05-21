@@ -195,6 +195,7 @@ bite.Popup.prototype.initData_ = function(callback) {
  * Async callback that gathers data before the final rendering of the popup.
  * @param {function()} callback The callback to invoke when initialization
  *     is complete.
+ * @param {!bite.common.net.xhr.async.response} response The response.
  * @private
  */
 bite.Popup.prototype.initDataComplete_ = function(callback, response) {
