@@ -20,12 +20,77 @@
  * Shows the body area.
  */
 {template .showBodyArea}
-  <table width="100%" style="border-spacing: 0;">
-    <tr>
-      <td>
-        <img id="resultScreenshot" width="100%">
-      </td>
-    </tr>
+  <div id="resultContent" style="margin-left:224px;overflow:auto;padding-top:20px;"></div>
+{/template}
+
+
+/**
+ * Shows the result details.
+ * @param details
+ */
+{template .showResultDetails}
+  <div style="font-weight:bold;font-size:14px;">
+    Project name
+  </div>
+  <div style="padding-top:10px;padding-bottom:15px;border-bottom:1px solid #D9D9D9;margin-right:224px;">
+    {$details.projectName}
+  </div>
+
+  <div style="font-weight:bold;font-size:14px;padding-top:15px;">
+    Test name
+  </div>
+  <div style="padding-top:10px;padding-bottom:15px;border-bottom:1px solid #D9D9D9;margin-right:224px;">
+    {$details.testName}
+  </div>
+
+  <div style="font-weight:bold;font-size:14px;padding-top:15px;">
+    Start URL
+  </div>
+  <div style="padding-top:10px;padding-bottom:15px;border-bottom:1px solid #D9D9D9;margin-right:224px;">
+    <a href="{$details.startUrl}" target="_blank">{$details.startUrl}</a>
+  </div>
+
+  <div style="font-weight:bold;font-size:14px;padding-top:15px;">
+    Failed URL
+  </div>
+  <div style="padding-top:10px;padding-bottom:15px;border-bottom:1px solid #D9D9D9;margin-right:224px;">
+    <a href="{$details.failedUrl}" target="_blank">{$details.failedUrl}</a>
+  </div>
+
+  <div style="font-weight:bold;font-size:14px;padding-top:15px;">
+    Failure log
+  </div>
+  <div style="padding-top:10px;padding-bottom:15px;border-bottom:1px solid #D9D9D9;margin-right:224px;">
+    {$details.failureLog}
+  </div>
+
+  <div style="font-weight:bold;font-size:14px;padding-top:15px;">
+    Scripts & Translation
+  </div>
+  <div id="scriptsTable" style="padding-top:10px;padding-bottom:15px;border-bottom:1px solid #D9D9D9;margin-right:224px;"></div>
+
+  <div style="font-weight:bold;font-size:14px;padding-top:15px;padding-bottom:15px;">
+    Screenshot
+  </div>
+  <img id="resultScreenshot" width="80%" src="{$details.screenshot}">
+  </table>
+{/template}
+
+
+/**
+ * Shows the scripts and translation.
+ * @param scripts
+ * @param failedIndex
+ */
+{template .showScripts}
+  <table>
+    {foreach $script in $scripts}
+      <tr>
+        <td>{$script.index}</td>
+        <td {if $failedIndex == $script.index}style="background-color:red;color:white;font-weight:bold;"{/if}>{$script.code}</td>
+        <td {if $failedIndex == $script.index}style="background-color:red;color:white;font-weight:bold;"{/if}>{$script.translation}</td>
+      </tr>
+    {/foreach}
   </table>
 {/template}
 

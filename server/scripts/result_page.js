@@ -74,6 +74,27 @@ bite.server.Result.prototype.parseParams_ = function(paramsMap) {
 
 
 /**
+ * Gets the scripts and translation.
+ * @param {Object} logObj The log object.
+ * @return {Array} The scripts and translation array.
+ * @private
+ */
+bite.server.Result.prototype.getScripts_ = function(logObj) {
+  var code = logObj['scripts'];
+  var translation = logObj['translation'];
+  var result = [];
+  for (var i = 0, len = code.length; i < len; ++i) {
+    result.push({
+      'index': i,
+      'code': code[i],
+      'translation': translation[i]
+    });
+  }
+  return result;
+};
+
+
+/**
  * Loads the result info from server.
  * @param {string} resultKey The result's key string.
  * @private
@@ -89,7 +110,25 @@ bite.server.Result.prototype.loadResultFromServer_ = function(resultKey) {
     var xhr = e.target;
     if (xhr.isSuccess()) {
       var result = xhr.getResponseJson();
-      goog.dom.getElement('resultScreenshot').src = result['screenshot'];
+      var runs_obj = xhr.getResponseJson();
+      if (runs_obj) {
+        var log = runs_obj['log'];
+        var logObj = goog.json.parse(log);
+        var resultDetails = {
+            'screenshot': runs_obj['screenshot'],
+            'projectName': logObj['projectName'],
+            'testName': logObj['testName'],
+            'startUrl': logObj['startUrl'],
+            'failedUrl': logObj['pageUrl'],
+            'failureLog': logObj['failureReason']};
+        goog.dom.getElement('resultContent').innerHTML =
+            bite.server.templates.details.ResultPage.showResultDetails(
+                {'details': resultDetails});
+        goog.dom.getElement('scriptsTable').innerHTML =
+            bite.server.templates.details.ResultPage.showScripts(
+                {'scripts': this.getScripts_(logObj),
+                 'failedIndex': logObj['stepIndex']});
+      }
     } else {
       throw new Error('Failed to get the Run template: ' +
                       xhr.getStatus());

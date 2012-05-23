@@ -362,6 +362,13 @@ rpf.PlayBackManager = function(
   this.failureLog_ = '';
 
   /**
+   * The failure URL.
+   * @type {string}
+   * @private
+   */
+  this.failureUrl_ = '';
+
+  /**
    * The elapsed time.
    * @type {string}
    * @private
@@ -1042,13 +1049,41 @@ rpf.PlayBackManager.prototype.createLogJsonStr_ = function(
   result['timeStamp'] = timeStamp;
   result['failedHtml'] = failedHtml;
   result['cmd'] = cmd;
-  result['failureReason'] = failureReason;
-  result['pageUrl'] = pageUrl;
+  result['failureReason'] = this.getAndClearFailureLog();
+  result['startUrl'] = this.playbackStartUrl_;
+  result['pageUrl'] = this.getAndClearFailureUrl();
   result['stepIndex'] = stepIndex;
   result['testName'] = this.currentTestName_;
   result['projectName'] = this.currentProjectName_;
   result['testLocation'] = this.currentTestLocation_;
+  result['scripts'] = this.scripts_;
+  result['translation'] = this.getTranslation_();
   return JSON.stringify(result);
+};
+
+
+/**
+ * Get the translated scripts.
+ * @return {Array} The translation array.
+ * @private
+ */
+rpf.PlayBackManager.prototype.getTranslation_ = function() {
+  var codeGen = new rpf.CodeGenerator();
+  var readable = [];
+
+  var descriptor = null;
+  for (var i = 0; i < this.scripts_.length; i++) {
+    if (this.infoMap_ && !goog.object.isEmpty(this.infoMap_)) {
+      var stepId = bite.base.Helper.getStepId(this.scripts_[i]);
+      if (stepId && this.infoMap_['steps'][stepId]) {
+        var elemId = this.infoMap_['steps'][stepId]['elemId'];
+        descriptor = this.infoMap_['elems'][elemId]['descriptor'];
+      }
+    }
+    readable.push(codeGen.translateCmd(
+        this.scripts_[i], this.datafile_, descriptor));
+  }
+  return readable;
 };
 
 
@@ -1338,6 +1373,15 @@ rpf.PlayBackManager.prototype.setFailureLog = function(log) {
 
 
 /**
+ * Sets the failure URL.
+ * @param {string} url The failure URL.
+ */
+rpf.PlayBackManager.prototype.setFailureUrl = function(url) {
+  this.failureUrl_ = url;
+};
+
+
+/**
  * Gets and clears the failure log.
  * @return {string} The failure log.
  * @export
@@ -1346,6 +1390,17 @@ rpf.PlayBackManager.prototype.getAndClearFailureLog = function() {
   var failureLog = this.failureLog_;
   this.failureLog_ = '';
   return failureLog;
+};
+
+
+/**
+ * Gets and clears the failure URL.
+ * @return {string} The failure url.
+ */
+rpf.PlayBackManager.prototype.getAndClearFailureUrl = function() {
+  var failureUrl = this.failureUrl_;
+  this.failureUrl_ = '';
+  return failureUrl;
 };
 
 
@@ -1372,6 +1427,9 @@ rpf.PlayBackManager.prototype.updateRuntimeStatus_ = function(text, color) {
 rpf.PlayBackManager.prototype.checkFailureCondition = function() {
   console.log('Replay was forced out because of failures!');
   this.failureReason_ = 'MultipleRetryFindElemFailure';
+  if (!this.checkPageReady_()) {
+    this.setFailureLog('Likely a timeout waiting for a page to be loaded.');
+  }
   this.onFailed_();
 };
 

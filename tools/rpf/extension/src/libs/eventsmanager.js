@@ -842,6 +842,7 @@ rpf.EventsManager.prototype.callBackOnRequest = function(
           request['result'], rpf.EventsManager.ResultTypes_.PASS)) {
         result = rpf.EventsManager.ResultTypes_.FAILED;
         this.playbackMgr_.setFailureLog(request['result']);
+        this.playbackMgr_.setFailureUrl(request['url']);
       }
 
       this.playbackMgr_.callBackAfterExecCmds(result, request['result']);

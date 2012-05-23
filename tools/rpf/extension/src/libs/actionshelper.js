@@ -445,6 +445,7 @@ function onRequestCallback(request, sender, sendResponse) {
       chrome.extension.sendRequest(
           {command: 'cmdDone',
            result: resultStr,
+           url: goog.dom.getDocument().URL,
            index: BiteRpfAction.cmdIndex});
     } finally {
       // The sendResponse is called to close the request.

@@ -99,7 +99,8 @@ class ViewResultHandler(base.BaseHandler):
     """Updates the result."""
     resultKeyStr = self.GetRequiredParameter('resultKey')
     result = bite_result.LoadResultByKeyStr(resultKeyStr)
-    params = {'screenshot': str(result.screenshot)}
+    params = {'screenshot': str(result.screenshot),
+              'log': str(result.log)}
     self.response.out.write(basic_util.DumpJsonStr(params))
 
 
