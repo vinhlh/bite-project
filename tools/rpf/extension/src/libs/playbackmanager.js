@@ -661,7 +661,9 @@ rpf.PlayBackManager.prototype.callbackInitReplayPageTwo_ = function(
  */
 rpf.PlayBackManager.prototype.kickOffTest_ = function() {
   this.currentStep_ = 0;
-  this.startTimeEachRun_ = 0;
+  // Make sure the initial page loading is also included as part of test run.
+  this.startTimeEachRun_ = this.getDate_().getTime();
+  this.eachCmdTimeout_ = this.defaultTimeout_;
   this.replayTabReady_ = false;
   this.preparationDone_ = true;
   this.playbackTimer_.start();

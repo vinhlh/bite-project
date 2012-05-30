@@ -190,7 +190,7 @@ class GetDetailsHandler(base.BaseHandler):
         finish_time_str = basic_util.CreateStartStr(finish_time_pst)
       details.append({'id': result.test_id,
                       'resultKey': str(result.key()),
-                      'log': str(result.log),
+                      'log': result.log,
                       'name': result.test_name,
                       'status': result.status,
                       'when': finish_time_str,
