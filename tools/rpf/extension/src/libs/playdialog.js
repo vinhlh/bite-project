@@ -40,7 +40,8 @@ goog.require('rpf.soy.Dialog');
  * while inserting in new recorded steps in playbackmanager.
  *
  * @param {rpf.Console.Messenger} messenger The messenger instance.
- * @param {function(Bite.Constants.UiCmds, Object, Event, Function=)} onUiEvents
+ * @param {function(Bite.Constants.UiCmds, Object, Event,
+ *         function(Object))} onUiEvents
  *     The function to handle the specific event.
  * @constructor
  * @export
@@ -84,7 +85,7 @@ rpf.PlayDialog = function(messenger, onUiEvents) {
    * @type {function(Bite.Constants.UiCmds, Object, Event, Function=)}
    * @private
    */
-  this.onUiEvents_ = onUiEvents;
+  this.onUiEvents_ = /** @type {function(Bite.Constants.UiCmds, Object, Event, Function=)} */ onUiEvents;
 
   /**
    * Inits the playback dialog.

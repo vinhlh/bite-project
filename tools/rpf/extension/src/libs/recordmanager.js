@@ -176,7 +176,7 @@ rpf.RecordManager.prototype.startRecording = function(
  * Callback after checking whether the tab under record exists.
  * @param {Function} callback The callback function.
  * @param {Object} injectedTabs The injected tabs.
- * @param {Tab} tab The tab.
+ * @param {Array.<Tab>} tab The tab.
  * @private
  */
 rpf.RecordManager.prototype.checkTestTabExistsCallback_ = function(
@@ -189,10 +189,10 @@ rpf.RecordManager.prototype.checkTestTabExistsCallback_ = function(
                         '<a href="https://sites.google.com/site/' +
                         'rpfwiki/q-a#selectnewtab" target="_blank">here</a>.';
   } else {
-    if (injectedTabs[tab.id]) {
+    if (injectedTabs[tab[0].id]) {
       result['success'] = true;
-      result['url'] = tab.url;
-      this.scriptMgr_.startUrl = tab.url;
+      result['url'] = tab[0].url;
+      this.scriptMgr_.startUrl = tab[0].url;
     } else {
       result['success'] = false;
       result['message'] = 'Maybe you would need to refresh the page' +

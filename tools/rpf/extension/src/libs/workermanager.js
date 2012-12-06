@@ -47,7 +47,7 @@ goog.require('rpf.soy.Dialog');
  * @param {rpf.PlayBackManager} playbackMgr The playback manager.
  * @param {rpf.Automator} automator The rpf automator.
  * @param {rpf.ConsoleLogger} logger The console logger instance.
- * @param {function(Object, Object, function(Object))} eventMgrListener
+ * @param {function(Object, MessageSender, function(Object))} eventMgrListener
  *     The listener registered in eventsManager.
  * @param {function(Object, function(*)=)} sendMessageToConsole The
  *     function to send message to console world.
@@ -78,7 +78,7 @@ rpf.WorkerManager = function(
 
   /**
    * The event lisnener registered on event manager.
-   * @type {function(Object, Object, function(Object))}
+   * @type {function(Object, MessageSender, function(Object))}
    * @private
    */
   this.eventMgrListener_ = eventMgrListener;
@@ -638,20 +638,20 @@ rpf.WorkerManager.prototype.kickOffPlayback = function(
  *     doneResult The result of the previous script.
  * @param {number} winId The playback window id.
  * @param {string} dataUrl The img data url string.
- * @param {string} log The result log.
+ * @param {string=} log The result log.
  */
 rpf.WorkerManager.prototype.runNext = function(
     doneResult, winId, dataUrl, log) {
   rpf.MiscHelper.removeWindowById(winId);
   this.updateRunningTestStatus(
-      this.autoRunningTestId_, doneResult, dataUrl, log);
+      this.autoRunningTestId_, doneResult, dataUrl, log||'');
   this.autoRunningTestId_ = 0;
   this.isWorking_ = false;  // TODO(phu): Use hanging GET to solve.
   this.eventMgrListener_(
       {'command': Bite.Constants.CONSOLE_CMDS.EVENT_COMPLETED,
        'params': {'eventType':
            Bite.Constants.COMPLETED_EVENT_TYPES.FINISHED_UPDATE_TEST_RESULT}},
-      {}, goog.nullFunction);
+      /** @type {MessageSender} */ {}, goog.nullFunction);
 };
 
 

@@ -1,18 +1,19 @@
 {
   "name": "BITE-Playground (Dev)",
   "version": "2.0.1.11",
+  "manifest_version": 2,
   "description": "Open source version of BITE. (Dev)",
   "options_page": "options.html",
   "browser_action": {
-    "default_icon": "imgs/logo-19x19.png",
+    "default_icon": {"19": "imgs/logo-19x19.png"},
     "default_title": "BITE",
-    "popup": "popup.html"
+    "default_popup": "popup.html"
   },
   "icons": {
     "48": "imgs/logo-48x48.png",
     "128": "imgs/logo-128x128.png"
   },
-  "background_page": "background.html",
+  "background": {"page": "background.html"},
   "content_scripts": [
     {
       "js": [ "getactioninfo_script.js" ],

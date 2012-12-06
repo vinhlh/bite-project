@@ -42,7 +42,7 @@ goog.require('rpf.ScriptManager');
  * @param {rpf.ConsoleLogger} logger The console logger instance.
  * @param {function(Object, function(*)=)} sendMessageToConsole The
  *     function to send message to console world.
- * @param {function(Object, Object, function(Object))} eventMgrListener
+ * @param {function(Object, MessageSender, function(Object))} eventMgrListener
  *     The listener registered in eventsManager.
  * @constructor
  * @export
@@ -74,7 +74,7 @@ rpf.PlayBackManager = function(
 
   /**
    * The event lisnener registered on event manager.
-   * @type {function(Object, Object, function(Object))}
+   * @type {function(Object, MessageSender, function(Object))}
    * @private
    */
   this.eventMgrListener_ = eventMgrListener;
@@ -953,7 +953,7 @@ rpf.PlayBackManager.prototype.finishCurrentRun = function(status, log) {
       {'command': Bite.Constants.CONSOLE_CMDS.EVENT_COMPLETED,
        'params': {'eventType':
            Bite.Constants.COMPLETED_EVENT_TYPES.FINISHED_RUNNING_TEST}},
-      {}, goog.nullFunction);
+      /** @type {MessageSender} */ {}, goog.nullFunction);
 };
 
 
@@ -1357,7 +1357,7 @@ rpf.PlayBackManager.prototype.waitForElementReadyAndExecCmds = function() {
 
 /**
  * Callback from client content script (not necessary done).
- * @param {Object} response Contains the result.
+ * @param {*} response Contains the result.
  * @export
  */
 rpf.PlayBackManager.prototype.callBackWhileExecCmds = function(response) {

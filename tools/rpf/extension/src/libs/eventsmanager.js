@@ -980,7 +980,7 @@ rpf.EventsManager.prototype.automateRpf = function(params) {
 
 /**
  * Callback when the test window is opened.
- * @param {Window} win The test window.
+ * @param {ChromeWindow} win The test window.
  * @private
  */
 rpf.EventsManager.prototype.openTestWindowCallback_ = function(win) {

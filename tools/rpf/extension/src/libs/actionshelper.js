@@ -254,14 +254,14 @@ BiteRpfAction.enter = goog.nullFunction;
 
 /**
  * The select wrapper.
- * @type {function((string|Element))}
+ * @type {function((string|Element), string)}
  */
 BiteRpfAction.select = goog.nullFunction;
 
 
 /**
  * The drag wrapper.
- * @type {function((string|Element))}
+ * @type {function((string|Element), number, number)}
  */
 BiteRpfAction.drag = goog.nullFunction;
 
@@ -297,7 +297,7 @@ BiteRpfAction.doubleClick = goog.nullFunction;
 
 /**
  * The verify wrapper.
- * @type {function((string|Element))}
+ * @type {function((string|Element), string)}
  */
 BiteRpfAction.verify = goog.nullFunction;
 
@@ -318,7 +318,7 @@ BiteRpfAction.move = goog.nullFunction;
 
 /**
  * The verify not wrapper.
- * @type {function((string|Element))}
+ * @type {function((string|Element), string)}
  */
 BiteRpfAction.verifyNot = goog.nullFunction;
 

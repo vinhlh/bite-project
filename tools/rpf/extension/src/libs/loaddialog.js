@@ -27,7 +27,6 @@ goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.style');
-goog.require('goog.ui.AutoComplete.Basic');
 goog.require('goog.ui.ComboBox');
 goog.require('goog.ui.Dialog');
 goog.require('rpf.Console.Messenger');

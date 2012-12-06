@@ -35,11 +35,11 @@ goog.require('goog.events.EventTarget');
 
 /**
  * A class for automating RPF behaviors.
- * @param {function(Object, function(Object)=)} consoleListener The listener
+ * @param {function(Object, function(*)=)} consoleListener The listener
  *     registered in rpf console.
- * @param {function(Object, Object, function(Object))} eventMgrListener
+ * @param {function(Object, MessageSender, function(*))} eventMgrListener
  *     The listener registered in eventsManager.
- * @param {function(Object, Object, function(Object))} rpfListener
+ * @param {function(Object, MessageSender, function(Object))} rpfListener
  *     The listener registered in rpf.js.
  * @constructor
  */
@@ -69,21 +69,21 @@ rpf.Automator = function(consoleListener, eventMgrListener, rpfListener) {
 
   /**
    * See description for function parameter consoleListener.
-   * @type {function(Object, function(Object)=)}
+   * @type {function(Object, function(*)=)}
    * @private
    */
   this.consoleListener_ = consoleListener;
 
   /**
    * See description for function parameter eventMgrListener.
-   * @type {function(Object, Object, function(Object))}
+   * @type {function(Object, MessageSender, function(*))}
    * @private
    */
   this.eventMgrListener_ = eventMgrListener;
 
   /**
    * See description for function parameter rpfListener.
-   * @type {function(Object, Object, function(Object))}
+   * @type {function(Object, MessageSender, function(Object))}
    * @private
    */
   this.rpfListener_ = rpfListener;
@@ -207,11 +207,14 @@ rpf.Automator.prototype.executeNextStep_ = function() {
       break;
     case Bite.Constants.ListenerDestination.EVENT_MANAGER:
       this.eventMgrListener_({'command': message,
-                              'params': params}, {}, goog.nullFunction);
+                              'params': params},
+                              /** @type {MessageSender} */ {},
+                              goog.nullFunction);
       break;
     case Bite.Constants.ListenerDestination.RPF:
       this.rpfListener_({'command': message,
-                         'params': params}, {}, goog.nullFunction);
+                         'params': params},
+                         /** @type {MessageSender} */ {}, goog.nullFunction);
       break;
     case Bite.Constants.ListenerDestination.CONTENT:
       break;

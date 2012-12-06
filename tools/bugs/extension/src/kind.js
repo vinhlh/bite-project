@@ -123,7 +123,6 @@ bugs.kind.callbackReturnId;
  * the object will contain either an error property describing what went wrong
  * or an object containing the data for the requested bug.
  *
- * @typedef{function(!{success: boolean, error: *,
- *                     bugMap: *})}
+ * @typedef{function(!{success: boolean, error: *, bugMap: *})}
  */
 bugs.kind.callbackReturnUrlBugMap;

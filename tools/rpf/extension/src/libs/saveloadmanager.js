@@ -36,7 +36,7 @@ goog.require('rpf.StatusLogger');
  * @param {rpf.ScriptManager} scriptMgr The script manager.
  * @param {function(Object, function(*)=)} sendMessageToConsole The
  *     function to send message to console world.
- * @param {function(Object, Object, function(Object))} eventMgrListener
+ * @param {function(Object, MessageSender, function(Object))} eventMgrListener
  *     The listener registered in eventsManager.
  * TODO(phu): Consider splitting this into saveManager and loadManager.
  * @constructor
@@ -57,7 +57,7 @@ rpf.SaveLoadManager = function(scriptMgr, sendMessageToConsole,
 
   /**
    * The event lisnener registered on event manager.
-   * @type {function(Object, Object, function(Object))}
+   * @type {function(Object, MessageSender, function(Object))}
    * @private
    */
   this.eventMgrListener_ = eventMgrListener;
@@ -619,7 +619,7 @@ rpf.SaveLoadManager.prototype.saveProjectLocally = function(
       {'command': Bite.Constants.CONSOLE_CMDS.EVENT_COMPLETED,
        'params': {'eventType':
            Bite.Constants.COMPLETED_EVENT_TYPES.PROJECT_SAVED_LOCALLY}},
-      {}, goog.nullFunction);
+      /** @type {MessageSender} */ {}, goog.nullFunction);
 };
 
 
