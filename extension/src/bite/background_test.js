@@ -20,7 +20,6 @@
 
 
 goog.require('Bite.Constants');
-goog.require('goog.json');
 goog.require('goog.net.XhrIo');
 goog.require('goog.structs.Queue');
 goog.require('goog.testing.MockControl');

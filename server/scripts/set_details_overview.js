@@ -25,7 +25,6 @@ goog.require('bite.server.Helper');
 goog.require('bite.server.set.Tab');
 goog.require('bite.server.templates.details');
 goog.require('goog.dom');
-goog.require('goog.json');
 
 
 
@@ -67,7 +66,7 @@ goog.inherits(bite.server.set.Overview, bite.server.set.Tab);
 
 /**
  * Inits the setting's overview page.
- * @param {Element} tabDetailsDiv The tab details div.
+ * @param {Element=} tabDetailsDiv The tab details div.
  * @export
  */
 bite.server.set.Overview.prototype.init = function(tabDetailsDiv) {
@@ -109,7 +108,7 @@ bite.server.set.Overview.prototype.loadSetting = function() {
  */
 bite.server.set.Overview.prototype.setProperties = function(params) {
   this.description = params['description'];
-  this.labels = goog.json.parse(params['labels'])['labels'];
+  this.labels = JSON.parse(params['labels'])['labels'];
   this.biteProject = params['projectName'];
 };
 
@@ -123,5 +122,5 @@ bite.server.set.Overview.prototype.setProperties = function(params) {
 bite.server.set.Overview.prototype.addProperties = function(params) {
   params['projectName'] = this.biteProject;
   params['description'] = this.description;
-  params['labels'] = goog.json.serialize({'labels': this.labels});
+  params['labels'] = JSON.stringify({'labels': this.labels});
 };

@@ -21,7 +21,6 @@
 
 goog.require('Bite.Constants');
 goog.require('bite.Popup');
-goog.require('goog.json');
 goog.require('goog.testing.MockControl');
 goog.require('goog.testing.PropertyReplacer');
 goog.require('goog.testing.asserts');
@@ -156,7 +155,7 @@ function testInitDataComplete() {
 
   var mockParse = mocks.createFunctionMock();
   mockParse('data').$returns({'version': 'a'});
-  stubs.set(goog.json, 'parse', mockParse);
+  stubs.set(JSON, 'parse', mockParse);
 
   var mockInitLogin = mocks.createFunctionMock();
   mockInitLogin(mockCallback).$returns();

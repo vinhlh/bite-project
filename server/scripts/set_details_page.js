@@ -123,14 +123,14 @@ goog.inherits(bite.server.Set, bite.server.Page);
 
 /**
  * Inits the setting page.
- * @param {goog.Uri.QueryData} paramsMap The params map of the url hash.
+ * @param {Object=} paramsMap The params map of the url hash.
  * @export
  */
 bite.server.Set.prototype.init = function(paramsMap) {
   this.layoutHelper = bite.server.LayoutHelper.getInstance();
   var baseView = goog.dom.getElement('baseView');
   baseView.innerHTML = bite.server.templates.details.showBodyArea();
-  this.parseParams_(paramsMap);
+  this.parseParams_(/** @type {goog.Uri.QueryData} */ (paramsMap));
   this.selectedTab = this.tabNameObjMap['runs'];
   this.selectedTab.init(goog.dom.getElement('setTabDetailDiv'));
 };

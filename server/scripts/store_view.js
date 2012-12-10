@@ -236,7 +236,7 @@ rpf.server.StoreView.prototype.parseMethodsString_ = function(methods) {
     return methodsArr;
   }
 
-  var methodInstances = goog.json.parse(methods);
+  var methodInstances = JSON.parse(methods);
   this.methodsMap_ = {};
 
   for (var i = 0, len = methodInstances.length; i < len; ++i) {
@@ -432,7 +432,7 @@ rpf.server.StoreView.prototype.onRunMethodInWindow_ = function(e) {
  * @private
  */
 rpf.server.StoreView.prototype.dispatchRpfEvent_ = function(target, data) {
-  goog.dom.getElement('rpfLaunchData').innerHTML = goog.json.serialize(data);
+  goog.dom.getElement('rpfLaunchData').innerHTML = JSON.stringify(data);
   var evt = goog.dom.getDocument().createEvent('Event');
   evt.initEvent('rpfLaunchEvent', true, true);
   target.dispatchEvent(evt);

@@ -113,7 +113,7 @@ bite.server.Result.prototype.loadResultFromServer_ = function(resultKey) {
       var runs_obj = xhr.getResponseJson();
       if (runs_obj) {
         var log = runs_obj['log'];
-        var logObj = goog.json.parse(log);
+        var logObj = JSON.parse(log);
         var resultDetails = {
             'screenshot': runs_obj['screenshot'],
             'projectName': logObj['projectName'],

@@ -20,7 +20,6 @@
 
 
 goog.require('bite.server.set.Tests');
-goog.require('goog.json');
 goog.require('goog.testing.MockControl');
 goog.require('goog.testing.PropertyReplacer');
 goog.require('goog.testing.asserts');

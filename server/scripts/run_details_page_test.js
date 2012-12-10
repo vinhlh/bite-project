@@ -22,7 +22,6 @@
 goog.require('bite.server.Run');
 goog.require('bite.server.run.Overview');
 goog.require('goog.dom');
-goog.require('goog.json');
 goog.require('goog.net.XhrIo');
 goog.require('goog.testing.MockControl');
 goog.require('goog.testing.PropertyReplacer');
@@ -66,7 +65,7 @@ function testLoadRunFromServer() {
   run.loadRunFromServer(runKey);
   var sendInstance = goog.testing.net.XhrIo.getSendInstances()[0];
   var sentUri = sendInstance.getLastUri();
-  sendInstance.simulateResponse(200, goog.json.serialize({'runKey': 'ddd'}));
+  sendInstance.simulateResponse(200, JSON.stringify({'runKey': 'ddd'}));
   assertEquals('/run/load_template', sentUri);
   assertEquals('ddd', run.runKey_);
   mockControl_.$verifyAll();

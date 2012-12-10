@@ -20,7 +20,6 @@
 
 
 goog.require('bite.server.set.Overview');
-goog.require('goog.json');
 goog.require('goog.testing.MockControl');
 goog.require('goog.testing.PropertyReplacer');
 goog.require('goog.testing.asserts');
@@ -45,7 +44,7 @@ function tearDown() {
 function testSetProperties() {
   var overview = new bite.server.set.Overview(null);
   var params = {'description': 'a',
-                'labels': goog.json.serialize({'labels': ['b']}),
+                'labels': JSON.stringify({'labels': ['b']}),
                 'projectName': 'c'};
   overview.setProperties(params);
   assertEquals(overview.description, 'a');
@@ -63,5 +62,5 @@ function testAddProperties() {
   overview.addProperties(params);
   assertEquals(params['description'], 'a');
   assertEquals(params['projectName'], 'c');
-  assertObjectEquals(params['labels'], goog.json.serialize({'labels': ['b']}));
+  assertObjectEquals(params['labels'], JSON.stringify({'labels': ['b']}));
 }

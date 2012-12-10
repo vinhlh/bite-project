@@ -22,7 +22,6 @@
 goog.require('bite.server.Set');
 goog.require('goog.Uri.QueryData');
 goog.require('goog.dom');
-goog.require('goog.json');
 goog.require('goog.net.XhrIo');
 goog.require('goog.testing.MockControl');
 goog.require('goog.testing.PropertyReplacer');

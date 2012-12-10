@@ -25,7 +25,6 @@ goog.require('bite.server.Helper');
 goog.require('bite.server.set.Tab');
 goog.require('bite.server.templates.details.RunOverview');
 goog.require('goog.dom');
-goog.require('goog.json');
 
 
 
@@ -86,7 +85,7 @@ goog.inherits(bite.server.run.Overview, bite.server.set.Tab);
 
 /**
  * Inits the overview tab of the run's details page.
- * @param {Element} tabDetailsDiv The tab details div.
+ * @param {Element=} tabDetailsDiv The tab details div.
  * @export
  */
 bite.server.run.Overview.prototype.init = function(tabDetailsDiv) {

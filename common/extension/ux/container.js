@@ -34,7 +34,6 @@ goog.require('goog.Timer');
 goog.require('goog.dom');
 goog.require('goog.events');
 goog.require('goog.events.EventHandler');
-goog.require('goog.json');
 goog.require('soy');
 
 
@@ -451,7 +450,7 @@ bite.ux.Container.prototype.setLastSizeAndPosition_ = function() {
   chrome.extension.sendRequest(
       {action: Bite.Constants.HUD_ACTION.SET_LOCAL_STORAGE,
        key: bite.ux.Container.Keys_.CONSOLE_LOCATION + this.consoleId_,
-       value: goog.json.serialize(consoleLocation)});
+       value: JSON.stringify(consoleLocation)});
 };
 
 
@@ -482,7 +481,7 @@ bite.ux.Container.prototype.handleGetSavedConsoleLocation_ =
   if (rawLocation) {
     try {
       location = /** @type {!bite.ux.Container.Location} */
-          (goog.json.parse(rawLocation));
+          (JSON.parse(rawLocation));
     } catch (error) {
       chrome.extension.sendRequest(
           {action: Bite.Constants.HUD_ACTION.REMOVE_LOCAL_STORAGE,

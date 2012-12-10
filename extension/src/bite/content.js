@@ -41,7 +41,6 @@ goog.require('goog.dom');
 goog.require('goog.dom.TagName');
 goog.require('goog.dom.ViewportSizeMonitor');
 goog.require('goog.dom.classes');
-goog.require('goog.json');
 goog.require('goog.math');
 goog.require('goog.style');
 goog.require('goog.userAgent');
@@ -875,7 +874,7 @@ bite.client.Content.prototype.handleBugCommand_ = function(
       bite.client.Content.fetchBugsData();
       break;
     case bite.options.constants.Message.UPDATE:
-      var requestObj = goog.json.parse(request['data'] || '{}');
+      var requestObj = JSON.parse(request['data'] || '{}');
       this.serverChannel_ = requestObj['serverChannel'];
       this.bugFilters_ = requestObj;
       this.refreshBugConsoleUI_();

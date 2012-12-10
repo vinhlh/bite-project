@@ -24,7 +24,6 @@ goog.require('bite.server.Helper');
 goog.require('bite.server.set.Tab');
 goog.require('bite.server.templates.details');
 goog.require('goog.dom');
-goog.require('goog.json');
 goog.require('goog.string');
 
 
@@ -91,7 +90,7 @@ goog.inherits(bite.server.set.Settings, bite.server.set.Tab);
 
 /**
  * Inits the setting's overview page.
- * @param {Element} tabDetailsDiv The tab details div.
+ * @param {Element=} tabDetailsDiv The tab details div.
  * @export
  */
 bite.server.set.Settings.prototype.init = function(tabDetailsDiv) {
@@ -162,6 +161,6 @@ bite.server.set.Settings.prototype.addProperties = function(params) {
   params['interval'] = this.interval_;
   params['startUrl'] = this.startUrl_;
   params['failureThresh'] = this.failureThresh_;
-  params['emailFrom'] = goog.json.serialize(this.emailFrom_);
-  params['emailTo'] = goog.json.serialize(this.emailTo_);
+  params['emailFrom'] = JSON.stringify(this.emailFrom_);
+  params['emailTo'] = JSON.stringify(this.emailTo_);
 };

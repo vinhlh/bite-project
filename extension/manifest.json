@@ -1,6 +1,6 @@
 {
   "name": "BITE-Playground (Dev)",
-  "version": "2.0.1.11",
+  "version": "2.0.1.13",
   "manifest_version": 2,
   "description": "Open source version of BITE. (Dev)",
   "options_page": "options.html",

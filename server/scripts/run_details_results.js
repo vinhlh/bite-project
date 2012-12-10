@@ -69,7 +69,7 @@ goog.inherits(bite.server.run.Results, bite.server.set.Tab);
 
 /**
  * Inits the Run's page's results tab.
- * @param {Element} tabDetailsDiv The tab details div.
+ * @param {Element=} tabDetailsDiv The tab details div.
  * @export
  */
 bite.server.run.Results.prototype.init = function(tabDetailsDiv) {
@@ -185,7 +185,7 @@ bite.server.run.Results.prototype.onPlaybackTests_ = function(e) {
   var data = {'command': 'playbackMultiple',
               'data': testsInfo};
 
-  goog.dom.getElement('rpfLaunchData').innerHTML = goog.json.serialize(data);
+  goog.dom.getElement('rpfLaunchData').innerHTML = JSON.stringify(data);
   var evt = goog.dom.getDocument().createEvent('Event');
   evt.initEvent('rpfLaunchEvent', true, true);
   e.target.dispatchEvent(evt);

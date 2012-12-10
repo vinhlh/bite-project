@@ -24,7 +24,6 @@ goog.provide('bite.LoginManager');
 
 goog.require('bite.common.net.xhr.async');
 goog.require('goog.Uri');
-goog.require('goog.json');
 goog.require('goog.string');
 
 
@@ -102,7 +101,7 @@ bite.LoginManager.prototype.getCurrentUserCallback_ =
       throw '';
     }
 
-    var data = goog.json.parse(response.data);
+    var data = JSON.parse(response.data);
 
     var loginOrOutUrl = data['url'] || '';
     if (!goog.string.startsWith(loginOrOutUrl, 'http')) {

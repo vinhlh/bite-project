@@ -22,7 +22,6 @@
 goog.require('Bite.Constants');
 goog.require('bite.ux.Container');
 goog.require('goog.dom');
-goog.require('goog.json');
 goog.require('goog.testing.PropertyReplacer');
 
 
@@ -38,7 +37,7 @@ var mockSendRequest = function(data, callback) {
   if (data['action'] == Bite.Constants.HUD_ACTION.GET_LOCAL_STORAGE) {
     if (data['key'] ==
         bite.ux.Container.Keys_.CONSOLE_LOCATION + 'test_console') {
-      var positionData = goog.json.serialize(
+      var positionData = JSON.stringify(
           {position: {x: 20, y: 20},
            size: {height: 450, width: 350}});
       callback(positionData);

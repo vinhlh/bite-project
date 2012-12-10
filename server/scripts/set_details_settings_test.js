@@ -20,7 +20,6 @@
 
 
 goog.require('bite.server.set.Settings');
-goog.require('goog.json');
 goog.require('goog.testing.MockControl');
 goog.require('goog.testing.PropertyReplacer');
 goog.require('goog.testing.asserts');
@@ -74,6 +73,6 @@ function testAddProperties() {
   assertEquals(params['interval'], 1);
   assertEquals(params['startUrl'], 'd');
   assertEquals(params['failureThresh'], 0);
-  assertObjectEquals(params['emailFrom'], goog.json.serialize(['b']));
-  assertObjectEquals(params['emailTo'], goog.json.serialize(['c']));
+  assertObjectEquals(params['emailFrom'], JSON.stringify(['b']));
+  assertObjectEquals(params['emailTo'], JSON.stringify(['c']));
 }

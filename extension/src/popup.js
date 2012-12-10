@@ -27,7 +27,6 @@ goog.require('bite.options.constants');
 goog.require('bite.options.data');
 goog.require('goog.dom');
 goog.require('goog.events');
-goog.require('goog.json');
 goog.require('goog.string');
 goog.require('goog.ui.ToggleButton');
 
@@ -202,7 +201,6 @@ bite.Popup.prototype.init = function(opt_initCallback) {
  */
 bite.Popup.prototype.initData_ = function(callback) {
   var url = chrome.extension.getURL('manifest.json');
-  console.log('initData_: url='+url);
   bite.common.net.xhr.async.get(url,
       goog.bind(this.initDataComplete_, this, callback));
 };
@@ -217,11 +215,12 @@ bite.Popup.prototype.initData_ = function(callback) {
  */
 bite.Popup.prototype.initDataComplete_ = function(callback, response) {
   try {
+    window.jason = response;
     if (!response.success) {
       throw response.data;
     }
 
-    var manifest = goog.json.parse(response.data);
+    var manifest = JSON.parse(response.data);
     this.browserVersion_ = manifest['version'];
   } catch (error) {
     this.browserVersion_ = '';
@@ -370,3 +369,7 @@ bite.Popup.prototype.onClickCallback_ = function(optionName) {
   goog.global.close();
 };
 
+
+document.addEventListener('DOMContentLoaded', function() {
+  bite.Popup.getInstance().init();
+}, false);

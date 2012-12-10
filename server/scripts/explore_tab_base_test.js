@@ -21,7 +21,6 @@
 
 goog.require('bite.server.explore.Tab');
 goog.require('goog.dom');
-goog.require('goog.json');
 goog.require('goog.net.XhrIo');
 goog.require('goog.testing.MockControl');
 goog.require('goog.testing.PropertyReplacer');

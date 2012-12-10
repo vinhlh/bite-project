@@ -60,7 +60,7 @@ goog.inherits(bite.server.set.Runs, bite.server.set.Tab);
 
 /**
  * Inits the setting's overview page.
- * @param {Element} tabDetailsDiv The tab details div.
+ * @param {Element=} tabDetailsDiv The tab details div.
  * @export
  */
 bite.server.set.Runs.prototype.init = function(tabDetailsDiv) {

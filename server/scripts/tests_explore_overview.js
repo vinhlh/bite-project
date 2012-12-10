@@ -67,8 +67,8 @@ bite.server.explore.OverviewTab.prototype.init = function() {
 bite.server.explore.OverviewTab.prototype.setUpLeftNavs = function() {
   this.showLeftNavs(
       this.getDataFunc(),
-      goog.bind(this.onArtifactSelected, this),
-      goog.bind(this.handleUserOperation, this));
+      goog.bind(/** @type {function()} */ (this.onArtifactSelected), this),
+      goog.bind(/** @type {function()} */ (this.handleUserOperation), this));
 };
 
 

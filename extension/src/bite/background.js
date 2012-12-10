@@ -33,7 +33,6 @@ goog.require('bite.options.data');
 goog.require('bugs.api');
 goog.require('goog.Timer');
 goog.require('goog.Uri');
-goog.require('goog.json');
 goog.require('goog.userAgent');
 goog.require('rpf.MiscHelper');
 goog.require('rpf.Rpf');
@@ -175,7 +174,7 @@ bite.client.Background.prototype.fetchTestsDataCallback_ = function(callback,
   var user = null;
 
   if (response.success) {
-    var compatTesting = goog.json.parse(response.data);
+    var compatTesting = JSON.parse(response.data);
     test = compatTesting['test'];
     user = compatTesting['user'];
     this.currentUser_ = user;
@@ -757,7 +756,7 @@ bite.client.Background.prototype.broadcastConfigurationChange_ =
   var configuration = bite.options.data.getCurrentConfiguration();
   var msg = {};
   msg['action'] = bite.options.constants.Message.UPDATE;
-  msg['data'] = goog.json.serialize(configuration);
+  msg['data'] = JSON.stringify(configuration);
 
   // For each window, loop over its tabs and send a message with the current
   // configuration.

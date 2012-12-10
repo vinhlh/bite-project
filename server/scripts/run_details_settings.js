@@ -24,7 +24,6 @@ goog.require('bite.server.Helper');
 goog.require('bite.server.set.Tab');
 goog.require('bite.server.templates.details.RunSettings');
 goog.require('goog.dom');
-goog.require('goog.json');
 goog.require('goog.string');
 
 
@@ -98,7 +97,7 @@ goog.inherits(bite.server.run.Settings, bite.server.set.Tab);
 
 /**
  * Inits the Run page's settings page.
- * @param {Element} tabDetailsDiv The tab details div.
+ * @param {Element=} tabDetailsDiv The tab details div.
  * @export
  */
 bite.server.run.Settings.prototype.init = function(tabDetailsDiv) {
@@ -168,8 +167,8 @@ bite.server.run.Settings.prototype.setProperties = function(params) {
 bite.server.run.Settings.prototype.addProperties = function(params) {
   params['runTokens'] = this.token_;
   params['runStartUrl'] = this.startUrl_;
-  params['filteredLabels'] = goog.json.serialize(this.filteredResultLabels_);
-  params['dimensionLabels'] = goog.json.serialize(this.dimensionLabels_);
+  params['filteredLabels'] = JSON.stringify(this.filteredResultLabels_);
+  params['dimensionLabels'] = JSON.stringify(this.dimensionLabels_);
   params['lineTimeout'] = this.lineTimeout_;
   params['testTimeout'] = this.testTimeout_;
   params['saveScnShots'] = this.saveScnShots_;

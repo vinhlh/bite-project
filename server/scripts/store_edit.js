@@ -148,7 +148,7 @@ rpf.server.StoreEdit.prototype.initDepsField_ = function() {
  * @private
  */
 rpf.server.StoreEdit.prototype.initMethodFields_ = function(method) {
-  var details = goog.json.parse(method);
+  var details = JSON.parse(method);
   this.methodCodeElem_.value = unescape(details['methodCode']);
   this.methodNameElem_.value = details['methodName'];
   this.descriptionElem_.value = unescape(details['description']);
@@ -340,7 +340,7 @@ rpf.server.StoreEdit.prototype.parseLabelString_ = function(labels) {
       result.push(goog.string.trim(raw_labels[i]));
     }
   }
-  return goog.json.serialize(result);
+  return JSON.stringify(result);
 };
 
 

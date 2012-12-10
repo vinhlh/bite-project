@@ -26,7 +26,6 @@ goog.require('common.dom.querySelector');
 goog.require('goog.dom');
 goog.require('goog.format.HtmlPrettyPrinter');
 goog.require('goog.format.JsonPrettyPrinter');
-goog.require('goog.json');
 goog.require('goog.string');
 
 
@@ -336,7 +335,7 @@ common.client.ElementDescriptor.prototype.generateElementDescriptor =
   if (opt_Optimized == false) {
     opt = false;
   }
-  var descriptor = goog.json.serialize(this.generateElementDescriptor_(
+  var descriptor = JSON.stringify(this.generateElementDescriptor_(
       elem, propagateTimes, opt));
   var printer = new goog.format.JsonPrettyPrinter(null);
   return printer.format(descriptor);
@@ -468,7 +467,7 @@ common.client.ElementDescriptor.prototype.parseElementDescriptor_ =
     function(descriptorStrOrObj, document_, opt_all) {
   var descriptor = {};
   if (typeof(descriptorStrOrObj) == 'string') {
-    descriptor = goog.json.parse(descriptorStrOrObj);
+    descriptor = JSON.parse(descriptorStrOrObj);
   } else {
     descriptor = descriptorStrOrObj;
   }
@@ -830,7 +829,7 @@ var elemDescriptor = new common.client.ElementDescriptor();
 function parseElementDescriptor(descriptor, opt_all) {
   if (typeof descriptor == 'string') {
     try {
-      goog.json.parse(descriptor);
+      JSON.parse(descriptor);
     } catch (e) {
       return null;
     }
@@ -1026,7 +1025,7 @@ common.client.ElementDescriptor.getAttrValue = function(
 common.client.ElementDescriptor.getAttrsToVerify = function(
     descriptor, opt_process) {
   if (typeof(descriptor) == 'string') {
-    descriptor = goog.json.parse(descriptor);
+    descriptor = JSON.parse(descriptor);
   }
   var result = {};
   var specialAttrs = ['tagName', 'elementText', 'checked', 'disabled',
