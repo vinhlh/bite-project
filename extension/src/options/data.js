@@ -142,7 +142,8 @@ bite.options.data.update = function(id, value, opt_username) {
   // Cache the new option's value and a signature to mark who and when the
   // configuration was updated.
   goog.global.localStorage.setItem(keys[id], processedValue);
-  goog.global.localStorage.setItem(keys.ADMIN_LAST_SAVE_TIME, timestamp);
+  goog.global.localStorage.setItem(keys.ADMIN_LAST_SAVE_TIME,
+                                   /** @type {string} */ (timestamp));
   goog.global.localStorage.setItem(keys.ADMIN_LAST_SAVE_USER, username);
 };
 
