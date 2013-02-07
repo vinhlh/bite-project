@@ -3791,3 +3791,8 @@ rpf.ConsoleManager.prototype.setProjectNameUi_ = function(name) {
   projectNameElement.value = name;
 };
 
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  rpf.ConsoleManager.getInstance();
+}, false);
