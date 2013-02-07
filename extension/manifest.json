@@ -25,6 +25,7 @@
       "exclude_globs": [ "*://code.google.com/*" ]
     }
   ],
+  "content_security_policy": "script-src 'self' https://d1n0x3qji82z53.cloudfront.net https://www.google-analytics.com; object-src 'self'",
   "incognito": "spanning",
   "permissions": [
     "tabs",

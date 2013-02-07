@@ -105,8 +105,7 @@ rpf.EditorManager = function(
 
   this.editor_ = ace.edit(editorContainerId);
 
-  var javaScriptMode = require('ace/mode/javascript').Mode;
-  this.editor_.getSession().setMode(new javaScriptMode());
+  this.editor_.getSession().setMode('ace/mode/javascript');
 
   this.editor_.renderer.setHScrollBarAlwaysVisible(false);
   this.editor_.getSession().setUseWrapMode(false);
