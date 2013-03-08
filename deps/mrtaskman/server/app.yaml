@@ -1,0 +1,81 @@
+application: mrtaskman
+version: 3
+runtime: python27
+api_version: 1
+threadsafe: false
+
+builtins:
+- appstats: on
+- deferred: on
+- remote_api: on
+
+handlers:
+
+# Tasks.
+- url: /executors/[a-zA-Z0-9]+
+  script: handlers.tasks.app
+- url: /executors/[a-zA-Z0-9]+/deleteall
+  script: models.tasks.app
+  login: admin
+- url: /executors/[a-zA-Z0-9]+/pause
+  script: handlers.tasks.app
+- url: /executors/[a-zA-Z0-9]+/peek
+  script: handlers.tasks.app
+- url: /tasks/[0-9]+
+  script: handlers.tasks.app
+- url: /tasks/[0-9]+/task_complete_url
+  script: handlers.tasks.app
+- url: /tasks/[0-9]+/invoke_webhook
+  script: models.tasks.app
+  login: admin
+- url: /tasks/assign
+  script: handlers.tasks.app
+- url: /tasks/list_by_name
+  script: handlers.tasks.app
+- url: /tasks/schedule
+  script: handlers.tasks.app
+- url: /tasks/timeout
+  script: models.tasks.app
+  login: admin
+- url: /taskresultfiles/.+
+  script: handlers.taskresultfiles.app
+
+# Packages.
+- url: /packages/create
+  script: handlers.packages.app
+- url: /packages/deleteall
+  script: models.packages.app
+- url: /packages/[a-zA-Z0-9\-_]+\.[0-9.]+
+  script: handlers.packages.app
+- url: /packagefiles/.+
+  script: handlers.packagefiles.app
+
+# Events.
+- url: /events/[a-z0-9]+
+  script: handlers.events.app
+- url: /events
+  script: handlers.events.app
+
+# Dash.
+- url: /dash
+  script: handlers.dash.app
+- url: /dash/.+
+  script: handlers.dash.app
+
+# ProdEagle
+- url: /prodeagle/
+  script: third_party.prodeagle.harvest.app
+
+# MapReduce
+- url: /mapreduce(/.*)?
+  script: mapreduce/main.py
+  login: admin
+- url: /index
+  script: index.index_handlers.app
+  login: admin
+
+# Admin Console.
+admin_console:
+  pages:
+  - name: MrTaskman Dashboard
+    url: /dash

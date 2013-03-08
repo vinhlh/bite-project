@@ -1,0 +1,15 @@
+{
+  "kind": "mrtaskman#create_package_request",
+  "name": "CrashyPackage",
+  "version": "1",
+  "files": [
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "file1",
+      "file_destination": "Crashy.apk",
+      "filename": "Crashy.apk",
+      "client_path": "test/crashy/Crashy.apk",
+      "file_mode": "755"
+    }
+  ]
+}

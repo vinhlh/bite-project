@@ -1,0 +1,7 @@
+{
+  "kind": "mrtaskman#task_complete_request",
+  "task_id": 78,
+  "attempt": 1,
+  "exit_code": 0,
+  "execution_time": 17.62
+}

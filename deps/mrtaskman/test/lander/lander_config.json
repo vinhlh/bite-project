@@ -1,0 +1,24 @@
+{
+  "kind": "mrtaskman#config",
+  "packages": [
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "AndroidMonkeyPackage",
+      "version": 1
+    },
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "LunarLanderPackage",
+      "version": 1
+    }
+  ],
+  "files": [],
+  "task": {
+    "name": "LunarLanderMonkey",
+    "requirements": {
+      "executor": ["android"]
+    },
+    "command": "./android_monkey.py LunarLander.apk",
+    "timeout": "300s"
+  }
+}

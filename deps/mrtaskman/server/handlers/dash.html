@@ -1,0 +1,18 @@
+<html>
+<head><title>Dash</title>
+<script type=text/javascript>
+  function refresh()
+  {
+    document.all.prodeagle.src = document.all.prodeagle.src;
+  }
+  window.setInterval("refresh()",60000);
+</script>
+</head>
+<body>
+{% for device in devices %}
+<iframe src='/dash/{{ device }}' height=500></iframe>
+{% endfor %}
+<br/>
+<iframe name='prodeagle' src='http://www.prodeagle.com/monitor/?site=mrtaskman.appspot.com&dashboard=Default' style='width:100%;height=100%;display:block;border:none;'>
+</body>
+</html>

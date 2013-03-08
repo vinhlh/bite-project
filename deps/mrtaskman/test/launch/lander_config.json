@@ -1,0 +1,25 @@
+{
+  "kind": "mrtaskman#config",
+  "packages": [
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "AndroidLaunchPackage",
+      "version": 1
+    },
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "LunarLanderPackage",
+      "version": 1
+    }
+  ],
+  "files": [],
+  "task": {
+    "name": "LunarLanderInstall",
+    "priority": 7,
+    "requirements": {
+      "executor": ["android"]
+    },
+    "command": "./android_launch.py LunarLander.apk",
+    "timeout": "300s"
+  }
+}

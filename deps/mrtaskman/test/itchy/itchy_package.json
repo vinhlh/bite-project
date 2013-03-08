@@ -1,0 +1,15 @@
+{
+  "kind": "mrtaskman#create_package_request",
+  "name": "ItchyPackage",
+  "version": "1",
+  "files": [
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "file1",
+      "file_destination": "Itchy.apk",
+      "filename": "Itchy.apk",
+      "client_path": "test/itchy/Itchy.apk",
+      "file_mode": "755"
+    }
+  ]
+}

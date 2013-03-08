@@ -1,0 +1,19 @@
+{
+  "kind": "mrtaskman#config",
+  "packages": [
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "AndroidApkinfoPackage",
+      "version": 1
+    }
+  ],
+  "files": [],
+  "task": {
+    "name": "TaskVersionGettr",
+    "requirements": {
+      "executor": ["macos"]
+    },
+    "command": "echo '{}' > ./result_metadata",
+    "timeout": "3000s"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "kind": "mrtaskman#config",
+  "files": ["android_monkey.py"],
+  "task": {
+    "name": "AndroidMonkey",
+    "requirements": {
+      "executor": ["Android3.0", "Android4.0"]
+    },
+    "command": "./android_monkey.py",
+    "timeout": "300s"
+  }
+}

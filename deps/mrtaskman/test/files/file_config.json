@@ -1,0 +1,19 @@
+{
+  "kind": "mrtaskman#config",
+  "packages": [
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "FilePackage",
+      "version": 1
+    }
+  ],
+  "files": [],
+  "task": {
+    "name": "CatFile",
+    "requirements": {
+      "executor": ["macos"]
+    },
+    "command": "/bin/cat url_file.txt",
+    "timeout": "1m"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "kind": "mrtaskman#config",
+  "packages": [{
+    "kind": "mrtaskman#packageref",
+    "name": "MacOsTestPackage",
+    "version": 1
+  }],
+  "files": [],
+  "task": {
+    "name": "test",
+    "requirements": {
+      "executor": ["macos"]
+    },
+    "command": "echo 'Hello World' $FOO $BAR $PATH",
+    "env": {
+      "FOO": "foo",
+      "BAR": "bar"
+    },
+    "timeout": "300s"
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "kind": "mrtaskman#config",
+  "packages": [{
+    "kind": "mrtaskman#packageref",
+    "name": "MacOsTestPackage",
+    "version": 1
+  }],
+  "files": [],
+  "task": {
+    "name": "timeout_test",
+    "requirements": {
+      "executor": ["macos"]
+    },
+    "command": "sleep 100",
+    "timeout": "5s"
+  }
+}

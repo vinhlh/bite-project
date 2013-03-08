@@ -1,0 +1,24 @@
+{
+  "kind": "mrtaskman#config",
+  "packages": [
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "MonkeyPackage",
+      "version": 1
+    },
+    {
+      "kind": "mrtaskman#packageref",
+      "name": "ChessPackage",
+      "version": 1
+    }
+  ],
+  "files": [],
+  "task": {
+    "name": "ChessMonkey",
+    "requirements": {
+      "executor": ["macos"]
+    },
+    "command": "./android_monkey.py chess_1.56.apk --pct-touch 20 --pct-trackball 20 --pct-nav 0 --pct-motion 20 --pct-syskeys 0 --pct-majornav 10 --pct-appswitch 0 --pct-flip 20 --pct-anyevent 0 --throttle 5 -v 10000",
+    "timeout": "5m"
+  }
+}

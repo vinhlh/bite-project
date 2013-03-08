@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 28
+/svn/!svn/ver/31/trunk/tests
+END
+gflags_validators_test.py
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/svn/!svn/ver/20/trunk/tests/gflags_validators_test.py
+END
+gflags_helpxml_test.py
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/svn/!svn/ver/20/trunk/tests/gflags_helpxml_test.py
+END
+gflags_googletest.py
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/svn/!svn/ver/24/trunk/tests/gflags_googletest.py
+END
+gflags_unittest.py
+K 25
+svn:wc:ra_dav:version-url
+V 47
+/svn/!svn/ver/31/trunk/tests/gflags_unittest.py
+END

@@ -1,0 +1,11 @@
+{
+  "kind": "mrtaskman#event",
+  "worker_name": "Clarice",
+  "event_type": "STARTUP",
+  "event_severity": "DEBUG",
+  "event_name": "LoveYourMamaEvent",
+  "worker_version": "12.2",
+  "event_info": "An Exception occurred. Blaaaah!",
+  "task_id": 1234,
+  "task_info": "During package stage."
+}

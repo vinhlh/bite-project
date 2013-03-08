@@ -1,0 +1,16 @@
+{
+  "kind": "mrtaskman#create_package_request",
+  "name": "FilePackage",
+  "version": "1",
+  "files": [],
+  "urlfiles": [
+    {
+      "kind": "mrtaskman$url_file",
+      "form_name": "url1",
+      "file_destination": "url_file.txt",
+      "filename": "url_file.txt",
+      "url": "http://psnews.net/text/",
+      "file_mode": "644"
+    }
+  ]
+}

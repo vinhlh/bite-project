@@ -1,0 +1,15 @@
+{
+  "kind": "mrtaskman#create_package_request",
+  "name": "FlakyPackage",
+  "version": "1",
+  "files": [
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "file1",
+      "file_destination": "Flaky.apk",
+      "filename": "Flaky.apk",
+      "client_path": "test/flaky/Flaky.apk",
+      "file_mode": "755"
+    }
+  ]
+}

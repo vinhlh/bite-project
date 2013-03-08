@@ -1,0 +1,15 @@
+{
+  "kind": "mrtaskman#create_package_request",
+  "name": "LunarLanderPackage",
+  "version": "1",
+  "files": [
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "file1",
+      "file_destination": "LunarLander.apk",
+      "filename": "LunarLander.apk",
+      "client_path": "test/lander/LunarLander.apk",
+      "file_mode": "755"
+    }
+  ]
+}

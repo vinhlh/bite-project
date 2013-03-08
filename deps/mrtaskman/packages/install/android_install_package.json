@@ -1,0 +1,31 @@
+{
+  "kind": "mrtaskman#create_package_request",
+  "name": "AndroidInstallPackage",
+  "version": "1",
+  "files": [
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "android_install",
+      "file_destination": "android_install.py",
+      "filename": "android_install.py",
+      "client_path": "packages/install/android_install.py",
+      "file_mode": "755"
+    },
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "debug.keystore",
+      "file_destination": "debug.keystore",
+      "filename": "debug.keystore",
+      "client_path": "packages/install/debug.keystore",
+      "file_mode": "755"
+    },
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "AXMLPrinter2",
+      "file_destination": "AXMLPrinter2.jar",
+      "filename": "AXMLPrinter2.jar",
+      "client_path": "packages/install/AXMLPrinter2.jar",
+      "file_mode": "755"
+    }
+  ]
+}

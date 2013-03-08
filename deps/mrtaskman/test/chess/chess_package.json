@@ -1,0 +1,15 @@
+{
+  "kind": "mrtaskman#create_package_request",
+  "name": "ChessPackage",
+  "version": "1",
+  "files": [
+    {
+      "kind": "mrtaskman#form_file",
+      "form_name": "file1",
+      "file_destination": "chess_1.56.apk",
+      "filename": "chess_1.56.apk",
+      "client_path": "test/chess/chess_1.56.apk",
+      "file_mode": "755"
+    }
+  ]
+}
