@@ -1,0 +1,131 @@
+K 25
+svn:wc:ra_dav:version-url
+V 55
+/svn/!svn/ver/2433/trunk/closure/goog/storage/mechanism
+END
+mechanism.js
+K 25
+svn:wc:ra_dav:version-url
+V 67
+/svn/!svn/ver/911/trunk/closure/goog/storage/mechanism/mechanism.js
+END
+mechanismsharingtester.js
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/mechanismsharingtester.js
+END
+html5sessionstorage_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/html5sessionstorage_test.html
+END
+errorhandlingmechanism_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 88
+/svn/!svn/ver/2415/trunk/closure/goog/storage/mechanism/errorhandlingmechanism_test.html
+END
+html5webstorage.js
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/2433/trunk/closure/goog/storage/mechanism/html5webstorage.js
+END
+iterablemechanism.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/960/trunk/closure/goog/storage/mechanism/iterablemechanism.js
+END
+ieuserdata_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/ieuserdata_test.html
+END
+html5localstorage_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/html5localstorage_test.html
+END
+mechanismseparationtester.js
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/mechanismseparationtester.js
+END
+prefixedmechanism_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 83
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/prefixedmechanism_test.html
+END
+html5sessionstorage.js
+K 25
+svn:wc:ra_dav:version-url
+V 78
+/svn/!svn/ver/2140/trunk/closure/goog/storage/mechanism/html5sessionstorage.js
+END
+mechanismfactory_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/mechanismfactory_test.html
+END
+errorhandlingmechanism.js
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/2415/trunk/closure/goog/storage/mechanism/errorhandlingmechanism.js
+END
+errorcode.js
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/svn/!svn/ver/2384/trunk/closure/goog/storage/mechanism/errorcode.js
+END
+ieuserdata.js
+K 25
+svn:wc:ra_dav:version-url
+V 69
+/svn/!svn/ver/2259/trunk/closure/goog/storage/mechanism/ieuserdata.js
+END
+html5localstorage.js
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/2140/trunk/closure/goog/storage/mechanism/html5localstorage.js
+END
+mechanismtester.js
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/2428/trunk/closure/goog/storage/mechanism/mechanismtester.js
+END
+prefixedmechanism.js
+K 25
+svn:wc:ra_dav:version-url
+V 76
+/svn/!svn/ver/2140/trunk/closure/goog/storage/mechanism/prefixedmechanism.js
+END
+mechanismfactory.js
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/2320/trunk/closure/goog/storage/mechanism/mechanismfactory.js
+END
+html5webstorage_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 81
+/svn/!svn/ver/2433/trunk/closure/goog/storage/mechanism/html5webstorage_test.html
+END
+iterablemechanismtester.js
+K 25
+svn:wc:ra_dav:version-url
+V 82
+/svn/!svn/ver/2425/trunk/closure/goog/storage/mechanism/iterablemechanismtester.js
+END

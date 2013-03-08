@@ -1,0 +1,47 @@
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/svn/!svn/ver/18101/trunk/javascript/atoms/test/html5
+END
+nested_window_storage_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/nested_window_storage_test.html
+END
+connection_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/connection_test.html
+END
+appcache_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/18101/trunk/javascript/atoms/test/html5/appcache_test.html
+END
+storage_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/storage_test.html
+END
+database_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/17788/trunk/javascript/atoms/test/html5/database_test.html
+END
+no_manifest_appcache_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/no_manifest_appcache_test.html
+END
+location_test.html
+K 25
+svn:wc:ra_dav:version-url
+V 72
+/svn/!svn/ver/17789/trunk/javascript/atoms/test/html5/location_test.html
+END

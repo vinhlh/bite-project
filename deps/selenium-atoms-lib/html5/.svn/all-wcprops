@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 48
+/svn/!svn/ver/17797/trunk/javascript/atoms/html5
+END
+storage.js
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/svn/!svn/ver/16735/trunk/javascript/atoms/html5/storage.js
+END
+database.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/17797/trunk/javascript/atoms/html5/database.js
+END
+appcache.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/15933/trunk/javascript/atoms/html5/appcache.js
+END
+location.js
+K 25
+svn:wc:ra_dav:version-url
+V 60
+/svn/!svn/ver/15933/trunk/javascript/atoms/html5/location.js
+END
+html5_browser.js
+K 25
+svn:wc:ra_dav:version-url
+V 65
+/svn/!svn/ver/15933/trunk/javascript/atoms/html5/html5_browser.js
+END
+connection.js
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/17797/trunk/javascript/atoms/html5/connection.js
+END

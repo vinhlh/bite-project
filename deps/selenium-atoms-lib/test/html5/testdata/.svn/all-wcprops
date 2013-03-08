@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/testdata
+END
+offline.html
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/testdata/offline.html
+END
+ps_logo2.png
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/testdata/ps_logo2.png
+END
+frame_a.html
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/testdata/frame_a.html
+END
+with_fallback.appcache
+K 25
+svn:wc:ra_dav:version-url
+V 85
+/svn/!svn/ver/12915/trunk/javascript/atoms/test/html5/testdata/with_fallback.appcache
+END
+frame_b.html
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/!svn/ver/15933/trunk/javascript/atoms/test/html5/testdata/frame_b.html
+END
