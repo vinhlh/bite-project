@@ -648,3 +648,15 @@ bite.options.Page.prototype.updateOption_ = function(key, value) {
   }
 };
 
+
+var optionsPage = new bite.options.Page();
+
+
+document.addEventListener('DOMContentLoaded', function() {
+  optionsPage.init();
+}, false);
+
+
+document.addEventListener('unload', function() {
+  optionsPage.stop();
+}, false);
