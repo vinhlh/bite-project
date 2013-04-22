@@ -26,12 +26,12 @@
 {template .consoleContainer}
   <div {if $consoleId}id="{$consoleId}"{/if} class="bite-container"
        style="visibility:hidden">
-    <link rel="stylesheet" href="{$rootFolder}/styles/consoles.css"
+    <link rel="stylesheet" href="{$rootFolder}styles/consoles.css"
           type="text/css">
     <div class="bite-header">
       <div class="bite-logo">
         <a target="_blank" href="{$serverUrl}">
-          <img src="{$rootFolder}/imgs/logo-24x24.png" alt="Logo">
+          <img src="{$rootFolder}imgs/logo-24x24.png" alt="Logo">
         </a>
       </div>
       <div class="bite-header-text">
@@ -46,7 +46,7 @@
         {if $link}
           <a href="{$link}" target="_blank">
         {/if}
-          <img title="{$tooltip}" src="{$rootFolder}/imgs/rpf/step-issue-16.png"
+          <img title="{$tooltip}" src="{$rootFolder}imgs/rpf/step-issue-16.png"
                width="16px" height="16px">
         {if $link}
           </a>
