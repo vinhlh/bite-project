@@ -301,3 +301,6 @@ bite.Popup.prototype.onClickCallback_ = function(optionName) {
   goog.global.close();
 };
 
+document.addEventListener('DOMContentLoaded', function() {
+  bite.Popup.getInstance().init();
+}, false);

@@ -1,17 +1,20 @@
 {
   "name": "RPF (Beta)",
   "version": "1.0.0.0",
+  "manifest_version": 2,
   "description": "Open source version of Record and Playback Framework for Web UI Testing.",
   "browser_action": {
     "default_icon": "imgs/rpflogo.png",
     "default_title": "RPF",
-    "popup": "popup.html"
+    "default_popup": "popup.html"
   },
   "icons": {
     "48": "imgs/rpflogo-48.png",
     "128": "imgs/rpflogo-128.png"
   },
-  "background_page": "background.html",
+  "background": {
+    "page": "background.html"
+  },
   "content_scripts": [
     {
       "js": [ "getactioninfo_script.js" ],
@@ -21,6 +24,7 @@
     }
   ],
   "incognito": "spanning",
+  "content_security_policy": "script-src 'self' 'unsafe-eval' https://d1n0x3qji82z53.cloudfront.net https://ssl.google-analytics.com; object-src 'self'",
   "permissions": [
     "tabs",
     "<all_urls>",

@@ -119,12 +119,20 @@ class RPF(bundle.Bundle):
         TREE: False
       },
 
+      # 'ace': {
+      #   SRC: os.path.join(deps_location, deps[DEPS.ACE][DEPS.ROOT], 'build',
+      #                     'src'),
+      #   DST: os.path.join(dst_root, 'ace'),
+      #   TREE: True
+      # }
+
+      ## map directory to this
       'ace': {
-        SRC: os.path.join(deps_location, deps[DEPS.ACE][DEPS.ROOT], 'build',
-                          'src'),
+        SRC: os.path.join(deps_location, deps[DEPS.ACE][DEPS.ROOT], 'lib', 'ace'),
         DST: os.path.join(dst_root, 'ace'),
         TREE: True
       }
+
     }
 
     # Styles
@@ -180,6 +188,8 @@ class RPF(bundle.Bundle):
       '--root=%s' % os.path.join(deps_location, PATHS.GENFILES_ROOT,
                                  'rpf'),
       '--root=%s' % os.path.join(deps_location, deps[DEPS.ATOMS][DEPS.ROOT]),
+      # add this dep
+      '--root=%s' % os.path.join(deps_location, deps[DEPS.WGXPATH][DEPS.ROOT]),
 
       '--compiler_flags=--externs=%s' % os.path.join(src_location,
           'common', 'extension', 'externs', 'closure.js'),
