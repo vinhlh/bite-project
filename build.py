@@ -45,6 +45,7 @@ try:
   from bite_build import flags as FLAGS
   from bite_build import paths as PATHS
   from bite_build import rpf as RPF
+  from bite_build import rpfl as RPFL
   from bite_build import server as SERVER
   from bite_build import tools
   bite_build_imported = True
@@ -161,7 +162,14 @@ def Main():
   # F T -> No build
   # F F -> Build
   if args[FLAGS.EXTENSION_ONLY] or not args[FLAGS.SERVER_ONLY]:
-    if args[FLAGS.RPF]:
+    if args[FLAGS.RPF_LIB]:
+      rpfl = RPFL.RPFL(deps, debug=True, deps_root='', src_root='', dst_root='')
+      rpfl.Construct(verbose, deps,
+                    start_msg='Creating RPFL bundle ...',
+                    fail_early=True,
+                    deps_root='')
+
+    elif args[FLAGS.RPF]:
       rpf = RPF.RPF(deps, debug=True, deps_root='', src_root='', dst_root='')
       rpf.Construct(verbose, deps,
                     start_msg='Creating RPF extension bundle ...',
@@ -179,7 +187,7 @@ def Main():
   # T F -> No build
   # F T -> Build
   # F F -> Build
-  if not args[FLAGS.EXTENSION_ONLY]:
+  if not args[FLAGS.EXTENSION_ONLY] and not args[FLAGS.RPF_LIB]:
     server = SERVER.Server(deps, debug=True, deps_root='', src_root='',
                            dst_root='')
     server.Construct(verbose, deps,

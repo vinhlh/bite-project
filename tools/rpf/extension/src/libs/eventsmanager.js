@@ -809,6 +809,10 @@ rpf.EventsManager.prototype.generateCmdBasedOnRecording_ = function(
  */
 rpf.EventsManager.prototype.callBackOnRequest = function(
     request, sender, sendResponse) {
+
+  // for debugging
+  console.log('[callBackOnRequest]', request, sender);
+
   if (!request['command']) {
     return;
   }
@@ -1120,6 +1124,10 @@ rpf.EventsManager.prototype.dispatchEventOnAutomator_ = function(eventType) {
  */
 rpf.EventsManager.prototype.callBackOnMessageReceived = function(
     request, sender, sendResponse) {
+
+  // for debugging
+  console.log('[callBackOnMessageReceived]', request, sender);
+
   if (!request['command']) {
     return;
   }

@@ -36,6 +36,7 @@ EXPUNGE = 'expunge'
 EXTENSION_ONLY = 'extension_only'
 QUIET = 'quiet'
 RPF = 'rpf'
+RPF_LIB = 'rpfl'
 SERVER_ONLY = 'server_only'
 
 ACTION = 'action'
@@ -85,6 +86,13 @@ FLAGS = {
     DEFAULT: False,
     REQUIRED: False,
     HELP: 'Build RPF extension.'
+  },
+
+  RPF_LIB: {
+    ACTION: 'store_true',
+    DEFAULT: False,
+    REQUIRED: False,
+    HELP: 'Build RPF lib.'
   },
 
   SERVER_ONLY: {

@@ -726,6 +726,10 @@ rpf.ContentScript.RecordHelper.prototype.dblClickHandler_ = function(e) {
  */
 rpf.ContentScript.RecordHelper.prototype.onRequest = function(
     request, sender, callback) {
+
+  // for debugging
+  console.log('[request]', request, sender);
+
   switch (request['recordAction']) {
     case Bite.Constants.RECORD_ACTION.START_RECORDING:
       this.rootArr_ = request['params']['rootArr'];
