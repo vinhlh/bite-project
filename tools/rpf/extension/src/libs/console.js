@@ -1333,6 +1333,7 @@ rpf.ConsoleManager.prototype.onUiEvents = function(
  */
 rpf.ConsoleManager.prototype.handleMessages_ = function(
     uiCmd, params, opt_callback) {
+  console.log(uiCmd, params);
   switch (uiCmd) {
     // For the console helper.
     case Bite.Constants.UiCmds.GENERATE_CUSTOMIZED_FUNCTION_CALL:
@@ -3215,6 +3216,7 @@ rpf.ConsoleManager.prototype.getScreenshots_ = function() {
   var screenshotMgr = this.getScreenshotDialog().getScreenshotManager();
   var scrShots = screenshotMgr.getScreenshots();
   var scrSteps = screenshotMgr.getCmdIndices();
+  console.log(scrSteps, scrShots);
   for (var i = 0; i < scrShots.length; i++) {
     screenshots[scrSteps[i]] = {};
     screenshots[scrSteps[i]]['index'] = scrSteps[i];

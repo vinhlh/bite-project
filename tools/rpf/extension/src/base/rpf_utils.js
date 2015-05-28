@@ -68,16 +68,55 @@ rpf.Utils.prototype.getScreenshotManager =
 rpf.Utils.prototype.startRecording = function (tabId, windowId) {
     this.rpf_.getEventsManager().setConsoleTabId(tabId);
     this.rpf_.getEventsManager().getRecorder().startRecording(null, tabId, windowId);
+
+    this.infoMap = {};
+    this.getScreenshotManager().clear();
 };
 
 rpf.Utils.prototype.stopRecording = function () {
     this.rpf_.getEventsManager().getRecorder().stopRecording();
 };
 
+rpf.EventsManager.prototype.isInjected = function (tabId) {
+    return this.injectedTabs_[tabId] ? true : false;
+};
+
+rpf.Utils.prototype.setRecordingTab = function (tabId, windowId) {
+    var eventMgr = this.rpf_.getEventsManager();
+
+    if (!eventMgr.isInjected(tabId)) {
+        return false;
+    }
+
+    eventMgr.getRecorder().setRecordingTab(tabId, windowId);
+    return true;
+};
+
+rpf.Utils.prototype.getRecordingData = function () {
+    var screenMgr = this.getScreenshotManager(),
+        screenshots = screenMgr.getScreenshots(),
+        cmds = screenMgr.getCmdIndices(),
+        newScreenshots = {};
+
+    for (var i = 0; i < screenshots.length; i++) {
+        newScreenshots[cmds[i]] = screenshots[i];
+    }
+
+    return {
+        infoMap: this.infoMap,
+        screenshots: newScreenshots
+    };
+};
+
+rpf.Utils.prototype.isRecording = function () {
+    return this.rpf_.getEventsManager().getRecorder().isRecording();
+};
+
 var rpfUtils = rpf.Utils.getInstance();
 
 /**
- * Override
+ * Override this fucntion to save all generated commands
+ *
  * @param {Object} request The request object.
  * @param {function(*)=} opt_callback The callback function.
  * @private
@@ -102,6 +141,7 @@ rpf.EventsManager.prototype.sendMessageToConsole_ = function (request, opt_callb
             // TODO: store a command
             if (request.params['cmdMap']) {
                 bite.console.Helper.assignInfoMap(rpfUtils.infoMap, request.params['cmdMap']);
+                rpfUtils.getScreenshotManager().addIndex(request.params['cmdMap']['id']);
             }
             break;
 
