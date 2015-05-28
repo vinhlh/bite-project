@@ -28,3 +28,13 @@ optional arguments:
   --server_only     Only build the server
   --extension_only  Only build the extension.
   ```
+
+### Extract RPF
+Run command
+``` ./build.py --rpfl```
+
+It will generate 2 files:
+```
+- rpf_background_script.js Control listener, received all results which returned from listener.
+- rpf_content_script.js Listen all user actions in a webpage.
+```
