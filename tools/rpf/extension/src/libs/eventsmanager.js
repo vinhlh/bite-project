@@ -811,7 +811,7 @@ rpf.EventsManager.prototype.callBackOnRequest = function(
     request, sender, sendResponse) {
 
   // for debugging
-  console.log('[callBackOnRequest]', request, sender);
+  console.log('[callBackOnRequest]', request.command, request.params, sender);
 
   if (!request['command']) {
     return;
@@ -1126,7 +1126,7 @@ rpf.EventsManager.prototype.callBackOnMessageReceived = function(
     request, sender, sendResponse) {
 
   // for debugging
-  console.log('[callBackOnMessageReceived]', request, sender);
+  console.log('[callBackOnMessageReceived]', request.command, request.params, sender);
 
   if (!request['command']) {
     return;

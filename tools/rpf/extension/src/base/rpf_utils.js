@@ -31,6 +31,13 @@ rpf.Utils = function () {
     this.infoMap = {};
 
     /**
+     * data File
+     * @type {Array}
+     */
+
+    this.dataFile = [];
+
+    /**
      * The screenshot manager instance.
      * @type {bite.console.Screenshot}
      * @private
@@ -104,15 +111,14 @@ rpf.Utils.prototype.getRecordingData = function () {
 
     return {
         infoMap: this.infoMap,
-        screenshots: newScreenshots
+        screenshots: newScreenshots,
+        dataFile: this.dataFile
     };
 };
 
 rpf.Utils.prototype.isRecording = function () {
     return this.rpf_.getEventsManager().getRecorder().isRecording();
 };
-
-var rpfUtils = rpf.Utils.getInstance();
 
 /**
  * Override this fucntion to save all generated commands
@@ -121,7 +127,6 @@ var rpfUtils = rpf.Utils.getInstance();
  * @param {function(*)=} opt_callback The callback function.
  * @private
  */
-
 rpf.EventsManager.prototype.sendMessageToConsole_ = function (request, opt_callback) {
     if (!request.command) {
         return;
@@ -134,7 +139,7 @@ rpf.EventsManager.prototype.sendMessageToConsole_ = function (request, opt_callb
     switch (request.command) {
         case Bite.Constants.UiCmds.ADD_GENERATED_CMD:
             rpfUtils.getScreenshotManager().addGeneratedCmd(request.params['cmd']);
-            console.log(rpfUtils.getScreenshotManager().getGeneratedCmds());
+            // console.log(rpfUtils.getScreenshotManager().getGeneratedCmds());
             break;
 
         case Bite.Constants.UiCmds.ADD_NEW_COMMAND:
@@ -142,11 +147,45 @@ rpf.EventsManager.prototype.sendMessageToConsole_ = function (request, opt_callb
             if (request.params['cmdMap']) {
                 bite.console.Helper.assignInfoMap(rpfUtils.infoMap, request.params['cmdMap']);
                 rpfUtils.getScreenshotManager().addIndex(request.params['cmdMap']['id']);
+
+                if (request.params['dCmd']) {
+                    rpfUtils.dataFile.push(request.params['dCmd']);
+                }
+            } else {
+                rpfUtils.getScreenshotManager().addGeneratedCmd(request.params['pCmd']);
             }
             break;
 
         case Bite.Constants.UiCmds.ADD_SCREENSHOT:
             rpfUtils.getScreenshotManager().addScreenShot(request.params['dataUrl'], request.params['iconUrl']);
             break;
+
+        case Bite.Constants.UiCmds.UPDATE_PLAYBACK_STATUS:
+            var playbackTabId = CaptureBackground.getPlaybackTabId();
+
+            playbackTabId && chrome.tabs.sendMessage(playbackTabId, {
+                type: 'updatePlaybackStatus',
+                data: request.params
+            });
+            break;
+        case Bite.Constants.UiCmds.UPDATE_CURRENT_STEP:
+            var playbackTabId = CaptureBackground.getPlaybackTabId();
+
+            playbackTabId && chrome.tabs.sendMessage(playbackTabId, {
+                type: 'updateCurrentStep',
+                data: request.params
+            });
+            break;
+        case Bite.Constants.UiCmds.UPDATE_WHEN_ON_FAILED:
+            var playbackTabId = CaptureBackground.getPlaybackTabId();
+
+            playbackTabId && chrome.tabs.sendMessage(playbackTabId, {
+                type: 'updateWhenOnFailed',
+                data: request.params
+            });
+            break;
     }
 };
+
+var rpfUtils = rpf.Utils.getInstance();
+
