@@ -14,7 +14,7 @@
 
 
 var console = {};
-var CaptureBackground = {};
+var backgroundService = {};
 var JSON = {};
 var ContentMap = {};
 var cmdIndex = 0;

@@ -82,6 +82,9 @@ rpf.Utils.prototype.startRecording = function (tabId, windowId) {
 
 rpf.Utils.prototype.stopRecording = function () {
     this.rpf_.getEventsManager().getRecorder().stopRecording();
+
+    this.infoMap = {};
+    this.getScreenshotManager().clear();
 };
 
 rpf.EventsManager.prototype.isInjected = function (tabId) {
@@ -161,7 +164,7 @@ rpf.EventsManager.prototype.sendMessageToConsole_ = function (request, opt_callb
             break;
 
         case Bite.Constants.UiCmds.UPDATE_PLAYBACK_STATUS:
-            var playbackTabId = CaptureBackground.getPlaybackTabId();
+            var playbackTabId = backgroundService.getPlaybackTabId();
 
             playbackTabId && chrome.tabs.sendMessage(playbackTabId, {
                 type: 'updatePlaybackStatus',
@@ -169,7 +172,7 @@ rpf.EventsManager.prototype.sendMessageToConsole_ = function (request, opt_callb
             });
             break;
         case Bite.Constants.UiCmds.UPDATE_CURRENT_STEP:
-            var playbackTabId = CaptureBackground.getPlaybackTabId();
+            var playbackTabId = backgroundService.getPlaybackTabId();
 
             playbackTabId && chrome.tabs.sendMessage(playbackTabId, {
                 type: 'updateCurrentStep',
@@ -177,7 +180,7 @@ rpf.EventsManager.prototype.sendMessageToConsole_ = function (request, opt_callb
             });
             break;
         case Bite.Constants.UiCmds.UPDATE_WHEN_ON_FAILED:
-            var playbackTabId = CaptureBackground.getPlaybackTabId();
+            var playbackTabId = backgroundService.getPlaybackTabId();
 
             playbackTabId && chrome.tabs.sendMessage(playbackTabId, {
                 type: 'updateWhenOnFailed',

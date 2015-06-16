@@ -47,16 +47,16 @@ class RPFL(bundle.Bundle):
 
     return {
       ## custom build to extract the framework
-      'rpf_content': {
+      'rpf.content': {
         SRC: os.path.join(src_location, PATHS.RPF_ROOT, 'src', 'libs',
                           'getactioninfo.js'),
-        DST: os.path.join(dst_root, 'rpf_content.js')
+        DST: os.path.join(dst_root, 'rpf.content.js')
       },
 
-      'rpf_background': {
+      'rpf.background': {
         SRC: os.path.join(src_location, PATHS.RPF_ROOT, 'src', 'base',
                           'rpf_utils.js'),
-        DST: os.path.join(dst_root, 'rpf_background.js')
+        DST: os.path.join(dst_root, 'rpf.background.js')
       }
 
     }
@@ -86,11 +86,10 @@ class RPFL(bundle.Bundle):
     js_targets = self.CreateJsTargets(src_location=src_location,
                                       dst_location=dst_location)
     for target_name in js_targets:
-      name = '%s_script' % target_name
-      filename = '%s.js' % name
+      filename = '%s.js' % target_name
       dst = os.path.join(dst_root, filename)
 
-      targets[name] = {
+      targets[target_name] = {
         SRC: js_targets[target_name][DST],
         DST: dst,
         TREE: False
