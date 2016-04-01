@@ -33,8 +33,17 @@ optional arguments:
 Run command
 ``` ./build.py --rpfl```
 
+
+
 It will generate 2 files:
 ```
 - rpf_background_script.js Control listener, received all results which returned from listener.
 - rpf_content_script.js Listen all user actions in a webpage.
 ```
+
+### Server Delpoy
+1. Change [application:id] in file app.yaml
+2. Use command \path to GAE SDK\appcfg.py update server
+
+### Fix type text issue
+Comment out row #3127 in extesion "content_script.js" file after build
